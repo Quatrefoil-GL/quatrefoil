@@ -67,78 +67,30 @@
     |quatrefoil.comp.portal $ {}
       :ns $ quote
         ns quatrefoil.comp.portal $ :require
-          [] quatrefoil.dsl.alias :refer $ [] create-comp group box sphere text
+          [] quatrefoil.dsl.alias :refer $ group box sphere text
+          quatrefoil.core :refer $ defcomp
       :defs $ {}
         |comp-portal $ quote
-          def comp-portal $ create-comp :portal
-            fn (on-change)
-              group ({})
-                box
-                  {}
-                    :params $ {} (:width 16) (:height 4) (:depth 6) (:x -40) (:y 30) (:z 0)
-                    :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6)
-                    :event $ {}
-                      :click $ fn (event d!) (js/console.log |Click: event) (on-change :todolist d!)
-                  text $ {}
-                    :params $ {} (:text |Todolist) (:size 4) (:height 2) (:z 40) (:x 0)
-                    :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
-                box
-                  {}
-                    :params $ {} (:width 16) (:height 4) (:depth 6) (:x 0) (:y 30)
-                    :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6)
-                    :event $ {}
-                      :click $ fn (event d!) (js/console.log |Click: event) (on-change :demo d!)
-                  text $ {}
-                    :params $ {} (:text |Demo) (:size 4) (:height 2) (:z 40) (:x 0)
-                    :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
-      :proc $ quote ()
-    |quatrefoil.dsl.render $ {}
-      :ns $ quote
-        ns quatrefoil.dsl.render $ :require
-          [] quatrefoil.util.core :refer $ [] comp? shape? =seq? =component?
-          [] clojure.set :as set
-      :defs $ {}
-        |render-component $ quote
-          defn render-component (markup coord)
-            if
-              and $ nil? markup
-              do (js/console.warn "|Calling render-component with nil!") nil
-              let
-                  base-tree markup
-                  args $ :args base-tree
-                  base-coord $ conj coord (:name base-tree)
-                  render $ :render base-tree
-                  tree-markup $ apply render args
-                  tree $ render-markup tree-markup base-coord base-coord
-                merge base-tree $ {} (:tree tree)
-        |render-shape $ quote
-          defn render-shape (markup coord comp-coord)
-            let
-                children $ either (:children markup) ({})
-                all-keys $ keys children
-              ; .log js/console |Shape: markup
-              -> markup (assoc :coord coord)
-                assoc :children $ -> all-keys
-                  map $ fn (k)
-                    [] k $ let
-                        child $ get children k
-                      if (nil? child) nil $ render-markup child (conj coord k) comp-coord
-                  filter $ fn (entry) (; .log js/console "|Rendering child:" entry)
-                    some? $ last entry
-                  pairs-map
-        |updated? $ quote
-          defn updated? (markup prev-tree)
-            and
-              not $ identical? (:args markup) (:args prev-tree)
-              not $ identical? (:states markup) (:states prev-tree)
-        |render-markup $ quote
-          defn render-markup (markup coord comp-coord)
-            cond
-                nil? markup
-                , nil
-              (comp? markup) (render-component markup coord)
-              (shape? markup) (render-shape markup coord comp-coord)
-              true $ js/console.log "|Unknown markup with" markup
+          defcomp comp-portal (on-change)
+            group ({})
+              box
+                {}
+                  :params $ {} (:width 16) (:height 4) (:depth 6) (:x -40) (:y 30) (:z 0)
+                  :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6)
+                  :event $ {}
+                    :click $ fn (event d!) (js/console.log |Click: event) (on-change :todolist d!)
+                text $ {}
+                  :params $ {} (:text |Todolist) (:size 4) (:height 2) (:z 40) (:x 0)
+                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
+              box
+                {}
+                  :params $ {} (:width 16) (:height 4) (:depth 6) (:x 0) (:y 30)
+                  :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6)
+                  :event $ {}
+                    :click $ fn (event d!) (js/console.log |Click: event) (on-change :demo d!)
+                text $ {}
+                  :params $ {} (:text |Demo) (:size 4) (:height 2) (:z 40) (:x 0)
+                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
       :proc $ quote ()
     |quatrefoil.dsl.object3d-dom $ {}
       :ns $ quote
@@ -158,14 +110,13 @@
               reset! camera-ref object3d
               , object3d
         |create-element $ quote
-          defn create-element (element)
+          defn create-element (element coord)
             ; .log js/console |Element: element $ :coord element
             let
                 params $ merge default-params (:params element)
                 material $ either (:material element)
                   {} (:kind :mesh-basic) (:color 0xa0a0a0)
                 event $ :event element
-                coord $ :coord element
               case-default (:name element)
                 do (.warn js/console "|Unknown element" element)
                   new $ .-Object3D js/THREE
@@ -179,7 +130,7 @@
         |virtual-tree-ref $ quote
           defatom virtual-tree-ref $ {}
         |create-sphere-element $ quote
-          defn create-sphere-element (params material event comp-coord)
+          defn create-sphere-element (params material event coord)
             let
                 geometry $ new THREE/SphereGeometry
                   or (:radius params) 8
@@ -191,11 +142,11 @@
                 scale-zero $ :scale-x params
                 scale-zero $ :scale-y params
                 scale-zero $ :scale-y params
-              set! (.-coord object3d) comp-coord
+              set! (.-coord object3d) coord
               ; .log js/console |Sphere: object3d
               , object3d
         |create-box-element $ quote
-          defn create-box-element (params material event comp-coord)
+          defn create-box-element (params material event coord)
             let
                 geometry $ new THREE/BoxGeometry (:width params) (:height params) (:depth params)
                 object3d $ new THREE/Mesh geometry (create-material material)
@@ -204,7 +155,7 @@
                 scale-zero $ :scale-x params
                 scale-zero $ :scale-y params
                 scale-zero $ :scale-y params
-              set! (.-coord object3d) comp-coord
+              set! (.-coord object3d) coord
               , object3d
         |font-ref $ quote
           def font-ref $ new THREE/Font
@@ -266,7 +217,7 @@
         |build-tree $ quote
           defn build-tree (coord tree) (; js/console.log "\"build tree:" coord tree)
             let
-                object3d $ create-element (assoc tree :children nil)
+                object3d $ create-element (assoc tree :children nil) coord
                 children $ -> (:children tree) (to-pairs)
                   map $ fn (entry)
                     update entry 1 $ fn (child)
@@ -453,20 +404,20 @@
     |quatrefoil.comp.back $ {}
       :ns $ quote
         ns quatrefoil.comp.back $ :require
-          [] quatrefoil.dsl.alias :refer $ [] create-comp group box scene text
+          [] quatrefoil.dsl.alias :refer $ [] group box scene text
+          quatrefoil.core :refer $ defcomp
       :defs $ {}
         |comp-back $ quote
-          def comp-back $ create-comp :back
-            fn (on-back)
-              box
-                {}
-                  :params $ {} (:width 16) (:height 4) (:depth 6) (:x 60) (:y 30)
-                  :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
-                  :event $ {}
-                    :click $ fn (e d!) (on-back d!)
-                text $ {}
-                  :params $ {} (:text |Back) (:size 4) (:height 2) (:z 10)
-                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
+          defcomp comp-back (on-back)
+            box
+              {}
+                :params $ {} (:width 16) (:height 4) (:depth 6) (:x 60) (:y 30)
+                :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
+                :event $ {}
+                  :click $ fn (e d!) (on-back d!)
+              text $ {}
+                :params $ {} (:text |Back) (:size 4) (:height 2) (:z 10)
+                :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
       :proc $ quote ()
     |quatrefoil.util.core $ {}
       :ns $ quote
@@ -515,19 +466,16 @@
                     update entry 1 $ fn (child) (purify-tree child)
                   pairs-map
         |find-element $ quote
-          defn find-element (tree comp-coord) (; .log js/console |Find... tree comp-coord)
-            if (empty? comp-coord) tree $ let
-                cursor $ first comp-coord
-              if (comp? tree)
-                if
-                  = cursor $ :name tree
-                  recur (:tree tree) (rest comp-coord)
-                  , nil
+          defn find-element (tree coord) (; .log js/console |Find... tree coord)
+            if (comp? tree)
+              recur (:tree tree) coord
+              if (empty? coord) tree $ let
+                  cursor $ first coord
                 if
                   contains? (:children tree) cursor
                   recur
                     get-in tree $ [] :children cursor
-                    rest comp-coord
+                    rest coord
                   , nil
         |=seq? $ quote
           defn =seq? (xs ys)
@@ -555,7 +503,6 @@
               :material $ :material props
               :event $ :event props
               :children $ arrange-children children
-              :coord nil
         |perspective-camera $ quote
           defn perspective-camera (props & children) (create-element :perspective-camera props children)
         |group $ quote
@@ -682,17 +629,17 @@
     |quatrefoil.types $ {}
       :ns $ quote (ns quatrefoil.types)
       :defs $ {}
-        |Component $ quote (defrecord Component :name :args :render :tree)
-        |Shape $ quote (defrecord Shape :name :params :material :event :children :coord)
+        |Component $ quote (defrecord Component :name :tree)
+        |Shape $ quote (defrecord Shape :name :params :material :event :children)
       :proc $ quote ()
     |quatrefoil.core $ {}
       :ns $ quote
         ns quatrefoil.core $ :require
-          [] quatrefoil.dsl.render :refer $ [] render-component
           [] quatrefoil.dsl.diff :refer $ [] diff-tree
           [] quatrefoil.dsl.object3d-dom :refer $ [] build-tree
           [] quatrefoil.util.core :refer $ [] purify-tree
           [] quatrefoil.dsl.patch :refer $ [] apply-changes
+          quatrefoil.types :refer $ Component
       :defs $ {}
         |>> $ quote
           defn >> (states k)
@@ -704,7 +651,7 @@
         |render-canvas! $ quote
           defn render-canvas! (markup states-ref scene) (; js/console.log "\"render" markup)
             let
-                new-tree $ render-component markup ([])
+                new-tree markup
               if (some? @tree-ref)
                 let
                     collect! $ fn (x) (swap! *tmp-changes conj x)
@@ -720,124 +667,131 @@
           defatom timestamp-ref $ js/Date.now
         |clear-cache! $ quote
           defn clear-cache! () $ reset! tree-cache-ref nil
+        |defcomp $ quote
+          defmacro defcomp (comp-name params & body)
+            assert "\"expected symbol of comp-name" $ symbol? comp-name
+            assert "\"expected params in list" $ and (list? params) (every? params symbol?)
+            if (empty? body)
+              quasiquote $ echo "\"[Warn] invalid component body for" (quote ~comp-name) (quote ~params)
+              quasiquote $ defn ~comp-name (~ params)
+                %{} Component (:name ~comp-name)
+                  :tree $ &let nil ~@body
         |tree-cache-ref $ quote (defatom tree-cache-ref nil)
       :proc $ quote ()
     |quatrefoil.comp.canvas $ {}
       :ns $ quote
         ns quatrefoil.comp.canvas $ :require
-          [] quatrefoil.dsl.alias :refer $ [] create-comp group box sphere point-light perspective-camera scene text
+          [] quatrefoil.dsl.alias :refer $ []  group box sphere point-light perspective-camera scene text
+          quatrefoil.core :refer $ defcomp
           [] quatrefoil.comp.todolist :refer $ [] comp-todolist
           [] quatrefoil.comp.portal :refer $ [] comp-portal
           [] quatrefoil.comp.back :refer $ [] comp-back
           [] quatrefoil.comp.fade-in-out :refer $ [] comp-fade-in-out
       :defs $ {}
         |comp-demo $ quote
-          def comp-demo $ create-comp :demo
-            fn () $ group ({})
-              box $ {}
-                :params $ {} (:width 16) (:height 4) (:depth 6) (:x -40) (:y 0) (:z 0)
-                :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
-                :event $ {}
-                  :click $ fn (event dispatch!) (.log js/console |Click: event) (dispatch! :demo nil)
-              sphere $ {}
-                :params $ {} (:radius 8) (:x 10)
-                :material $ {} (:kind :mesh-lambert) (:opacity 0.6) (:color 0x9050c0)
-                :event $ {}
-                  :click $ fn (event dispatch!) (.log js/console |Click: event) (dispatch! :canvas nil)
-              group ({})
-                text $ {}
-                  :params $ {} (:text |Quatrefoil) (:size 4) (:height 2) (:z 20) (:x -30)
-                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
+          defcomp comp-demo () $ group ({})
+            box $ {}
+              :params $ {} (:width 16) (:height 4) (:depth 6) (:x -40) (:y 0) (:z 0)
+              :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
+              :event $ {}
+                :click $ fn (event dispatch!) (.log js/console |Click: event) (dispatch! :demo nil)
+            sphere $ {}
+              :params $ {} (:radius 8) (:x 10)
+              :material $ {} (:kind :mesh-lambert) (:opacity 0.6) (:color 0x9050c0)
+              :event $ {}
+                :click $ fn (event dispatch!) (.log js/console |Click: event) (dispatch! :canvas nil)
+            group ({})
+              text $ {}
+                :params $ {} (:text |Quatrefoil) (:size 4) (:height 2) (:z 20) (:x -30)
+                :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
         |init-state $ quote
           defn init-state (& args) :portal
         |update-state $ quote
           defn update-state (state new-state) new-state
         |comp-container $ quote
-          def comp-container $ create-comp :container
-            fn (store) (println "\"store" store)
-              let
-                  states $ :states store
-                  cursor $ :cursor states
-                  state $ either (:data states)
-                    {} $ :tab :portal
-                  tab $ :tab state
-                scene ({})
-                  case-default tab
-                    comp-portal $ fn (next d!)
+          defcomp comp-container (store) (println "\"store" store)
+            let
+                states $ :states store
+                cursor $ :cursor states
+                state $ either (:data states)
+                  {} $ :tab :portal
+                tab $ :tab state
+              scene ({})
+                case-default tab
+                  comp-portal $ fn (next d!)
+                    d! cursor $ assoc state :tab next
+                  :portal $ comp-portal
+                    fn (next d!)
                       d! cursor $ assoc state :tab next
-                    :portal $ comp-portal
-                      fn (next d!)
-                        d! cursor $ assoc state :tab next
-                    :todolist $ comp-todolist (:tasks store)
-                    :demo $ comp-demo
-                  if (not= state :portal)
-                    comp-back $ fn (d!)
-                      d! cursor $ assoc state :tab :portal
-                  point-light $ {}
-                    :params $ {} (:color 0xffffff) (:x 20) (:y 40) (:z 100) (:intensity 2) (:distance 400)
-                  perspective-camera $ {}
-                    :params $ {} (:x 0) (:y 0) (:z 200) (:fov 45)
-                      :aspect $ / js/window.innerWidth js/window.innerHeight
-                      :near 0.1
-                      :far 1000
+                  :todolist $ comp-todolist (:tasks store)
+                  :demo $ comp-demo
+                if (not= state :portal)
+                  comp-back $ fn (d!)
+                    d! cursor $ assoc state :tab :portal
+                point-light $ {}
+                  :params $ {} (:color 0xffffff) (:x 20) (:y 40) (:z 100) (:intensity 2) (:distance 400)
+                perspective-camera $ {}
+                  :params $ {} (:x 0) (:y 0) (:z 200) (:fov 45)
+                    :aspect $ / js/window.innerWidth js/window.innerHeight
+                    :near 0.1
+                    :far 1000
       :proc $ quote ()
     |quatrefoil.comp.todolist $ {}
       :ns $ quote
         ns quatrefoil.comp.todolist $ :require
-          [] quatrefoil.dsl.alias :refer $ [] create-comp group box sphere point-light perspective-camera scene text
+          [] quatrefoil.dsl.alias :refer $ [] group box sphere point-light perspective-camera scene text
+          quatrefoil.core :refer $ defcomp
       :defs $ {}
         |comp-todolist $ quote
-          def comp-todolist $ create-comp :todolist
-            fn (tasks)
-              group ({})
-                group
-                  {} $ :params
-                    {} (:y 40) (:x 0) (:z 0)
-                  box $ {}
-                    :params $ {} (:width 32) (:height 6) (:depth 1) (:opacity 0.5)
-                    :material $ {} (:kind :mesh-lambert) (:color 0xffaaaa)
-                    :event $ {}
-                      :click $ fn (event dispatch!)
-                        dispatch! :add-task $ js/prompt "|Task content?"
-                group
-                  {} $ :params
-                    {} (:y 30) (:x 0) (:z 0)
-                  -> (vals tasks)
-                    map-indexed $ fn (idx task)
-                      [] (:id task) (comp-task task idx)
-                    pairs-map
-        |comp-task $ quote
-          def comp-task $ create-comp :task
-            fn (task idx)
+          defcomp comp-todolist (tasks)
+            group ({})
               group
                 {} $ :params
-                  {} (:x 0)
-                    :y $ * idx -8
-                sphere $ {}
-                  :params $ {} (:radius 2) (:x -20)
-                  :material $ {} (:kind :mesh-lambert) (:opacity 0.3)
-                    :color $ if (:done? task) 0x905055 0x9050ff
+                  {} (:y 40) (:x 0) (:z 0)
+                box $ {}
+                  :params $ {} (:width 32) (:height 6) (:depth 1) (:opacity 0.5)
+                  :material $ {} (:kind :mesh-lambert) (:color 0xffaaaa)
                   :event $ {}
                     :click $ fn (event dispatch!)
-                      dispatch! :toggle-task $ :id task
-                box
-                  {}
-                    :params $ {} (:width 32) (:height 4) (:depth 1) (:opacity 0.5)
-                    :material $ {} (:kind :mesh-lambert) (:color 0xcccccc)
-                    :event $ {}
-                      :click $ fn (event dispatch!)
-                        dispatch! :edit-task $ [] (:id task)
-                          js/prompt "|New task:" $ :text task
-                  text $ {}
-                    :params $ {}
-                      :text $ :text task
-                      :size 3
-                      :height 2
-                    :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
-                sphere $ {}
-                  :params $ {} (:radius 2) (:x 30)
-                  :material $ {} (:kind :mesh-lambert) (:opacity 0.3) (:color 0xff5050)
+                      dispatch! :add-task $ js/prompt "|Task content?"
+              group
+                {} $ :params
+                  {} (:y 30) (:x 0) (:z 0)
+                -> (vals tasks)
+                  map-indexed $ fn (idx task)
+                    [] (:id task) (comp-task task idx)
+                  pairs-map
+        |comp-task $ quote
+          defcomp comp-task (task idx)
+            group
+              {} $ :params
+                {} (:x 0)
+                  :y $ * idx -8
+              sphere $ {}
+                :params $ {} (:radius 2) (:x -20)
+                :material $ {} (:kind :mesh-lambert) (:opacity 0.3)
+                  :color $ if (:done? task) 0x905055 0x9050ff
+                :event $ {}
+                  :click $ fn (event dispatch!)
+                    dispatch! :toggle-task $ :id task
+              box
+                {}
+                  :params $ {} (:width 32) (:height 4) (:depth 1) (:opacity 0.5)
+                  :material $ {} (:kind :mesh-lambert) (:color 0xcccccc)
                   :event $ {}
                     :click $ fn (event dispatch!)
-                      dispatch! :delete-task $ :id task
+                      dispatch! :edit-task $ [] (:id task)
+                        js/prompt "|New task:" $ :text task
+                text $ {}
+                  :params $ {}
+                    :text $ :text task
+                    :size 3
+                    :height 2
+                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
+              sphere $ {}
+                :params $ {} (:radius 2) (:x 30)
+                :material $ {} (:kind :mesh-lambert) (:opacity 0.3) (:color 0xff5050)
+                :event $ {}
+                  :click $ fn (event dispatch!)
+                    dispatch! :delete-task $ :id task
       :proc $ quote ()
