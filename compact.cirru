@@ -1,73 +1,11 @@
 
 {} (:package |quatrefoil)
-  :configs $ {} (:init-fn |quatrefoil.main/main!) (:reload-fn |quatrefoil.main/reload!) (:modules nil) (:version nil)
+  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:modules nil) (:version nil)
   :files $ {}
-    |quatrefoil.main $ {}
+    |quatrefoil.app.comp.portal $ {}
       :ns $ quote
-        ns quatrefoil.main $ :require
-          [] "\"./alter-object3d" :refer $ inject_bang
-          [] quatrefoil.core :refer $ [] render-canvas! tree-ref clear-cache!
-          [] quatrefoil.comp.canvas :refer $ [] comp-container
-          [] quatrefoil.dsl.object3d-dom :refer $ [] camera-ref global-scene on-canvas-click ref-dirty-call!
-          [] quatrefoil.updater.core :refer $ [] updater
-          [] "\"three" :as THREE
-      :defs $ {}
-        |dispatch! $ quote
-          defn dispatch! (op op-data)
-            if (list? op)
-              recur :states $ [] op op-data
-              let
-                  store $ updater @store-ref op op-data
-                js/console.log |Dispatch: op op-data store
-                reset! store-ref store
-        |main! $ quote
-          defn main! () (load-console-formatter!) (inject_bang)
-            let
-                canvas-el $ js/document.querySelector |canvas
-              reset! renderer-ref $ new THREE/WebGLRenderer
-                &let
-                  options $ to-js-data
-                    {} (:canvas nil) (:antialias true)
-                  set! (.-canvas options) canvas-el
-                  , options
-              .setPixelRatio @renderer-ref $ either js/window.devicePixelRatio 1
-              .addEventListener canvas-el |click $ fn (event) (on-canvas-click event dispatch! tree-ref)
-            .setSize @renderer-ref js/window.innerWidth js/window.innerHeight
-            render-canvas-app!
-            add-watch store-ref :changes $ fn (store prev) (render-canvas-app!)
-            add-watch states-ref :changes $ fn (store prev) (render-canvas-app!)
-            println "|App started!"
-        |renderer-ref $ quote (defatom renderer-ref nil)
-        |render-canvas-app! $ quote
-          defn render-canvas-app! () (; println "|Render app:")
-            render-canvas! (comp-container @store-ref) states-ref global-scene
-            .render @renderer-ref global-scene @camera-ref
-            ; js/console.log "\"app:" global-scene
-        |store-ref $ quote
-          defatom store-ref $ {}
-            :tasks $ {}
-              100 $ {} (:id 100) (:text "|Initial task") (:done? false)
-            :states $ {}
-              :cursor $ []
-        |reload! $ quote
-          defn reload! () (clear-cache!) (render-canvas-app!) (println "|Code updated.")
-        |states-ref $ quote
-          defatom states-ref $ {}
-      :proc $ quote ()
-    |quatrefoil.cursor $ {}
-      :ns $ quote (ns quatrefoil.cursor)
-      :defs $ {}
-        |update-states $ quote
-          defn update-states (store pair)
-            let[] (cursor new-state) pair $ assoc-in store
-              concat ([] :states) cursor $ [] :data
-              , new-state
-      :proc $ quote ()
-      :configs $ {}
-    |quatrefoil.comp.portal $ {}
-      :ns $ quote
-        ns quatrefoil.comp.portal $ :require
-          [] quatrefoil.dsl.alias :refer $ group box sphere text
+        ns quatrefoil.app.comp.portal $ :require
+          quatrefoil.alias :refer $ group box sphere text
           quatrefoil.core :refer $ defcomp
       :defs $ {}
         |comp-portal $ quote
@@ -92,6 +30,129 @@
                   :params $ {} (:text |Demo) (:size 4) (:height 2) (:z 40) (:x 0)
                   :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
       :proc $ quote ()
+    |quatrefoil.alias $ {}
+      :ns $ quote
+        ns quatrefoil.alias $ :require
+          quatrefoil.schema :refer $ Shape Component comp? shape?
+      :defs $ {}
+        |point-light $ quote
+          defn point-light (props & children) (create-element :point-light props children)
+        |create-element $ quote
+          defn create-element (el-name props children)
+            %{} Shape (:name el-name)
+              :params $ :params props
+              :material $ :material props
+              :event $ :event props
+              :children $ arrange-children children
+        |perspective-camera $ quote
+          defn perspective-camera (props & children) (create-element :perspective-camera props children)
+        |group $ quote
+          defn group (props & children) (create-element :group props children)
+        |arrange-children $ quote
+          defn arrange-children (children)
+            let
+                cursor $ first children
+                result $ if
+                  and
+                    = 1 $ count children
+                    not $ or (comp? cursor) (shape? cursor)
+                  -> cursor (to-pairs)
+                    filter $ fn (entry)
+                      some? $ last entry
+                    pairs-map
+                  -> children
+                    map-indexed $ fn (idx p) ([] idx p)
+                    filter $ fn (entry)
+                      some? $ last entry
+                    pairs-map
+              ; .log js/console "|Handle children:" children result
+              , result
+        |camera $ quote
+          defn camera (props & children) (create-element :camera props children)
+        |create-comp $ quote
+          defn create-comp (comp-name render)
+            fn (& args)
+              %{} Component (:name comp-name) (:args args) (:render render) (:tree nil)
+        |box $ quote
+          defn box (props & children) (create-element :box props children)
+        |text $ quote
+          defn text (props & children) (create-element :text props children)
+        |line $ quote
+          defn line (props & children) (create-element :line props children)
+        |sphere $ quote
+          defn sphere (props & children) (create-element :sphere props children)
+        |scene $ quote
+          defn scene (props & children) (create-element :scene props children)
+      :proc $ quote ()
+    |quatrefoil.app.comp.todolist $ {}
+      :ns $ quote
+        ns quatrefoil.app.comp.todolist $ :require
+          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text
+          quatrefoil.core :refer $ defcomp
+      :defs $ {}
+        |comp-todolist $ quote
+          defcomp comp-todolist (tasks)
+            group ({})
+              group
+                {} $ :params
+                  {} (:y 40) (:x 0) (:z 0)
+                box $ {}
+                  :params $ {} (:width 32) (:height 6) (:depth 1) (:opacity 0.5)
+                  :material $ {} (:kind :mesh-lambert) (:color 0xffaaaa)
+                  :event $ {}
+                    :click $ fn (event dispatch!)
+                      dispatch! :add-task $ js/prompt "|Task content?"
+              group
+                {} $ :params
+                  {} (:y 30) (:x 0) (:z 0)
+                -> (vals tasks)
+                  map-indexed $ fn (idx task)
+                    [] (:id task) (comp-task task idx)
+                  pairs-map
+        |comp-task $ quote
+          defcomp comp-task (task idx)
+            group
+              {} $ :params
+                {} (:x 0)
+                  :y $ * idx -8
+              sphere $ {}
+                :params $ {} (:radius 2) (:x -20)
+                :material $ {} (:kind :mesh-lambert) (:opacity 0.3)
+                  :color $ if (:done? task) 0x905055 0x9050ff
+                :event $ {}
+                  :click $ fn (event dispatch!)
+                    dispatch! :toggle-task $ :id task
+              box
+                {}
+                  :params $ {} (:width 32) (:height 4) (:depth 1) (:opacity 0.5)
+                  :material $ {} (:kind :mesh-lambert) (:color 0xcccccc)
+                  :event $ {}
+                    :click $ fn (event dispatch!)
+                      dispatch! :edit-task $ [] (:id task)
+                        js/prompt "|New task:" $ :text task
+                text $ {}
+                  :params $ {}
+                    :text $ :text task
+                    :size 3
+                    :height 2
+                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
+              sphere $ {}
+                :params $ {} (:radius 2) (:x 30)
+                :material $ {} (:kind :mesh-lambert) (:opacity 0.3) (:color 0xff5050)
+                :event $ {}
+                  :click $ fn (event dispatch!)
+                    dispatch! :delete-task $ :id task
+      :proc $ quote ()
+    |quatrefoil.cursor $ {}
+      :ns $ quote (ns quatrefoil.cursor)
+      :defs $ {}
+        |update-states $ quote
+          defn update-states (store pair)
+            let[] (cursor new-state) pair $ assoc-in store
+              concat ([] :states) cursor $ [] :data
+              , new-state
+      :proc $ quote ()
+      :configs $ {}
     |quatrefoil.dsl.object3d-dom $ {}
       :ns $ quote
         ns quatrefoil.dsl.object3d-dom $ :require
@@ -251,35 +312,68 @@
               .set (.-scale object3d) (:scale-x params) (:scale-y params) (:scale-y params)
               , object3d
       :proc $ quote ()
-    |quatrefoil.updater.core $ {}
+    |quatrefoil.app.comp.container $ {}
       :ns $ quote
-        ns quatrefoil.updater.core $ :require
-          quatrefoil.cursor :refer $ update-states
+        ns quatrefoil.app.comp.container $ :require
+          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text
+          quatrefoil.core :refer $ defcomp
+          quatrefoil.app.comp.todolist :refer $ comp-todolist
+          quatrefoil.app.comp.portal :refer $ comp-portal
+          quatrefoil.app.comp.back :refer $ comp-back
       :defs $ {}
-        |updater $ quote
-          defn updater (store op op-data)
-            case-default op store
-              :states $ update-states store op-data
-              :add-task $ update store :tasks
-                fn (tasks)
-                  let
-                      id $ js/Date.now
-                    assoc tasks id $ {} (:id id) (:text op-data) (:done? false)
-              :delete-task $ update store :tasks
-                fn (tasks) (dissoc tasks op-data)
-              :toggle-task $ update store :tasks
-                fn (tasks)
-                  update-in tasks ([] op-data :done?) not
-              :edit-task $ update store :tasks
-                fn (tasks)
-                  assoc-in tasks
-                    [] (first op-data) :text
-                    last op-data
+        |comp-demo $ quote
+          defcomp comp-demo () $ group ({})
+            box $ {}
+              :params $ {} (:width 16) (:height 4) (:depth 6) (:x -40) (:y 0) (:z 0)
+              :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
+              :event $ {}
+                :click $ fn (event dispatch!) (.log js/console |Click: event) (dispatch! :demo nil)
+            sphere $ {}
+              :params $ {} (:radius 8) (:x 10)
+              :material $ {} (:kind :mesh-lambert) (:opacity 0.6) (:color 0x9050c0)
+              :event $ {}
+                :click $ fn (event dispatch!) (.log js/console |Click: event) (dispatch! :canvas nil)
+            group ({})
+              text $ {}
+                :params $ {} (:text |Quatrefoil) (:size 4) (:height 2) (:z 20) (:x -30)
+                :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
+        |init-state $ quote
+          defn init-state (& args) :portal
+        |update-state $ quote
+          defn update-state (state new-state) new-state
+        |comp-container $ quote
+          defcomp comp-container (store) (println "\"store" store)
+            let
+                states $ :states store
+                cursor $ :cursor states
+                state $ either (:data states)
+                  {} $ :tab :portal
+                tab $ :tab state
+              scene ({})
+                case-default tab
+                  comp-portal $ fn (next d!)
+                    d! cursor $ assoc state :tab next
+                  :portal $ comp-portal
+                    fn (next d!)
+                      d! cursor $ assoc state :tab next
+                  :todolist $ comp-todolist (:tasks store)
+                  :demo $ comp-demo
+                if (not= state :portal)
+                  comp-back $ fn (d!)
+                    d! cursor $ assoc state :tab :portal
+                point-light $ {}
+                  :params $ {} (:color 0xffffff) (:x 20) (:y 40) (:z 100) (:intensity 2) (:distance 400)
+                perspective-camera $ {}
+                  :params $ {} (:x 0) (:y 0) (:z 200) (:fov 45)
+                    :aspect $ / js/window.innerWidth js/window.innerHeight
+                    :near 0.1
+                    :far 1000
       :proc $ quote ()
     |quatrefoil.dsl.diff $ {}
       :ns $ quote
         ns quatrefoil.dsl.diff $ :require
-          [] quatrefoil.util.core :refer $ [] comp? shape? purify-tree
+          quatrefoil.util.core :refer $ purify-tree
+          quatrefoil.schema :refer $ comp? shape?
       :defs $ {}
         |diff-params $ quote
           defn diff-params (prev-params params coord collect!)
@@ -401,10 +495,10 @@
               fn (acc x)
                 assoc acc x $ &get m x
       :proc $ quote ()
-    |quatrefoil.comp.back $ {}
+    |quatrefoil.app.comp.back $ {}
       :ns $ quote
-        ns quatrefoil.comp.back $ :require
-          [] quatrefoil.dsl.alias :refer $ [] group box scene text
+        ns quatrefoil.app.comp.back $ :require
+          quatrefoil.alias :refer $ group box scene text
           quatrefoil.core :refer $ defcomp
       :defs $ {}
         |comp-back $ quote
@@ -422,11 +516,8 @@
     |quatrefoil.util.core $ {}
       :ns $ quote
         ns quatrefoil.util.core $ :require
-          [] quatrefoil.types :refer $ [] Component Shape
+          quatrefoil.schema :refer $ Component Shape comp? shape?
       :defs $ {}
-        |comp? $ quote
-          defn comp? (x)
-            and (record? x) (relevant-record? Component x)
         |scale-zero $ quote
           defn scale-zero (x)
             if (&= 0 x) 0.01 x
@@ -453,9 +544,6 @@
                 if
                   some? $ .-children child
                   collect-children child collect!
-        |shape? $ quote
-          defn shape? (x)
-            and (record? x) (relevant-record? Shape x)
         |purify-tree $ quote
           defn purify-tree (tree)
             if (comp? tree)
@@ -488,60 +576,17 @@
                   recur (rest xs) (rest ys)
                   , false
       :proc $ quote ()
-    |quatrefoil.dsl.alias $ {}
-      :ns $ quote
-        ns quatrefoil.dsl.alias $ :require
-          [] quatrefoil.types :refer $ [] Shape Component
-          [] quatrefoil.util.core :refer $ [] comp? shape?
+    |quatrefoil.schema $ {}
+      :ns $ quote (ns quatrefoil.schema)
       :defs $ {}
-        |point-light $ quote
-          defn point-light (props & children) (create-element :point-light props children)
-        |create-element $ quote
-          defn create-element (el-name props children)
-            %{} Shape (:name el-name)
-              :params $ :params props
-              :material $ :material props
-              :event $ :event props
-              :children $ arrange-children children
-        |perspective-camera $ quote
-          defn perspective-camera (props & children) (create-element :perspective-camera props children)
-        |group $ quote
-          defn group (props & children) (create-element :group props children)
-        |arrange-children $ quote
-          defn arrange-children (children)
-            let
-                cursor $ first children
-                result $ if
-                  and
-                    = 1 $ count children
-                    not $ or (comp? cursor) (shape? cursor)
-                  -> cursor (to-pairs)
-                    filter $ fn (entry)
-                      some? $ last entry
-                    pairs-map
-                  -> children
-                    map-indexed $ fn (idx p) ([] idx p)
-                    filter $ fn (entry)
-                      some? $ last entry
-                    pairs-map
-              ; .log js/console "|Handle children:" children result
-              , result
-        |camera $ quote
-          defn camera (props & children) (create-element :camera props children)
-        |create-comp $ quote
-          defn create-comp (comp-name render)
-            fn (& args)
-              %{} Component (:name comp-name) (:args args) (:render render) (:tree nil)
-        |box $ quote
-          defn box (props & children) (create-element :box props children)
-        |text $ quote
-          defn text (props & children) (create-element :text props children)
-        |line $ quote
-          defn line (props & children) (create-element :line props children)
-        |sphere $ quote
-          defn sphere (props & children) (create-element :sphere props children)
-        |scene $ quote
-          defn scene (props & children) (create-element :scene props children)
+        |Component $ quote (defrecord Component :name :tree)
+        |Shape $ quote (defrecord Shape :name :params :material :event :children)
+        |comp? $ quote
+          defn comp? (x)
+            and (record? x) (relevant-record? Component x)
+        |shape? $ quote
+          defn shape? (x)
+            and (record? x) (relevant-record? Shape x)
       :proc $ quote ()
     |quatrefoil.dsl.patch $ {}
       :ns $ quote
@@ -626,11 +671,79 @@
                     :scale-z $ .setZ (.-scale target) (scale-zero v)
                     :radius $ set! (-> target .-geometry .-radius) v
       :proc $ quote ()
-    |quatrefoil.types $ {}
-      :ns $ quote (ns quatrefoil.types)
+    |quatrefoil.app.updater $ {}
+      :ns $ quote
+        ns quatrefoil.app.updater $ :require
+          quatrefoil.cursor :refer $ update-states
       :defs $ {}
-        |Component $ quote (defrecord Component :name :tree)
-        |Shape $ quote (defrecord Shape :name :params :material :event :children)
+        |updater $ quote
+          defn updater (store op op-data)
+            case-default op store
+              :states $ update-states store op-data
+              :add-task $ update store :tasks
+                fn (tasks)
+                  let
+                      id $ js/Date.now
+                    assoc tasks id $ {} (:id id) (:text op-data) (:done? false)
+              :delete-task $ update store :tasks
+                fn (tasks) (dissoc tasks op-data)
+              :toggle-task $ update store :tasks
+                fn (tasks)
+                  update-in tasks ([] op-data :done?) not
+              :edit-task $ update store :tasks
+                fn (tasks)
+                  assoc-in tasks
+                    [] (first op-data) :text
+                    last op-data
+      :proc $ quote ()
+    |quatrefoil.app.main $ {}
+      :ns $ quote
+        ns quatrefoil.app.main $ :require
+          "\"./alter-object3d" :refer $ inject_bang
+          quatrefoil.core :refer $ render-canvas! tree-ref clear-cache!
+          quatrefoil.app.comp.container :refer $ comp-container
+          quatrefoil.dsl.object3d-dom :refer $ camera-ref global-scene on-canvas-click ref-dirty-call!
+          quatrefoil.app.updater :refer $ [] updater
+          "\"three" :as THREE
+      :defs $ {}
+        |dispatch! $ quote
+          defn dispatch! (op op-data)
+            if (list? op)
+              recur :states $ [] op op-data
+              let
+                  store $ updater @store-ref op op-data
+                js/console.log |Dispatch: op op-data store
+                reset! store-ref store
+        |main! $ quote
+          defn main! () (load-console-formatter!) (inject_bang)
+            let
+                canvas-el $ js/document.querySelector |canvas
+              reset! renderer-ref $ new THREE/WebGLRenderer
+                &let
+                  options $ to-js-data
+                    {} (:canvas nil) (:antialias true)
+                  set! (.-canvas options) canvas-el
+                  , options
+              .setPixelRatio @renderer-ref $ either js/window.devicePixelRatio 1
+              .addEventListener canvas-el |click $ fn (event) (on-canvas-click event dispatch! tree-ref)
+            .setSize @renderer-ref js/window.innerWidth js/window.innerHeight
+            render-canvas-app!
+            add-watch store-ref :changes $ fn (store prev) (render-canvas-app!)
+            println "|App started!"
+        |renderer-ref $ quote (defatom renderer-ref nil)
+        |render-canvas-app! $ quote
+          defn render-canvas-app! () (; println "|Render app:")
+            render-canvas! (comp-container @store-ref) global-scene
+            .render @renderer-ref global-scene @camera-ref
+            ; js/console.log "\"app:" global-scene
+        |store-ref $ quote
+          defatom store-ref $ {}
+            :tasks $ {}
+              100 $ {} (:id 100) (:text "|Initial task") (:done? false)
+            :states $ {}
+              :cursor $ []
+        |reload! $ quote
+          defn reload! () (clear-cache!) (render-canvas-app!) (println "|Code updated.")
       :proc $ quote ()
     |quatrefoil.core $ {}
       :ns $ quote
@@ -639,7 +752,7 @@
           [] quatrefoil.dsl.object3d-dom :refer $ [] build-tree
           [] quatrefoil.util.core :refer $ [] purify-tree
           [] quatrefoil.dsl.patch :refer $ [] apply-changes
-          quatrefoil.types :refer $ Component
+          quatrefoil.schema :refer $ Component
       :defs $ {}
         |>> $ quote
           defn >> (states k)
@@ -649,7 +762,7 @@
               assoc branch :cursor $ append parent-cursor k
         |*tmp-changes $ quote (defatom *tmp-changes nil)
         |render-canvas! $ quote
-          defn render-canvas! (markup states-ref scene) (; js/console.log "\"render" markup)
+          defn render-canvas! (markup scene) (; js/console.log "\"render" markup)
             let
                 new-tree markup
               if (some? @tree-ref)
@@ -677,121 +790,4 @@
                 %{} Component (:name ~comp-name)
                   :tree $ &let nil ~@body
         |tree-cache-ref $ quote (defatom tree-cache-ref nil)
-      :proc $ quote ()
-    |quatrefoil.comp.canvas $ {}
-      :ns $ quote
-        ns quatrefoil.comp.canvas $ :require
-          [] quatrefoil.dsl.alias :refer $ []  group box sphere point-light perspective-camera scene text
-          quatrefoil.core :refer $ defcomp
-          [] quatrefoil.comp.todolist :refer $ [] comp-todolist
-          [] quatrefoil.comp.portal :refer $ [] comp-portal
-          [] quatrefoil.comp.back :refer $ [] comp-back
-          [] quatrefoil.comp.fade-in-out :refer $ [] comp-fade-in-out
-      :defs $ {}
-        |comp-demo $ quote
-          defcomp comp-demo () $ group ({})
-            box $ {}
-              :params $ {} (:width 16) (:height 4) (:depth 6) (:x -40) (:y 0) (:z 0)
-              :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
-              :event $ {}
-                :click $ fn (event dispatch!) (.log js/console |Click: event) (dispatch! :demo nil)
-            sphere $ {}
-              :params $ {} (:radius 8) (:x 10)
-              :material $ {} (:kind :mesh-lambert) (:opacity 0.6) (:color 0x9050c0)
-              :event $ {}
-                :click $ fn (event dispatch!) (.log js/console |Click: event) (dispatch! :canvas nil)
-            group ({})
-              text $ {}
-                :params $ {} (:text |Quatrefoil) (:size 4) (:height 2) (:z 20) (:x -30)
-                :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
-        |init-state $ quote
-          defn init-state (& args) :portal
-        |update-state $ quote
-          defn update-state (state new-state) new-state
-        |comp-container $ quote
-          defcomp comp-container (store) (println "\"store" store)
-            let
-                states $ :states store
-                cursor $ :cursor states
-                state $ either (:data states)
-                  {} $ :tab :portal
-                tab $ :tab state
-              scene ({})
-                case-default tab
-                  comp-portal $ fn (next d!)
-                    d! cursor $ assoc state :tab next
-                  :portal $ comp-portal
-                    fn (next d!)
-                      d! cursor $ assoc state :tab next
-                  :todolist $ comp-todolist (:tasks store)
-                  :demo $ comp-demo
-                if (not= state :portal)
-                  comp-back $ fn (d!)
-                    d! cursor $ assoc state :tab :portal
-                point-light $ {}
-                  :params $ {} (:color 0xffffff) (:x 20) (:y 40) (:z 100) (:intensity 2) (:distance 400)
-                perspective-camera $ {}
-                  :params $ {} (:x 0) (:y 0) (:z 200) (:fov 45)
-                    :aspect $ / js/window.innerWidth js/window.innerHeight
-                    :near 0.1
-                    :far 1000
-      :proc $ quote ()
-    |quatrefoil.comp.todolist $ {}
-      :ns $ quote
-        ns quatrefoil.comp.todolist $ :require
-          [] quatrefoil.dsl.alias :refer $ [] group box sphere point-light perspective-camera scene text
-          quatrefoil.core :refer $ defcomp
-      :defs $ {}
-        |comp-todolist $ quote
-          defcomp comp-todolist (tasks)
-            group ({})
-              group
-                {} $ :params
-                  {} (:y 40) (:x 0) (:z 0)
-                box $ {}
-                  :params $ {} (:width 32) (:height 6) (:depth 1) (:opacity 0.5)
-                  :material $ {} (:kind :mesh-lambert) (:color 0xffaaaa)
-                  :event $ {}
-                    :click $ fn (event dispatch!)
-                      dispatch! :add-task $ js/prompt "|Task content?"
-              group
-                {} $ :params
-                  {} (:y 30) (:x 0) (:z 0)
-                -> (vals tasks)
-                  map-indexed $ fn (idx task)
-                    [] (:id task) (comp-task task idx)
-                  pairs-map
-        |comp-task $ quote
-          defcomp comp-task (task idx)
-            group
-              {} $ :params
-                {} (:x 0)
-                  :y $ * idx -8
-              sphere $ {}
-                :params $ {} (:radius 2) (:x -20)
-                :material $ {} (:kind :mesh-lambert) (:opacity 0.3)
-                  :color $ if (:done? task) 0x905055 0x9050ff
-                :event $ {}
-                  :click $ fn (event dispatch!)
-                    dispatch! :toggle-task $ :id task
-              box
-                {}
-                  :params $ {} (:width 32) (:height 4) (:depth 1) (:opacity 0.5)
-                  :material $ {} (:kind :mesh-lambert) (:color 0xcccccc)
-                  :event $ {}
-                    :click $ fn (event dispatch!)
-                      dispatch! :edit-task $ [] (:id task)
-                        js/prompt "|New task:" $ :text task
-                text $ {}
-                  :params $ {}
-                    :text $ :text task
-                    :size 3
-                    :height 2
-                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
-              sphere $ {}
-                :params $ {} (:radius 2) (:x 30)
-                :material $ {} (:kind :mesh-lambert) (:opacity 0.3) (:color 0xff5050)
-                :event $ {}
-                  :click $ fn (event dispatch!)
-                    dispatch! :delete-task $ :id task
       :proc $ quote ()
