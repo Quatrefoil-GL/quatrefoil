@@ -6,7 +6,7 @@
       :ns $ quote
         ns quatrefoil.main $ :require
           [] "\"./alter-object3d" :refer $ inject_bang
-          [] quatrefoil.core :refer $ [] render-canvas! tree-ref clear-cache! instant-variation-ref write-instants!
+          [] quatrefoil.core :refer $ [] render-canvas! tree-ref clear-cache!
           [] quatrefoil.comp.canvas :refer $ [] comp-canvas
           [] quatrefoil.dsl.object3d-dom :refer $ [] camera-ref global-scene on-canvas-click ref-dirty-call!
           [] quatrefoil.updater.core :refer $ [] updater
@@ -35,17 +35,12 @@
             add-watch store-ref :changes $ fn (store prev) (render-canvas-app!)
             add-watch states-ref :changes $ fn (store prev) (render-canvas-app!)
             println "|App started!"
-        |instants-ref $ quote
-          defatom instants-ref $ {}
         |renderer-ref $ quote (defatom renderer-ref nil)
         |render-canvas-app! $ quote
-          defn render-canvas-app! ()
-            if (some? @ref-task)
-              do (js/clearTimeout @ref-task) (reset! ref-task nil)
-            ; println "|Render app:" $ pr-str @instants-ref
-            render-canvas! (comp-canvas @store-ref) states-ref @instants-ref global-scene
+          defn render-canvas-app! () (; println "|Render app:")
+            render-canvas! (comp-canvas @store-ref) states-ref global-scene
             .render @renderer-ref global-scene @camera-ref
-            js/console.log "\"app:" global-scene
+            ; js/console.log "\"app:" global-scene
         |store-ref $ quote
           defatom store-ref $ {}
             :tasks $ {}
@@ -54,48 +49,6 @@
           defn reload! () (clear-cache!) (render-canvas-app!) (println "|Code updated.")
         |states-ref $ quote
           defatom states-ref $ {}
-        |ref-task $ quote (defatom ref-task nil)
-      :proc $ quote ()
-    |quatrefoil.comp.fade-in-out $ {}
-      :ns $ quote
-        ns quatrefoil.comp.fade-in-out $ :require
-          [] quatrefoil.dsl.alias :refer $ [] create-comp group box sphere text
-      :defs $ {}
-        |on-update $ quote
-          defn on-update (instant old-args args old-state state) instant
-        |on-unmount $ quote
-          defn on-unmount (instant)
-            {} (:presence 1000) (:presence-v -1)
-        |on-tick $ quote
-          defn on-tick (instant elapsed)
-            let
-                next-presence $ + (:presence instant)
-                  * elapsed $ :presence-v instant
-              .log js/console "|Next presence:" next-presence elapsed $ :presence-v instant
-              if (<= next-presence 0)
-                {} (:presence 0) (:presence-v 0)
-                if (>= next-presence 1000)
-                  {} (:presence 1000) (:presence-v 0)
-                  assoc instant :presence next-presence
-        |remove? $ quote
-          defn remove? (instant)
-            <= (:presence instant) 0
-        |comp-fade-in-out $ quote
-          def comp-fade-in-out $ create-comp :fade-in-out
-            {} (:init-instant init-instant) (:on-update on-update) (:on-unmount on-unmount) (:on-tick on-tick) (:remove? remove?)
-            fn (inside)
-              fn (state mutate! instant) (println |Fading: instant)
-                let
-                    ratio $ either
-                      / (get instant :presence) 1000
-                      , 1
-                  group
-                    {} $ :params
-                      {} (:scale-x ratio) (:scale-y ratio) (:scale-z ratio)
-                    , inside
-        |init-instant $ quote
-          defn init-instant (args state at-place?)
-            {} (:presence 0) (:presence-v 1)
       :proc $ quote ()
     |quatrefoil.comp.portal $ {}
       :ns $ quote
@@ -133,80 +86,31 @@
           [] clojure.set :as set
       :defs $ {}
         |render-component $ quote
-          defn render-component (markup prev-markup coord states instants new? packed) (; .log js/console "|Component states:" states) (; println |Instants: coord instants)
+          defn render-component (markup prev-markup coord states new? packed) (; .log js/console "|Component states:" states)
             if
-              and (nil? markup) (nil? prev-markup)
-              do (.warn js/console "|Calling render-component with nil!") nil
+              and $ nil? markup
+              do (js/console.warn "|Calling render-component with nil!") nil
               let
-                  elapsed $ :elapsed packed
-                  base-tree $ or markup prev-markup
-                  comp-name $ :name base-tree
+                  base-tree markup
                   args $ :args base-tree
                   base-coord $ conj coord (:name base-tree)
                   render $ :render base-tree
                   hooks $ :hooks base-tree
-                  init-instant $ :init-instant hooks
-                  on-tick $ or (:on-tick hooks) defaut-tick
-                  on-unmount $ :on-unmount hooks
-                  on-update $ :on-update hooks
-                  remove? $ :remove? hooks
                   state $ get-state states (:init-state hooks) args
-                  at-place? $ and (not new?) (nil? prev-markup)
-                  instant $ get-instant instants init-instant args state at-place? (some? prev-markup)
                   build-mutate $ :build-mutate packed
                   mutate! $ fn (& state-args)
                     let
                         update-state $ :update-state hooks
                         new-state $ apply update-state (prepend state-args state)
-                      .log js/console "|During mutate:" base-coord state new-state states
+                      js/console.log "|During mutate:" base-coord state new-state states
                       build-mutate base-coord new-state
-                  queue! $ :queue! packed
                   curry-render $ apply render args
-                  cached-tree $ if (some? prev-markup) (:tree prev-markup) nil
-                  render-result $ fn (the-instant removing?)
-                    let
-                        tree-markup $ curry-render state mutate!
-                        tree $ render-markup tree-markup cached-tree base-coord base-coord states instants true packed
-                      merge base-tree $ {} (:tree tree)
-                        :states $ if (some? states) (assoc states 'data state) nil
-                        :instants $ if (some? instants) (assoc instants :data the-instant) nil
-                        :removing? removing?
-                cond
-                    and (some? markup) (nil? prev-markup)
-                    do
-                      if (some? instant) (queue! base-coord instant :init)
-                      render-result instant false
-                  (and (some? markup) (some? prev-markup) (=component? prev-markup markup))
-                    do (; .log js/console "|Reusing component:" coord) prev-markup
-                  (and (some? markup) (some? prev-markup))
-                    if
-                      and (fn? on-update) (updated? markup prev-markup)
-                      let
-                          new-instant $ on-update instant (:args prev-markup) args (:states prev-markup) state
-                        if (not= instant new-instant)
-                          do (queue! base-coord new-instant :update) (render-result new-instant false)
-                          let
-                              ticked-instant $ on-tick instant elapsed
-                            if (not= instant ticked-instant) (queue! base-coord ticked-instant :tick-on-update)
-                            render-result ticked-instant false
-                      let
-                          new-instant $ on-tick instant elapsed
-                        if (not= instant new-instant) (queue! base-coord new-instant :tick)
-                        render-result new-instant false
-                  (and (nil? markup) (some? prev-markup) (:removing? prev-markup))
-                    let
-                        new-instant $ on-tick instant elapsed
-                      if (remove? new-instant) nil $ do (queue! base-coord new-instant :removing) (render-result new-instant true)
-                  (and (nil? markup) (some? prev-markup) (not (:removing? prev-markup)))
-                    if (fn? on-unmount)
-                      let
-                          new-instant $ on-unmount instant
-                        queue! base-coord new-instant :unmount
-                        render-result new-instant true
-                      , nil
-                  true $ do (.warn js/console "|Unexpected case:" markup prev-markup)
+                  tree-markup $ curry-render state mutate!
+                  tree $ render-markup tree-markup nil base-coord base-coord states true packed
+                merge base-tree $ {} (:tree tree)
+                  :states $ if (some? states) (assoc states 'data state) nil
         |render-shape $ quote
-          defn render-shape (markup prev-markup coord comp-coord states instants new? packed)
+          defn render-shape (markup prev-markup coord comp-coord states new? packed)
             let
                 prev-children $ either (get prev-markup :children) ({})
                 children $ either (:children markup) ({})
@@ -220,25 +124,17 @@
                         prev-child $ get prev-children k
                       if
                         and (nil? child) (nil? prev-child)
-                        , nil $ render-markup child prev-child (conj coord k) comp-coord (get states k) (get instants k) new? packed
+                        , nil $ render-markup child prev-child (conj coord k) comp-coord (get states k) new? packed
                   filter $ fn (entry) (; .log js/console "|Rendering child:" entry)
                     some? $ last entry
                   pairs-map
-        |get-instant $ quote
-          defn get-instant (instants init-instant args state at-place? has-prev?)
-            if (nil? instants) nil $ if
-              and has-prev? $ contains? instants 'data
-              get instants 'data
-              if (fn? init-instant) (init-instant args state at-place?) nil
         |updated? $ quote
           defn updated? (markup prev-tree)
             and
               not $ identical? (:args markup) (:args prev-tree)
               not $ identical? (:states markup) (:states prev-tree)
-        |defaut-tick $ quote
-          defn defaut-tick (instant elapsed) instant
         |render-markup $ quote
-          defn render-markup (markup prev-markup coord comp-coord states instants new? packed)
+          defn render-markup (markup prev-markup coord comp-coord states new? packed)
             cond
                 and (nil? markup) (nil? prev-markup)
                 , nil
@@ -246,30 +142,26 @@
                 let
                     k $ :name markup
                     child-states $ get states k
-                    child-instants $ get instants k
-                  render-component markup nil coord child-states child-instants new? packed
+                  render-component markup nil coord child-states new? packed
               (and (comp? prev-markup) (nil? markup))
                 let
                     k $ :name prev-markup
                     child-states $ get states k
-                    child-instants $ get instants k
-                  render-component nil prev-markup coord child-states child-instants new? packed
+                  render-component nil prev-markup coord child-states new? packed
               (and (comp? prev-markup) (comp? markup) (= (:name prev-markup) (:name markup)))
                 let
                     k $ :name markup
                     child-states $ get states k
-                    child-instants $ get instants k
-                  render-component markup prev-markup coord child-states child-instants new? packed
+                  render-component markup prev-markup coord child-states new? packed
               (and (comp? prev-markup) (comp? markup) (not= (:name prev-markup) (:name markup)))
                 let
                     k $ :name markup
                     child-states $ get states k
-                    child-instants $ get instants k
-                  render-component markup nil coord child-states child-instants new? packed
+                  render-component markup nil coord child-states new? packed
               (and (shape? markup) (or (nil? prev-markup) (comp? prev-markup)))
-                render-shape markup nil coord comp-coord states instants new? packed
+                render-shape markup nil coord comp-coord states new? packed
               (and (shape? markup) (shape? prev-markup))
-                render-shape markup prev-markup coord comp-coord states instants new? packed
+                render-shape markup prev-markup coord comp-coord states new? packed
               (and (nil? markup) (shape? prev-markup))
                 , nil
               :else $ do (.log js/console "|Unknown markup with" markup prev-markup) nil
@@ -620,15 +512,12 @@
             let
                 prev-args $ :args prev-tree
                 prev-states $ :states prev-tree
-                prev-instants $ :instants prev-tree
               ; println
                 =seq? (:args markup) prev-args
                 identical? (:states markup) prev-states
-                identical? (:instants markup) prev-instants
               and
                 =seq? (:args markup) prev-args
                 identical? (:states markup) prev-states
-                identical? (:instants markup) prev-instants
         |reach-object3d $ quote
           defn reach-object3d (object3d coord)
             if (empty? coord) object3d $ let
@@ -725,11 +614,9 @@
             fn (& args)
               %{} Component (:name comp-name) (:args args)
                 :states $ {}
-                :instants $ {}
                 :render render
                 :tree nil
                 :hooks hooks
-                :removing? false
         |box $ quote
           defn box (props & children) (create-element :box props children)
         |text $ quote
@@ -759,9 +646,8 @@
               let-sugar
                     [] coord op op-data
                     , change
-                ; .log js/console |Change: op coord
-                case-default op
-                  do $ .log js/console "|Unknown op:" op
+                ; js/console.log |Change: op coord
+                case-default op (js/console.log "|Unknown op:" op)
                   :add-material $ update-material coord op-data
                   :update-material $ update-material coord op-data
                   :remove-children $ remove-children coord op-data
@@ -797,13 +683,10 @@
             let
                 target $ reach-object3d global-scene coord
               ; .log js/console target
-              &doseq (entry op-data)
-                let-sugar
-                      [] param new-value
-                      , entry
-                  case-default param
-                    do $ .log js/console "|Unknown param:" param
-                    :color $ .set (-> target .-material .-color) new-value
+              &doseq
+                entry $ to-pairs op-data
+                let[] (param new-value) entry $ case-default param (js/console.log "|Unknown param:" param)
+                  :color $ .set (-> target .-material .-color) new-value
         |remove-children $ quote
           defn remove-children (coord op-data)
             let
@@ -813,7 +696,8 @@
           defn update-params (coord op-data)
             let
                 target $ reach-object3d global-scene coord
-              &doseq (entry op-data)
+              &doseq
+                entry $ to-pairs op-data
                 let-sugar
                       [] k v
                       , entry
@@ -830,7 +714,7 @@
     |quatrefoil.types $ {}
       :ns $ quote (ns quatrefoil.types)
       :defs $ {}
-        |Component $ quote (defrecord Component :name :args :states :instants :render :tree :hooks :removing?)
+        |Component $ quote (defrecord Component :name :args :states :render :tree :hooks)
         |Shape $ quote (defrecord Shape :name :params :material :event :children :coord)
       :proc $ quote ()
     |quatrefoil.core $ {}
@@ -842,22 +726,22 @@
           [] quatrefoil.util.core :refer $ [] purify-tree
           [] quatrefoil.dsl.patch :refer $ [] apply-changes
       :defs $ {}
+        |>> $ quote
+          defn >> (states k)
+            let
+                parent-cursor $ either (:cursor states) ([])
+                branch $ either (get states k) ({})
+              assoc branch :cursor $ append parent-cursor k
+        |*tmp-changes $ quote (defatom *tmp-changes nil)
         |render-canvas! $ quote
-          defn render-canvas! (markup states-ref instants scene) (; js/console.log "\"render" markup)
+          defn render-canvas! (markup states-ref scene) (; js/console.log "\"render" markup)
             let
                 build-mutate $ fn (coord new-state) (println "|Mutate states:" new-state)
                   swap! states-ref assoc-in (conj coord 'data) new-state
-                queue! $ fn (coord new-instant mark)
-                  swap! instant-variation-ref conj $ [] coord new-instant mark
-                now $ js/Date.now
-                packed $ {} (:build-mutate build-mutate) (:queue! queue!)
-                  :elapsed $ - now @timestamp-ref
-                new-tree $ with-js-log
-                  render-component markup @tree-cache-ref ([])
-                    get @states-ref $ :name markup
-                    get instants $ :name markup
-                    , false packed
-              reset! timestamp-ref now
+                packed $ {} (:build-mutate build-mutate)
+                new-tree $ render-component markup @tree-cache-ref ([])
+                  get @states-ref $ :name markup
+                  , false packed
               if (some? @tree-ref)
                 let
                     collect! $ fn (x) (swap! *tmp-changes conj x)
@@ -867,24 +751,13 @@
                 build-tree ([]) (purify-tree new-tree)
               reset! tree-ref new-tree
               reset! tree-cache-ref new-tree
-              ; .log js/console |Tree: new-tree
-        |tree-cache-ref $ quote (defatom tree-cache-ref nil)
-        |instant-variation-ref $ quote
-          defatom instant-variation-ref $ []
-        |clear-cache! $ quote
-          defn clear-cache! () $ reset! tree-cache-ref nil
-        |write-instants! $ quote
-          defn write-instants! (instants-ref changes)
-            &doseq (change changes)
-              let-sugar
-                    [] coord new-instant mark
-                    , change
-                swap! instants-ref assoc-in (conj coord 'data) new-instant
+              ; js/console.log |Tree: new-tree
         |tree-ref $ quote (defatom tree-ref nil)
         |timestamp-ref $ quote
           defatom timestamp-ref $ js/Date.now
-        |*tmp-changes $ quote
-          defatom *tmp-changes $ []
+        |clear-cache! $ quote
+          defn clear-cache! () $ reset! tree-cache-ref nil
+        |tree-cache-ref $ quote (defatom tree-cache-ref nil)
       :proc $ quote ()
     |quatrefoil.comp.canvas $ {}
       :ns $ quote
