@@ -84,6 +84,18 @@
         |scene $ quote
           defn scene (props & children) (create-element :scene props children)
       :proc $ quote ()
+    |quatrefoil.globals $ {}
+      :ns $ quote
+        ns quatrefoil.globals $ :require ("\"three" :as THREE)
+      :defs $ {}
+        |*global-tree $ quote (defatom *global-tree nil)
+        |*global-renderer $ quote (defatom *global-renderer nil)
+        |*global-camera $ quote (defatom *global-camera nil)
+        |global-scene $ quote
+          def global-scene $ new THREE/Scene
+        |*proxied-dispatch $ quote (defatom *proxied-dispatch nil)
+      :proc $ quote ()
+      :configs $ {}
     |quatrefoil.app.comp.todolist $ {}
       :ns $ quote
         ns quatrefoil.app.comp.todolist $ :require
@@ -158,6 +170,7 @@
         ns quatrefoil.dsl.object3d-dom $ :require
           [] quatrefoil.util.core :refer $ [] purify-tree collect-children find-element scale-zero
           [] "\"three" :as THREE
+          quatrefoil.globals :refer $ *global-renderer *global-camera global-scene *global-tree *proxied-dispatch
       :defs $ {}
         |create-perspective-camera $ quote
           defn create-perspective-camera (params)
@@ -168,7 +181,7 @@
                 far $ :far params
                 object3d $ new THREE/PerspectiveCamera fov aspect near far
               .set (.-position object3d) (:x params) (:y params) (:z params)
-              reset! camera-ref object3d
+              reset! *global-camera object3d
               , object3d
         |create-element $ quote
           defn create-element (element coord)
@@ -188,8 +201,6 @@
                 :point-light $ create-point-light params
                 :perspective-camera $ create-perspective-camera params
                 :text $ create-text-element params material
-        |virtual-tree-ref $ quote
-          defatom virtual-tree-ref $ {}
         |create-sphere-element $ quote
           defn create-sphere-element (params material event coord)
             let
@@ -218,9 +229,6 @@
                 scale-zero $ :scale-y params
               set! (.-coord object3d) coord
               , object3d
-        |font-ref $ quote
-          def font-ref $ new THREE/Font
-            js/JSON.parse $ load-file |assets/hind.json
         |create-material $ quote
           defn create-material (material)
             case-default (:kind material)
@@ -234,23 +242,21 @@
                 to-js-data $ dissoc material :kind
         |default-params $ quote
           def default-params $ {} (:x 0) (:y 0) (:z 0) (:scale-x 1) (:scale-y 1) (:scale-z 1)
-        |camera-ref $ quote (defatom camera-ref nil)
         |create-text-element $ quote
           defn create-text-element (params material)
             let
                 geometry $ new THREE/TextGeometry
                   either (:text params) |Quatrefoil
-                  to-js-data $ assoc params :font font-ref
+                  to-js-data $ assoc params :font font-resource
                 object3d $ new THREE/Mesh geometry (create-material material)
               .set (.-position object3d) (:x params) (:y params) (:z params)
               , object3d
         |load-file $ quote
           defmacro load-file (filename) (read-file filename)
-        |global-scene $ quote
-          def global-scene $ new THREE/Scene
         |on-canvas-click $ quote
-          defn on-canvas-click (event dispatch! tree-ref)
+          defn on-canvas-click (event)
             let
+                element-tree @*global-tree
                 mouse $ new THREE/Vector2
                 raycaster $ new THREE/Raycaster
               set! (.-x mouse)
@@ -259,7 +265,7 @@
               set! (.-y mouse)
                 - 1 $ * 2
                   / (.-clientY event) js/window.innerHeight
-              .setFromCamera raycaster mouse @camera-ref
+              .setFromCamera raycaster mouse @*global-camera
               let
                   intersects $ .intersectObjects raycaster
                     let
@@ -272,9 +278,9 @@
                 if (some? maybe-target)
                   let
                       coord $ -> maybe-target .-object .-coord
-                      target-el $ find-element @tree-ref coord
+                      target-el $ find-element element-tree coord
                       maybe-handler $ -> target-el (get :event) (get :click)
-                    if (some? maybe-handler) (maybe-handler event dispatch!) (println "|Found no handler for" coord)
+                    if (some? maybe-handler) (maybe-handler event @*proxied-dispatch) (println "|Found no handler for" coord)
         |build-tree $ quote
           defn build-tree (coord tree) (; js/console.log "\"build tree:" coord tree)
             let
@@ -292,8 +298,10 @@
                     child $ last entry
                   ; js/console.log |Child: child entry
                   .addBy object3d (first entry) child
-              swap! virtual-tree-ref assoc-in (conj coord 'data) virtual-element
               , object3d
+        |font-resource $ quote
+          def font-resource $ new THREE/Font
+            js/JSON.parse $ load-file |assets/hind.json
         |create-point-light $ quote
           defn create-point-light (params)
             let
@@ -319,7 +327,6 @@
           quatrefoil.core :refer $ defcomp
           quatrefoil.app.comp.todolist :refer $ comp-todolist
           quatrefoil.app.comp.portal :refer $ comp-portal
-          quatrefoil.app.comp.back :refer $ comp-back
       :defs $ {}
         |comp-demo $ quote
           defcomp comp-demo () $ group ({})
@@ -337,10 +344,6 @@
               text $ {}
                 :params $ {} (:text |Quatrefoil) (:size 4) (:height 2) (:z 20) (:x -30)
                 :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
-        |init-state $ quote
-          defn init-state (& args) :portal
-        |update-state $ quote
-          defn update-state (state new-state) new-state
         |comp-container $ quote
           defcomp comp-container (store) (println "\"store" store)
             let
@@ -368,6 +371,17 @@
                     :aspect $ / js/window.innerWidth js/window.innerHeight
                     :near 0.1
                     :far 1000
+        |comp-back $ quote
+          defcomp comp-back (on-back)
+            box
+              {}
+                :params $ {} (:width 16) (:height 4) (:depth 6) (:x 60) (:y 30)
+                :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
+                :event $ {}
+                  :click $ fn (e d!) (on-back d!)
+              text $ {}
+                :params $ {} (:text |Back) (:size 4) (:height 2) (:z 10)
+                :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
       :proc $ quote ()
     |quatrefoil.dsl.diff $ {}
       :ns $ quote
@@ -495,24 +509,6 @@
               fn (acc x)
                 assoc acc x $ &get m x
       :proc $ quote ()
-    |quatrefoil.app.comp.back $ {}
-      :ns $ quote
-        ns quatrefoil.app.comp.back $ :require
-          quatrefoil.alias :refer $ group box scene text
-          quatrefoil.core :refer $ defcomp
-      :defs $ {}
-        |comp-back $ quote
-          defcomp comp-back (on-back)
-            box
-              {}
-                :params $ {} (:width 16) (:height 4) (:depth 6) (:x 60) (:y 30)
-                :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
-                :event $ {}
-                  :click $ fn (e d!) (on-back d!)
-              text $ {}
-                :params $ {} (:text |Back) (:size 4) (:height 2) (:z 10)
-                :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
-      :proc $ quote ()
     |quatrefoil.util.core $ {}
       :ns $ quote
         ns quatrefoil.util.core $ :require
@@ -591,8 +587,9 @@
     |quatrefoil.dsl.patch $ {}
       :ns $ quote
         ns quatrefoil.dsl.patch $ :require
-          [] quatrefoil.dsl.object3d-dom :refer $ [] global-scene build-tree
+          [] quatrefoil.dsl.object3d-dom :refer $ [] build-tree
           [] quatrefoil.util.core :refer $ [] reach-object3d scale-zero
+          quatrefoil.globals :refer $ global-scene
       :defs $ {}
         |add-element $ quote
           defn add-element (coord op-data)
@@ -700,9 +697,9 @@
       :ns $ quote
         ns quatrefoil.app.main $ :require
           "\"./alter-object3d" :refer $ inject_bang
-          quatrefoil.core :refer $ render-canvas! tree-ref clear-cache!
+          quatrefoil.core :refer $ render-canvas! *global-tree clear-cache! init-renderer!
           quatrefoil.app.comp.container :refer $ comp-container
-          quatrefoil.dsl.object3d-dom :refer $ camera-ref global-scene on-canvas-click ref-dirty-call!
+          quatrefoil.dsl.object3d-dom :refer $ on-canvas-click ref-dirty-call!
           quatrefoil.app.updater :refer $ [] updater
           "\"three" :as THREE
       :defs $ {}
@@ -711,48 +708,40 @@
             if (list? op)
               recur :states $ [] op op-data
               let
-                  store $ updater @store-ref op op-data
+                  store $ updater @*store op op-data
                 js/console.log |Dispatch: op op-data store
-                reset! store-ref store
+                reset! *store store
         |main! $ quote
           defn main! () (load-console-formatter!) (inject_bang)
             let
                 canvas-el $ js/document.querySelector |canvas
-              reset! renderer-ref $ new THREE/WebGLRenderer
-                &let
-                  options $ to-js-data
-                    {} (:canvas nil) (:antialias true)
-                  set! (.-canvas options) canvas-el
-                  , options
-              .setPixelRatio @renderer-ref $ either js/window.devicePixelRatio 1
-              .addEventListener canvas-el |click $ fn (event) (on-canvas-click event dispatch! tree-ref)
-            .setSize @renderer-ref js/window.innerWidth js/window.innerHeight
-            render-canvas-app!
-            add-watch store-ref :changes $ fn (store prev) (render-canvas-app!)
+              init-renderer! canvas-el
+            render-app!
+            add-watch *store :changes $ fn (store prev) (render-app!)
             println "|App started!"
-        |renderer-ref $ quote (defatom renderer-ref nil)
-        |render-canvas-app! $ quote
-          defn render-canvas-app! () (; println "|Render app:")
-            render-canvas! (comp-container @store-ref) global-scene
-            .render @renderer-ref global-scene @camera-ref
-            ; js/console.log "\"app:" global-scene
-        |store-ref $ quote
-          defatom store-ref $ {}
+        |reload! $ quote
+          defn reload! () (clear-cache!) (render-app!) (println "|Code updated.")
+        |*store $ quote
+          defatom *store $ {}
             :tasks $ {}
               100 $ {} (:id 100) (:text "|Initial task") (:done? false)
             :states $ {}
               :cursor $ []
-        |reload! $ quote
-          defn reload! () (clear-cache!) (render-canvas-app!) (println "|Code updated.")
+        |render-app! $ quote
+          defn render-app! () (; println "|Render app:")
+            render-canvas! (comp-container @*store) dispatch!
+            ; js/console.log "\"app:" global-scene
       :proc $ quote ()
     |quatrefoil.core $ {}
       :ns $ quote
         ns quatrefoil.core $ :require
           [] quatrefoil.dsl.diff :refer $ [] diff-tree
-          [] quatrefoil.dsl.object3d-dom :refer $ [] build-tree
+          [] quatrefoil.dsl.object3d-dom :refer $ [] build-tree on-canvas-click
           [] quatrefoil.util.core :refer $ [] purify-tree
           [] quatrefoil.dsl.patch :refer $ [] apply-changes
           quatrefoil.schema :refer $ Component
+          "\"three" :as THREE
+          quatrefoil.globals :refer $ *global-tree *global-camera *global-renderer global-scene *proxied-dispatch
       :defs $ {}
         |>> $ quote
           defn >> (states k)
@@ -762,24 +751,21 @@
               assoc branch :cursor $ append parent-cursor k
         |*tmp-changes $ quote (defatom *tmp-changes nil)
         |render-canvas! $ quote
-          defn render-canvas! (markup scene) (; js/console.log "\"render" markup)
+          defn render-canvas! (markup dispatch!) (; js/console.log "\"render" markup) (reset! *proxied-dispatch dispatch!)
             let
                 new-tree markup
-              if (some? @tree-ref)
+              if (some? @*global-tree)
                 let
                     collect! $ fn (x) (swap! *tmp-changes conj x)
                   reset! *tmp-changes $ []
-                  diff-tree @tree-ref new-tree ([]) collect!
+                  diff-tree @*global-tree new-tree ([]) collect!
                   apply-changes @*tmp-changes
                 build-tree ([]) (purify-tree new-tree)
-              reset! tree-ref new-tree
-              reset! tree-cache-ref new-tree
+              reset! *global-tree new-tree
+              .render @*global-renderer global-scene @*global-camera
               ; js/console.log |Tree: new-tree
-        |tree-ref $ quote (defatom tree-ref nil)
-        |timestamp-ref $ quote
-          defatom timestamp-ref $ js/Date.now
         |clear-cache! $ quote
-          defn clear-cache! () $ reset! tree-cache-ref nil
+          defn clear-cache! () $ ; "\"TODO memof..."
         |defcomp $ quote
           defmacro defcomp (comp-name params & body)
             assert "\"expected symbol of comp-name" $ symbol? comp-name
@@ -789,5 +775,15 @@
               quasiquote $ defn ~comp-name (~ params)
                 %{} Component (:name ~comp-name)
                   :tree $ &let nil ~@body
-        |tree-cache-ref $ quote (defatom tree-cache-ref nil)
+        |init-renderer! $ quote
+          defn init-renderer! (canvas-el)
+            reset! *global-renderer $ new THREE/WebGLRenderer
+              &let
+                options $ to-js-data
+                  {} (:canvas nil) (:antialias true)
+                set! (.-canvas options) canvas-el
+                , options
+            .setPixelRatio @*global-renderer $ either js/window.devicePixelRatio 1
+            .setSize @*global-renderer js/window.innerWidth js/window.innerHeight
+            .addEventListener canvas-el |click $ fn (event) (on-canvas-click event)
       :proc $ quote ()
