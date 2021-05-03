@@ -4,7 +4,7 @@ Quatrefoil
 
 > Render Three.js with Respo style code(experimental).
 
-Demo http://repo.quamolit.org/quatrefoil/
+Demo http://repo.quamolit.org/quatrefoil.calcit/
 
 ### Patching operations
 
@@ -25,15 +25,14 @@ Demo http://repo.quamolit.org/quatrefoil/
 
 ### Develop
 
+Relies on https://github.com/calcit-lang/calcit_runner.rs .
+
 ```bash
 yarn
-yarn watch
-
-# also for index.html
-yarn cp-target
+calcit_runner --emit-js -1
+cp assets/* js/out/
+yarn vite
 ```
-
-Workflow https://github.com/mvc-works/quamolit-workflow
 
 ### License
 

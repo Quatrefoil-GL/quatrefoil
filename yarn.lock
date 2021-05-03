@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@calcit/procs@^0.3.4":
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/@calcit/procs/-/procs-0.3.4.tgz#f6540708a2e9f28dea5722f488ca2b86762138ef"
-  integrity sha512-CAff/edPuxTqAsbYCSvpnHTOWT7chDMGDARG4zl820cb/pH7E9nzt5PK7lHt3ctnRoIMM3wvSBzb2dKJ5Uy++A==
+"@calcit/procs@^0.3.5":
+  version "0.3.5"
+  resolved "https://registry.yarnpkg.com/@calcit/procs/-/procs-0.3.5.tgz#8387ffdd6155ecd946d3e45525c2641a75100934"
+  integrity sha512-pn4Kqb+rOXLS21OAEqfJA6X3GpNLB2cpBJe28eFpijDMG3ztl7NXrjNWVBDI3qfZbW3Dph1Kht9pdFIIJnp3Kg==
   dependencies:
     "@calcit/ternary-tree" "0.0.12"
     "@cirru/parser.ts" "^0.0.3"
@@ -111,15 +111,15 @@ source-map@^0.6.1:
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
   integrity sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==
 
-three@^0.126.1:
-  version "0.126.1"
-  resolved "https://registry.yarnpkg.com/three/-/three-0.126.1.tgz#cf4e4e52060fd952f6f0d5440cbd422c66bc4be7"
-  integrity sha512-eOEXnZeE1FDV0XgL1u08auIP13jxdN9LQBAEmlErYzMxtIIfuGIAZbijOyookALUhqVzVOx0Tywj6n192VM+nQ==
+three@^0.128.0:
+  version "0.128.0"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.128.0.tgz#884dacca6a330e45600a09ec5439283f50b76aa6"
+  integrity sha512-i0ap/E+OaSfzw7bD1TtYnPo3VEplkl70WX5fZqZnfZsE3k3aSFudqrrC9ldFZfYFkn1zwDmBcdGfiIm/hnbyZA==
 
-vite@^2.2.3:
-  version "2.2.3"
-  resolved "https://registry.yarnpkg.com/vite/-/vite-2.2.3.tgz#1acbdfa56ac00e00e7ccb6988f63f130c2f99dbb"
-  integrity sha512-PtjyBL4GtACM+uT5q5hi2+AlMBbb6YI2b2bam6QI8ZdZt4FezseF0yZHQx0G+b3po9jIJ/GS5N9gc5Yq9Rue7g==
+vite@^2.2.4:
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-2.2.4.tgz#8f9cc85aacab04c850085894b086c8717f12ed16"
+  integrity sha512-vnIwSNci+phFMp6krhy+FbYzKL0R67Sdt9mVZ96S27AewrApSJjTqncJcalk8sf60BgcbW4+1C6DFIWkxquO9g==
   dependencies:
     esbuild "^0.9.3"
     postcss "^8.2.1"
