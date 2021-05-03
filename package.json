@@ -1,0 +1,21 @@
+{
+  "name": "quatrefoil",
+  "version": "0.1.0",
+  "description": "ClojureScript workflow using Calcit Editor",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:mvc-works/calcit-workflow.git"
+  },
+  "author": "jiyinyiyong",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^2.2.3"
+  },
+  "dependencies": {
+    "@calcit/procs": "^0.3.4",
+    "shortid": "^2.2.16",
+    "three": "^0.126.1"
+  }
+}
