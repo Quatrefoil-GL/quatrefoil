@@ -18,7 +18,7 @@
                   :event $ {}
                     :click $ fn (event d!) (js/console.log |Click: event) (on-change :todolist d!)
                 text $ {}
-                  :params $ {} (:text |Todolist) (:size 4) (:height 2) (:z 40) (:x 0)
+                  :params $ {} (:text |Todolist) (:size 4) (:height 2) (:z 4) (:x 0)
                   :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
               box
                 {}
@@ -27,7 +27,7 @@
                   :event $ {}
                     :click $ fn (event d!) (js/console.log |Click: event) (on-change :demo d!)
                 text $ {}
-                  :params $ {} (:text |Demo) (:size 4) (:height 2) (:z 40) (:x 0)
+                  :params $ {} (:text |Demo) (:size 4) (:height 2) (:z 4) (:x 0)
                   :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
       :proc $ quote ()
     |quatrefoil.alias $ {}
@@ -366,6 +366,8 @@
                     d! cursor $ assoc state :tab :portal
                 point-light $ {}
                   :params $ {} (:color 0xffffff) (:x 20) (:y 40) (:z 100) (:intensity 2) (:distance 400)
+                point-light $ {}
+                  :params $ {} (:color 0xffffff) (:x 0) (:y 20) (:z 0) (:intensity 2) (:distance 400)
                 perspective-camera $ {}
                   :params $ {} (:x 0) (:y 0) (:z 200) (:fov 45)
                     :aspect $ / js/window.innerWidth js/window.innerHeight
@@ -786,4 +788,29 @@
             .setPixelRatio @*global-renderer $ either js/window.devicePixelRatio 1
             .setSize @*global-renderer js/window.innerWidth js/window.innerHeight
             .addEventListener canvas-el |click $ fn (event) (on-canvas-click event)
+            .addEventListener window "\"keydown" $ fn (event)
+              handle-key-event $ .-key event
+        |handle-key-event $ quote
+          defn handle-key-event (key)
+            let
+                move $ case-default key nil
+                  "\"ArrowDown" $ [] 0 -4 0
+                  "\"ArrowUp" $ [] 0 4 0
+                  "\"ArrowLeft" $ [] -4 0 0
+                  "\"ArrowRight" $ [] 4 0 0
+                  "\"w" $ [] 0 0 -4
+                  "\"s" $ [] 0 0 4
+                camera @*global-camera
+                position $ .-position camera
+              ; js/console.log move camera
+              when (some? move)
+                let[] (x y z) move
+                  set! (.-x position)
+                    &+ x $ .-x position
+                  set! (.-y position)
+                    &+ y $ .-y position
+                  set! (.-z position)
+                    &+ z $ .-z position
+                .lookAt camera $ new THREE/Vector3 0 0 0
+                .render @*global-renderer global-scene camera
       :proc $ quote ()
