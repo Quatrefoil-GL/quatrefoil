@@ -12,22 +12,18 @@
           defcomp comp-portal (on-change)
             group ({})
               box
-                {}
-                  :params $ {} (:width 16) (:height 4) (:depth 6) (:x -40) (:y 30) (:z 0)
+                {} (:width 16) (:height 4) (:depth 6) (:x -40) (:y 30) (:z 0)
                   :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6)
                   :event $ {}
                     :click $ fn (event d!) (js/console.log |Click: event) (on-change :todolist d!)
-                text $ {}
-                  :params $ {} (:text |Todolist) (:size 4) (:height 2) (:z 4) (:x 0)
+                text $ {} (:text |Todolist) (:size 4) (:height 2) (:z 4) (:x 0)
                   :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
               box
-                {}
-                  :params $ {} (:width 16) (:height 4) (:depth 6) (:x 0) (:y 30)
+                {} (:width 16) (:height 4) (:depth 6) (:x 0) (:y 30)
                   :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6)
                   :event $ {}
                     :click $ fn (event d!) (js/console.log |Click: event) (on-change :demo d!)
-                text $ {}
-                  :params $ {} (:text |Demo) (:size 4) (:height 2) (:z 4) (:x 0)
+                text $ {} (:text |Demo) (:size 4) (:height 2) (:z 4) (:x 0)
                   :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
       :proc $ quote ()
     |quatrefoil.alias $ {}
@@ -40,7 +36,7 @@
         |create-element $ quote
           defn create-element (el-name props children)
             %{} Shape (:name el-name)
-              :params $ :params props
+              :params $ -> props (dissoc :material) (dissoc :event)
               :material $ :material props
               :event $ :event props
               :children $ arrange-children children
@@ -69,10 +65,6 @@
               , result
         |camera $ quote
           defn camera (props & children) (create-element :camera props children)
-        |create-comp $ quote
-          defn create-comp (comp-name render)
-            fn (& args)
-              %{} Component (:name comp-name) (:args args) (:render render) (:tree nil)
         |box $ quote
           defn box (props & children) (create-element :box props children)
         |text $ quote
@@ -106,17 +98,14 @@
           defcomp comp-todolist (tasks)
             group ({})
               group
-                {} $ :params
-                  {} (:y 40) (:x 0) (:z 0)
-                box $ {}
-                  :params $ {} (:width 32) (:height 6) (:depth 1) (:opacity 0.5)
+                {} (:y 40) (:x 0) (:z 0)
+                box $ {} (:width 32) (:height 6) (:depth 1) (:opacity 0.5)
                   :material $ {} (:kind :mesh-lambert) (:color 0xffaaaa)
                   :event $ {}
                     :click $ fn (event dispatch!)
                       dispatch! :add-task $ js/prompt "|Task content?"
               group
-                {} $ :params
-                  {} (:y 30) (:x 0) (:z 0)
+                {} (:y 30) (:x 0) (:z 0)
                 -> (vals tasks)
                   map-indexed $ fn (idx task)
                     [] (:id task) (comp-task task idx)
@@ -124,32 +113,27 @@
         |comp-task $ quote
           defcomp comp-task (task idx)
             group
-              {} $ :params
-                {} (:x 0)
-                  :y $ * idx -8
-              sphere $ {}
-                :params $ {} (:radius 2) (:x -20)
+              {} (:x 0)
+                :y $ * idx -8
+              sphere $ {} (:radius 2) (:x -20)
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.3)
                   :color $ if (:done? task) 0x905055 0x9050ff
                 :event $ {}
                   :click $ fn (event dispatch!)
                     dispatch! :toggle-task $ :id task
               box
-                {}
-                  :params $ {} (:width 32) (:height 4) (:depth 1) (:opacity 0.5)
+                {} (:width 32) (:height 4) (:depth 1) (:opacity 0.5)
                   :material $ {} (:kind :mesh-lambert) (:color 0xcccccc)
                   :event $ {}
                     :click $ fn (event dispatch!)
                       dispatch! :edit-task $ [] (:id task)
                         js/prompt "|New task:" $ :text task
                 text $ {}
-                  :params $ {}
-                    :text $ :text task
-                    :size 3
-                    :height 2
+                  :text $ :text task
+                  :size 3
+                  :height 2
                   :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
-              sphere $ {}
-                :params $ {} (:radius 2) (:x 30)
+              sphere $ {} (:radius 2) (:x 30)
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.3) (:color 0xff5050)
                 :event $ {}
                   :click $ fn (event dispatch!)
@@ -183,24 +167,6 @@
               .set (.-position object3d) (:x params) (:y params) (:z params)
               reset! *global-camera object3d
               , object3d
-        |create-element $ quote
-          defn create-element (element coord)
-            ; .log js/console |Element: element $ :coord element
-            let
-                params $ merge default-params (:params element)
-                material $ either (:material element)
-                  {} (:kind :mesh-basic) (:color 0xa0a0a0)
-                event $ :event element
-              case-default (:name element)
-                do (.warn js/console "|Unknown element" element)
-                  new $ .-Object3D js/THREE
-                :scene global-scene
-                :group $ create-group-element params
-                :box $ create-box-element params material event coord
-                :sphere $ create-sphere-element params material event coord
-                :point-light $ create-point-light params
-                :perspective-camera $ create-perspective-camera params
-                :text $ create-text-element params material
         |create-sphere-element $ quote
           defn create-sphere-element (params material event coord)
             let
@@ -242,6 +208,24 @@
                 to-js-data $ dissoc material :kind
         |default-params $ quote
           def default-params $ {} (:x 0) (:y 0) (:z 0) (:scale-x 1) (:scale-y 1) (:scale-z 1)
+        |create-shape $ quote
+          defn create-shape (element coord)
+            ; .log js/console |Element: element $ :coord element
+            let
+                params $ merge default-params (:params element)
+                material $ either (:material element)
+                  {} (:kind :mesh-basic) (:color 0xa0a0a0)
+                event $ :event element
+              case-default (:name element)
+                do (.warn js/console "|Unknown element" element)
+                  new $ .-Object3D js/THREE
+                :scene global-scene
+                :group $ create-group-element params
+                :box $ create-box-element params material event coord
+                :sphere $ create-sphere-element params material event coord
+                :point-light $ create-point-light params
+                :perspective-camera $ create-perspective-camera params
+                :text $ create-text-element params material
         |create-text-element $ quote
           defn create-text-element (params material)
             let
@@ -284,7 +268,7 @@
         |build-tree $ quote
           defn build-tree (coord tree) (; js/console.log "\"build tree:" coord tree)
             let
-                object3d $ create-element (assoc tree :children nil) coord
+                object3d $ create-shape (assoc tree :children nil) coord
                 children $ -> (:children tree) (to-pairs)
                   map $ fn (entry)
                     update entry 1 $ fn (child)
@@ -330,19 +314,16 @@
       :defs $ {}
         |comp-demo $ quote
           defcomp comp-demo () $ group ({})
-            box $ {}
-              :params $ {} (:width 16) (:height 4) (:depth 6) (:x -40) (:y 0) (:z 0)
+            box $ {} (:width 16) (:height 4) (:depth 6) (:x -40) (:y 0) (:z 0)
               :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
               :event $ {}
                 :click $ fn (event dispatch!) (.log js/console |Click: event) (dispatch! :demo nil)
-            sphere $ {}
-              :params $ {} (:radius 8) (:x 10)
+            sphere $ {} (:radius 8) (:x 10)
               :material $ {} (:kind :mesh-lambert) (:opacity 0.6) (:color 0x9050c0)
               :event $ {}
                 :click $ fn (event dispatch!) (.log js/console |Click: event) (dispatch! :canvas nil)
             group ({})
-              text $ {}
-                :params $ {} (:text |Quatrefoil) (:size 4) (:height 2) (:z 20) (:x -30)
+              text $ {} (:text |Quatrefoil) (:size 4) (:height 2) (:z 20) (:x -30)
                 :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
         |comp-container $ quote
           defcomp comp-container (store) (println "\"store" store)
@@ -364,25 +345,20 @@
                 if (not= state :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
-                point-light $ {}
-                  :params $ {} (:color 0xffffff) (:x 20) (:y 40) (:z 100) (:intensity 2) (:distance 400)
-                point-light $ {}
-                  :params $ {} (:color 0xffffff) (:x 0) (:y 20) (:z 0) (:intensity 2) (:distance 400)
-                perspective-camera $ {}
-                  :params $ {} (:x 0) (:y 0) (:z 200) (:fov 45)
-                    :aspect $ / js/window.innerWidth js/window.innerHeight
-                    :near 0.1
-                    :far 1000
+                point-light $ {} (:color 0xffffff) (:x 20) (:y 40) (:z 100) (:intensity 2) (:distance 400)
+                point-light $ {} (:color 0xffffff) (:x 0) (:y 20) (:z 0) (:intensity 2) (:distance 400)
+                perspective-camera $ {} (:x 0) (:y 0) (:z 200) (:fov 45)
+                  :aspect $ / js/window.innerWidth js/window.innerHeight
+                  :near 0.1
+                  :far 1000
         |comp-back $ quote
           defcomp comp-back (on-back)
             box
-              {}
-                :params $ {} (:width 16) (:height 4) (:depth 6) (:x 60) (:y 30)
+              {} (:width 16) (:height 4) (:depth 6) (:x 60) (:y 30)
                 :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
                 :event $ {}
                   :click $ fn (e d!) (on-back d!)
-              text $ {}
-                :params $ {} (:text |Back) (:size 4) (:height 2) (:z 10)
+              text $ {} (:text |Back) (:size 4) (:height 2) (:z 10)
                 :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
       :proc $ quote ()
     |quatrefoil.dsl.diff $ {}
@@ -788,7 +764,7 @@
             .setPixelRatio @*global-renderer $ either js/window.devicePixelRatio 1
             .setSize @*global-renderer js/window.innerWidth js/window.innerHeight
             .addEventListener canvas-el |click $ fn (event) (on-canvas-click event)
-            .addEventListener window "\"keydown" $ fn (event)
+            .addEventListener js/window "\"keydown" $ fn (event)
               handle-key-event $ .-key event
         |handle-key-event $ quote
           defn handle-key-event (key)
