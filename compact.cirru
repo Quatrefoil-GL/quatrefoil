@@ -67,6 +67,8 @@
           defn camera (props & children) (create-element :camera props children)
         |box $ quote
           defn box (props & children) (create-element :box props children)
+        |ambient-light $ quote
+          defn ambient-light (props & children) (create-element :ambient-light props children)
         |text $ quote
           defn text (props & children) (create-element :text props children)
         |line $ quote
@@ -86,6 +88,9 @@
         |global-scene $ quote
           def global-scene $ new THREE/Scene
         |*proxied-dispatch $ quote (defatom *proxied-dispatch nil)
+        |*viewer-angle $ quote
+          defatom *viewer-angle $ &/ &PI 2
+        |*viewer-y-shift $ quote (defatom *viewer-y-shift 0)
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.app.comp.todolist $ {}
@@ -224,6 +229,7 @@
                 :box $ create-box-element params material event coord
                 :sphere $ create-sphere-element params material event coord
                 :point-light $ create-point-light params
+                :ambient-light $ create-ambient-light params
                 :perspective-camera $ create-perspective-camera params
                 :text $ create-text-element params material
         |create-text-element $ quote
@@ -237,6 +243,15 @@
               , object3d
         |load-file $ quote
           defmacro load-file (filename) (read-file filename)
+        |create-ambient-light $ quote
+          defn create-ambient-light (params)
+            let
+                color $ :color params
+                intensity $ either (:intensity params) 1
+                object3d $ with-js-log (new THREE/AmbientLight color intensity)
+              .set (.-position object3d) (:x params) (:y params) (:z params)
+              ; .log js/console |Light: object3d
+              , object3d
         |on-canvas-click $ quote
           defn on-canvas-click (event)
             let
@@ -307,7 +322,7 @@
     |quatrefoil.app.comp.container $ {}
       :ns $ quote
         ns quatrefoil.app.comp.container $ :require
-          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text
+          quatrefoil.alias :refer $ group box sphere point-light ambient-light perspective-camera scene text
           quatrefoil.core :refer $ defcomp
           quatrefoil.app.comp.todolist :refer $ comp-todolist
           quatrefoil.app.comp.portal :refer $ comp-portal
@@ -347,6 +362,7 @@
                     d! cursor $ assoc state :tab :portal
                 point-light $ {} (:color 0xffffff) (:x 20) (:y 40) (:z 100) (:intensity 2) (:distance 400)
                 point-light $ {} (:color 0xffffff) (:x 0) (:y 20) (:z 0) (:intensity 2) (:distance 400)
+                ambient-light $ {} (:color 0x666666)
                 perspective-camera $ {} (:x 0) (:y 0) (:z 200) (:fov 45)
                   :aspect $ / js/window.innerWidth js/window.innerHeight
                   :near 0.1
@@ -568,6 +584,7 @@
           [] quatrefoil.dsl.object3d-dom :refer $ [] build-tree
           [] quatrefoil.util.core :refer $ [] reach-object3d scale-zero
           quatrefoil.globals :refer $ global-scene
+          "\"three" :as THREE
       :defs $ {}
         |add-element $ quote
           defn add-element (coord op-data)
@@ -637,10 +654,11 @@
                       [] k v
                       , entry
                   case-default k
-                    do $ .log js/console "|Unknown param change:" k v
+                    do $ js/console.logs "|Unknown param change:" k v
                     :x $ .setX (.-position target) v
                     :y $ .setY (.-position target) v
                     :z $ .setZ (.-position target) v
+                    :color $ set! (.-color target) (new THREE/Color v)
                     :scale-x $ .setX (.-scale target) (scale-zero v)
                     :scale-y $ .setY (.-scale target) (scale-zero v)
                     :scale-z $ .setZ (.-scale target) (scale-zero v)
@@ -719,7 +737,7 @@
           [] quatrefoil.dsl.patch :refer $ [] apply-changes
           quatrefoil.schema :refer $ Component
           "\"three" :as THREE
-          quatrefoil.globals :refer $ *global-tree *global-camera *global-renderer global-scene *proxied-dispatch
+          quatrefoil.globals :refer $ *global-tree *global-camera *global-renderer global-scene *proxied-dispatch *viewer-angle *viewer-y-shift
       :defs $ {}
         |>> $ quote
           defn >> (states k)
@@ -741,7 +759,7 @@
                 build-tree ([]) (purify-tree new-tree)
               reset! *global-tree new-tree
               .render @*global-renderer global-scene @*global-camera
-              ; js/console.log |Tree: new-tree
+              js/console.log |Scene: global-scene
         |clear-cache! $ quote
           defn clear-cache! () $ ; "\"TODO memof..."
         |defcomp $ quote
@@ -765,28 +783,56 @@
             .setSize @*global-renderer js/window.innerWidth js/window.innerHeight
             .addEventListener canvas-el |click $ fn (event) (on-canvas-click event)
             .addEventListener js/window "\"keydown" $ fn (event)
-              handle-key-event $ .-key event
+              handle-key-event (.-key event) (.-shiftKey event)
         |handle-key-event $ quote
-          defn handle-key-event (key)
+          defn handle-key-event (key shift?)
             let
+                angle @*viewer-angle
                 move $ case-default key nil
-                  "\"ArrowDown" $ [] 0 -4 0
-                  "\"ArrowUp" $ [] 0 4 0
-                  "\"ArrowLeft" $ [] -4 0 0
-                  "\"ArrowRight" $ [] 4 0 0
-                  "\"w" $ [] 0 0 -4
-                  "\"s" $ [] 0 0 4
+                  "\"ArrowDown" $ if shift?
+                    do (swap! *viewer-y-shift &- 1) ([] 0 0 0)
+                    [] 0 -2 0
+                  "\"ArrowUp" $ if shift?
+                    do (swap! *viewer-y-shift &+ 1) ([] 0 0 0)
+                    [] 0 2 0
+                  "\"ArrowLeft" $ do (swap! *viewer-angle &+ 0.04) ([] 0 0 0)
+                  "\"ArrowRight" $ do (swap! *viewer-angle &- 0.04) ([] 0 0 0)
+                  "\"w" $ &let (a @*viewer-angle)
+                    []
+                      &* 4 $ cos a
+                      , 0 $ &* -4 (sin a)
+                  "\"s" $ &let (a @*viewer-angle)
+                    []
+                      &* -1 $ cos a
+                      , 0 $ &* 1 (sin a)
+                  "\"a" $ &let
+                    a $ &+ @*viewer-angle (&/ &PI 2)
+                    []
+                      &* 2 $ cos a
+                      , 0 $ &* -2 (sin a)
+                  "\"d" $ &let
+                    a $ &- @*viewer-angle (&/ &PI 2)
+                    []
+                      &* 2 $ cos a
+                      , 0 $ &* -2 (sin a)
                 camera @*global-camera
                 position $ .-position camera
               ; js/console.log move camera
-              when (some? move)
-                let[] (x y z) move
-                  set! (.-x position)
-                    &+ x $ .-x position
-                  set! (.-y position)
-                    &+ y $ .-y position
-                  set! (.-z position)
-                    &+ z $ .-z position
-                .lookAt camera $ new THREE/Vector3 0 0 0
+              when (some? move) 
+                let-sugar
+                      [] dx dy dz
+                      , move
+                    x $ &+ (.-x position) dx
+                    y $ &+ (.-y position) dy
+                    z $ &+ (.-z position) dz
+                    x2 $ &+ x
+                      &* 4 $ cos @*viewer-angle
+                    y2 $ &+ y (&* 0.2 @*viewer-y-shift)
+                    z2 $ &+ z
+                      &* -4 $ sin @*viewer-angle
+                  set! (.-x position) x
+                  set! (.-y position) y
+                  set! (.-z position) z
+                  .lookAt camera $ new THREE/Vector3 x2 y2 z2
                 .render @*global-renderer global-scene camera
       :proc $ quote ()

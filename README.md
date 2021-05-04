@@ -23,6 +23,19 @@ Demo http://repo.quamolit.org/quatrefoil.calcit/
 * [ ] `add-events`
 * [ ] `remove-events`
 
+Keyword shortcuts for viewport moving:
+
+* `w` move forward
+* `s` move backward
+* `a` move left
+* `d` move left
+* "Up" move up
+* "Down" move down
+* "Shift Up" rotate to view up
+* "Shift Down" rotate to view down
+* "Left" rotate to view left
+* "Right" rotate to view right
+
 ### Develop
 
 Relies on https://github.com/calcit-lang/calcit_runner.rs .
