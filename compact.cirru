@@ -13,18 +13,18 @@
             group ({})
               box
                 {} (:width 16) (:height 4) (:depth 6) (:x -40) (:y 30) (:z 0)
-                  :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6)
+                  :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6) (:transparent true)
                   :event $ {}
                     :click $ fn (e d!) (on-change :todolist d!)
-                text $ {} (:text |Todolist) (:size 4) (:height 2) (:z 4) (:x 0)
-                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
+                text $ {} (:text |Todolist) (:size 4) (:height 1) (:z 4) (:x 0)
+                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
               box
                 {} (:width 16) (:height 4) (:depth 6) (:x 0) (:y 30)
-                  :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6)
+                  :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6) (:transparent true)
                   :event $ {}
                     :click $ fn (e d!) (on-change :demo d!)
-                text $ {} (:text |Demo) (:size 4) (:height 2) (:z 4) (:x 0)
-                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
+                text $ {} (:text |Demo) (:size 4) (:height 1) (:z 4) (:x 0)
+                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
       :proc $ quote ()
     |quatrefoil.alias $ {}
       :ns $ quote
@@ -99,8 +99,8 @@
             group ({})
               group
                 {} (:y 40) (:x 0) (:z 0)
-                box $ {} (:width 32) (:height 6) (:depth 1)
-                  :material $ {} (:kind :mesh-lambert) (:color 0xffaaaa) (:opacity 0.5)
+                box $ {} (:width 40) (:height 6) (:depth 1)
+                  :material $ {} (:kind :mesh-lambert) (:color 0xffaaaa) (:opacity 0.9) (:transparent true)
                   :event $ {}
                     :click $ fn (e d!)
                       d! :add-task $ js/prompt "|Task content?"
@@ -115,15 +115,15 @@
             group
               {} (:x 0)
                 :y $ * idx -8
-              sphere $ {} (:radius 2) (:x -20)
+              sphere $ {} (:radius 2) (:x -30)
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.8) (:transparent true)
                   :color $ if (:done? task) 0x905055 0x9050ff
                 :event $ {}
                   :click $ fn (event dispatch!)
                     dispatch! :toggle-task $ :id task
               box
-                {} (:width 32) (:height 4) (:depth 1)
-                  :material $ {} (:kind :mesh-lambert) (:color 0xcccccc) (:opacity 0.8) (:transparent true)
+                {} (:width 40) (:height 4) (:depth 1)
+                  :material $ {} (:kind :mesh-lambert) (:color 0xcccccc) (:opacity 0.6) (:transparent true)
                   :event $ {}
                     :click $ fn (event dispatch!)
                       dispatch! :edit-task $ [] (:id task)
@@ -131,7 +131,8 @@
                 text $ {}
                   :text $ :text task
                   :size 3
-                  :height 2
+                  :height 1
+                  :x -10
                   :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.8) (:transparent true)
               sphere $ {} (:radius 2) (:x 30)
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.8) (:color 0xff5050) (:transparent true)
@@ -345,10 +346,10 @@
                   {} $ :tab :portal
                 tab $ :tab state
               scene ({})
-                perspective-camera $ {} (:x 0) (:y 0) (:z 200) (:fov 45)
+                perspective-camera $ {} (:x 0) (:y 0) (:z 100) (:fov 45)
                   :aspect $ / js/window.innerWidth js/window.innerHeight
                   :near 0.1
-                  :far 1000
+                  :far 500
                 case-default tab
                   comp-portal $ fn (next d!)
                     d! cursor $ assoc state :tab next
@@ -361,8 +362,8 @@
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
                 ambient-light $ {} (:color 0x666666)
-                point-light $ {} (:color 0xffffff) (:x 20) (:y 40) (:z 100) (:intensity 2) (:distance 200)
-                point-light $ {} (:color 0xffffff) (:x 0) (:y 20) (:z 0) (:intensity 2) (:distance 40)
+                point-light $ {} (:color 0xffffff) (:x 20) (:y 40) (:z 50) (:intensity 2) (:distance 200)
+                point-light $ {} (:color 0xffffff) (:x 0) (:y 60) (:z 0) (:intensity 2) (:distance 200)
         |comp-back $ quote
           defcomp comp-back (on-back)
             box
@@ -488,7 +489,7 @@
                 collect! $ [] coord :remove-element
               (not= (:name prev-tree) (:name tree))
                 collect! $ [] coord :replace-element (purify-tree tree)
-              (and (= :text (:name tree) (:name prev-tree)) (not= (get-in tree ([] :params :text)) (get-in prev-tree ([] :params :text))))
+              (and (= :text (:name tree) (:name prev-tree)) (not= (:params tree) (:params prev-tree)))
                 collect! $ [] coord :replace-element (purify-tree tree)
               true $ do
                 diff-params (:params prev-tree) (:params tree) coord collect!
@@ -588,51 +589,6 @@
           quatrefoil.globals :refer $ global-scene
           "\"three" :as THREE
       :defs $ {}
-        |add-element $ quote
-          defn add-element (coord op-data)
-            if (empty? coord) (.warn js/console "|Cannot add element with empty coord!")
-              let
-                  target $ reach-object3d global-scene (butlast coord)
-                .addBy target (last coord) (build-tree coord op-data)
-        |apply-changes $ quote
-          defn apply-changes (changes)
-            println "\"changes" (count changes) changes
-            &doseq (change changes)
-              let-sugar
-                    [] coord op op-data
-                    , change
-                ; js/console.log |Change: op coord
-                case-default op (js/console.log "|Unknown op:" op)
-                  :add-material $ update-material coord op-data
-                  :update-material $ update-material coord op-data
-                  :remove-children $ remove-children coord op-data
-                  :add-children $ add-children coord op-data
-                  :update-params $ update-params coord op-data
-                  :add-params $ update-params coord op-data
-                  :add-element $ add-element coord op-data
-                  :remove-element $ remove-element coord
-                  :replace-element $ replace-element coord op-data
-        |add-children $ quote
-          defn add-children (coord op-data)
-            let
-                target $ reach-object3d global-scene coord
-              &doseq (entry op-data)
-                let-sugar
-                      [] k tree
-                      , entry
-                  .addBy target k $ build-tree (conj coord k) tree
-        |remove-element $ quote
-          defn remove-element (coord)
-            if (empty? coord) (.warn js/console "|Cannot remove by empty coord!")
-              let
-                  target $ reach-object3d global-scene (butlast coord)
-                .removeBy target $ last coord
-        |replace-element $ quote
-          defn replace-element (coord op-data)
-            if (empty? coord) (.warn js/console "|Cannot replace with empty coord!")
-              let
-                  target $ reach-object3d global-scene (butlast coord)
-                .replaceBy target (last coord) (build-tree coord op-data)
         |update-material $ quote
           defn update-material (coord op-data) (; println "|Update material" coord op-data)
             let
@@ -645,11 +601,37 @@
                   :color $ .set (.-color material) new-value
                   :opacity $ set! (.-opacity material) new-value
                   :transparent $ set! (.-transparent material) new-value
-        |remove-children $ quote
-          defn remove-children (coord op-data)
-            let
-                target $ reach-object3d global-scene coord
-              &doseq (child-key op-data) (.removeBy target child-key)
+        |replace-element $ quote
+          defn replace-element (coord op-data)
+            if (empty? coord) (.warn js/console "|Cannot replace with empty coord!")
+              let
+                  target $ reach-object3d global-scene (butlast coord)
+                .replaceBy target (last coord) (build-tree coord op-data)
+        |apply-changes $ quote
+          defn apply-changes (changes)
+            ; println "\"changes" (count changes) changes
+            &doseq (change changes)
+              let-sugar
+                    [] coord op op-data
+                    , change
+                ; js/console.log |Change: op coord
+                case-default op (js/console.log "|Unknown op:" op)
+                  :add-material $ update-material coord op-data
+                  :update-material $ update-material coord op-data
+                  :remove-material $ remove-material coord op-data
+                  :remove-children $ remove-children coord op-data
+                  :add-children $ add-children coord op-data
+                  :update-params $ update-params coord op-data
+                  :add-params $ update-params coord op-data
+                  :add-element $ add-element coord op-data
+                  :remove-element $ remove-element coord
+                  :replace-element $ replace-element coord op-data
+        |remove-element $ quote
+          defn remove-element (coord)
+            if (empty? coord) (.warn js/console "|Cannot remove by empty coord!")
+              let
+                  target $ reach-object3d global-scene (butlast coord)
+                .removeBy target $ last coord
         |update-params $ quote
           defn update-params (coord op-data)
             let
@@ -669,6 +651,35 @@
                     :scale-y $ .setY (.-scale target) (scale-zero v)
                     :scale-z $ .setZ (.-scale target) (scale-zero v)
                     :radius $ set! (-> target .-geometry .-radius) v
+        |remove-material $ quote
+          defn remove-material (coord op-data)
+            let
+                target $ reach-object3d global-scene coord
+                material $ .-material target
+              &doseq (entry op-data)
+                case-default entry (println "|Unknown material prop:" op-data)
+                  :opacity $ set! (.-opacity material) 0.9
+                  :transparent $ set! (.-transparent material) 1
+        |remove-children $ quote
+          defn remove-children (coord op-data)
+            let
+                target $ reach-object3d global-scene coord
+              &doseq (child-key op-data) (.removeBy target child-key)
+        |add-element $ quote
+          defn add-element (coord op-data)
+            if (empty? coord) (.warn js/console "|Cannot add element with empty coord!")
+              let
+                  target $ reach-object3d global-scene (butlast coord)
+                .addBy target (last coord) (build-tree coord op-data)
+        |add-children $ quote
+          defn add-children (coord op-data)
+            let
+                target $ reach-object3d global-scene coord
+              &doseq (entry op-data)
+                let-sugar
+                      [] k tree
+                      , entry
+                  .addBy target k $ build-tree (conj coord k) tree
       :proc $ quote ()
     |quatrefoil.app.updater $ {}
       :ns $ quote
