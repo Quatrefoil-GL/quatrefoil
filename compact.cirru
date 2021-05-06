@@ -873,6 +873,11 @@
             .setPixelRatio @*global-renderer $ either js/window.devicePixelRatio 1
             .setSize @*global-renderer js/window.innerWidth js/window.innerHeight
             .addEventListener canvas-el |click $ fn (event) (on-canvas-click event)
+            .addEventListener js/window |resize $ fn (event)
+              set! (.-aspect @*global-camera) (/ js/window.innerWidth js/window.innerHeight)
+              .updateProjectionMatrix @*global-camera
+              .setSize @*global-renderer js/window.innerWidth js/window.innerHeight
+              .render @*global-renderer global-scene @*global-camera
         |clear-cache! $ quote
           defn clear-cache! () $ ; "\"TODO memof..."
         |defcomp $ quote
