@@ -12,18 +12,22 @@
           defcomp comp-portal (on-change)
             group ({})
               box
-                {} (:width 16) (:height 4) (:depth 6) (:x -40) (:y 30) (:z 0)
+                {} (:width 16) (:height 4) (:depth 6)
+                  :position $ [] -43 30 0
                   :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6) (:transparent true)
                   :event $ {}
                     :click $ fn (e d!) (on-change :todolist d!)
-                text $ {} (:text |Todolist) (:size 4) (:height 1) (:z 4) (:x 0)
+                text $ {} (:text |Todolist) (:size 4) (:height 1)
+                  :position $ [] 0 0 4
                   :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
               box
-                {} (:width 16) (:height 4) (:depth 6) (:x 0) (:y 30)
+                {} (:width 16) (:height 4) (:depth 6)
+                  :position $ [] 0 30 0
                   :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6) (:transparent true)
                   :event $ {}
                     :click $ fn (e d!) (on-change :demo d!)
-                text $ {} (:text |Demo) (:size 4) (:height 1) (:z 4) (:x 0)
+                text $ {} (:text |Demo) (:size 4) (:height 1)
+                  :position $ [] 0 0 4
                   :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
       :proc $ quote ()
     |quatrefoil.alias $ {}
@@ -36,7 +40,9 @@
         |create-element $ quote
           defn create-element (el-name props children)
             %{} Shape (:name el-name)
-              :params $ -> props (dissoc :material) (dissoc :event)
+              :params $ -> props (dissoc :material) (dissoc :event) (dissoc :position) (dissoc :scale)
+              :position $ :position props
+              :scale $ :scale props
               :material $ :material props
               :event $ :event props
               :children $ arrange-children children
@@ -98,14 +104,14 @@
           defcomp comp-todolist (tasks)
             group ({})
               group
-                {} (:y 40) (:x 0) (:z 0)
+                {} $ :position ([] 0 30 0)
                 box $ {} (:width 40) (:height 6) (:depth 1)
                   :material $ {} (:kind :mesh-lambert) (:color 0xffaaaa) (:opacity 0.9) (:transparent true)
                   :event $ {}
                     :click $ fn (e d!)
                       d! :add-task $ js/prompt "|Task content?"
               group
-                {} (:y 30) (:x 0) (:z 0)
+                {} $ :position ([] 0 20 0)
                 -> (vals tasks)
                   map-indexed $ fn (idx task)
                     [] (:id task) (comp-task task idx)
@@ -113,9 +119,10 @@
         |comp-task $ quote
           defcomp comp-task (task idx)
             group
-              {} (:x 0)
-                :y $ * idx -8
-              sphere $ {} (:radius 2) (:x -30)
+              {} $ :position
+                [] 0 (* idx -8) 0
+              sphere $ {} (:radius 2)
+                :position $ [] -30 0 0
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.8) (:transparent true)
                   :color $ if (:done? task) 0x905055 0x9050ff
                 :event $ {}
@@ -132,9 +139,10 @@
                   :text $ :text task
                   :size 3
                   :height 1
-                  :x -10
+                  :position $ [] -10 0 0
                   :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.8) (:transparent true)
-              sphere $ {} (:radius 2) (:x 30)
+              sphere $ {} (:radius 2)
+                :position $ [] 30 0 0
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.8) (:color 0xff5050) (:transparent true)
                 :event $ {}
                   :click $ fn (event dispatch!)
@@ -158,42 +166,40 @@
           quatrefoil.globals :refer $ *global-renderer *global-camera global-scene *global-tree *proxied-dispatch
       :defs $ {}
         |create-perspective-camera $ quote
-          defn create-perspective-camera (params)
+          defn create-perspective-camera (params position)
             let
                 fov $ :fov params
                 aspect $ :aspect params
                 near $ :near params
                 far $ :far params
                 object3d $ new THREE/PerspectiveCamera fov aspect near far
-              .set (.-position object3d) (:x params) (:y params) (:z params)
+              set-position! object3d position
               reset! *global-camera object3d
               , object3d
+        |set-position! $ quote
+          defn set-position! (object position)
+            if (some? position)
+              let[] (x y z) position $ .set (.-position object) x y z
         |create-sphere-element $ quote
-          defn create-sphere-element (params material event coord)
+          defn create-sphere-element (params position scale material event coord)
             let
                 geometry $ new THREE/SphereGeometry
                   or (:radius params) 8
                   or (:width-segments params) 32
                   or (:height-segments params) 32
                 object3d $ new THREE/Mesh geometry (create-material material)
-              .set (.-position object3d) (:x params) (:y params) (:z params)
-              .set (.-scale object3d)
-                scale-zero $ :scale-x params
-                scale-zero $ :scale-y params
-                scale-zero $ :scale-y params
+              set-position! object3d position
+              set-scale! object3d scale
               set! (.-coord object3d) coord
               ; .log js/console |Sphere: object3d
               , object3d
         |create-box-element $ quote
-          defn create-box-element (params material event coord)
+          defn create-box-element (params position scale material event coord)
             let
                 geometry $ new THREE/BoxGeometry (:width params) (:height params) (:depth params)
                 object3d $ new THREE/Mesh geometry (create-material material)
-              .set (.-position object3d) (:x params) (:y params) (:z params)
-              .set (.-scale object3d)
-                scale-zero $ :scale-x params
-                scale-zero $ :scale-y params
-                scale-zero $ :scale-y params
+              set-position! object3d position
+              set-scale! object3d scale
               set! (.-coord object3d) coord
               , object3d
         |create-material $ quote
@@ -214,38 +220,41 @@
             ; .log js/console |Element: element $ :coord element
             let
                 params $ merge default-params (:params element)
+                position $ :position element
+                scale $ :scale element
                 material $ either (:material element)
                   {} (:kind :mesh-basic) (:color 0xa0a0a0)
                 event $ :event element
               case-default (:name element)
                 do (.warn js/console "|Unknown element" element) (new js/Object3D)
                 :scene global-scene
-                :group $ create-group-element params
-                :box $ create-box-element params material event coord
-                :sphere $ create-sphere-element params material event coord
-                :point-light $ create-point-light params
-                :ambient-light $ create-ambient-light params
-                :perspective-camera $ create-perspective-camera params
-                :text $ create-text-element params material
+                :group $ create-group-element params position scale
+                :box $ create-box-element params position scale material event coord
+                :sphere $ create-sphere-element params position scale material event coord
+                :point-light $ create-point-light params position
+                :ambient-light $ create-ambient-light params position
+                :perspective-camera $ create-perspective-camera params position
+                :text $ create-text-element params position scale material
         |create-text-element $ quote
-          defn create-text-element (params material)
+          defn create-text-element (params position scale material)
             let
                 geometry $ new THREE/TextGeometry
                   either (:text params) |Quatrefoil
                   to-js-data $ assoc params :font font-resource
                 object3d $ new THREE/Mesh geometry (create-material material)
-              .set (.-position object3d) (:x params) (:y params) (:z params)
+              set-position! object3d position
+              set-scale! object3d scale
               , object3d
         |load-file $ quote
           defmacro load-file (filename) (read-file filename)
         |create-ambient-light $ quote
-          defn create-ambient-light (params)
+          defn create-ambient-light (params position)
             let
                 color $ :color params
                 intensity $ either (:intensity params) 1
                 object3d $ new THREE/AmbientLight color intensity
-              .set (.-position object3d) (:x params) (:y params) (:z params)
-              ; .log js/console |Light: object3d
+              set-position! object3d position
+              ; js/console.log |Light: object3d
               , object3d
         |on-canvas-click $ quote
           defn on-canvas-click (event)
@@ -298,22 +307,26 @@
         |font-resource $ quote
           def font-resource $ new THREE/Font
             js/JSON.parse $ load-file |assets/hind.json
+        |set-scale! $ quote
+          defn set-scale! (object scale)
+            if (some? scale)
+              let[] (x y z) scale $ .set (.-scale object) (scale-zero x) (scale-zero y) (scale-zero z)
         |create-point-light $ quote
-          defn create-point-light (params)
+          defn create-point-light (params position)
             let
                 color $ :color params
                 intensity $ :intensity params
                 distance $ :distance params
                 object3d $ new THREE/PointLight color intensity distance
-              .set (.-position object3d) (:x params) (:y params) (:z params)
+              set-position! object3d position
               ; .log js/console |Light: object3d
               , object3d
         |create-group-element $ quote
-          defn create-group-element (params)
+          defn create-group-element (params position scale)
             let
                 object3d $ new THREE/Group
-              .set (.-position object3d) (:x params) (:y params) (:z params)
-              .set (.-scale object3d) (:scale-x params) (:scale-y params) (:scale-y params)
+              set-position! object3d position
+              set-scale! object3d scale
               , object3d
       :proc $ quote ()
     |quatrefoil.app.comp.container $ {}
@@ -326,16 +339,19 @@
       :defs $ {}
         |comp-demo $ quote
           defcomp comp-demo () $ group ({})
-            box $ {} (:width 16) (:height 4) (:depth 6) (:x -40) (:y 0) (:z 0)
+            box $ {} (:width 16) (:height 4) (:depth 6)
+              :position $ [] -40 0 0
               :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
               :event $ {}
                 :click $ fn (e d!) (d! :demo nil)
-            sphere $ {} (:radius 8) (:x 10)
+            sphere $ {} (:radius 8)
+              :position $ [] 10 0 0
               :material $ {} (:kind :mesh-lambert) (:opacity 0.6) (:color 0x9050c0)
               :event $ {}
                 :click $ fn (e d!) (d! :canvas nil)
             group ({})
-              text $ {} (:text |Quatrefoil) (:size 4) (:height 2) (:z 20) (:x -30)
+              text $ {} (:text |Quatrefoil) (:size 4) (:height 2)
+                :position $ [] -30 0 20
                 :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
         |comp-container $ quote
           defcomp comp-container (store)
@@ -346,10 +362,11 @@
                   {} $ :tab :portal
                 tab $ :tab state
               scene ({})
-                perspective-camera $ {} (:x 0) (:y 0) (:z 100) (:fov 45)
+                perspective-camera $ {} (:fov 45)
                   :aspect $ / js/window.innerWidth js/window.innerHeight
                   :near 0.1
                   :far 500
+                  :position $ [] 0 0 100
                 case-default tab
                   comp-portal $ fn (next d!)
                     d! cursor $ assoc state :tab next
@@ -362,16 +379,20 @@
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
                 ambient-light $ {} (:color 0x666666)
-                point-light $ {} (:color 0xffffff) (:x 20) (:y 40) (:z 50) (:intensity 2) (:distance 200)
-                point-light $ {} (:color 0xffffff) (:x 0) (:y 60) (:z 0) (:intensity 2) (:distance 200)
+                point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
+                  :position $ [] 20 40 50
+                point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
+                  :position $ [] 0 60 0
         |comp-back $ quote
           defcomp comp-back (on-back)
             box
-              {} (:width 16) (:height 4) (:depth 6) (:x 60) (:y 30)
+              {} (:width 16) (:height 4) (:depth 6)
+                :position $ [] 60 30 0
                 :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
                 :event $ {}
                   :click $ fn (e d!) (on-back d!)
-              text $ {} (:text |Back) (:size 4) (:height 2) (:z 10)
+              text $ {} (:text |Back) (:size 4) (:height 2)
+                :position $ [] 0 0 10
                 :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
       :proc $ quote ()
     |quatrefoil.dsl.diff $ {}
@@ -475,10 +496,12 @@
                   not $ empty? updated-material
                   collect! $ [] coord :update-material updated-material
         |diff-tree $ quote
-          defn diff-tree (prev-tree tree coord collect!) (; .log js/console |Diffing: coord prev-tree tree)
+          defn diff-tree (prev-tree tree coord collect!) (; js/console.log |Diffing: coord prev-tree tree)
             cond
                 = nil prev-tree tree
                 &let nil nil
+              (and (comp? prev-tree) (comp? tree) (not= (:name prev-tree) (:name tree)))
+                collect! $ [] coord :replace-element (purify-tree tree)
               (comp? prev-tree)
                 recur (:tree prev-tree) tree coord collect!
               (comp? tree)
@@ -493,6 +516,12 @@
                 collect! $ [] coord :replace-element (purify-tree tree)
               true $ do
                 diff-params (:params prev-tree) (:params tree) coord collect!
+                if
+                  not= (:position prev-tree) (:position tree)
+                  collect! $ [] coord :change-position (:position tree)
+                if
+                  not= (:scale prev-tree) (:scale tree)
+                  collect! $ [] coord :change-scale (:scale tree)
                 diff-material (:material prev-tree) (:material tree) coord collect!
                 diff-events (:event prev-tree) (:event tree) coord collect!
                 diff-children (:children prev-tree) (:children tree) coord collect!
@@ -573,7 +602,7 @@
       :ns $ quote (ns quatrefoil.schema)
       :defs $ {}
         |Component $ quote (defrecord Component :name :tree)
-        |Shape $ quote (defrecord Shape :name :params :material :event :children)
+        |Shape $ quote (defrecord Shape :name :params :position :scale :material :event :children)
         |comp? $ quote
           defn comp? (x)
             and (record? x) (relevant-record? Component x)
@@ -584,29 +613,29 @@
     |quatrefoil.dsl.patch $ {}
       :ns $ quote
         ns quatrefoil.dsl.patch $ :require
-          [] quatrefoil.dsl.object3d-dom :refer $ [] build-tree
+          [] quatrefoil.dsl.object3d-dom :refer $ [] build-tree set-position! set-scale!
           [] quatrefoil.util.core :refer $ [] reach-object3d scale-zero
           quatrefoil.globals :refer $ global-scene
           "\"three" :as THREE
       :defs $ {}
         |update-material $ quote
-          defn update-material (coord op-data) (; println "|Update material" coord op-data)
+          defn update-material (target coord op-data) (; println "|Update material" coord op-data)
             let
-                target $ reach-object3d global-scene coord
                 material $ .-material target
-              ; .log js/console target
+              ; js/console.log target
               &doseq
                 entry $ to-pairs op-data
                 let[] (param new-value) entry $ case-default param (js/console.log "|Unknown param:" param)
-                  :color $ .set (.-color material) new-value
+                  :color $ .set (.-color material) (new THREE/Color new-value)
                   :opacity $ set! (.-opacity material) new-value
                   :transparent $ set! (.-transparent material) new-value
+              set! (.-needsUpdate material) true
         |replace-element $ quote
-          defn replace-element (coord op-data)
+          defn replace-element (target coord op-data)
             if (empty? coord) (.warn js/console "|Cannot replace with empty coord!")
               let
-                  target $ reach-object3d global-scene (butlast coord)
-                .replaceBy target (last coord) (build-tree coord op-data)
+                  parent $ reach-object3d global-scene (butlast coord)
+                .replaceBy parent (last coord) (build-tree coord op-data)
         |apply-changes $ quote
           defn apply-changes (changes)
             ; println "\"changes" (count changes) changes
@@ -614,72 +643,63 @@
               let-sugar
                     [] coord op op-data
                     , change
-                ; js/console.log |Change: op coord
+                  target $ reach-object3d global-scene coord
+                ; println |Change: op coord op-data
                 case-default op (js/console.log "|Unknown op:" op)
-                  :add-material $ update-material coord op-data
-                  :update-material $ update-material coord op-data
-                  :remove-material $ remove-material coord op-data
-                  :remove-children $ remove-children coord op-data
-                  :add-children $ add-children coord op-data
-                  :update-params $ update-params coord op-data
-                  :add-params $ update-params coord op-data
-                  :add-element $ add-element coord op-data
-                  :remove-element $ remove-element coord
-                  :replace-element $ replace-element coord op-data
+                  :add-material $ update-material target coord op-data
+                  :update-material $ update-material target coord op-data
+                  :remove-material $ remove-material target coord op-data
+                  :remove-children $ remove-children target coord op-data
+                  :add-children $ add-children target coord op-data
+                  :update-params $ update-params target coord op-data
+                  :add-params $ update-params target coord op-data
+                  :add-element $ add-element target coord op-data
+                  :remove-element $ remove-element target coord
+                  :replace-element $ replace-element target coord op-data
+                  :change-position $ set-position! target
+                    either op-data $ [] 0 0 0
+                  :change-scale $ set-scale! target
+                    either op-data $ [] 0 0 0
         |remove-element $ quote
-          defn remove-element (coord)
-            if (empty? coord) (.warn js/console "|Cannot remove by empty coord!")
+          defn remove-element (target coord)
+            if (empty? coord) (js/console.warn "|Cannot remove by empty coord!")
               let
-                  target $ reach-object3d global-scene (butlast coord)
-                .removeBy target $ last coord
+                  parent $ reach-object3d global-scene (butlast coord)
+                .removeBy parent $ last coord
         |update-params $ quote
-          defn update-params (coord op-data)
-            let
-                target $ reach-object3d global-scene coord
-              &doseq
-                entry $ to-pairs op-data
-                let-sugar
-                      [] k v
-                      , entry
-                  case-default k
-                    do $ js/console.error "|Unknown param change:" k v
-                    :x $ .setX (.-position target) v
-                    :y $ .setY (.-position target) v
-                    :z $ .setZ (.-position target) v
-                    :color $ set! (.-color target) (new THREE/Color v)
-                    :scale-x $ .setX (.-scale target) (scale-zero v)
-                    :scale-y $ .setY (.-scale target) (scale-zero v)
-                    :scale-z $ .setZ (.-scale target) (scale-zero v)
-                    :radius $ set! (-> target .-geometry .-radius) v
+          defn update-params (target coord op-data)
+            &doseq
+              entry $ to-pairs op-data
+              let-sugar
+                    [] k v
+                    , entry
+                case-default k
+                  do $ js/console.error "|TODO param change:" k v
+                  :radius $ set! (-> target .-geometry .-radius) v
         |remove-material $ quote
-          defn remove-material (coord op-data)
+          defn remove-material (target coord op-data)
             let
-                target $ reach-object3d global-scene coord
                 material $ .-material target
               &doseq (entry op-data)
                 case-default entry (println "|Unknown material prop:" op-data)
                   :opacity $ set! (.-opacity material) 0.9
                   :transparent $ set! (.-transparent material) 1
         |remove-children $ quote
-          defn remove-children (coord op-data)
-            let
-                target $ reach-object3d global-scene coord
-              &doseq (child-key op-data) (.removeBy target child-key)
+          defn remove-children (target coord op-data)
+            &doseq (child-key op-data) (.removeBy target child-key)
         |add-element $ quote
-          defn add-element (coord op-data)
-            if (empty? coord) (.warn js/console "|Cannot add element with empty coord!")
+          defn add-element (target coord op-data)
+            if (empty? coord) (js/console.warn "|Cannot remove by empty coord!")
               let
-                  target $ reach-object3d global-scene (butlast coord)
-                .addBy target (last coord) (build-tree coord op-data)
+                  parent $ reach-object3d global-scene (butlast coord)
+                .addBy parent (last coord) (build-tree coord op-data)
         |add-children $ quote
-          defn add-children (coord op-data)
-            let
-                target $ reach-object3d global-scene coord
-              &doseq (entry op-data)
-                let-sugar
-                      [] k tree
-                      , entry
-                  .addBy target k $ build-tree (conj coord k) tree
+          defn add-children (target coord op-data)
+            &doseq (entry op-data)
+              let-sugar
+                    [] k tree
+                    , entry
+                .addBy target k $ build-tree (conj coord k) tree
       :proc $ quote ()
     |quatrefoil.app.updater $ {}
       :ns $ quote
@@ -887,6 +907,7 @@
             if (empty? body)
               quasiquote $ echo "\"[Warn] invalid component body for" (quote ~comp-name) (quote ~params)
               quasiquote $ defn ~comp-name (~ params)
-                %{} Component (:name ~comp-name)
+                %{} Component
+                  :name $ quote ~comp-name
                   :tree $ &let nil ~@body
       :proc $ quote ()
