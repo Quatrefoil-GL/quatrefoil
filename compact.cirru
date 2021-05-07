@@ -29,6 +29,15 @@
                 text $ {} (:text |Demo) (:size 4) (:height 1)
                   :position $ [] 0 0 4
                   :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
+              box
+                {} (:width 16) (:height 4) (:depth 6)
+                  :position $ [] 0 15 0
+                  :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6) (:transparent true)
+                  :event $ {}
+                    :click $ fn (e d!) (on-change :lines d!)
+                text $ {} (:text |Lines) (:size 4) (:height 1)
+                  :position $ [] 0 0 4
+                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
       :proc $ quote ()
     |quatrefoil.alias $ {}
       :ns $ quote
@@ -70,6 +79,8 @@
           defn box (props & children) (create-element :box props children)
         |ambient-light $ quote
           defn ambient-light (props & children) (create-element :ambient-light props children)
+        |spline $ quote
+          defn spline (props & children) (create-element :spline props children)
         |text $ quote
           defn text (props & children) (create-element :text props children)
         |line $ quote
@@ -148,6 +159,27 @@
                   :click $ fn (event dispatch!)
                     dispatch! :delete-task $ :id task
       :proc $ quote ()
+    |quatrefoil.app.comp.lines $ {}
+      :ns $ quote
+        ns quatrefoil.app.comp.lines $ :require
+          quatrefoil.alias :refer $ group box sphere text line spline
+          quatrefoil.core :refer $ defcomp
+      :defs $ {}
+        |comp-lines $ quote
+          defcomp comp-lines () $ group ({})
+            text $ {} (:text |Lines) (:size 4) (:height 1)
+              :position $ [] 0 0 4
+              :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
+            line $ {}
+              :points $ [] ([] 4 0 0) ([] 5 6 4) ([] 2 3 4) ([] 0 8 0) ([] 2 5 1)
+              :position $ [] 0 0 0
+              :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 0.9) (:transparent true) (:linewidth 4) (:gapSize 0.5) (:dashSize 0.5)
+            spline $ {}
+              :points $ [] ([] 10 10 0) ([] 8 0 0) ([] 18 0 0) ([] 19 6 4) ([] 15 6 4) ([] 13 8 0) ([] 12 5 1)
+              :position $ [] 0 0 0
+              :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 0.9) (:transparent true) (:linewidth 4) (:gapSize 1) (:dashSize 1)
+      :proc $ quote ()
+      :configs $ {}
     |quatrefoil.cursor $ {}
       :ns $ quote (ns quatrefoil.cursor)
       :defs $ {}
@@ -202,12 +234,28 @@
               set-scale! object3d scale
               set! (.-coord object3d) coord
               , object3d
+        |create-spline-element $ quote
+          defn create-spline-element (params position scale material)
+            let
+                points0 $ :points params
+                curve $ new THREE/CatmullRomCurve3
+                  js-array & $ -> points0
+                    map $ fn (p) (new THREE/Vector3 & p)
+                points $ .getPoints curve
+                  * 16 $ count points0
+                geometry $ -> (new THREE/BufferGeometry) (.setFromPoints points)
+                object3d $ new THREE/Line geometry (create-material material)
+              set-position! object3d position
+              set-scale! object3d scale
+              , object3d
         |create-material $ quote
           defn create-material (material)
             case-default (:kind material)
               do (.warn js/console "|Unknown material:" material)
                 new THREE/LineBasicMaterial $ to-js-data (dissoc material :kind)
               :line-basic $ new THREE/LineBasicMaterial
+                to-js-data $ dissoc material :kind
+              :mesh-line $ new THREE/LineDashedMaterial
                 to-js-data $ dissoc material :kind
               :mesh-basic $ new THREE/MeshBasicMaterial
                 to-js-data $ dissoc material :kind
@@ -235,6 +283,8 @@
                 :ambient-light $ create-ambient-light params position
                 :perspective-camera $ create-perspective-camera params position
                 :text $ create-text-element params position scale material
+                :line $ create-line-element params position scale material
+                :spline $ create-spline-element params position scale material
         |create-text-element $ quote
           defn create-text-element (params position scale material)
             let
@@ -255,6 +305,20 @@
                 object3d $ new THREE/AmbientLight color intensity
               set-position! object3d position
               ; js/console.log |Light: object3d
+              , object3d
+        |create-line-element $ quote
+          defn create-line-element (params position scale material)
+            let
+                points $ &let
+                  ps $ new js/Array
+                  &doseq
+                    p $ :points params
+                    .push ps $ new THREE/Vector3 & p
+                  , ps
+                geometry $ -> (new THREE/BufferGeometry) (.setFromPoints points)
+                object3d $ new THREE/Line geometry (create-material material)
+              set-position! object3d position
+              set-scale! object3d scale
               , object3d
         |on-canvas-click $ quote
           defn on-canvas-click (event)
@@ -336,6 +400,7 @@
           quatrefoil.core :refer $ defcomp
           quatrefoil.app.comp.todolist :refer $ comp-todolist
           quatrefoil.app.comp.portal :refer $ comp-portal
+          quatrefoil.app.comp.lines :refer $ comp-lines
       :defs $ {}
         |comp-demo $ quote
           defcomp comp-demo () $ group ({})
@@ -375,6 +440,7 @@
                       d! cursor $ assoc state :tab next
                   :todolist $ comp-todolist (:tasks store)
                   :demo $ comp-demo
+                  :lines $ comp-lines
                 if (not= tab :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
@@ -514,6 +580,10 @@
                 collect! $ [] coord :replace-element (purify-tree tree)
               (and (= :text (:name tree) (:name prev-tree)) (not= (:params tree) (:params prev-tree)))
                 collect! $ [] coord :replace-element (purify-tree tree)
+              (and (= :line (:name tree) (:name prev-tree)) (not= (:params tree) (:params prev-tree)))
+                collect! $ [] coord :replace-element (purify-tree tree)
+              (and (= :spline (:name tree) (:name prev-tree)) (not= (:params tree) (:params prev-tree)))
+                collect! $ [] coord :replace-element (purify-tree tree)
               true $ do
                 diff-params (:params prev-tree) (:params tree) coord collect!
                 if
@@ -613,7 +683,7 @@
     |quatrefoil.dsl.patch $ {}
       :ns $ quote
         ns quatrefoil.dsl.patch $ :require
-          [] quatrefoil.dsl.object3d-dom :refer $ [] build-tree set-position! set-scale!
+          [] quatrefoil.dsl.object3d-dom :refer $ [] build-tree set-position! set-scale! create-material
           [] quatrefoil.util.core :refer $ [] reach-object3d scale-zero
           quatrefoil.globals :refer $ global-scene
           "\"three" :as THREE
@@ -649,6 +719,7 @@
                   :add-material $ update-material target coord op-data
                   :update-material $ update-material target coord op-data
                   :remove-material $ remove-material target coord op-data
+                  :replace-material $ replace-material target coord op-data
                   :remove-children $ remove-children target coord op-data
                   :add-children $ add-children target coord op-data
                   :update-params $ update-params target coord op-data
@@ -666,6 +737,9 @@
               let
                   parent $ reach-object3d global-scene (butlast coord)
                 .removeBy parent $ last coord
+        |replace-material $ quote
+          defn replace-material (target coord op-data)
+            set! (.-material target) (create-material op-data)
         |update-params $ quote
           defn update-params (target coord op-data)
             &doseq
