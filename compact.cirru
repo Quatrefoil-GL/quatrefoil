@@ -97,12 +97,12 @@
         |*global-tree $ quote (defatom *global-tree nil)
         |*global-renderer $ quote (defatom *global-renderer nil)
         |*global-camera $ quote (defatom *global-camera nil)
-        |global-scene $ quote
-          def global-scene $ new THREE/Scene
         |*proxied-dispatch $ quote (defatom *proxied-dispatch nil)
         |*viewer-angle $ quote
           defatom *viewer-angle $ &/ &PI 2
         |*viewer-y-shift $ quote (defatom *viewer-y-shift 0)
+        |*global-scene $ quote
+          defatom *global-scene $ new THREE/Scene
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.app.comp.todolist $ {}
@@ -171,7 +171,7 @@
               :position $ [] 0 0 4
               :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
             line $ {}
-              :points $ [] ([] 4 0 0) ([] 5 6 4) ([] 2 3 4) ([] 0 8 0) ([] 2 5 1)
+              :points $ [] ([] 0 0 0) ([] 3 3 4) ([] 1 4 6) ([] -2 8 0) ([] 2 5 1)
               :position $ [] 0 0 0
               :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 0.9) (:transparent true) (:linewidth 4) (:gapSize 0.5) (:dashSize 0.5)
             spline $ {}
@@ -195,7 +195,7 @@
         ns quatrefoil.dsl.object3d-dom $ :require
           [] quatrefoil.util.core :refer $ [] purify-tree collect-children find-element scale-zero
           [] "\"three" :as THREE
-          quatrefoil.globals :refer $ *global-renderer *global-camera global-scene *global-tree *proxied-dispatch
+          quatrefoil.globals :refer $ *global-renderer *global-camera *global-scene *global-tree *proxied-dispatch
       :defs $ {}
         |create-perspective-camera $ quote
           defn create-perspective-camera (params position)
@@ -255,7 +255,7 @@
                 new THREE/LineBasicMaterial $ to-js-data (dissoc material :kind)
               :line-basic $ new THREE/LineBasicMaterial
                 to-js-data $ dissoc material :kind
-              :mesh-line $ new THREE/LineDashedMaterial
+              :line-dashed $ new THREE/LineDashedMaterial
                 to-js-data $ dissoc material :kind
               :mesh-basic $ new THREE/MeshBasicMaterial
                 to-js-data $ dissoc material :kind
@@ -275,7 +275,7 @@
                 event $ :event element
               case-default (:name element)
                 do (.warn js/console "|Unknown element" element) (new js/Object3D)
-                :scene global-scene
+                :scene @*global-scene
                 :group $ create-group-element params position scale
                 :box $ create-box-element params position scale material event coord
                 :sphere $ create-sphere-element params position scale material event coord
@@ -338,7 +338,7 @@
                     let
                         children $ to-js-data ([])
                         collect! $ fn (x) (.push children x)
-                      collect-children global-scene collect!
+                      collect-children @*global-scene collect!
                       , children
                   maybe-target $ aget intersects 0
                 ; js/console.log intersects
@@ -468,7 +468,7 @@
           quatrefoil.schema :refer $ comp? shape?
       :defs $ {}
         |diff-params $ quote
-          defn diff-params (prev-params params coord collect!)
+          defn diff-params (prev-params params coord collect!) (; "\"unused code, when params changed, geometry would be recreated, so not diffed")
             let
                 prev-keys $ keys
                   either prev-params $ {}
@@ -580,12 +580,10 @@
                 collect! $ [] coord :replace-element (purify-tree tree)
               (and (= :text (:name tree) (:name prev-tree)) (not= (:params tree) (:params prev-tree)))
                 collect! $ [] coord :replace-element (purify-tree tree)
-              (and (= :line (:name tree) (:name prev-tree)) (not= (:params tree) (:params prev-tree)))
-                collect! $ [] coord :replace-element (purify-tree tree)
-              (and (= :spline (:name tree) (:name prev-tree)) (not= (:params tree) (:params prev-tree)))
+              (and (= (:name tree) (:name prev-tree)) (not= (:params tree) (:params prev-tree)))
                 collect! $ [] coord :replace-element (purify-tree tree)
               true $ do
-                diff-params (:params prev-tree) (:params tree) coord collect!
+                ; diff-params (:params prev-tree) (:params tree) coord collect!
                 if
                   not= (:position prev-tree) (:position tree)
                   collect! $ [] coord :change-position (:position tree)
@@ -685,7 +683,7 @@
         ns quatrefoil.dsl.patch $ :require
           [] quatrefoil.dsl.object3d-dom :refer $ [] build-tree set-position! set-scale! create-material
           [] quatrefoil.util.core :refer $ [] reach-object3d scale-zero
-          quatrefoil.globals :refer $ global-scene
+          quatrefoil.globals :refer $ *global-scene
           "\"three" :as THREE
       :defs $ {}
         |update-material $ quote
@@ -704,7 +702,7 @@
           defn replace-element (target coord op-data)
             if (empty? coord) (.warn js/console "|Cannot replace with empty coord!")
               let
-                  parent $ reach-object3d global-scene (butlast coord)
+                  parent $ reach-object3d @*global-scene (butlast coord)
                 .replaceBy parent (last coord) (build-tree coord op-data)
         |apply-changes $ quote
           defn apply-changes (changes)
@@ -713,8 +711,8 @@
               let-sugar
                     [] coord op op-data
                     , change
-                  target $ reach-object3d global-scene coord
-                ; println |Change: op coord op-data
+                  target $ reach-object3d @*global-scene coord
+                ; js/console.log |Change: op coord op-data
                 case-default op (js/console.log "|Unknown op:" op)
                   :add-material $ update-material target coord op-data
                   :update-material $ update-material target coord op-data
@@ -722,8 +720,6 @@
                   :replace-material $ replace-material target coord op-data
                   :remove-children $ remove-children target coord op-data
                   :add-children $ add-children target coord op-data
-                  :update-params $ update-params target coord op-data
-                  :add-params $ update-params target coord op-data
                   :add-element $ add-element target coord op-data
                   :remove-element $ remove-element target coord
                   :replace-element $ replace-element target coord op-data
@@ -735,21 +731,11 @@
           defn remove-element (target coord)
             if (empty? coord) (js/console.warn "|Cannot remove by empty coord!")
               let
-                  parent $ reach-object3d global-scene (butlast coord)
+                  parent $ reach-object3d @*global-scene (butlast coord)
                 .removeBy parent $ last coord
         |replace-material $ quote
           defn replace-material (target coord op-data)
             set! (.-material target) (create-material op-data)
-        |update-params $ quote
-          defn update-params (target coord op-data)
-            &doseq
-              entry $ to-pairs op-data
-              let-sugar
-                    [] k v
-                    , entry
-                case-default k
-                  do $ js/console.error "|TODO param change:" k v
-                  :radius $ set! (-> target .-geometry .-radius) v
         |remove-material $ quote
           defn remove-material (target coord op-data)
             let
@@ -765,7 +751,7 @@
           defn add-element (target coord op-data)
             if (empty? coord) (js/console.warn "|Cannot remove by empty coord!")
               let
-                  parent $ reach-object3d global-scene (butlast coord)
+                  parent $ reach-object3d @*global-scene (butlast coord)
                 .addBy parent (last coord) (build-tree coord op-data)
         |add-children $ quote
           defn add-children (target coord op-data)
@@ -852,7 +838,7 @@
           [] quatrefoil.dsl.patch :refer $ [] apply-changes
           quatrefoil.schema :refer $ Component
           "\"three" :as THREE
-          quatrefoil.globals :refer $ *global-tree *global-camera *global-renderer global-scene *proxied-dispatch *viewer-angle *viewer-y-shift
+          quatrefoil.globals :refer $ *global-tree *global-camera *global-renderer *global-scene *proxied-dispatch *viewer-angle *viewer-y-shift
       :defs $ {}
         |>> $ quote
           defn >> (states k)
@@ -881,7 +867,7 @@
                 apply-changes @*tmp-changes
               build-tree ([]) (purify-tree markup)
             reset! *global-tree markup
-            .render @*global-renderer global-scene @*global-camera
+            .render @*global-renderer @*global-scene @*global-camera
         |tween-move-camera! $ quote
           defn tween-move-camera! (control)
             let
@@ -892,13 +878,13 @@
                     do
                       swap! *viewer-y-shift &+ $ / shift 10
                       .lookAt camera $ new-lookat-point
-                      .render @*global-renderer global-scene camera
+                      .render @*global-renderer @*global-scene camera
                 (:angle angle)
                   tween-call 20 5 $ fn (i)
                     swap! *viewer-angle &+ $ / angle 10
                     do
                       .lookAt camera $ new-lookat-point
-                      .render @*global-renderer global-scene camera
+                      .render @*global-renderer @*global-scene camera
                 (:move dx dy dz)
                   tween-call 20 5 $ fn (i)
                     let-sugar
@@ -910,7 +896,7 @@
                       set! (.-y position) y
                       set! (.-z position) z
                       .lookAt camera $ new-lookat-point
-                      .render @*global-renderer global-scene camera
+                      .render @*global-renderer @*global-scene camera
                 _ $ println "\"unknown camera control:" control
         |handle-key-event $ quote
           defn handle-key-event (event)
@@ -971,7 +957,7 @@
               set! (.-aspect @*global-camera) (/ js/window.innerWidth js/window.innerHeight)
               .updateProjectionMatrix @*global-camera
               .setSize @*global-renderer js/window.innerWidth js/window.innerHeight
-              .render @*global-renderer global-scene @*global-camera
+              .render @*global-renderer @*global-scene @*global-camera
         |clear-cache! $ quote
           defn clear-cache! () $ ; "\"TODO memof..."
         |defcomp $ quote
