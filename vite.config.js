@@ -1,7 +1,9 @@
 
 export default {
-  watch: {
-    interval: 160,
-    ignored: '*.cirru',
+  server: {
+    watch: {
+      interval: 160,
+      ignored: ["**/*.cirru"],
+    }
   }
 };
