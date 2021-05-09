@@ -38,6 +38,15 @@
                 text $ {} (:text |Lines) (:size 4) (:height 1)
                   :position $ [] 0 0 4
                   :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
+              box
+                {} (:width 16) (:height 4) (:depth 6)
+                  :position $ [] -30 15 0
+                  :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6) (:transparent true)
+                  :event $ {}
+                    :click $ fn (e d!) (on-change :shapes d!)
+                text $ {} (:text |Shapes) (:size 4) (:height 1)
+                  :position $ [] 0 0 4
+                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
       :proc $ quote ()
     |quatrefoil.alias $ {}
       :ns $ quote
@@ -87,6 +96,8 @@
           defn line (props & children) (create-element :line props children)
         |sphere $ quote
           defn sphere (props & children) (create-element :sphere props children)
+        |torus $ quote
+          defn torus (props & children) (create-element :torus props children)
         |scene $ quote
           defn scene (props & children) (create-element :scene props children)
       :proc $ quote ()
@@ -223,6 +234,8 @@
               set-position! object3d position
               set-scale! object3d scale
               set! (.-coord object3d) coord
+              set! (.-castShadow object3d) true
+              set! (.-receiveShadow object3d) true
               ; .log js/console |Sphere: object3d
               , object3d
         |create-box-element $ quote
@@ -232,7 +245,20 @@
                 object3d $ new THREE/Mesh geometry (create-material material)
               set-position! object3d position
               set-scale! object3d scale
+              set! (.-castShadow object3d) true
+              set! (.-receiveShadow object3d) true
               set! (.-coord object3d) coord
+              , object3d
+        |create-torus-element $ quote
+          defn create-torus-element (params position scale material)
+            let
+                geometry $ ->
+                  new THREE/TorusGeometry (:r1 params) (:r2 params) (:s1 params) (:s2 params) (:arc params)
+                object3d $ new THREE/Mesh geometry (create-material material)
+              set! (.-castShadow object3d) true
+              set! (.-receiveShadow object3d) true
+              set-position! object3d position
+              set-scale! object3d scale
               , object3d
         |create-spline-element $ quote
           defn create-spline-element (params position scale material)
@@ -245,6 +271,8 @@
                   * 16 $ count points0
                 geometry $ -> (new THREE/BufferGeometry) (.setFromPoints points)
                 object3d $ new THREE/Line geometry (create-material material)
+              set! (.-castShadow object3d) true
+              set! (.-receiveShadow object3d) true
               set-position! object3d position
               set-scale! object3d scale
               , object3d
@@ -261,13 +289,13 @@
                 to-js-data $ dissoc material :kind
               :mesh-lambert $ new THREE/MeshLambertMaterial
                 to-js-data $ dissoc material :kind
-        |default-params $ quote
-          def default-params $ {} (:x 0) (:y 0) (:z 0) (:scale-x 1) (:scale-y 1) (:scale-z 1)
+              :mesh-standard $ new THREE/MeshStandardMaterial
+                to-js-data $ dissoc material :kind
         |create-shape $ quote
           defn create-shape (element coord)
-            ; .log js/console |Element: element $ :coord element
+            ; js/console.log |Element: element $ :coord element
             let
-                params $ merge default-params (:params element)
+                params $ :params element
                 position $ :position element
                 scale $ :scale element
                 material $ either (:material element)
@@ -285,6 +313,7 @@
                 :text $ create-text-element params position scale material
                 :line $ create-line-element params position scale material
                 :spline $ create-spline-element params position scale material
+                :torus $ create-torus-element params position scale material
         |create-text-element $ quote
           defn create-text-element (params position scale material)
             let
@@ -382,8 +411,9 @@
                 intensity $ :intensity params
                 distance $ :distance params
                 object3d $ new THREE/PointLight color intensity distance
+              set! (.-castShadow object3d) true
               set-position! object3d position
-              ; .log js/console |Light: object3d
+              ; js/console.log |Light: object3d
               , object3d
         |create-group-element $ quote
           defn create-group-element (params position scale)
@@ -401,6 +431,7 @@
           quatrefoil.app.comp.todolist :refer $ comp-todolist
           quatrefoil.app.comp.portal :refer $ comp-portal
           quatrefoil.app.comp.lines :refer $ comp-lines
+          quatrefoil.app.comp.shapes :refer $ comp-shapes
       :defs $ {}
         |comp-demo $ quote
           defcomp comp-demo () $ group ({})
@@ -418,6 +449,13 @@
               text $ {} (:text |Quatrefoil) (:size 4) (:height 2)
                 :position $ [] -30 0 20
                 :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
+            sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0xffffff) (:emissiveIntensity 1) (:roughness 0)
+              :position $ [] -10 20 0
+              :material $ {} (:kind :mesh-basic) (:color 0xffff55)
+              :event $ {}
+                :click $ fn (e d!) (d! :canvas nil)
+            point-light $ {} (:color 0xffff55) (:intensity 2) (:distance 200)
+              :position $ [] -10 20 0
         |comp-container $ quote
           defcomp comp-container (store)
             let
@@ -441,13 +479,14 @@
                   :todolist $ comp-todolist (:tasks store)
                   :demo $ comp-demo
                   :lines $ comp-lines
+                  :shapes $ comp-shapes
                 if (not= tab :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
                 ambient-light $ {} (:color 0x666666)
-                point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
+                point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                   :position $ [] 20 40 50
-                point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
+                ; point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
                   :position $ [] 0 60 0
         |comp-back $ quote
           defcomp comp-back (on-back)
@@ -461,6 +500,23 @@
                 :position $ [] 0 0 10
                 :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
       :proc $ quote ()
+    |quatrefoil.app.comp.shapes $ {}
+      :ns $ quote
+        ns quatrefoil.app.comp.shapes $ :require
+          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text torus
+          quatrefoil.core :refer $ defcomp
+      :defs $ {}
+        |comp-shapes $ quote
+          defcomp comp-shapes () $ group ({})
+            box $ {} (:width 1) (:height 10) (:depth 10)
+              :position $ [] 0 0 0
+              :material $ {} (:kind :mesh-lambert) (:opacity 0.8) (:transparent true) (:color 0xffddaa)
+            torus $ {} (:r1 10) (:r2 2) (:s1 20) (:s2 40)
+              :arc $ * 2 &PI
+              :position $ [] 0 0 0
+              :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0x9050c0)
+      :proc $ quote ()
+      :configs $ {} (:extension nil)
     |quatrefoil.dsl.diff $ {}
       :ns $ quote
         ns quatrefoil.dsl.diff $ :require
@@ -808,7 +864,7 @@
           defn main! () (load-console-formatter!) (inject_bang)
             let
                 canvas-el $ js/document.querySelector |canvas
-              init-renderer! canvas-el
+              init-renderer! canvas-el $ {} (:background 0x110022)
             render-app!
             add-watch *store :changes $ fn (store prev) (render-app!)
             set! js/window.onkeydown handle-key-event
@@ -943,13 +999,17 @@
                 fn () $ f i
                 * d i
         |init-renderer! $ quote
-          defn init-renderer! (canvas-el)
+          defn init-renderer! (canvas-el options)
             reset! *global-renderer $ new THREE/WebGLRenderer
               &let
                 options $ to-js-data
                   {} (:canvas nil) (:antialias true)
                 set! (.-canvas options) canvas-el
                 , options
+            if
+              some? $ :background options
+              .setClearColor @*global-renderer (:background options) 1
+            set! (.-gammaFactor @*global-renderer) 22
             .setPixelRatio @*global-renderer $ either js/window.devicePixelRatio 1
             .setSize @*global-renderer js/window.innerWidth js/window.innerHeight
             .addEventListener canvas-el |click $ fn (event) (on-canvas-click event)
