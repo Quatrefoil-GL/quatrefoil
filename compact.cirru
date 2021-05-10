@@ -94,6 +94,8 @@
           defn text (props & children) (create-element :text props children)
         |line $ quote
           defn line (props & children) (create-element :line props children)
+        |tube $ quote
+          defn tube (props & children) (create-element :tube props children)
         |sphere $ quote
           defn sphere (props & children) (create-element :sphere props children)
         |torus $ quote
@@ -173,7 +175,7 @@
     |quatrefoil.app.comp.lines $ {}
       :ns $ quote
         ns quatrefoil.app.comp.lines $ :require
-          quatrefoil.alias :refer $ group box sphere text line spline
+          quatrefoil.alias :refer $ group box sphere text line spline tube
           quatrefoil.core :refer $ defcomp
       :defs $ {}
         |comp-lines $ quote
@@ -189,6 +191,19 @@
               :points $ [] ([] 10 10 0) ([] 8 0 0) ([] 18 0 0) ([] 19 6 4) ([] 15 6 4) ([] 13 8 0) ([] 12 5 1)
               :position $ [] 0 0 0
               :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 0.9) (:transparent true) (:linewidth 4) (:gapSize 1) (:dashSize 1)
+            tube $ {} (:points-fn tube-fn) (:radius 0.8) (:tubularSegments 400) (:radialSegments 20)
+              :position $ [] -10 0 0
+              :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
+        |tube-fn $ quote
+          defn tube-fn (t)
+            []
+              *
+                + 2 $ * t 20
+                sin $ * 40 t
+              * 30 t
+              *
+                + 2 $ * t 20
+                cos $ * 40 t
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.cursor $ {}
@@ -207,6 +222,7 @@
           [] quatrefoil.util.core :refer $ [] purify-tree collect-children find-element scale-zero
           [] "\"three" :as THREE
           quatrefoil.globals :refer $ *global-renderer *global-camera *global-scene *global-tree *proxied-dispatch
+          "\"./make-curve" :refer $ makeCurve createMultiMaterialMesh
       :defs $ {}
         |create-perspective-camera $ quote
           defn create-perspective-camera (params position)
@@ -278,19 +294,39 @@
               , object3d
         |create-material $ quote
           defn create-material (material)
-            case-default (:kind material)
-              do (.warn js/console "|Unknown material:" material)
-                new THREE/LineBasicMaterial $ to-js-data (dissoc material :kind)
-              :line-basic $ new THREE/LineBasicMaterial
-                to-js-data $ dissoc material :kind
-              :line-dashed $ new THREE/LineDashedMaterial
-                to-js-data $ dissoc material :kind
-              :mesh-basic $ new THREE/MeshBasicMaterial
-                to-js-data $ dissoc material :kind
-              :mesh-lambert $ new THREE/MeshLambertMaterial
-                to-js-data $ dissoc material :kind
-              :mesh-standard $ new THREE/MeshStandardMaterial
-                to-js-data $ dissoc material :kind
+            &let
+              m $ case-default (:kind material)
+                do (.warn js/console "|Unknown material:" material)
+                  new THREE/LineBasicMaterial $ to-js-data (dissoc material :kind)
+                :line-basic $ new THREE/LineBasicMaterial
+                  to-js-data $ dissoc material :kind
+                :line-dashed $ new THREE/LineDashedMaterial
+                  to-js-data $ dissoc material :kind
+                :mesh-basic $ new THREE/MeshBasicMaterial
+                  to-js-data $ dissoc material :kind
+                :mesh-lambert $ new THREE/MeshLambertMaterial
+                  to-js-data $ dissoc material :kind
+                :mesh-standard $ new THREE/MeshStandardMaterial
+                  to-js-data $ dissoc material :kind
+              set! (.-side m) THREE/DoubleSide
+              , m
+        |create-tube-element $ quote
+          defn create-tube-element (params position scale material)
+            let
+                points-fn $ :points-fn params
+                geometry $ ->
+                  new THREE/TubeGeometry
+                    with-js-log $ makeCurve points-fn
+                    either (:tubularSegments params) 40
+                    either (:radius params) 2
+                    either (:radialSegments params) 8
+                    either (:closed? params) false
+                object3d $ new THREE/Mesh geometry (create-material material)
+              set! (.-castShadow object3d) true
+              set! (.-receiveShadow object3d) true
+              set-position! object3d position
+              set-scale! object3d scale
+              , object3d
         |create-shape $ quote
           defn create-shape (element coord)
             ; js/console.log |Element: element $ :coord element
@@ -314,6 +350,7 @@
                 :line $ create-line-element params position scale material
                 :spline $ create-spline-element params position scale material
                 :torus $ create-torus-element params position scale material
+                :tube $ create-tube-element params position scale material
         |create-text-element $ quote
           defn create-text-element (params position scale material)
             let
@@ -449,9 +486,9 @@
               text $ {} (:text |Quatrefoil) (:size 4) (:height 2)
                 :position $ [] -30 0 20
                 :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
-            sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0xffffff) (:emissiveIntensity 1) (:roughness 0)
+            sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
               :position $ [] -10 20 0
-              :material $ {} (:kind :mesh-basic) (:color 0xffff55)
+              :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.8) (:transparent true)
               :event $ {}
                 :click $ fn (e d!) (d! :canvas nil)
             point-light $ {} (:color 0xffff55) (:intensity 2) (:distance 200)
