@@ -66,6 +66,8 @@
               :children $ arrange-children children
         |perspective-camera $ quote
           defn perspective-camera (props & children) (create-element :perspective-camera props children)
+        |shape $ quote
+          defn shape (props & children) (create-element :shape props children)
         |group $ quote
           defn group (props & children) (create-element :group props children)
         |arrange-children $ quote
@@ -90,10 +92,14 @@
           defn ambient-light (props & children) (create-element :ambient-light props children)
         |spline $ quote
           defn spline (props & children) (create-element :spline props children)
+        |rect-area-light $ quote
+          defn rect-area-light (props & children) (create-element :rect-area-light props children)
         |text $ quote
           defn text (props & children) (create-element :text props children)
         |line $ quote
           defn line (props & children) (create-element :line props children)
+        |tube $ quote
+          defn tube (props & children) (create-element :tube props children)
         |sphere $ quote
           defn sphere (props & children) (create-element :sphere props children)
         |torus $ quote
@@ -173,7 +179,7 @@
     |quatrefoil.app.comp.lines $ {}
       :ns $ quote
         ns quatrefoil.app.comp.lines $ :require
-          quatrefoil.alias :refer $ group box sphere text line spline
+          quatrefoil.alias :refer $ group box sphere text line spline tube
           quatrefoil.core :refer $ defcomp
       :defs $ {}
         |comp-lines $ quote
@@ -189,6 +195,19 @@
               :points $ [] ([] 10 10 0) ([] 8 0 0) ([] 18 0 0) ([] 19 6 4) ([] 15 6 4) ([] 13 8 0) ([] 12 5 1)
               :position $ [] 0 0 0
               :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 0.9) (:transparent true) (:linewidth 4) (:gapSize 1) (:dashSize 1)
+            tube $ {} (:points-fn tube-fn) (:radius 0.8) (:tubularSegments 400) (:radialSegments 20)
+              :position $ [] -10 0 0
+              :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
+        |tube-fn $ quote
+          defn tube-fn (t)
+            []
+              *
+                + 2 $ * t 20
+                sin $ * 40 t
+              * 30 t
+              *
+                + 2 $ * t 20
+                cos $ * 40 t
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.cursor $ {}
@@ -207,6 +226,8 @@
           [] quatrefoil.util.core :refer $ [] purify-tree collect-children find-element scale-zero
           [] "\"three" :as THREE
           quatrefoil.globals :refer $ *global-renderer *global-camera *global-scene *global-tree *proxied-dispatch
+          "\"./make-curve" :refer $ makeCurve createMultiMaterialMesh
+          "\"three/examples/jsm/helpers/RectAreaLightHelper" :refer $ RectAreaLightHelper
       :defs $ {}
         |create-perspective-camera $ quote
           defn create-perspective-camera (params position)
@@ -276,21 +297,55 @@
               set-position! object3d position
               set-scale! object3d scale
               , object3d
+        |create-rect-area-light $ quote
+          defn create-rect-area-light (params position)
+            let
+                color $ :color params
+                intensity $ :intensity params
+                width $ :width params
+                height $ :height params
+                look-at $ :look-at params
+                object3d $ new THREE/RectAreaLight color intensity width height
+              .lookAt object3d & look-at
+              set! (.-castShadow object3d) true
+              set-position! object3d position
+              js/console.log "|Area Light:" object3d
+              .add object3d $ new RectAreaLightHelper object3d
+              , object3d
         |create-material $ quote
           defn create-material (material)
-            case-default (:kind material)
-              do (.warn js/console "|Unknown material:" material)
-                new THREE/LineBasicMaterial $ to-js-data (dissoc material :kind)
-              :line-basic $ new THREE/LineBasicMaterial
-                to-js-data $ dissoc material :kind
-              :line-dashed $ new THREE/LineDashedMaterial
-                to-js-data $ dissoc material :kind
-              :mesh-basic $ new THREE/MeshBasicMaterial
-                to-js-data $ dissoc material :kind
-              :mesh-lambert $ new THREE/MeshLambertMaterial
-                to-js-data $ dissoc material :kind
-              :mesh-standard $ new THREE/MeshStandardMaterial
-                to-js-data $ dissoc material :kind
+            &let
+              m $ case-default (:kind material)
+                do (.warn js/console "|Unknown material:" material)
+                  new THREE/LineBasicMaterial $ to-js-data (dissoc material :kind)
+                :line-basic $ new THREE/LineBasicMaterial
+                  to-js-data $ dissoc material :kind
+                :line-dashed $ new THREE/LineDashedMaterial
+                  to-js-data $ dissoc material :kind
+                :mesh-basic $ new THREE/MeshBasicMaterial
+                  to-js-data $ dissoc material :kind
+                :mesh-lambert $ new THREE/MeshLambertMaterial
+                  to-js-data $ dissoc material :kind
+                :mesh-standard $ new THREE/MeshStandardMaterial
+                  to-js-data $ dissoc material :kind
+              set! (.-side m) THREE/DoubleSide
+              , m
+        |create-tube-element $ quote
+          defn create-tube-element (params position scale material)
+            let
+                points-fn $ :points-fn params
+                geometry $ ->
+                  new THREE/TubeGeometry (makeCurve points-fn)
+                    either (:tubularSegments params) 40
+                    either (:radius params) 2
+                    either (:radialSegments params) 8
+                    either (:closed? params) false
+                object3d $ new THREE/Mesh geometry (create-material material)
+              set! (.-castShadow object3d) true
+              set! (.-receiveShadow object3d) true
+              set-position! object3d position
+              set-scale! object3d scale
+              , object3d
         |create-shape $ quote
           defn create-shape (element coord)
             ; js/console.log |Element: element $ :coord element
@@ -309,11 +364,14 @@
                 :sphere $ create-sphere-element params position scale material event coord
                 :point-light $ create-point-light params position
                 :ambient-light $ create-ambient-light params position
+                :rect-area-light $ create-rect-area-light params position
                 :perspective-camera $ create-perspective-camera params position
                 :text $ create-text-element params position scale material
                 :line $ create-line-element params position scale material
                 :spline $ create-spline-element params position scale material
                 :torus $ create-torus-element params position scale material
+                :tube $ create-tube-element params position scale material
+                :shape $ create-shape-element params position scale material
         |create-text-element $ quote
           defn create-text-element (params position scale material)
             let
@@ -334,6 +392,22 @@
                 object3d $ new THREE/AmbientLight color intensity
               set-position! object3d position
               ; js/console.log |Light: object3d
+              , object3d
+        |create-shape-element $ quote
+          defn create-shape-element (params position scale material)
+            let
+                shape-2d $ &let
+                  s $ new THREE/Shape
+                  &doseq
+                    op $ :path params
+                    write-shape-path! s op
+                  , s
+                geometry $ new THREE/ShapeGeometry shape-2d
+                object3d $ new THREE/Mesh geometry (create-material material)
+              set! (.-castShadow object3d) true
+              set! (.-receiveShadow object3d) true
+              set-position! object3d position
+              set-scale! object3d scale
               , object3d
         |create-line-element $ quote
           defn create-line-element (params position scale material)
@@ -404,6 +478,15 @@
           defn set-scale! (object scale)
             if (some? scale)
               let[] (x y z) scale $ .set (.-scale object) (scale-zero x) (scale-zero y) (scale-zero z)
+        |write-shape-path! $ quote
+          defn write-shape-path! (s op)
+            key-match op
+                :move-to x y
+                .moveTo s x y
+              (:line-to x y) (.lineTo s x y)
+              (:quadratic-curve-to x0 y0 x1 y1) (.quadraticCurveTo s x0 y0 x1 y1)
+              (:bezier-curve-to x0 y0 x1 y1 x2 y2) (.bezierCurveTo s x0 y0 x1 y1 x2 y2)
+              _ $ js/console.log "\"Unknown shape path" op
         |create-point-light $ quote
           defn create-point-light (params position)
             let
@@ -449,9 +532,9 @@
               text $ {} (:text |Quatrefoil) (:size 4) (:height 2)
                 :position $ [] -30 0 20
                 :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
-            sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0xffffff) (:emissiveIntensity 1) (:roughness 0)
+            sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
               :position $ [] -10 20 0
-              :material $ {} (:kind :mesh-basic) (:color 0xffff55)
+              :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.8) (:transparent true)
               :event $ {}
                 :click $ fn (e d!) (d! :canvas nil)
             point-light $ {} (:color 0xffff55) (:intensity 2) (:distance 200)
@@ -503,7 +586,7 @@
     |quatrefoil.app.comp.shapes $ {}
       :ns $ quote
         ns quatrefoil.app.comp.shapes $ :require
-          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text torus
+          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text torus shape rect-area-light
           quatrefoil.core :refer $ defcomp
       :defs $ {}
         |comp-shapes $ quote
@@ -514,7 +597,14 @@
             torus $ {} (:r1 10) (:r2 2) (:s1 20) (:s2 40)
               :arc $ * 2 &PI
               :position $ [] 0 0 0
-              :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0x9050c0)
+              :material $ {} (:kind :mesh-standard) (:opacity 0.9) (:transparent true) (:roughness 0.5) (:metalness 0.9) (:color 0x9050c0)
+            shape $ {}
+              :path $ [][] (:move-to 0 0) (:line-to 7 2) (:line-to 16 10) (:line-to 20 20) (:line-to 8 17) (:line-to 4 12) (:line-to 0 0)
+              :position $ [] 20 0 0
+              :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0x249825)
+            rect-area-light $ {} (:intensity 18) (:width 8) (:color 0xffca00) (:height 30)
+              :look-at $ [] -2 0 3
+              :position $ [] 13 0 -4
       :proc $ quote ()
       :configs $ {} (:extension nil)
     |quatrefoil.dsl.diff $ {}
@@ -895,6 +985,7 @@
           quatrefoil.schema :refer $ Component
           "\"three" :as THREE
           quatrefoil.globals :refer $ *global-tree *global-camera *global-renderer *global-scene *proxied-dispatch *viewer-angle *viewer-y-shift
+          "\"three/examples/jsm/lights/RectAreaLightUniformsLib" :refer $ RectAreaLightUniformsLib
       :defs $ {}
         |>> $ quote
           defn >> (states k)
@@ -999,7 +1090,7 @@
                 fn () $ f i
                 * d i
         |init-renderer! $ quote
-          defn init-renderer! (canvas-el options)
+          defn init-renderer! (canvas-el options) (.init RectAreaLightUniformsLib)
             reset! *global-renderer $ new THREE/WebGLRenderer
               &let
                 options $ to-js-data
