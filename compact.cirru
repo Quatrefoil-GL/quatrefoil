@@ -92,6 +92,8 @@
           defn ambient-light (props & children) (create-element :ambient-light props children)
         |spline $ quote
           defn spline (props & children) (create-element :spline props children)
+        |rect-area-light $ quote
+          defn rect-area-light (props & children) (create-element :rect-area-light props children)
         |text $ quote
           defn text (props & children) (create-element :text props children)
         |line $ quote
@@ -225,6 +227,7 @@
           [] "\"three" :as THREE
           quatrefoil.globals :refer $ *global-renderer *global-camera *global-scene *global-tree *proxied-dispatch
           "\"./make-curve" :refer $ makeCurve createMultiMaterialMesh
+          "\"three/examples/jsm/helpers/RectAreaLightHelper" :refer $ RectAreaLightHelper
       :defs $ {}
         |create-perspective-camera $ quote
           defn create-perspective-camera (params position)
@@ -294,6 +297,21 @@
               set-position! object3d position
               set-scale! object3d scale
               , object3d
+        |create-rect-area-light $ quote
+          defn create-rect-area-light (params position)
+            let
+                color $ :color params
+                intensity $ :intensity params
+                width $ :width params
+                height $ :height params
+                look-at $ :look-at params
+                object3d $ new THREE/RectAreaLight color intensity width height
+              .lookAt object3d & look-at
+              set! (.-castShadow object3d) true
+              set-position! object3d position
+              js/console.log "|Area Light:" object3d
+              .add object3d $ new RectAreaLightHelper object3d
+              , object3d
         |create-material $ quote
           defn create-material (material)
             &let
@@ -317,8 +335,7 @@
             let
                 points-fn $ :points-fn params
                 geometry $ ->
-                  new THREE/TubeGeometry
-                    with-js-log $ makeCurve points-fn
+                  new THREE/TubeGeometry (makeCurve points-fn)
                     either (:tubularSegments params) 40
                     either (:radius params) 2
                     either (:radialSegments params) 8
@@ -347,6 +364,7 @@
                 :sphere $ create-sphere-element params position scale material event coord
                 :point-light $ create-point-light params position
                 :ambient-light $ create-ambient-light params position
+                :rect-area-light $ create-rect-area-light params position
                 :perspective-camera $ create-perspective-camera params position
                 :text $ create-text-element params position scale material
                 :line $ create-line-element params position scale material
@@ -568,7 +586,7 @@
     |quatrefoil.app.comp.shapes $ {}
       :ns $ quote
         ns quatrefoil.app.comp.shapes $ :require
-          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text torus shape
+          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text torus shape rect-area-light
           quatrefoil.core :refer $ defcomp
       :defs $ {}
         |comp-shapes $ quote
@@ -579,11 +597,14 @@
             torus $ {} (:r1 10) (:r2 2) (:s1 20) (:s2 40)
               :arc $ * 2 &PI
               :position $ [] 0 0 0
-              :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0x9050c0)
+              :material $ {} (:kind :mesh-standard) (:opacity 0.9) (:transparent true) (:roughness 0.5) (:metalness 0.9) (:color 0x9050c0)
             shape $ {}
               :path $ [][] (:move-to 0 0) (:line-to 7 2) (:line-to 16 10) (:line-to 20 20) (:line-to 8 17) (:line-to 4 12) (:line-to 0 0)
               :position $ [] 20 0 0
               :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0x249825)
+            rect-area-light $ {} (:intensity 18) (:width 8) (:color 0xffca00) (:height 30)
+              :look-at $ [] -2 0 3
+              :position $ [] 13 0 -4
       :proc $ quote ()
       :configs $ {} (:extension nil)
     |quatrefoil.dsl.diff $ {}
@@ -964,6 +985,7 @@
           quatrefoil.schema :refer $ Component
           "\"three" :as THREE
           quatrefoil.globals :refer $ *global-tree *global-camera *global-renderer *global-scene *proxied-dispatch *viewer-angle *viewer-y-shift
+          "\"three/examples/jsm/lights/RectAreaLightUniformsLib" :refer $ RectAreaLightUniformsLib
       :defs $ {}
         |>> $ quote
           defn >> (states k)
@@ -1068,7 +1090,7 @@
                 fn () $ f i
                 * d i
         |init-renderer! $ quote
-          defn init-renderer! (canvas-el options)
+          defn init-renderer! (canvas-el options) (.init RectAreaLightUniformsLib)
             reset! *global-renderer $ new THREE/WebGLRenderer
               &let
                 options $ to-js-data
