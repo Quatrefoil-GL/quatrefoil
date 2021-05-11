@@ -66,6 +66,8 @@
               :children $ arrange-children children
         |perspective-camera $ quote
           defn perspective-camera (props & children) (create-element :perspective-camera props children)
+        |shape $ quote
+          defn shape (props & children) (create-element :shape props children)
         |group $ quote
           defn group (props & children) (create-element :group props children)
         |arrange-children $ quote
@@ -351,6 +353,7 @@
                 :spline $ create-spline-element params position scale material
                 :torus $ create-torus-element params position scale material
                 :tube $ create-tube-element params position scale material
+                :shape $ create-shape-element params position scale material
         |create-text-element $ quote
           defn create-text-element (params position scale material)
             let
@@ -371,6 +374,22 @@
                 object3d $ new THREE/AmbientLight color intensity
               set-position! object3d position
               ; js/console.log |Light: object3d
+              , object3d
+        |create-shape-element $ quote
+          defn create-shape-element (params position scale material)
+            let
+                shape-2d $ &let
+                  s $ new THREE/Shape
+                  &doseq
+                    op $ :path params
+                    write-shape-path! s op
+                  , s
+                geometry $ new THREE/ShapeGeometry shape-2d
+                object3d $ new THREE/Mesh geometry (create-material material)
+              set! (.-castShadow object3d) true
+              set! (.-receiveShadow object3d) true
+              set-position! object3d position
+              set-scale! object3d scale
               , object3d
         |create-line-element $ quote
           defn create-line-element (params position scale material)
@@ -441,6 +460,15 @@
           defn set-scale! (object scale)
             if (some? scale)
               let[] (x y z) scale $ .set (.-scale object) (scale-zero x) (scale-zero y) (scale-zero z)
+        |write-shape-path! $ quote
+          defn write-shape-path! (s op)
+            key-match op
+                :move-to x y
+                .moveTo s x y
+              (:line-to x y) (.lineTo s x y)
+              (:quadratic-curve-to x0 y0 x1 y1) (.quadraticCurveTo s x0 y0 x1 y1)
+              (:bezier-curve-to x0 y0 x1 y1 x2 y2) (.bezierCurveTo s x0 y0 x1 y1 x2 y2)
+              _ $ js/console.log "\"Unknown shape path" op
         |create-point-light $ quote
           defn create-point-light (params position)
             let
@@ -540,7 +568,7 @@
     |quatrefoil.app.comp.shapes $ {}
       :ns $ quote
         ns quatrefoil.app.comp.shapes $ :require
-          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text torus
+          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text torus shape
           quatrefoil.core :refer $ defcomp
       :defs $ {}
         |comp-shapes $ quote
@@ -552,6 +580,10 @@
               :arc $ * 2 &PI
               :position $ [] 0 0 0
               :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0x9050c0)
+            shape $ {}
+              :path $ [][] (:move-to 0 0) (:line-to 7 2) (:line-to 16 10) (:line-to 20 20) (:line-to 8 17) (:line-to 4 12) (:line-to 0 0)
+              :position $ [] 20 0 0
+              :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0x249825)
       :proc $ quote ()
       :configs $ {} (:extension nil)
     |quatrefoil.dsl.diff $ {}
