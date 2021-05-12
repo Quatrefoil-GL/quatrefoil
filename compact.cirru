@@ -84,6 +84,8 @@
                       pairs-map
               ; .log js/console "|Handle children:" children result
               , result
+        |polyhedron $ quote
+          defn polyhedron (props & children) (create-element :polyhedron props children)
         |camera $ quote
           defn camera (props & children) (create-element :camera props children)
         |box $ quote
@@ -330,6 +332,22 @@
                   to-js-data $ dissoc material :kind
               set! (.-side m) THREE/DoubleSide
               , m
+        |create-polyhedron-element $ quote
+          defn create-polyhedron-element (params position scale material)
+            let
+                vertices $ js-array &
+                  concat & $ :vertices params
+                indices $ js-array &
+                  concat & $ :indices params
+                radius $ :radius params
+                detail $ :detail params
+                geometry $ new THREE/PolyhedronGeometry vertices indices radius detail
+                object3d $ new THREE/Mesh geometry (create-material material)
+              set! (.-castShadow object3d) true
+              set! (.-receiveShadow object3d) true
+              set-position! object3d position
+              set-scale! object3d scale
+              , object3d
         |create-tube-element $ quote
           defn create-tube-element (params position scale material)
             let
@@ -372,6 +390,7 @@
                 :torus $ create-torus-element params position scale material
                 :tube $ create-tube-element params position scale material
                 :shape $ create-shape-element params position scale material
+                :polyhedron $ create-polyhedron-element params position scale material
         |create-text-element $ quote
           defn create-text-element (params position scale material)
             let
@@ -586,7 +605,7 @@
     |quatrefoil.app.comp.shapes $ {}
       :ns $ quote
         ns quatrefoil.app.comp.shapes $ :require
-          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text torus shape rect-area-light
+          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text torus shape rect-area-light polyhedron
           quatrefoil.core :refer $ defcomp
       :defs $ {}
         |comp-shapes $ quote
@@ -605,6 +624,13 @@
             rect-area-light $ {} (:intensity 18) (:width 8) (:color 0xffca00) (:height 30)
               :look-at $ [] -2 0 3
               :position $ [] 13 0 -4
+            polyhedron $ {}
+              :vertices $ [][] (8 4 -2) (4 9 -3) (-5 -2 -4) (4 2 8)
+              :indices $ [][] (0 1 2) (0 1 3) (0 2 3) (1 2 3)
+              :radius 10
+              :detail 0
+              :position $ [] 20 10 10
+              :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0x9498c5)
       :proc $ quote ()
       :configs $ {} (:extension nil)
     |quatrefoil.dsl.diff $ {}
