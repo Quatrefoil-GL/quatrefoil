@@ -13,7 +13,7 @@
             group ({})
               box
                 {} (:width 16) (:height 4) (:depth 6)
-                  :position $ [] -43 30 0
+                  :position $ [] -40 30 0
                   :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6) (:transparent true)
                   :event $ {}
                     :click $ fn (e d!) (on-change :todolist d!)
@@ -40,11 +40,20 @@
                   :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
               box
                 {} (:width 16) (:height 4) (:depth 6)
-                  :position $ [] -30 15 0
+                  :position $ [] -40 15 0
                   :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6) (:transparent true)
                   :event $ {}
                     :click $ fn (e d!) (on-change :shapes d!)
                 text $ {} (:text |Shapes) (:size 4) (:height 1)
+                  :position $ [] 0 0 4
+                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
+              box
+                {} (:width 16) (:height 4) (:depth 6)
+                  :position $ [] -40 0 0
+                  :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6) (:transparent true)
+                  :event $ {}
+                    :click $ fn (e d!) (on-change :triflorum d!)
+                text $ {} (:text |Triflorum) (:size 4) (:height 1)
                   :position $ [] 0 0 4
                   :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
       :proc $ quote ()
@@ -311,7 +320,7 @@
               .lookAt object3d & look-at
               set! (.-castShadow object3d) true
               set-position! object3d position
-              js/console.log "|Area Light:" object3d
+              ; js/console.log "|Area Light:" object3d
               .add object3d $ new RectAreaLightHelper object3d
               , object3d
         |create-material $ quote
@@ -534,6 +543,7 @@
           quatrefoil.app.comp.portal :refer $ comp-portal
           quatrefoil.app.comp.lines :refer $ comp-lines
           quatrefoil.app.comp.shapes :refer $ comp-shapes
+          quatrefoil.app.comp.triflorum :refer $ comp-triflorum
       :defs $ {}
         |comp-demo $ quote
           defcomp comp-demo () $ group ({})
@@ -582,6 +592,7 @@
                   :demo $ comp-demo
                   :lines $ comp-lines
                   :shapes $ comp-shapes
+                  :triflorum $ comp-triflorum
                 if (not= tab :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
@@ -602,6 +613,22 @@
                 :position $ [] 0 0 10
                 :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
       :proc $ quote ()
+    |quatrefoil.math $ {}
+      :ns $ quote (ns quatrefoil.math)
+      :defs $ {}
+        |v+ $ quote
+          defn v+ (& xs)
+            foldl xs ([] 0 0 0)
+              fn (acc x) (&v+ acc x)
+        |&v+ $ quote
+          defn &v+ (a b)
+            let[] (x y z) a $ let[] (x2 y2 z2) b
+              [] (+ x x2) (+ y y2) (+ z z2)
+        |v-scale $ quote
+          defn v-scale (v n)
+            let[] (x y z) v $ [] (&* n x) (&* n y) (&* n z)
+      :proc $ quote ()
+      :configs $ {}
     |quatrefoil.app.comp.shapes $ {}
       :ns $ quote
         ns quatrefoil.app.comp.shapes $ :require
@@ -771,6 +798,123 @@
               fn (acc x)
                 assoc acc x $ &get m x
       :proc $ quote ()
+    |quatrefoil.app.comp.triflorum $ {}
+      :ns $ quote
+        ns quatrefoil.app.comp.triflorum $ :require
+          quatrefoil.alias :refer $ group box sphere text line tube polyhedron
+          quatrefoil.core :refer $ defcomp
+          quatrefoil.math :refer $ v+ v-scale
+      :defs $ {}
+        |comp-triflorum $ quote
+          defcomp comp-triflorum () $ group ({}) &
+            -> (range 100)
+              map $ fn (i)
+                tube $ {}
+                  :points-fn $ petal-fn i
+                  :radius 0.06
+                  :tubularSegments 20
+                  :radialSegments 8
+                  :position $ [] 0 0 0
+                  :material $ {} (:kind :mesh-standard) (:color 0x882222) (:opacity 1) (:transparent true)
+            , &
+              -> (range 100)
+                map $ fn (i)
+                  tube $ {}
+                    :points-fn $ yarn-fn i
+                    :radius 0.3
+                    :tubularSegments 20
+                    :radialSegments 8
+                    :position $ [] 0 0 0
+                    :material $ {} (:kind :mesh-standard) (:color 0xffaaaa) (:opacity 0.27) (:transparent true)
+              , &
+                -> (range 12)
+                  map $ fn (i)
+                    let
+                        theta $ * i &PI (sqrt 2) 0.15
+                      polyhedron $ {}
+                        :vertices $ let
+                            r1 1
+                            r2 1
+                            r3 3
+                            th1 $ + theta 1.5
+                            th2 $ - theta 1.5
+                            th3 $ - theta &PI
+                          [][]
+                              * r1 $ cos th1
+                              , 0 $ * r1 (sin th1)
+                            (* r1 (cos th2))
+                              , 0 $ * r1 (sin th2)
+                            (* r3 (cos theta))
+                              , 0.5 $ * r3 (sin theta)
+                            (* r2 (cos th3))
+                              , -2 $ * r2 (sin th3)
+                        :indices $ [][] (0 1 2) (0 1 3) (0 2 3) (1 2 3)
+                        :radius 6
+                        :detail 0
+                        :position $ let
+                            r 8
+                          []
+                            * r $ cos theta
+                            , -0.3 $ * r (sin theta)
+                        :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0x45cc33)
+                tube $ {} (:points-fn main-branch-fn) (:radius 0.7) (:tubularSegments 20) (:radialSegments 8)
+                  :position $ [] 0 0 0
+                  :material $ {} (:kind :mesh-standard) (:color 0x336622) (:opacity 1) (:transparent true)
+        |petal-fn $ quote
+          defn petal-fn (i)
+            fn (ratio)
+              let
+                  theta0 $ * i
+                    * &PI $ sqrt 2
+                  theta $ *
+                    + i $ * ratio 0.4
+                    * &PI $ sqrt 2
+                v+
+                  let
+                      radius $ +
+                        * (- 1 ratio) 8
+                        * 1.0 $ sqrt (+ 6 i)
+                    v-scale
+                      []
+                        * radius $ cos theta
+                        *
+                          - 20 $ * i 0.1
+                          , ratio
+                        * radius $ sin theta
+                      , ratio
+                  v-scale
+                    let
+                        radius $ * 0.8
+                          sqrt $ + 6 i
+                      []
+                        * radius $ cos theta0
+                        *
+                          - 20 $ * i 0.1
+                          , ratio
+                        * radius $ sin theta0
+                    - 1 ratio
+        |yarn-fn $ quote
+          defn yarn-fn (i)
+            fn (ratio)
+              let
+                  theta $ *
+                    + i $ * ratio 4
+                    * &PI $ sqrt 2
+                []
+                  * 1.0
+                    sqrt $ + 2 i
+                    cos theta
+                  *
+                    - 18 $ * i 0.1
+                    , ratio
+                  * 1.0
+                    sqrt $ + 2 i
+                    sin theta
+        |main-branch-fn $ quote
+          defn main-branch-fn (ratio)
+            [] 0 (* -20 ratio) 0
+      :proc $ quote ()
+      :configs $ {}
     |quatrefoil.util.core $ {}
       :ns $ quote
         ns quatrefoil.util.core $ :require
