@@ -13,9 +13,9 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: wget
-      run: mkdir ci-bin/ && wget -O ci-bin/calcit_runner http://repo.calcit-lang.org/binaries/linux/calcit_runner
+      run: mkdir ci-bin/ && wget -O ci-bin/cr http://repo.calcit-lang.org/binaries/linux/cr
     - name: "permission"
-      run: chmod +x ci-bin/calcit_runner
+      run: chmod +x ci-bin/cr
 
     - name: "prepare modules"
       run: >
@@ -29,7 +29,7 @@ jobs:
 
     - name: "compiles to js"
       run: >
-        ./ci-bin/calcit_runner --emit-js --once
+        ./ci-bin/cr --emit-js --once
         && cp assets/* js-out/
         && yarn && yarn vite build --base=./
 
