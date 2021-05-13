@@ -56,6 +56,15 @@
                 text $ {} (:text |Triflorum) (:size 4) (:height 1)
                   :position $ [] 0 0 4
                   :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
+              box
+                {} (:width 16) (:height 4) (:depth 6)
+                  :position $ [] 0 0 0
+                  :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6) (:transparent true)
+                  :event $ {}
+                    :click $ fn (e d!) (on-change :multiply d!)
+                text $ {} (:text |Multiply) (:size 4) (:height 1)
+                  :position $ [] 0 0 4
+                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
       :proc $ quote ()
     |quatrefoil.alias $ {}
       :ns $ quote
@@ -210,7 +219,7 @@
               :position $ [] -10 0 0
               :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
         |tube-fn $ quote
-          defn tube-fn (t)
+          defn tube-fn (t factor)
             []
               *
                 + 2 $ * t 20
@@ -219,6 +228,77 @@
               *
                 + 2 $ * t 20
                 cos $ * 40 t
+      :proc $ quote ()
+      :configs $ {}
+    |quatrefoil.app.comp.multiply $ {}
+      :ns $ quote
+        ns quatrefoil.app.comp.multiply $ :require
+          quatrefoil.alias :refer $ group box sphere text line tube
+          quatrefoil.core :refer $ defcomp
+          quatrefoil.math :refer $ q* &q* v-scale q+
+          quatrefoil.app.materials :refer $ cover-line
+      :defs $ {}
+        |comp-multiply $ quote
+          defcomp comp-multiply () $ group ({})
+            line $ {}
+              :points $ [] ([] -100 0 0) zero-point ([] 100 0 0) zero-point ([] 0 100 0) zero-point ([] 0 -100 0)
+              :material cover-line
+            line $ {}
+              :points $ [][] (0 0 200) (0 0 -200)
+              :material $ assoc cover-line :color 0xffff99
+            , &
+              concat & $ -> (range 6)
+                map $ fn (idx)
+                  let
+                      points $ calc-points
+                        q+ ([] 8 5 0 0)
+                          v-scale ([] 0 0 2 0) idx
+                    []
+                      group ({}) & $ -> points
+                        map-indexed $ fn (idx p)
+                          comp-point p $ = 0 idx
+                      line $ {} (:points points)
+                        :position $ [] 0 0 0
+                        :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 1) (:transparent false)
+              ; sphere $ {} (:radius 40)
+                :position $ [] 0 0 0
+                :material $ {} (:kind :mesh-basic) (:opacity 0.2) (:transparent true) (:color 0xcccc88)
+              comp-point
+                with-log $ v-scale multiplier 10
+                , true
+        |zero-point $ quote
+          def zero-point $ [] 0 0 0
+        |comp-point $ quote
+          defcomp comp-point (position first?)
+            group ({})
+              sphere $ {} (:radius 0.5) (:position position)
+                :material $ {} (:kind :mesh-standard) (:opacity 0.6) (:transparent true)
+                  :color $ if first? 0xffaa88 0xcc88cc
+              tube $ {} (:points-fn w-hint-fn)
+                :factor $ last position
+                :radius 0.1
+                :tubularSegments 400
+                :radialSegments 20
+                :position position
+                :material $ {} (:kind :mesh-standard) (:color 0xdd0088) (:opacity 0.6) (:transparent false)
+        |w-hint-fn $ quote
+          defn w-hint-fn (ratio factor)
+            [] 0 (* ratio factor) 0
+        |multiplier $ quote
+          def multiplier $ let
+              x 0
+              y 0
+              w 0.875
+              rest-space $ - 1 (pow x 2) (pow y 2) (pow w 2)
+              z_ $ if (>= rest-space 0) (sqrt rest-space) 0
+            [] x y z_ w
+        |calc-points $ quote
+          defn calc-points (p0)
+            apply-args
+                []
+                , p0 5
+              fn (acc p n)
+                if (<= n 0) acc $ recur (conj acc p) (&q* p multiplier) (dec n)
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.cursor $ {}
@@ -260,8 +340,8 @@
             let
                 geometry $ new THREE/SphereGeometry
                   or (:radius params) 8
-                  or (:width-segments params) 32
-                  or (:height-segments params) 32
+                  or (:width-segments params) 12
+                  or (:height-segments params) 12
                 object3d $ new THREE/Mesh geometry (create-material material)
               set-position! object3d position
               set-scale! object3d scale
@@ -361,8 +441,9 @@
           defn create-tube-element (params position scale material)
             let
                 points-fn $ :points-fn params
+                factor $ :factor params
                 geometry $ ->
-                  new THREE/TubeGeometry (makeCurve points-fn)
+                  new THREE/TubeGeometry (makeCurve points-fn factor)
                     either (:tubularSegments params) 40
                     either (:radius params) 2
                     either (:radialSegments params) 8
@@ -544,6 +625,7 @@
           quatrefoil.app.comp.lines :refer $ comp-lines
           quatrefoil.app.comp.shapes :refer $ comp-shapes
           quatrefoil.app.comp.triflorum :refer $ comp-triflorum
+          quatrefoil.app.comp.multiply :refer $ comp-multiply
       :defs $ {}
         |comp-demo $ quote
           defcomp comp-demo () $ group ({})
@@ -593,6 +675,7 @@
                   :lines $ comp-lines
                   :shapes $ comp-shapes
                   :triflorum $ comp-triflorum
+                  :multiply $ comp-multiply
                 if (not= tab :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
@@ -614,7 +697,8 @@
                 :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
       :proc $ quote ()
     |quatrefoil.math $ {}
-      :ns $ quote (ns quatrefoil.math)
+      :ns $ quote
+        ns quatrefoil.math $ :require ("\"three" :as THREE)
       :defs $ {}
         |v+ $ quote
           defn v+ (& xs)
@@ -626,7 +710,27 @@
               [] (+ x x2) (+ y y2) (+ z z2)
         |v-scale $ quote
           defn v-scale (v n)
-            let[] (x y z) v $ [] (&* n x) (&* n y) (&* n z)
+            let[] (x y z w) v $ [] (&* n x) (&* n y) (&* n z)
+              &* n $ either w 0
+        |q+ $ quote
+          defn q+ (& xs)
+            foldl xs ([] 0 0 0 0)
+              fn (acc x) (&q+ acc x)
+        |&q+ $ quote
+          defn &q+ (a b)
+            let-sugar
+                  [] x y z w
+                  , a
+                ([] x1 y1 z1 w1) b
+              [] (+ x x1) (+ y y1) (+ z z1) (+ w w1)
+        |&q* $ quote
+          defn &q* (a b)
+            &let
+              v $ .toArray
+                .multiply
+                  new THREE/Quaternion (nth a 3) (nth a 0) (nth a 1) (nth a 2)
+                  new THREE/Quaternion (nth b 3) (nth b 0) (nth b 1) (nth b 2)
+              [] (nth v 1) (nth v 2) (nth v 3) (nth v 0)
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.app.comp.shapes $ {}
@@ -809,21 +913,13 @@
           defcomp comp-triflorum () $ group ({}) &
             -> (range 100)
               map $ fn (i)
-                tube $ {}
-                  :points-fn $ petal-fn i
-                  :radius 0.06
-                  :tubularSegments 20
-                  :radialSegments 8
+                tube $ {} (:points-fn petal-fn) (:factor i) (:radius 0.06) (:tubularSegments 20) (:radialSegments 8)
                   :position $ [] 0 0 0
                   :material $ {} (:kind :mesh-standard) (:color 0x882222) (:opacity 1) (:transparent true)
             , &
               -> (range 100)
                 map $ fn (i)
-                  tube $ {}
-                    :points-fn $ yarn-fn i
-                    :radius 0.3
-                    :tubularSegments 20
-                    :radialSegments 8
+                  tube $ {} (:points-fn yarn-fn) (:factor i) (:radius 0.3) (:tubularSegments 20) (:radialSegments 8)
                     :position $ [] 0 0 0
                     :material $ {} (:kind :mesh-standard) (:color 0xffaaaa) (:opacity 0.27) (:transparent true)
               , &
@@ -861,57 +957,55 @@
                   :position $ [] 0 0 0
                   :material $ {} (:kind :mesh-standard) (:color 0x336622) (:opacity 1) (:transparent true)
         |petal-fn $ quote
-          defn petal-fn (i)
-            fn (ratio)
-              let
-                  theta0 $ * i
-                    * &PI $ sqrt 2
-                  theta $ *
-                    + i $ * ratio 0.4
-                    * &PI $ sqrt 2
-                v+
-                  let
-                      radius $ +
-                        * (- 1 ratio) 8
-                        * 1.0 $ sqrt (+ 6 i)
-                    v-scale
-                      []
-                        * radius $ cos theta
-                        *
-                          - 20 $ * i 0.1
-                          , ratio
-                        * radius $ sin theta
-                      , ratio
+          defn petal-fn (ratio i)
+            let
+                theta0 $ * i
+                  * &PI $ sqrt 2
+                theta $ *
+                  + i $ * ratio 0.4
+                  * &PI $ sqrt 2
+              v+
+                let
+                    radius $ +
+                      * (- 1 ratio) 8
+                      * 1.0 $ sqrt (+ 6 i)
                   v-scale
-                    let
-                        radius $ * 0.8
-                          sqrt $ + 6 i
-                      []
-                        * radius $ cos theta0
-                        *
-                          - 20 $ * i 0.1
-                          , ratio
-                        * radius $ sin theta0
-                    - 1 ratio
-        |yarn-fn $ quote
-          defn yarn-fn (i)
-            fn (ratio)
-              let
-                  theta $ *
-                    + i $ * ratio 4
-                    * &PI $ sqrt 2
-                []
-                  * 1.0
-                    sqrt $ + 2 i
-                    cos theta
-                  *
-                    - 18 $ * i 0.1
+                    []
+                      * radius $ cos theta
+                      *
+                        - 20 $ * i 0.1
+                        , ratio
+                      * radius $ sin theta
                     , ratio
-                  * 1.0
-                    sqrt $ + 2 i
-                    sin theta
+                v-scale
+                  let
+                      radius $ * 0.8
+                        sqrt $ + 6 i
+                    []
+                      * radius $ cos theta0
+                      *
+                        - 20 $ * i 0.1
+                        , ratio
+                      * radius $ sin theta0
+                  - 1 ratio
+        |yarn-fn $ quote
+          defn yarn-fn (ratio i)
+            let
+                theta $ *
+                  + i $ * ratio 4
+                  * &PI $ sqrt 2
+              []
+                * 1.0
+                  sqrt $ + 2 i
+                  cos theta
+                *
+                  - 18 $ * i 0.1
+                  , ratio
+                * 1.0
+                  sqrt $ + 2 i
+                  sin theta
         |main-branch-fn $ quote
-          defn main-branch-fn (ratio)
+          defn main-branch-fn (ratio factor)
             [] 0 (* -20 ratio) 0
       :proc $ quote ()
       :configs $ {}
@@ -994,6 +1088,13 @@
           defn shape? (x)
             and (record? x) (relevant-record? Shape x)
       :proc $ quote ()
+    |quatrefoil.app.materials $ {}
+      :ns $ quote (ns quatrefoil.app.materials)
+      :defs $ {}
+        |cover-line $ quote
+          def cover-line $ {} (:kind :line-basic) (:color 0xaaaaff) (:opacity 0.9) (:transparent true)
+      :proc $ quote ()
+      :configs $ {}
     |quatrefoil.dsl.patch $ {}
       :ns $ quote
         ns quatrefoil.dsl.patch $ :require

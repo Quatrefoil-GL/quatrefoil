@@ -4,7 +4,7 @@ import * as THREE from 'three';
 
 // https://threejs.org/docs/#api/en/geometries/TubeGeometry
 
-export let makeCurve = (f) => {
+export let makeCurve = (f, factor = 1) => {
 
   class CustomSinCurve extends THREE.Curve {
 
@@ -13,11 +13,11 @@ export let makeCurve = (f) => {
       this.scale = scale;
     }
 
-    getPoint( t, optionalTarget = new THREE.Vector3() ) {
+    getPoint(t, optionalTarget = new THREE.Vector3() ) {
 
       let t2 = isNaN(t) ? 1 : t;
 
-      let v = f(t2);
+      let v = f(t2, factor);
 
       let tx = v.get(0);
       let ty = v.get(1);
