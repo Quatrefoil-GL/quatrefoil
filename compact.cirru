@@ -235,7 +235,7 @@
         ns quatrefoil.app.comp.multiply $ :require
           quatrefoil.alias :refer $ group box sphere text line tube
           quatrefoil.core :refer $ defcomp
-          quatrefoil.math :refer $ q* &q* v-scale q+
+          quatrefoil.math :refer $ q* &q* v-scale q+ invert
           quatrefoil.app.materials :refer $ cover-line
       :defs $ {}
         |comp-multiply $ quote
@@ -247,25 +247,43 @@
               :points $ [][] (0 0 200) (0 0 -200)
               :material $ assoc cover-line :color 0xffff99
             , &
-              concat & $ -> (range 6)
-                map $ fn (idx)
-                  let
-                      points $ calc-points
-                        q+ ([] 8 5 0 0)
-                          v-scale ([] 0 0 2 0) idx
-                    []
-                      group ({}) & $ -> points
-                        map-indexed $ fn (idx p)
-                          comp-point p $ = 0 idx
-                      line $ {} (:points points)
-                        :position $ [] 0 0 0
-                        :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 1) (:transparent false)
-              ; sphere $ {} (:radius 40)
-                :position $ [] 0 0 0
-                :material $ {} (:kind :mesh-basic) (:opacity 0.2) (:transparent true) (:color 0xcccc88)
-              comp-point
-                with-log $ v-scale multiplier 10
-                , true
+              identity $ concat &
+                -> (range 4)
+                  map $ fn (idx)
+                    let
+                        points $ calc-points
+                          q+ ([] 8 5 0 0)
+                            v-scale ([] 0 0 2 0) idx
+                          , multiplier
+                      []
+                        group ({}) & $ -> points
+                          map-indexed $ fn (idx p)
+                            comp-point p $ = 0 idx
+                        line $ {} (:points points)
+                          :position $ [] 0 0 0
+                          :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 1) (:transparent false)
+              , &
+                identity $ let
+                    inverted-p $ invert multiplier
+                    p0 $ q+ ([] 8 5 0 0)
+                      v-scale ([] 0 0 6 0) 1
+                    p1 $ &q* multiplier p0
+                    p2 $ &q* p1 inverted-p
+                    points $ [] p0 p1 p2
+                  []
+                    group ({}) & $ -> points
+                      map-indexed $ fn (idx p)
+                        comp-point p $ = 0 idx
+                    line $ {} (:points points)
+                      :position $ [] 0 0 0
+                      :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 1) (:transparent false)
+                ; sphere $ {} (:radius 40)
+                  :position $ [] 0 0 0
+                  :material $ {} (:kind :mesh-basic) (:opacity 0.2) (:transparent true) (:color 0xcccc88)
+                comp-point (v-scale multiplier 10) true
+                box $ {} (:width 40) (:height 40) (:depth 0.04)
+                  :position $ [] 0 0 6
+                  :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.4) (:transparent true)
         |zero-point $ quote
           def zero-point $ [] 0 0 0
         |comp-point $ quote
@@ -288,17 +306,17 @@
           def multiplier $ let
               x 0
               y 0
-              w 0.875
+              w 0.6
               rest-space $ - 1 (pow x 2) (pow y 2) (pow w 2)
               z_ $ if (>= rest-space 0) (sqrt rest-space) 0
-            [] x y z_ w
+            with-log $ [] x y z_ w
         |calc-points $ quote
-          defn calc-points (p0)
+          defn calc-points (p0 next)
             apply-args
                 []
-                , p0 5
+                , p0 12
               fn (acc p n)
-                if (<= n 0) acc $ recur (conj acc p) (&q* p multiplier) (dec n)
+                if (<= n 0) acc $ recur (conj acc p) (&q* next p) (dec n)
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.cursor $ {}
@@ -700,6 +718,20 @@
       :ns $ quote
         ns quatrefoil.math $ :require ("\"three" :as THREE)
       :defs $ {}
+        |invert $ quote
+          defn invert (a)
+            let[] (x y z w) a $ v-scale (conjugate a) (q-length a)
+        |v-scale $ quote
+          defn v-scale (v n)
+            let[] (x y z w) v $ [] (&* n x) (&* n y) (&* n z)
+              &* n $ either w 0
+        |conjugate $ quote
+          defn conjugate (a)
+            let[] (x y z w) a $ [] (&- 0 x) (&- 0 y) (&- 0 z) w
+        |q-length $ quote
+          defn q-length (a)
+            let[] (x y z w) a $ sqrt
+              + (pow x 2) (pow y 2) (pow z 2) (pow w 2)
         |v+ $ quote
           defn v+ (& xs)
             foldl xs ([] 0 0 0)
@@ -708,14 +740,6 @@
           defn &v+ (a b)
             let[] (x y z) a $ let[] (x2 y2 z2) b
               [] (+ x x2) (+ y y2) (+ z z2)
-        |v-scale $ quote
-          defn v-scale (v n)
-            let[] (x y z w) v $ [] (&* n x) (&* n y) (&* n z)
-              &* n $ either w 0
-        |q+ $ quote
-          defn q+ (& xs)
-            foldl xs ([] 0 0 0 0)
-              fn (acc x) (&q+ acc x)
         |&q+ $ quote
           defn &q+ (a b)
             let-sugar
@@ -723,14 +747,18 @@
                   , a
                 ([] x1 y1 z1 w1) b
               [] (+ x x1) (+ y y1) (+ z z1) (+ w w1)
+        |q+ $ quote
+          defn q+ (& xs)
+            foldl xs ([] 0 0 0 0)
+              fn (acc x) (&q+ acc x)
         |&q* $ quote
           defn &q* (a b)
             &let
               v $ .toArray
                 .multiply
-                  new THREE/Quaternion (nth a 3) (nth a 0) (nth a 1) (nth a 2)
-                  new THREE/Quaternion (nth b 3) (nth b 0) (nth b 1) (nth b 2)
-              [] (nth v 1) (nth v 2) (nth v 3) (nth v 0)
+                  new THREE/Quaternion (nth a 0) (nth a 1) (nth a 2) (nth a 3)
+                  new THREE/Quaternion (nth b 0) (nth b 1) (nth b 2) (nth b 3)
+              [] (nth v 0) (nth v 1) (nth v 2) (nth v 3)
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.app.comp.shapes $ {}
