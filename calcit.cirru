@@ -2831,7 +2831,7 @@
                                                 :data $ {}
                                                   |T $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1620968002359) (:text |:transparent)
                                                   |j $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1620968002359) (:text |false)
-                      |D $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1620970380664) (:text |identity)
+                      |D $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1620972137045) (:text |identity)
                   |L $ {} (:type :expr) (:by |-pxyJ-2j) (:at 1620911654676)
                     :data $ {}
                       |T $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1620911654987) (:text |{})
@@ -12772,6 +12772,21 @@
                                             :data $ {}
                                               |T $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1620301353398) (:text |sin)
                                               |j $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1620301353398) (:text |a)
+                      |yb $ {} (:type :expr) (:by |-pxyJ-2j) (:at 1620301353398)
+                        :data $ {}
+                          |T $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1620971656815) (:text "|\"b")
+                          |j $ {} (:type :expr) (:by |-pxyJ-2j) (:at 1620301353398)
+                            :data $ {}
+                              |T $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1620301353398) (:text |tween-move-camera!)
+                              |j $ {} (:type :expr) (:by |-pxyJ-2j) (:at 1620301353398)
+                                :data $ {}
+                                  |T $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1620301353398) (:text |[])
+                                  |j $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1620301353398) (:text |:angle)
+                                  |r $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1620972097599) (:text |1.653959)
+                                  |v $ {} (:type :expr) (:by |-pxyJ-2j) (:at 1620972069375)
+                                    :data $ {}
+                                      |T $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1620972069792) (:text |;)
+                                      |j $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1620972081519) (:text "|\"manual value for turn back")
                       |r $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1620301353398) (:text |nil)
                       |y $ {} (:type :expr) (:by |-pxyJ-2j) (:at 1620301353398)
                         :data $ {}

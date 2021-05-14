@@ -1359,6 +1359,8 @@
                   tween-move-camera! $ [] :move 0 2 0
                 "\"ArrowLeft" $ tween-move-camera! ([] :angle 0.04)
                 "\"ArrowRight" $ tween-move-camera! ([] :angle -0.04)
+                "\"b" $ tween-move-camera!
+                  [] :angle 1.653959 $ ; "\"manual value for turn back"
                 "\"w" $ &let (a @*viewer-angle)
                   tween-move-camera! $ [] :move
                     &* 4 $ cos a
