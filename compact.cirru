@@ -11,60 +11,23 @@
         |comp-portal $ quote
           defcomp comp-portal (on-change)
             group ({})
-              box
-                {} (:width 16) (:height 4) (:depth 6)
-                  :position $ [] -40 30 0
-                  :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6) (:transparent true)
-                  :event $ {}
-                    :click $ fn (e d!) (on-change :todolist d!)
-                text $ {} (:text |Todolist) (:size 4) (:height 1)
-                  :position $ [] 0 0 4
-                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
-              box
-                {} (:width 16) (:height 4) (:depth 6)
-                  :position $ [] 0 30 0
-                  :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6) (:transparent true)
-                  :event $ {}
-                    :click $ fn (e d!) (on-change :demo d!)
-                text $ {} (:text |Demo) (:size 4) (:height 1)
-                  :position $ [] 0 0 4
-                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
-              box
-                {} (:width 16) (:height 4) (:depth 6)
-                  :position $ [] 0 15 0
-                  :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6) (:transparent true)
-                  :event $ {}
-                    :click $ fn (e d!) (on-change :lines d!)
-                text $ {} (:text |Lines) (:size 4) (:height 1)
-                  :position $ [] 0 0 4
-                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
-              box
-                {} (:width 16) (:height 4) (:depth 6)
-                  :position $ [] -40 15 0
-                  :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6) (:transparent true)
-                  :event $ {}
-                    :click $ fn (e d!) (on-change :shapes d!)
-                text $ {} (:text |Shapes) (:size 4) (:height 1)
-                  :position $ [] 0 0 4
-                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
-              box
-                {} (:width 16) (:height 4) (:depth 6)
-                  :position $ [] -40 0 0
-                  :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6) (:transparent true)
-                  :event $ {}
-                    :click $ fn (e d!) (on-change :triflorum d!)
-                text $ {} (:text |Triflorum) (:size 4) (:height 1)
-                  :position $ [] 0 0 4
-                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
-              box
-                {} (:width 16) (:height 4) (:depth 6)
-                  :position $ [] 0 0 0
-                  :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6) (:transparent true)
-                  :event $ {}
-                    :click $ fn (e d!) (on-change :multiply d!)
-                text $ {} (:text |Multiply) (:size 4) (:height 1)
-                  :position $ [] 0 0 4
-                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
+              comp-tab :todolist |Todolist ([] -40 30 0) on-change
+              comp-tab :demo |Demo ([] 0 30 0) on-change
+              comp-tab :lines |Lines ([] 0 15 0) on-change
+              comp-tab :shapes |Shapes ([] -40 15 0) on-change
+              comp-tab :triflorum |Multiply ([] -40 0 0) on-change
+              comp-tab :multiply |Triflorum ([] 0 0 0) on-change
+              comp-tab :mirror "\"DEMO" ([] -40 -15 0) on-change
+        |comp-tab $ quote
+          defcomp comp-tab (k title position on-change)
+            box
+              {} (:width 16) (:height 4) (:depth 6) (:position position)
+                :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6) (:transparent true)
+                :event $ {}
+                  :click $ fn (e d!) (on-change k d!)
+              text $ {} (:text title) (:size 4) (:height 1)
+                :position $ [] 0 0 4
+                :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
       :proc $ quote ()
     |quatrefoil.alias $ {}
       :ns $ quote
@@ -116,6 +79,8 @@
           defn rect-area-light (props & children) (create-element :rect-area-light props children)
         |text $ quote
           defn text (props & children) (create-element :text props children)
+        |plane-reflector $ quote
+          defn plane-reflector (props & children) (create-element :plane-reflector props children)
         |line $ quote
           defn line (props & children) (create-element :line props children)
         |tube $ quote
@@ -337,6 +302,7 @@
           quatrefoil.globals :refer $ *global-renderer *global-camera *global-scene *global-tree *proxied-dispatch
           "\"./make-curve" :refer $ makeCurve createMultiMaterialMesh
           "\"three/examples/jsm/helpers/RectAreaLightHelper" :refer $ RectAreaLightHelper
+          "\"three/examples/jsm/objects/Reflector" :refer $ Reflector
       :defs $ {}
         |create-perspective-camera $ quote
           defn create-perspective-camera (params position)
@@ -499,6 +465,7 @@
                 :tube $ create-tube-element params position scale material
                 :shape $ create-shape-element params position scale material
                 :polyhedron $ create-polyhedron-element params position scale material
+                :plane-reflector $ create-plane-reflector params position scale
         |create-text-element $ quote
           defn create-text-element (params position scale material)
             let
@@ -511,6 +478,21 @@
               , object3d
         |load-file $ quote
           defmacro load-file (filename) (read-file filename)
+        |create-plane-reflector $ quote
+          defn create-plane-reflector (params position scale)
+            let
+                geometry $ new THREE/PlaneGeometry
+                  either (:width params) 80
+                  either (:height params) 80
+                object3d $ new Reflector geometry
+                  js-object
+                    "\"clipBias" $ either (:clip-bias params) 0.003
+                    "\"textureWidth" $ * js/window.innerWidth js/window.devicePixelRatio
+                    "\"textureHeight" $ * js/window.innerHeight js/window.devicePixelRatio
+                    "\"color" $ either (:color params) "\"0x7777ff"
+              set-position! object3d position
+              set-scale! object3d scale
+              , object3d
         |create-ambient-light $ quote
           defn create-ambient-light (params position)
             let
@@ -644,6 +626,7 @@
           quatrefoil.app.comp.shapes :refer $ comp-shapes
           quatrefoil.app.comp.triflorum :refer $ comp-triflorum
           quatrefoil.app.comp.multiply :refer $ comp-multiply
+          quatrefoil.app.comp.mirror :refer $ comp-mirror
       :defs $ {}
         |comp-demo $ quote
           defcomp comp-demo () $ group ({})
@@ -694,6 +677,7 @@
                   :shapes $ comp-shapes
                   :triflorum $ comp-triflorum
                   :multiply $ comp-multiply
+                  :mirror $ comp-mirror
                 if (not= tab :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
@@ -764,7 +748,7 @@
     |quatrefoil.app.comp.shapes $ {}
       :ns $ quote
         ns quatrefoil.app.comp.shapes $ :require
-          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text torus shape rect-area-light polyhedron
+          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text torus shape rect-area-light polyhedron plane-reflector
           quatrefoil.core :refer $ defcomp
       :defs $ {}
         |comp-shapes $ quote
@@ -1035,6 +1019,25 @@
         |main-branch-fn $ quote
           defn main-branch-fn (ratio factor)
             [] 0 (* -20 ratio) 0
+      :proc $ quote ()
+      :configs $ {}
+    |quatrefoil.app.comp.mirror $ {}
+      :ns $ quote
+        ns quatrefoil.app.comp.mirror $ :require
+          quatrefoil.alias :refer $ group box sphere shape text line spline tube plane-reflector
+          quatrefoil.core :refer $ defcomp
+      :defs $ {}
+        |comp-mirror $ quote
+          defcomp comp-mirror () $ group ({})
+            plane-reflector $ {} (:width 200) (:height 200) (:color 0xffaaaa) (:clip-bias 0.5)
+              :position $ [] -20 40 -20
+            plane-reflector $ {} (:width 200) (:height 200) (:color 0xffaaaa) (:clip-bias 0.5)
+              :position $ [] -20 40 -60
+            shape $ {}
+              :path $ [][] (:move-to 25 25) (:bezier-curve-to 25 25 20 50 0 50) (:bezier-curve-to -30 50 -30 15 -30 15) (:bezier-curve-to -30 -5 -10 -27 25 -45) (:bezier-curve-to 60 -22 80 -5 80 15) (:bezier-curve-to 80 15 80 50 50 50) (:bezier-curve-to 35 50 25 25 25 25)
+              :scale $ [] 0.5 0.5 0.5
+              :position $ [] 20 0 30
+              :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0xff2225)
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.util.core $ {}
