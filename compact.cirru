@@ -17,7 +17,7 @@
               comp-tab :shapes |Shapes ([] -40 15 0) on-change
               comp-tab :triflorum |Multiply ([] -40 0 0) on-change
               comp-tab :multiply |Triflorum ([] 0 0 0) on-change
-              comp-tab :mirror "\"DEMO" ([] -40 -15 0) on-change
+              comp-tab :mirror "\"Mirror.. <3" ([] -40 -15 0) on-change
         |comp-tab $ quote
           defcomp comp-tab (k title position on-change)
             box
@@ -39,10 +39,11 @@
         |create-element $ quote
           defn create-element (el-name props children)
             %{} Shape (:name el-name)
-              :params $ -> props (dissoc :material) (dissoc :event) (dissoc :position) (dissoc :scale)
+              :params $ -> props (dissoc :material) (dissoc :event) (dissoc :position) (dissoc :scale) (dissoc :rotation)
               :position $ :position props
               :scale $ :scale props
               :material $ :material props
+              :rotation $ :rotation props
               :event $ :event props
               :children $ arrange-children children
         |perspective-camera $ quote
@@ -320,7 +321,7 @@
             if (some? position)
               let[] (x y z) position $ .set (.-position object) x y z
         |create-sphere-element $ quote
-          defn create-sphere-element (params position scale material event coord)
+          defn create-sphere-element (params position rotation scale material event coord)
             let
                 geometry $ new THREE/SphereGeometry
                   or (:radius params) 8
@@ -328,6 +329,7 @@
                   or (:height-segments params) 12
                 object3d $ new THREE/Mesh geometry (create-material material)
               set-position! object3d position
+              set-rotation! object3d rotation
               set-scale! object3d scale
               set! (.-coord object3d) coord
               set! (.-castShadow object3d) true
@@ -335,18 +337,19 @@
               ; .log js/console |Sphere: object3d
               , object3d
         |create-box-element $ quote
-          defn create-box-element (params position scale material event coord)
+          defn create-box-element (params position rotation scale material event coord)
             let
                 geometry $ new THREE/BoxGeometry (:width params) (:height params) (:depth params)
                 object3d $ new THREE/Mesh geometry (create-material material)
               set-position! object3d position
+              set-rotation! object3d rotation
               set-scale! object3d scale
               set! (.-castShadow object3d) true
               set! (.-receiveShadow object3d) true
               set! (.-coord object3d) coord
               , object3d
         |create-torus-element $ quote
-          defn create-torus-element (params position scale material)
+          defn create-torus-element (params position rotation scale material)
             let
                 geometry $ ->
                   new THREE/TorusGeometry (:r1 params) (:r2 params) (:s1 params) (:s2 params) (:arc params)
@@ -357,7 +360,7 @@
               set-scale! object3d scale
               , object3d
         |create-spline-element $ quote
-          defn create-spline-element (params position scale material)
+          defn create-spline-element (params position rotation scale material)
             let
                 points0 $ :points params
                 curve $ new THREE/CatmullRomCurve3
@@ -370,10 +373,11 @@
               set! (.-castShadow object3d) true
               set! (.-receiveShadow object3d) true
               set-position! object3d position
+              set-rotation! object3d rotation
               set-scale! object3d scale
               , object3d
         |create-rect-area-light $ quote
-          defn create-rect-area-light (params position)
+          defn create-rect-area-light (params position rotation)
             let
                 color $ :color params
                 intensity $ :intensity params
@@ -384,6 +388,7 @@
               .lookAt object3d & look-at
               set! (.-castShadow object3d) true
               set-position! object3d position
+              set-rotation! object3d rotation
               ; js/console.log "|Area Light:" object3d
               .add object3d $ new RectAreaLightHelper object3d
               , object3d
@@ -406,7 +411,7 @@
               set! (.-side m) THREE/DoubleSide
               , m
         |create-polyhedron-element $ quote
-          defn create-polyhedron-element (params position scale material)
+          defn create-polyhedron-element (params position rotation scale material)
             let
                 vertices $ js-array &
                   concat & $ :vertices params
@@ -419,10 +424,11 @@
               set! (.-castShadow object3d) true
               set! (.-receiveShadow object3d) true
               set-position! object3d position
+              set-rotation! object3d rotation
               set-scale! object3d scale
               , object3d
         |create-tube-element $ quote
-          defn create-tube-element (params position scale material)
+          defn create-tube-element (params position rotation scale material)
             let
                 points-fn $ :points-fn params
                 factor $ :factor params
@@ -436,6 +442,7 @@
               set! (.-castShadow object3d) true
               set! (.-receiveShadow object3d) true
               set-position! object3d position
+              set-rotation! object3d rotation
               set-scale! object3d scale
               , object3d
         |create-shape $ quote
@@ -445,41 +452,43 @@
                 params $ :params element
                 position $ :position element
                 scale $ :scale element
+                rotation $ :rotation element
                 material $ either (:material element)
                   {} (:kind :mesh-basic) (:color 0xa0a0a0)
                 event $ :event element
               case-default (:name element)
                 do (.warn js/console "|Unknown element" element) (new js/Object3D)
                 :scene @*global-scene
-                :group $ create-group-element params position scale
-                :box $ create-box-element params position scale material event coord
-                :sphere $ create-sphere-element params position scale material event coord
+                :group $ create-group-element params position rotation scale
+                :box $ create-box-element params position rotation scale material event coord
+                :sphere $ create-sphere-element params position rotation scale material event coord
                 :point-light $ create-point-light params position
                 :ambient-light $ create-ambient-light params position
-                :rect-area-light $ create-rect-area-light params position
+                :rect-area-light $ create-rect-area-light params position rotation
                 :perspective-camera $ create-perspective-camera params position
-                :text $ create-text-element params position scale material
-                :line $ create-line-element params position scale material
-                :spline $ create-spline-element params position scale material
-                :torus $ create-torus-element params position scale material
-                :tube $ create-tube-element params position scale material
-                :shape $ create-shape-element params position scale material
-                :polyhedron $ create-polyhedron-element params position scale material
-                :plane-reflector $ create-plane-reflector params position scale
+                :text $ create-text-element params position rotation scale material
+                :line $ create-line-element params position rotation scale material
+                :spline $ create-spline-element params position rotation scale material
+                :torus $ create-torus-element params position rotation scale material
+                :tube $ create-tube-element params position rotation scale material
+                :shape $ create-shape-element params position rotation scale material
+                :polyhedron $ create-polyhedron-element params position rotation scale material
+                :plane-reflector $ create-plane-reflector params position rotation scale
         |create-text-element $ quote
-          defn create-text-element (params position scale material)
+          defn create-text-element (params position rotation scale material)
             let
                 geometry $ new THREE/TextGeometry
                   either (:text params) |Quatrefoil
                   to-js-data $ assoc params :font font-resource
                 object3d $ new THREE/Mesh geometry (create-material material)
               set-position! object3d position
+              set-rotation! object3d rotation
               set-scale! object3d scale
               , object3d
         |load-file $ quote
           defmacro load-file (filename) (read-file filename)
         |create-plane-reflector $ quote
-          defn create-plane-reflector (params position scale)
+          defn create-plane-reflector (params position rotation scale)
             let
                 geometry $ new THREE/PlaneGeometry
                   either (:width params) 80
@@ -491,6 +500,7 @@
                     "\"textureHeight" $ * js/window.innerHeight js/window.devicePixelRatio
                     "\"color" $ either (:color params) "\"0x7777ff"
               set-position! object3d position
+              set-rotation! object3d rotation
               set-scale! object3d scale
               , object3d
         |create-ambient-light $ quote
@@ -503,7 +513,7 @@
               ; js/console.log |Light: object3d
               , object3d
         |create-shape-element $ quote
-          defn create-shape-element (params position scale material)
+          defn create-shape-element (params position rotation scale material)
             let
                 shape-2d $ &let
                   s $ new THREE/Shape
@@ -516,10 +526,11 @@
               set! (.-castShadow object3d) true
               set! (.-receiveShadow object3d) true
               set-position! object3d position
+              set-rotation! object3d rotation
               set-scale! object3d scale
               , object3d
         |create-line-element $ quote
-          defn create-line-element (params position scale material)
+          defn create-line-element (params position rotation scale material)
             let
                 points $ &let
                   ps $ new js/Array
@@ -530,6 +541,7 @@
                 geometry $ -> (new THREE/BufferGeometry) (.setFromPoints points)
                 object3d $ new THREE/Line geometry (create-material material)
               set-position! object3d position
+              set-rotation! object3d rotation
               set-scale! object3d scale
               , object3d
         |on-canvas-click $ quote
@@ -560,6 +572,10 @@
                       target-el $ find-element element-tree coord
                       maybe-handler $ -> target-el (get :event) (get :click)
                     if (some? maybe-handler) (maybe-handler event @*proxied-dispatch) (println "|Found no handler for" coord)
+        |set-rotation! $ quote
+          defn set-rotation! (object3d rotation)
+            if (some? rotation)
+              let[] (x y z) rotation $ .set (.-rotation object3d) x y z
         |build-tree $ quote
           defn build-tree (coord tree) (; js/console.log "\"build tree:" coord tree)
             if (some? tree)
@@ -608,10 +624,11 @@
               ; js/console.log |Light: object3d
               , object3d
         |create-group-element $ quote
-          defn create-group-element (params position scale)
+          defn create-group-element (params position rotation scale)
             let
                 object3d $ new THREE/Group
               set-position! object3d position
+              set-rotation! object3d rotation
               set-scale! object3d scale
               , object3d
       :proc $ quote ()
@@ -619,7 +636,7 @@
       :ns $ quote
         ns quatrefoil.app.comp.container $ :require
           quatrefoil.alias :refer $ group box sphere point-light ambient-light perspective-camera scene text
-          quatrefoil.core :refer $ defcomp
+          quatrefoil.core :refer $ defcomp >>
           quatrefoil.app.comp.todolist :refer $ comp-todolist
           quatrefoil.app.comp.portal :refer $ comp-portal
           quatrefoil.app.comp.lines :refer $ comp-lines
@@ -677,11 +694,11 @@
                   :shapes $ comp-shapes
                   :triflorum $ comp-triflorum
                   :multiply $ comp-multiply
-                  :mirror $ comp-mirror
+                  :mirror $ comp-mirror (>> states :mirror)
                 if (not= tab :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
-                ambient-light $ {} (:color 0x666666)
+                ambient-light $ {} (:color 0xaa6666)
                 point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                   :position $ [] 20 40 50
                 ; point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
@@ -720,6 +737,9 @@
           defn v+ (& xs)
             foldl xs ([] 0 0 0)
               fn (acc x) (&v+ acc x)
+        |rand-around $ quote
+          defn rand-around (base x)
+            + base (rand x) (* -0.5 x)
         |&v+ $ quote
           defn &v+ (a b)
             let[] (x y z) a $ let[] (x2 y2 z2) b
@@ -903,6 +923,9 @@
                   not= (:position prev-tree) (:position tree)
                   collect! $ [] coord :change-position (:position tree)
                 if
+                  not= (:rotation prev-tree) (:rotation tree)
+                  collect! $ [] coord :change-rotation (:rotation tree)
+                if
                   not= (:scale prev-tree) (:scale tree)
                   collect! $ [] coord :change-scale (:scale tree)
                 diff-material (:material prev-tree) (:material tree) coord collect!
@@ -1024,20 +1047,41 @@
     |quatrefoil.app.comp.mirror $ {}
       :ns $ quote
         ns quatrefoil.app.comp.mirror $ :require
-          quatrefoil.alias :refer $ group box sphere shape text line spline tube plane-reflector
+          quatrefoil.alias :refer $ group box sphere shape text line spline tube plane-reflector point-light
           quatrefoil.core :refer $ defcomp
+          quatrefoil.math :refer $ v-scale rand-around
       :defs $ {}
         |comp-mirror $ quote
-          defcomp comp-mirror () $ group ({})
-            plane-reflector $ {} (:width 200) (:height 200) (:color 0xffaaaa) (:clip-bias 0.5)
-              :position $ [] -20 40 -20
-            plane-reflector $ {} (:width 200) (:height 200) (:color 0xffaaaa) (:clip-bias 0.5)
-              :position $ [] -20 40 -60
-            shape $ {}
-              :path $ [][] (:move-to 25 25) (:bezier-curve-to 25 25 20 50 0 50) (:bezier-curve-to -30 50 -30 15 -30 15) (:bezier-curve-to -30 -5 -10 -27 25 -45) (:bezier-curve-to 60 -22 80 -5 80 15) (:bezier-curve-to 80 15 80 50 50 50) (:bezier-curve-to 35 50 25 25 25 25)
-              :scale $ [] 0.5 0.5 0.5
-              :position $ [] 20 0 30
-              :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0xff2225)
+          defcomp comp-mirror (states)
+            let
+                cursor $ :cursor states
+                state $ either (:data states)
+                  {} $ :v 0
+              group ({}) &
+                -> (range 2)
+                  map $ fn (i)
+                    plane-reflector $ {} (:width 40) (:height 40) (:color 0xffaaaa)
+                      :rotation $ [] (rand-around 0 1) (rand-around 0 1) (rand-around 0 1)
+                      :position $ [] (rand-around 0 100) (rand-around 0 100) (rand-around 0 -20)
+                , &
+                  -> (range 200)
+                    map $ fn (x)
+                      shape $ {} (:path heart-path)
+                        :scale $ v-scale ([] 1 1 1)
+                          pow (rand 0.26) 1.4
+                        :rotation $ [] (rand-around 0 1) (rand-around 0 1) (rand-around 0 1)
+                        :position $ [] (rand-around 0 100) (rand-around 0 100) (rand-around 20 80)
+                        :material $ {} (:kind :mesh-lambert) (:opacity 0.8) (:transparent true) (:color 0xff2225)
+                  box $ {} (:width 4) (:height 4) (:depth 4)
+                    :position $ [] 0 0 0
+                    :material $ {} (:kind :mesh-lambert) (:color 0xcccc33) (:opacity 0.6)
+                    :event $ {}
+                      :click $ fn (e d!)
+                        d! cursor $ assoc state :v (rand 1)
+                  point-light $ {} (:color 0xff8888) (:intensity 1.4) (:distance 200)
+                    :position $ [] -20 0 0
+        |heart-path $ quote
+          def heart-path $ [][] (:move-to 25 25) (:bezier-curve-to 25 25 20 50 0 50) (:bezier-curve-to -30 50 -30 15 -30 15) (:bezier-curve-to -30 -5 -10 -27 25 -45) (:bezier-curve-to 60 -22 80 -5 80 15) (:bezier-curve-to 80 15 80 50 50 50) (:bezier-curve-to 35 50 25 25 25 25)
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.util.core $ {}
@@ -1111,7 +1155,7 @@
       :ns $ quote (ns quatrefoil.schema)
       :defs $ {}
         |Component $ quote (defrecord Component :name :tree)
-        |Shape $ quote (defrecord Shape :name :params :position :scale :material :event :children)
+        |Shape $ quote (defrecord Shape :name :params :position :scale :rotation :material :event :children)
         |comp? $ quote
           defn comp? (x)
             and (record? x) (relevant-record? Component x)
@@ -1129,7 +1173,7 @@
     |quatrefoil.dsl.patch $ {}
       :ns $ quote
         ns quatrefoil.dsl.patch $ :require
-          [] quatrefoil.dsl.object3d-dom :refer $ [] build-tree set-position! set-scale! create-material
+          [] quatrefoil.dsl.object3d-dom :refer $ [] build-tree set-position! set-rotation! set-scale! create-material
           [] quatrefoil.util.core :refer $ [] reach-object3d scale-zero
           quatrefoil.globals :refer $ *global-scene
           "\"three" :as THREE
@@ -1172,6 +1216,8 @@
                   :remove-element $ remove-element target coord
                   :replace-element $ replace-element target coord op-data
                   :change-position $ set-position! target
+                    either op-data $ [] 0 0 0
+                  :change-rotation $ set-rotation! target
                     either op-data $ [] 0 0 0
                   :change-scale $ set-scale! target
                     either op-data $ [] 0 0 0
