@@ -190,7 +190,7 @@
               :points $ [] ([] 10 10 0) ([] 8 0 0) ([] 18 0 0) ([] 19 6 4) ([] 15 6 4) ([] 13 8 0) ([] 12 5 1)
               :position $ [] 0 0 0
               :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 0.9) (:transparent true) (:linewidth 4) (:gapSize 1) (:dashSize 1)
-            tube $ {} (:points-fn tube-fn) (:radius 0.8) (:tubularSegments 400) (:radialSegments 20)
+            tube $ {} (:points-fn tube-fn) (:radius 0.8) (:tubular-segments 400) (:radial-segments 20)
               :position $ [] -10 0 0
               :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
         |tube-fn $ quote
@@ -464,9 +464,13 @@
                 factor $ :factor params
                 geometry $ ->
                   new THREE/TubeGeometry (makeCurve points-fn factor)
-                    either (:tubularSegments params) 40
+                    -> (:tubular-segments params)
+                      either $ :tubular params
+                      either 40
                     either (:radius params) 2
-                    either (:radialSegments params) 8
+                    -> (:radial-segments params)
+                      either $ :radial params
+                      either 8
                     either (:closed? params) false
                 object3d $ new THREE/Mesh geometry (create-material material)
               set! (.-castShadow object3d) true
