@@ -15,8 +15,8 @@
               comp-tab :demo |Demo ([] 0 30 0) on-change
               comp-tab :lines |Lines ([] 0 15 0) on-change
               comp-tab :shapes |Shapes ([] -40 15 0) on-change
-              comp-tab :triflorum |Multiply ([] -40 0 0) on-change
-              comp-tab :multiply |Triflorum ([] 0 0 0) on-change
+              comp-tab :multiply |Multiply ([] -40 0 0) on-change
+              comp-tab :triflorum |Triflorum ([] 0 0 0) on-change
               comp-tab :mirror "\"Mirror.. <3" ([] -40 -15 0) on-change
         |comp-tab $ quote
           defcomp comp-tab (k title position on-change)
@@ -68,6 +68,8 @@
               , result
         |polyhedron $ quote
           defn polyhedron (props & children) (create-element :polyhedron props children)
+        |parametric $ quote
+          defn parametric (props & children) (create-element :parametric props children)
         |camera $ quote
           defn camera (props & children) (create-element :camera props children)
         |box $ quote
@@ -298,8 +300,8 @@
     |quatrefoil.dsl.object3d-dom $ {}
       :ns $ quote
         ns quatrefoil.dsl.object3d-dom $ :require
-          [] quatrefoil.util.core :refer $ [] purify-tree collect-children find-element scale-zero
-          [] "\"three" :as THREE
+          quatrefoil.util.core :refer $ purify-tree collect-children find-element scale-zero
+          "\"three" :as THREE
           quatrefoil.globals :refer $ *global-renderer *global-camera *global-scene *global-tree *proxied-dispatch
           "\"./make-curve" :refer $ makeCurve createMultiMaterialMesh
           "\"three/examples/jsm/helpers/RectAreaLightHelper" :refer $ RectAreaLightHelper
@@ -474,6 +476,7 @@
                 :shape $ create-shape-element params position rotation scale material
                 :polyhedron $ create-polyhedron-element params position rotation scale material
                 :plane-reflector $ create-plane-reflector params position rotation scale
+                :parametric $ create-parametric-element params position rotation scale material
         |create-text-element $ quote
           defn create-text-element (params position rotation scale material)
             let
@@ -631,6 +634,24 @@
               set-rotation! object3d rotation
               set-scale! object3d scale
               , object3d
+        |create-parametric-element $ quote
+          defn create-parametric-element (params position rotation scale material)
+            let
+                func $ either (:func params)
+                  fn (a b) ([] a b 0)
+                slices $ either (:slices params) 10
+                stacks $ either (:stacks params) 10
+                geometry $ new THREE/ParametricGeometry
+                  fn (u v target)
+                    let[] (x y z) (func u v) (.set target x y z)
+                  , slices stacks
+                object3d $ new THREE/Mesh geometry (create-material material)
+              set! (.-castShadow object3d) true
+              set! (.-receiveShadow object3d) true
+              set-position! object3d position
+              set-rotation! object3d rotation
+              set-scale! object3d scale
+              , object3d
       :proc $ quote ()
     |quatrefoil.app.comp.container $ {}
       :ns $ quote
@@ -768,8 +789,9 @@
     |quatrefoil.app.comp.shapes $ {}
       :ns $ quote
         ns quatrefoil.app.comp.shapes $ :require
-          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text torus shape rect-area-light polyhedron plane-reflector
+          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text torus shape rect-area-light polyhedron plane-reflector parametric
           quatrefoil.core :refer $ defcomp
+          "\"three" :as THREE
       :defs $ {}
         |comp-shapes $ quote
           defcomp comp-shapes () $ group ({})
@@ -794,6 +816,19 @@
               :detail 0
               :position $ [] 20 10 10
               :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0x9498c5)
+            parametric $ {}
+              :func $ fn (u v)
+                [] (* 8 u)
+                  +
+                    * 1 $ sin
+                      + (* 5 &PI v) (* 8 &PI u)
+                    * 1 $ cos
+                      + (* 10 &PI v) (* 3 &PI u)
+                  * 8 v
+              :slices 40
+              :stacks 40
+              :position $ [] 20 -20 10
+              :material $ {} (:kind :mesh-lambert) (:opacity 0.6) (:transparent true) (:color 0xfefea5)
       :proc $ quote ()
       :configs $ {} (:extension nil)
     |quatrefoil.dsl.diff $ {}
