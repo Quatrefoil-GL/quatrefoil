@@ -20,6 +20,7 @@
               comp-tab :multiply |Multiply ([] -40 0 0) on-change
               comp-tab :triflorum |Triflorum ([] 0 0 0) on-change
               comp-tab :mirror "\"Mirror.. <3" ([] -40 -15 0) on-change
+              comp-tab :fly "\"Fly" ([] 0 -15 0) on-change
         |comp-tab $ quote
           defcomp comp-tab (k title position on-change)
             box
@@ -184,7 +185,7 @@
     |quatrefoil.app.comp.lines $ {}
       :ns $ quote
         ns quatrefoil.app.comp.lines $ :require
-          quatrefoil.alias :refer $ group box sphere text line spline tube
+          quatrefoil.alias :refer $ group box sphere text line spline tube point-light ambient-light
           quatrefoil.core :refer $ defcomp
       :defs $ {}
         |comp-lines $ quote
@@ -213,6 +214,80 @@
               *
                 + 2 $ * t 20
                 cos $ * 40 t
+        |comp-fly-city $ quote
+          defcomp comp-fly-city (states)
+            let
+                cursor $ :cursor states
+                state $ or (:data states)
+                  {}
+                    :buildings $ make-building-data 80
+                    :factor $ [] 1 1 1
+              group ({}) & horizontal-lines & forward-lines &
+                -> (:buildings state)
+                  map $ fn (vec)
+                    let[] (x y w d h) vec $ box
+                      {} (:width w) (:height h) (:depth d)
+                        :position $ [] x (* h 0.5) (+ y)
+                        :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
+                        :event $ {}
+                          :click $ fn (e d!) (d! :demo nil)
+                sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
+                  :position $ [] 30 120 40
+                  :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.8) (:transparent true)
+                  :event $ {}
+                    :click $ fn (e d!)
+                      d! cursor $ assoc state :buildings (make-building-data 80)
+                point-light $ {} (:color 0xffff55) (:intensity 2) (:distance 600)
+                  :position $ [] 30 120 40
+                tube $ {} (:points-fn cloud-fn) (:radius 0.6) (:tubular-segments 1600) (:radial-segments 4)
+                  :factor $ :factor state
+                  :position $ [] 0 200 0
+                  :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
+                sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
+                  :position $ [] 0 240 0
+                  :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.2) (:transparent true)
+                  :event $ {}
+                    :click $ fn (e d!)
+                      d! cursor $ assoc state :factor
+                        [] (.rand-shift 1 0.92) (.rand-shift 1 0.92) (.rand-shift 1 0.92)
+                ambient-light $ {} (:color 0x444422)
+        |horizontal-lines $ quote
+          def horizontal-lines $ -> (range 20)
+            map $ fn (idx)
+              let
+                  pos $ * 10 (- idx 10)
+                line $ {}
+                  :points $ [] ([] -200 0 pos) ([] 200 0 pos)
+                  :position $ [] 0 0 0
+                  :material $ {} (:kind :line-dashed) (:color 0xccccff) (:opacity 0.3) (:transparent true) (:linewidth 2) (:gapSize 0.5) (:dashSize 0.5)
+        |forward-lines $ quote
+          def forward-lines $ -> (range 20)
+            map $ fn (idx)
+              let
+                  pos $ * 10 (- idx 10)
+                line $ {}
+                  :points $ [] ([] pos 0 -200) ([] pos 0 200)
+                  :position $ [] 0 0 0
+                  :material $ {} (:kind :line-dashed) (:color 0xccccff) (:opacity 0.3) (:transparent true) (:linewidth 2) (:gapSize 0.5) (:dashSize 0.5)
+        |make-building-data $ quote
+          defn make-building-data (n)
+            -> (range n)
+              map $ fn (i)
+                [] (.rand-shift 0 160) (.rand-shift 0 160) (.rand-shift 12 8) (.rand-shift 8 6) (.rand-shift 60 50)
+        |cloud-fn $ quote
+          defn cloud-fn (ratio factor)
+            let
+                f0 $ nth factor 0
+                f1 $ nth factor 1
+                f2 $ nth factor 2
+                deg $ * ratio 20 &PI
+                r $ * 160 (js/Math.sin deg)
+                deg2 $ / (* 5 f0 deg) 13
+                deg3 $ * 0.02 f1 deg
+              []
+                * r $ js/Math.cos deg2
+                * 0.6 f2 r $ js/Math.sin deg3
+                * r $ js/Math.sin deg2
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.app.comp.multiply $ {}
@@ -703,7 +778,7 @@
           quatrefoil.core :refer $ defcomp >>
           quatrefoil.app.comp.todolist :refer $ comp-todolist
           quatrefoil.app.comp.portal :refer $ comp-portal
-          quatrefoil.app.comp.lines :refer $ comp-lines
+          quatrefoil.app.comp.lines :refer $ comp-lines comp-fly-city
           quatrefoil.app.comp.shapes :refer $ comp-shapes
           quatrefoil.app.comp.triflorum :refer $ comp-triflorum
           quatrefoil.app.comp.multiply :refer $ comp-multiply
@@ -744,7 +819,7 @@
                 perspective-camera $ {} (:fov 45)
                   :aspect $ / js/window.innerWidth js/window.innerHeight
                   :near 0.1
-                  :far 500
+                  :far 1000
                   :position $ [] 0 0 100
                 case-default tab
                   comp-portal $ fn (next d!)
@@ -759,6 +834,7 @@
                   :triflorum $ comp-triflorum
                   :multiply $ comp-multiply
                   :mirror $ comp-mirror (>> states :mirror)
+                  :fly $ comp-fly-city (>> states :fly)
                 if (not= tab :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
@@ -1617,16 +1693,16 @@
                 , options
             if
               some? $ :background options
-              .setClearColor @*global-renderer (:background options) 1
+              .!setClearColor @*global-renderer (:background options) 1
             set! (.-gammaFactor @*global-renderer) 22
-            .setPixelRatio @*global-renderer $ either js/window.devicePixelRatio 1
-            .setSize @*global-renderer js/window.innerWidth js/window.innerHeight
-            .addEventListener canvas-el |click $ fn (event) (on-canvas-click event)
-            .addEventListener js/window |resize $ fn (event)
+            .!setPixelRatio @*global-renderer $ either js/window.devicePixelRatio 1
+            .!setSize @*global-renderer js/window.innerWidth js/window.innerHeight
+            .!addEventListener canvas-el |click $ fn (event) (on-canvas-click event)
+            .!addEventListener js/window |resize $ fn (event)
               set! (.-aspect @*global-camera) (/ js/window.innerWidth js/window.innerHeight)
-              .updateProjectionMatrix @*global-camera
-              .setSize @*global-renderer js/window.innerWidth js/window.innerHeight
-              .render @*global-renderer @*global-scene @*global-camera
+              .!updateProjectionMatrix @*global-camera
+              .!setSize @*global-renderer js/window.innerWidth js/window.innerHeight
+              .!render @*global-renderer @*global-scene @*global-camera
         |clear-cache! $ quote
           defn clear-cache! () $ ; "\"TODO memof..."
         |defcomp $ quote
