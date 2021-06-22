@@ -1,6 +1,8 @@
 
 {} (:package |quatrefoil)
-  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:modules nil) (:version nil)
+  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
+    :modules $ [] |touch-control/ |pointed-prompt/
+    :version |0.0.3
   :files $ {}
     |quatrefoil.app.comp.portal $ {}
       :ns $ quote
@@ -89,7 +91,7 @@
         |flat-values $ quote
           defmacro flat-values (& points)
             &let
-              chunk $ concat & points
+              chunk $ &list:concat & points
               quasiquote $ [] ~@chunk
         |line $ quote
           defn line (props & children) (create-element :line props children)
@@ -122,6 +124,7 @@
         ns quatrefoil.app.comp.todolist $ :require
           quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text
           quatrefoil.core :refer $ defcomp
+          pointed-prompt.core :refer $ prompt-at!
       :defs $ {}
         |comp-todolist $ quote
           defcomp comp-todolist (tasks)
@@ -131,8 +134,11 @@
                 box $ {} (:width 40) (:height 6) (:depth 1)
                   :material $ {} (:kind :mesh-lambert) (:color 0xffaaaa) (:opacity 0.9) (:transparent true)
                   :event $ {}
-                    :click $ fn (e d!)
-                      d! :add-task $ js/prompt "|Task content?"
+                    :click $ fn (e d!) (js/console.log "\"e" e)
+                      prompt-at!
+                        [] (.-pageX e) (.-pageY e)
+                        {} $ :initial "\""
+                        fn (text) (d! :add-task text)
               group
                 {} $ :position ([] 0 20 0)
                 -> (vals tasks)
@@ -156,8 +162,12 @@
                   :material $ {} (:kind :mesh-lambert) (:color 0xcccccc) (:opacity 0.6) (:transparent true)
                   :event $ {}
                     :click $ fn (event dispatch!)
-                      dispatch! :edit-task $ [] (:id task)
-                        js/prompt "|New task:" $ :text task
+                      [] (:id task)
+                        prompt-at!
+                          [] (.-pageX event) (.-pageY event)
+                          {} $ :initial (:text task)
+                          fn (text)
+                            dispatch! :edit-task $ [] (:id task) text
                 text $ {}
                   :text $ :text task
                   :size 3
@@ -284,7 +294,7 @@
               w 0.6
               rest-space $ - 1 (pow x 2) (pow y 2) (pow w 2)
               z_ $ if (>= rest-space 0) (sqrt rest-space) 0
-            with-log $ [] x y z_ w
+            w-log $ [] x y z_ w
         |calc-points $ quote
           defn calc-points (p0 next)
             apply-args
@@ -514,7 +524,7 @@
           defn create-text-element (params position rotation scale material)
             let
                 geometry $ new THREE/TextGeometry
-                  either (:text params) |Quatrefoil
+                  or (:text params) |Quatrefoil
                   to-js-data $ assoc params :font font-resource
                 object3d $ new THREE/Mesh geometry (create-material material)
               set-position! object3d position
@@ -794,6 +804,13 @@
         |rand-around $ quote
           defn rand-around (base x)
             + base (rand x) (* -0.5 x)
+        |&c+ $ quote
+          defn &c+ (a b)
+            let-sugar
+                  [] x0 y0
+                  , a
+                ([] x1 y1) b
+              [] (+ x0 x1) (+ y0 y1)
         |&v+ $ quote
           defn &v+ (a b)
             let[] (x y z) a $ let[] (x2 y2 z2) b
@@ -805,6 +822,15 @@
                   , a
                 ([] x1 y1 z1 w1) b
               [] (+ x x1) (+ y y1) (+ z z1) (+ w w1)
+        |&c* $ quote
+          defn &c* (a b)
+            let-sugar
+                  [] x0 y0
+                  , a
+                ([] x1 y1) b
+              []
+                - (* x0 x1) (* y0 y1)
+                + (* x0 y1) (* x1 y0)
         |q+ $ quote
           defn q+ (& xs)
             foldl xs ([] 0 0 0 0)
@@ -816,7 +842,7 @@
                 .multiply
                   new THREE/Quaternion (nth a 0) (nth a 1) (nth a 2) (nth a 3)
                   new THREE/Quaternion (nth b 0) (nth b 1) (nth b 2) (nth b 3)
-              [] (nth v 0) (nth v 1) (nth v 2) (nth v 3)
+              [] (aget v 0) (aget v 1) (aget v 2) (aget v 3)
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.app.comp.shapes $ {}
@@ -1231,10 +1257,10 @@
         |Shape $ quote (defrecord Shape :name :params :position :scale :rotation :material :event :children)
         |comp? $ quote
           defn comp? (x)
-            and (record? x) (relevant-record? Component x)
+            and (record? x) (.matches? Component x)
         |shape? $ quote
           defn shape? (x)
-            and (record? x) (relevant-record? Shape x)
+            and (record? x) (.matches? Shape x)
       :proc $ quote ()
     |quatrefoil.app.materials $ {}
       :ns $ quote (ns quatrefoil.app.materials)
@@ -1357,11 +1383,12 @@
       :ns $ quote
         ns quatrefoil.app.main $ :require
           "\"./alter-object3d" :refer $ inject_bang
-          quatrefoil.core :refer $ render-canvas! *global-tree clear-cache! init-renderer! handle-key-event
+          quatrefoil.core :refer $ render-canvas! *global-tree clear-cache! init-renderer! handle-key-event handle-control-events
           quatrefoil.app.comp.container :refer $ comp-container
-          quatrefoil.dsl.object3d-dom :refer $ on-canvas-click ref-dirty-call!
+          quatrefoil.dsl.object3d-dom :refer $ on-canvas-click
           quatrefoil.app.updater :refer $ [] updater
           "\"three" :as THREE
+          touch-control.core :refer $ render-control! control-states start-control-loop! clear-control-loop!
       :defs $ {}
         |dispatch! $ quote
           defn dispatch! (op op-data)
@@ -1379,9 +1406,11 @@
             render-app!
             add-watch *store :changes $ fn (store prev) (render-app!)
             set! js/window.onkeydown handle-key-event
+            render-control!
+            handle-control-events
             println "|App started!"
         |reload! $ quote
-          defn reload! () (clear-cache!) (remove-watch *store :changes)
+          defn reload! () (clear-cache!) (clear-control-loop!) (handle-control-events) (remove-watch *store :changes)
             add-watch *store :changes $ fn (store prev) (render-app!)
             render-app!
             set! js/window.onkeydown handle-key-event
@@ -1407,6 +1436,8 @@
           "\"three" :as THREE
           quatrefoil.globals :refer $ *global-tree *global-camera *global-renderer *global-scene *proxied-dispatch *viewer-angle *viewer-y-shift
           "\"three/examples/jsm/lights/RectAreaLightUniformsLib" :refer $ RectAreaLightUniformsLib
+          touch-control.core :refer $ render-control! control-states start-control-loop! clear-control-loop!
+          quatrefoil.math :refer $ &c* &c+
       :defs $ {}
         |>> $ quote
           defn >> (states k)
@@ -1445,14 +1476,14 @@
                   tween-call 20 5 $ fn (i)
                     do
                       swap! *viewer-y-shift &+ $ / shift 10
-                      .lookAt camera $ new-lookat-point
-                      .render @*global-renderer @*global-scene camera
+                      .!lookAt camera $ new-lookat-point
+                      .!render @*global-renderer @*global-scene camera
                 (:angle angle)
                   tween-call 20 5 $ fn (i)
                     swap! *viewer-angle &+ $ / angle 10
                     do
-                      .lookAt camera $ new-lookat-point
-                      .render @*global-renderer @*global-scene camera
+                      .!lookAt camera $ new-lookat-point
+                      .!render @*global-renderer @*global-scene camera
                 (:move dx dy dz)
                   tween-call 20 5 $ fn (i)
                     let-sugar
@@ -1463,9 +1494,72 @@
                       set! (.-x position) x
                       set! (.-y position) y
                       set! (.-z position) z
-                      .lookAt camera $ new-lookat-point
-                      .render @*global-renderer @*global-scene camera
+                      .!lookAt camera $ new-lookat-point
+                      .!render @*global-renderer @*global-scene camera
                 _ $ println "\"unknown camera control:" control
+        |handle-control-events $ quote
+          defn handle-control-events () $ start-control-loop! 10
+            fn (elapsed states)
+              let
+                  l-move $ :left-move states
+                  r-move $ :right-move states
+                  camera @*global-camera
+                  lifting? $ :left-a? states
+                if
+                  or
+                    not= l-move $ [] 0 0
+                    not= r-move $ [] 0 0
+                  if
+                    or
+                      not= l-move $ [] 0 0
+                      and lifting? $ not= 0 (last r-move)
+                    let-sugar
+                        position $ .-position camera
+                        shift $ * 0.25 0.2 @*viewer-y-shift
+                        virtual-length $ js/Math.sqrt
+                          + 1 $ js/Math.pow shift 2
+                        mx $ * elapsed (nth l-move 0)
+                        mz $ * elapsed (nth l-move 1)
+                        step-length $ js/Math.sqrt
+                          + (* mx mx) (* mz mz)
+                        a $ &- @*viewer-angle
+                          * 1 $ &/ &PI 2
+                        ([] dx dz)
+                          &c* ([] mx mz)
+                            [] (cos a) (sin a)
+                        x $ &+ (.-x position) (/ dx virtual-length)
+                        y $ +
+                          *
+                            if (> mz 0) 1 -1
+                            , shift $ / step-length virtual-length
+                          if lifting?
+                            &+ (.-y position)
+                              * elapsed $ nth r-move 1
+                            .-y position
+                        z $ &+ (.-z position)
+                          / (negate dz) virtual-length
+                      set! (.-x position) x
+                      set! (.-y position) y
+                      set! (.-z position) z
+                      .!lookAt camera $ new-lookat-point
+                      .!render @*global-renderer @*global-scene camera
+                if
+                  and
+                    not $ :left-a? states
+                    not= 0 $ nth r-move 0
+                  do
+                    swap! *viewer-angle &+ $ * -0.01 (nth r-move 0) elapsed
+                    do
+                      .!lookAt camera $ new-lookat-point
+                      .!render @*global-renderer @*global-scene camera
+                if
+                  and
+                    not $ :left-a? states
+                    not= 0 $ nth r-move 1
+                  do
+                    swap! *viewer-y-shift &+ $ * 0.1 (nth r-move 1) elapsed
+                    .!lookAt camera $ new-lookat-point
+                    .!render @*global-renderer @*global-scene camera
         |handle-key-event $ quote
           defn handle-key-event (event)
             let
@@ -1536,9 +1630,9 @@
           defn clear-cache! () $ ; "\"TODO memof..."
         |defcomp $ quote
           defmacro defcomp (comp-name params & body)
-            assert "\"expected symbol of comp-name" $ symbol? comp-name
-            assert "\"expected params in list" $ and (list? params) (every? params symbol?)
-            if (empty? body)
+            ; assert "\"expected symbol of comp-name" $ symbol? comp-name
+            ; assert "\"expected params in list" $ and (list? params) (every? params symbol?)
+            if (&list:empty? body)
               quasiquote $ echo "\"[Warn] invalid component body for" (quote ~comp-name) (quote ~params)
               quasiquote $ defn ~comp-name (~ params)
                 %{} Component
