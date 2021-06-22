@@ -1513,7 +1513,7 @@
           quatrefoil.globals :refer $ *global-tree *global-camera *global-renderer *global-scene *proxied-dispatch *viewer-angle *viewer-y-shift
           "\"three/examples/jsm/lights/RectAreaLightUniformsLib" :refer $ RectAreaLightUniformsLib
           touch-control.core :refer $ render-control! control-states start-control-loop! clear-control-loop!
-          quatrefoil.math :refer $ &c* &c+
+          quatrefoil.math :refer $ &c* &c+ &v+
       :defs $ {}
         |>> $ quote
           defn >> (states k)
@@ -1521,6 +1521,14 @@
                 parent-cursor $ either (:cursor states) ([])
                 branch $ either (get states k) ({})
               assoc branch :cursor $ append parent-cursor k
+        |shift-viewer-by! $ quote
+          defn shift-viewer-by! (x)
+            let
+                camera @*global-camera
+              if (= x false) (reset! *viewer-y-shift 0)
+                swap! *viewer-y-shift &+ $ * 2 x
+              .!lookAt camera $ new-lookat-point
+              .!render @*global-renderer @*global-scene camera
         |*tmp-changes $ quote (defatom *tmp-changes nil)
         |new-lookat-point $ quote
           defn new-lookat-point () $ let-sugar
@@ -1543,6 +1551,21 @@
               build-tree ([]) (purify-tree markup)
             reset! *global-tree markup
             .render @*global-renderer @*global-scene @*global-camera
+        |move-viewer-by! $ quote
+          defn move-viewer-by! (x0 y0 z0)
+            let-sugar
+                camera @*global-camera
+                ([] dx dy dz) (to-viewer-axis x0 y0 z0)
+                position $ .-position camera
+                x $ &+ (.-x position) dx
+                y $ &+ (.-y position) dy
+                z $ &+ (.-z position) dz
+              ; println ([] x0 y0 z0) |=> $ [] dx dy dz
+              set! (.-x position) x
+              set! (.-y position) y
+              set! (.-z position) z
+              .!lookAt camera $ new-lookat-point
+              .!render @*global-renderer @*global-scene camera
         |tween-move-camera! $ quote
           defn tween-move-camera! (control)
             let
@@ -1573,6 +1596,13 @@
                       .!lookAt camera $ new-lookat-point
                       .!render @*global-renderer @*global-scene camera
                 _ $ println "\"unknown camera control:" control
+        |rotate-viewer-by! $ quote
+          defn rotate-viewer-by! (x)
+            let
+                camera @*global-camera
+              swap! *viewer-angle &+ x
+              .!lookAt camera $ new-lookat-point
+              .!render @*global-renderer @*global-scene camera
         |handle-control-events $ quote
           defn handle-control-events () $ start-control-loop! 10
             fn (elapsed states delta)
@@ -1580,63 +1610,41 @@
                   l-move $ :left-move states
                   r-move $ :right-move states
                   r-delta $ :right-move delta
+                  l-delta $ :left-move delta
                   camera @*global-camera
-                  lifting? $ :left-a? states
-                if
-                  or
-                    not= l-move $ [] 0 0
-                    not= r-move $ [] 0 0
-                  if
-                    or
-                      not= l-move $ [] 0 0
-                      and lifting? $ not= 0 (last r-move)
-                    let-sugar
-                        position $ .-position camera
-                        shift $ * 0.25 0.2 @*viewer-y-shift
-                        virtual-length $ js/Math.sqrt
-                          + 1 $ js/Math.pow shift 2
-                        mx $ * elapsed (nth l-move 0)
-                        mz $ * elapsed (nth l-move 1)
-                        step-length $ js/Math.sqrt
-                          + (* mx mx) (* mz mz)
-                        a $ &- @*viewer-angle
-                          * 1 $ &/ &PI 2
-                        ([] dx dz)
-                          &c* ([] mx mz)
-                            [] (cos a) (sin a)
-                        x $ &+ (.-x position) (/ dx virtual-length)
-                        y $ +
-                          *
-                            if (> mz 0) 1 -1
-                            , shift $ / step-length virtual-length
-                          if lifting?
-                            &+ (.-y position)
-                              * elapsed $ nth r-move 1
-                            .-y position
-                        z $ &+ (.-z position)
-                          / (negate dz) virtual-length
-                      set! (.-x position) x
-                      set! (.-y position) y
-                      set! (.-z position) z
-                      .!lookAt camera $ new-lookat-point
-                      .!render @*global-renderer @*global-scene camera
-                if
-                  and
-                    not $ :left-a? states
-                    not= 0 $ nth r-move 0
-                  do
-                    swap! *viewer-angle &+ $ * -0.01 (nth r-move 0) elapsed
-                    do
-                      .!lookAt camera $ new-lookat-point
-                      .!render @*global-renderer @*global-scene camera
-                if
-                  and
-                    not $ :left-a? states
-                    not= 0 $ nth r-delta 1
-                  do
-                    swap! *viewer-y-shift &+ $ * 2 (nth r-delta 1) elapsed
-                    .!lookAt camera $ new-lookat-point
-                    .!render @*global-renderer @*global-scene camera
+                  left-a? $ :left-a? states
+                  right-b? $ :right-b? states
+                ; println "\"L" l-move "\"R" r-move
+                when
+                  not= 0 $ nth l-move 1
+                  move-viewer-by! 0 0 $ negate
+                    * 0.6 elapsed $ nth l-move 1
+                when
+                  not= 0 $ nth l-move 0
+                  rotate-viewer-by! $ * -0.01 elapsed (nth l-move 0)
+                when
+                  and (not left-a?)
+                    not= ([] 0 0) r-move
+                  move-viewer-by!
+                    * 0.6 elapsed $ nth r-move 0
+                    * 0.6 elapsed $ nth r-move 1
+                    , 0
+                when
+                  and left-a? $ not= 0 (nth r-delta 1)
+                  shift-viewer-by! $ * 1 (nth r-delta 1) elapsed
+                when
+                  and left-a? $ not= 0 (nth r-delta 0)
+                  rotate-viewer-by! $ * -0.1 (nth r-delta 0) elapsed
+                when right-b? $ let
+                    shift @*viewer-y-shift
+                  cond
+                      < shift -0.06
+                      shift-viewer-by! $ * 2 elapsed
+                    (> shift 0.06)
+                      shift-viewer-by! $ * -2 elapsed
+                    (< (js/Math.abs shift) 0.06)
+                      shift-viewer-by! false
+                    true nil
         |handle-key-event $ quote
           defn handle-key-event (event)
             let
@@ -1676,6 +1684,8 @@
                     &* 1 $ cos a
                     , 0
                       &* -1 $ sin a
+        |half-pi $ quote
+          def half-pi $ * 0.5 &PI
         |tween-call $ quote
           defn tween-call (n d f)
             &doseq
@@ -1705,6 +1715,43 @@
               .!render @*global-renderer @*global-scene @*global-camera
         |clear-cache! $ quote
           defn clear-cache! () $ ; "\"TODO memof..."
+        |to-viewer-axis $ quote
+          defn to-viewer-axis (x y z)
+            let
+                length $ sqrt
+                  + (pow x 2) (pow y 2) (pow z 2)
+                angle @*viewer-angle
+                project-distance 20
+                shift @*viewer-y-shift
+                v-angle $ js/Math.atan (/ shift project-distance)
+                from-y $ []
+                  -> y
+                    * $ js/Math.cos (+ v-angle half-pi)
+                    * $ js/Math.cos angle
+                  -> y $ *
+                    js/Math.sin $ + v-angle half-pi
+                  -> y
+                    * $ js/Math.cos (+ v-angle half-pi)
+                    * $ js/Math.sin angle
+                    negate
+                from-x $ wo-log
+                  []
+                    -> x $ *
+                      js/Math.cos $ - angle half-pi
+                    , 0 $ -> x
+                      * $ js/Math.sin (- angle half-pi)
+                      negate
+                from-z $ []
+                  -> z (negate)
+                    * $ js/Math.cos v-angle
+                    * $ js/Math.cos angle
+                  -> z (negate)
+                    * $ js/Math.sin v-angle
+                  -> z (negate)
+                    * $ js/Math.cos v-angle
+                    * $ js/Math.sin angle
+                    negate
+              -> from-x (&v+ from-y) (&v+ from-z)
         |defcomp $ quote
           defmacro defcomp (comp-name params & body)
             ; assert "\"expected symbol of comp-name" $ symbol? comp-name
