@@ -834,7 +834,7 @@
                 .multiply
                   new THREE/Quaternion (nth a 0) (nth a 1) (nth a 2) (nth a 3)
                   new THREE/Quaternion (nth b 0) (nth b 1) (nth b 2) (nth b 3)
-              [] (nth v 0) (nth v 1) (nth v 2) (nth v 3)
+              [] (aget v 0) (aget v 1) (aget v 2) (aget v 3)
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.app.comp.shapes $ {}
@@ -1490,12 +1490,13 @@
                       .!render @*global-renderer @*global-scene camera
                 _ $ println "\"unknown camera control:" control
         |handle-control-events $ quote
-          defn handle-control-events () $ start-control-loop! 20
+          defn handle-control-events () $ start-control-loop! 10
             fn (elapsed states)
               let
                   l-move $ :left-move states
                   r-move $ :right-move states
                   camera @*global-camera
+                  lifting? $ :left-a? states
                 if
                   or
                     not= l-move $ [] 0 0
@@ -1503,22 +1504,22 @@
                   if
                     or
                       not= l-move $ [] 0 0
-                      and
-                        not= 0 $ last r-move
-                        :left-a? states
+                      and lifting? $ not= 0 (last r-move)
                     let-sugar
                         position $ .-position camera
                         mx $ * elapsed (nth l-move 0)
-                        mz $ * elapsed
-                          negate $ nth l-move 1
-                        a $ &+ @*viewer-angle (&/ &PI 2)
+                        mz $ * elapsed (nth l-move 1)
+                        a $ &- @*viewer-angle
+                          * 1 $ &/ &PI 2
                         ([] dx dz)
                           &c* ([] mx mz)
                             [] (cos a) (sin a)
                         x $ &+ (.-x position) dx
-                        y $ &+ (.-y position)
-                          * elapsed $ nth r-move 1
-                        z $ &+ (.-z position) dz
+                        y $ if lifting?
+                          &+ (.-y position)
+                            * elapsed $ nth r-move 1
+                          .-y position
+                        z $ &+ (.-z position) (negate dz)
                       set! (.-x position) x
                       set! (.-y position) y
                       set! (.-z position) z
