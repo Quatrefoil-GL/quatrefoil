@@ -1499,10 +1499,11 @@
                 _ $ println "\"unknown camera control:" control
         |handle-control-events $ quote
           defn handle-control-events () $ start-control-loop! 10
-            fn (elapsed states)
+            fn (elapsed states delta)
               let
                   l-move $ :left-move states
                   r-move $ :right-move states
+                  r-delta $ :right-move delta
                   camera @*global-camera
                   lifting? $ :left-a? states
                 if
@@ -1555,9 +1556,9 @@
                 if
                   and
                     not $ :left-a? states
-                    not= 0 $ nth r-move 1
+                    not= 0 $ nth r-delta 1
                   do
-                    swap! *viewer-y-shift &+ $ * 0.1 (nth r-move 1) elapsed
+                    swap! *viewer-y-shift &+ $ * 2 (nth r-delta 1) elapsed
                     .!lookAt camera $ new-lookat-point
                     .!render @*global-renderer @*global-scene camera
         |handle-key-event $ quote
