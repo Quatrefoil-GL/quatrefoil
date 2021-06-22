@@ -1515,19 +1515,29 @@
                       and lifting? $ not= 0 (last r-move)
                     let-sugar
                         position $ .-position camera
+                        shift $ * 0.25 0.2 @*viewer-y-shift
+                        virtual-length $ js/Math.sqrt
+                          + 1 $ js/Math.pow shift 2
                         mx $ * elapsed (nth l-move 0)
                         mz $ * elapsed (nth l-move 1)
+                        step-length $ js/Math.sqrt
+                          + (* mx mx) (* mz mz)
                         a $ &- @*viewer-angle
                           * 1 $ &/ &PI 2
                         ([] dx dz)
                           &c* ([] mx mz)
                             [] (cos a) (sin a)
-                        x $ &+ (.-x position) dx
-                        y $ if lifting?
-                          &+ (.-y position)
-                            * elapsed $ nth r-move 1
-                          .-y position
-                        z $ &+ (.-z position) (negate dz)
+                        x $ &+ (.-x position) (/ dx virtual-length)
+                        y $ +
+                          *
+                            if (> mz 0) 1 -1
+                            , shift $ / step-length virtual-length
+                          if lifting?
+                            &+ (.-y position)
+                              * elapsed $ nth r-move 1
+                            .-y position
+                        z $ &+ (.-z position)
+                          / (negate dz) virtual-length
                       set! (.-x position) x
                       set! (.-y position) y
                       set! (.-z position) z
