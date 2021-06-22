@@ -1,7 +1,7 @@
 
 {} (:package |quatrefoil)
   :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
-    :modules $ [] |touch-control/
+    :modules $ [] |touch-control/ |pointed-prompt/
     :version |0.0.3
   :files $ {}
     |quatrefoil.app.comp.portal $ {}
@@ -124,6 +124,7 @@
         ns quatrefoil.app.comp.todolist $ :require
           quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text
           quatrefoil.core :refer $ defcomp
+          pointed-prompt.core :refer $ prompt-at!
       :defs $ {}
         |comp-todolist $ quote
           defcomp comp-todolist (tasks)
@@ -133,8 +134,11 @@
                 box $ {} (:width 40) (:height 6) (:depth 1)
                   :material $ {} (:kind :mesh-lambert) (:color 0xffaaaa) (:opacity 0.9) (:transparent true)
                   :event $ {}
-                    :click $ fn (e d!)
-                      d! :add-task $ js/prompt "|Task content?"
+                    :click $ fn (e d!) (js/console.log "\"e" e)
+                      prompt-at!
+                        [] (.-pageX e) (.-pageY e)
+                        {} $ :initial "\""
+                        fn (text) (d! :add-task text)
               group
                 {} $ :position ([] 0 20 0)
                 -> (vals tasks)
@@ -158,8 +162,12 @@
                   :material $ {} (:kind :mesh-lambert) (:color 0xcccccc) (:opacity 0.6) (:transparent true)
                   :event $ {}
                     :click $ fn (event dispatch!)
-                      dispatch! :edit-task $ [] (:id task)
-                        js/prompt "|New task:" $ :text task
+                      [] (:id task)
+                        prompt-at!
+                          [] (.-pageX event) (.-pageY event)
+                          {} $ :initial (:text task)
+                          fn (text)
+                            dispatch! :edit-task $ [] (:id task) text
                 text $ {}
                   :text $ :text task
                   :size 3
@@ -516,7 +524,7 @@
           defn create-text-element (params position rotation scale material)
             let
                 geometry $ new THREE/TextGeometry
-                  either (:text params) |Quatrefoil
+                  or (:text params) |Quatrefoil
                   to-js-data $ assoc params :font font-resource
                 object3d $ new THREE/Mesh geometry (create-material material)
               set-position! object3d position
