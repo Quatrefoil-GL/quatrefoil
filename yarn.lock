@@ -26,6 +26,11 @@
   resolved "https://registry.npmjs.org/@cirru/writer.ts/-/writer.ts-0.1.3.tgz#5f54bdecaa20ba3dab16cbe6da711854138a9c0a"
   integrity sha512-vJnhmhm7we5UfQIwmZfQpF3bAFbVybzT6LbmkbQHxgijaQg3gPfNVsnSIa3g3KpmWVtvkzEx+nUy5aMwsJiV1A==
 
+"@quamolit/touch-control@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.npmjs.org/@quamolit/touch-control/-/touch-control-0.0.3.tgz#4f435140e04016bda689383f0632cb184e4cb8d9"
+  integrity sha512-N9tVlCV1Td1wcHIumkAryrPDB4OL4fQefo0XpgehiFS7fipCy6QWS6DNqXIPHFUSZ9m2mSilr8JVJrCTIAcp8w==
+
 colorette@^1.2.2:
   version "1.2.2"
   resolved "https://registry.npmjs.org/colorette/-/colorette-1.2.2.tgz#cbcc79d5e99caea2dbf10eb3a26fd8b3e6acfa94"
