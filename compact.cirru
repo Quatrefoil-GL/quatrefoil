@@ -20,6 +20,7 @@
               comp-tab :multiply |Multiply ([] -40 0 0) on-change
               comp-tab :triflorum |Triflorum ([] 0 0 0) on-change
               comp-tab :mirror "\"Mirror.. <3" ([] -40 -15 0) on-change
+              comp-tab :fly "\"Fly" ([] 0 -15 0) on-change
         |comp-tab $ quote
           defcomp comp-tab (k title position on-change)
             box
@@ -184,7 +185,7 @@
     |quatrefoil.app.comp.lines $ {}
       :ns $ quote
         ns quatrefoil.app.comp.lines $ :require
-          quatrefoil.alias :refer $ group box sphere text line spline tube
+          quatrefoil.alias :refer $ group box sphere text line spline tube point-light ambient-light
           quatrefoil.core :refer $ defcomp
       :defs $ {}
         |comp-lines $ quote
@@ -213,6 +214,80 @@
               *
                 + 2 $ * t 20
                 cos $ * 40 t
+        |comp-fly-city $ quote
+          defcomp comp-fly-city (states)
+            let
+                cursor $ :cursor states
+                state $ or (:data states)
+                  {}
+                    :buildings $ make-building-data 80
+                    :factor $ [] 1 1 1
+              group ({}) & horizontal-lines & forward-lines &
+                -> (:buildings state)
+                  map $ fn (vec)
+                    let[] (x y w d h) vec $ box
+                      {} (:width w) (:height h) (:depth d)
+                        :position $ [] x (* h 0.5) (+ y)
+                        :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
+                        :event $ {}
+                          :click $ fn (e d!) (d! :demo nil)
+                sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
+                  :position $ [] 30 120 40
+                  :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.8) (:transparent true)
+                  :event $ {}
+                    :click $ fn (e d!)
+                      d! cursor $ assoc state :buildings (make-building-data 80)
+                point-light $ {} (:color 0xffff55) (:intensity 2) (:distance 600)
+                  :position $ [] 30 120 40
+                tube $ {} (:points-fn cloud-fn) (:radius 0.6) (:tubular-segments 1600) (:radial-segments 4)
+                  :factor $ :factor state
+                  :position $ [] 0 200 0
+                  :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
+                sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
+                  :position $ [] 0 240 0
+                  :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.2) (:transparent true)
+                  :event $ {}
+                    :click $ fn (e d!)
+                      d! cursor $ assoc state :factor
+                        [] (.rand-shift 1 0.92) (.rand-shift 1 0.92) (.rand-shift 1 0.92)
+                ambient-light $ {} (:color 0x444422)
+        |horizontal-lines $ quote
+          def horizontal-lines $ -> (range 20)
+            map $ fn (idx)
+              let
+                  pos $ * 10 (- idx 10)
+                line $ {}
+                  :points $ [] ([] -200 0 pos) ([] 200 0 pos)
+                  :position $ [] 0 0 0
+                  :material $ {} (:kind :line-dashed) (:color 0xccccff) (:opacity 0.3) (:transparent true) (:linewidth 2) (:gapSize 0.5) (:dashSize 0.5)
+        |forward-lines $ quote
+          def forward-lines $ -> (range 20)
+            map $ fn (idx)
+              let
+                  pos $ * 10 (- idx 10)
+                line $ {}
+                  :points $ [] ([] pos 0 -200) ([] pos 0 200)
+                  :position $ [] 0 0 0
+                  :material $ {} (:kind :line-dashed) (:color 0xccccff) (:opacity 0.3) (:transparent true) (:linewidth 2) (:gapSize 0.5) (:dashSize 0.5)
+        |make-building-data $ quote
+          defn make-building-data (n)
+            -> (range n)
+              map $ fn (i)
+                [] (.rand-shift 0 160) (.rand-shift 0 160) (.rand-shift 12 8) (.rand-shift 8 6) (.rand-shift 60 50)
+        |cloud-fn $ quote
+          defn cloud-fn (ratio factor)
+            let
+                f0 $ nth factor 0
+                f1 $ nth factor 1
+                f2 $ nth factor 2
+                deg $ * ratio 20 &PI
+                r $ * 160 (js/Math.sin deg)
+                deg2 $ / (* 5 f0 deg) 13
+                deg3 $ * 0.02 f1 deg
+              []
+                * r $ js/Math.cos deg2
+                * 0.6 f2 r $ js/Math.sin deg3
+                * r $ js/Math.sin deg2
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.app.comp.multiply $ {}
@@ -703,7 +778,7 @@
           quatrefoil.core :refer $ defcomp >>
           quatrefoil.app.comp.todolist :refer $ comp-todolist
           quatrefoil.app.comp.portal :refer $ comp-portal
-          quatrefoil.app.comp.lines :refer $ comp-lines
+          quatrefoil.app.comp.lines :refer $ comp-lines comp-fly-city
           quatrefoil.app.comp.shapes :refer $ comp-shapes
           quatrefoil.app.comp.triflorum :refer $ comp-triflorum
           quatrefoil.app.comp.multiply :refer $ comp-multiply
@@ -744,7 +819,7 @@
                 perspective-camera $ {} (:fov 45)
                   :aspect $ / js/window.innerWidth js/window.innerHeight
                   :near 0.1
-                  :far 500
+                  :far 1000
                   :position $ [] 0 0 100
                 case-default tab
                   comp-portal $ fn (next d!)
@@ -759,6 +834,7 @@
                   :triflorum $ comp-triflorum
                   :multiply $ comp-multiply
                   :mirror $ comp-mirror (>> states :mirror)
+                  :fly $ comp-fly-city (>> states :fly)
                 if (not= tab :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
@@ -1437,7 +1513,7 @@
           quatrefoil.globals :refer $ *global-tree *global-camera *global-renderer *global-scene *proxied-dispatch *viewer-angle *viewer-y-shift
           "\"three/examples/jsm/lights/RectAreaLightUniformsLib" :refer $ RectAreaLightUniformsLib
           touch-control.core :refer $ render-control! control-states start-control-loop! clear-control-loop!
-          quatrefoil.math :refer $ &c* &c+
+          quatrefoil.math :refer $ &c* &c+ &v+
       :defs $ {}
         |>> $ quote
           defn >> (states k)
@@ -1445,6 +1521,14 @@
                 parent-cursor $ either (:cursor states) ([])
                 branch $ either (get states k) ({})
               assoc branch :cursor $ append parent-cursor k
+        |shift-viewer-by! $ quote
+          defn shift-viewer-by! (x)
+            let
+                camera @*global-camera
+              if (= x false) (reset! *viewer-y-shift 0)
+                swap! *viewer-y-shift &+ $ * 2 x
+              .!lookAt camera $ new-lookat-point
+              .!render @*global-renderer @*global-scene camera
         |*tmp-changes $ quote (defatom *tmp-changes nil)
         |new-lookat-point $ quote
           defn new-lookat-point () $ let-sugar
@@ -1467,6 +1551,21 @@
               build-tree ([]) (purify-tree markup)
             reset! *global-tree markup
             .render @*global-renderer @*global-scene @*global-camera
+        |move-viewer-by! $ quote
+          defn move-viewer-by! (x0 y0 z0)
+            let-sugar
+                camera @*global-camera
+                ([] dx dy dz) (to-viewer-axis x0 y0 z0)
+                position $ .-position camera
+                x $ &+ (.-x position) dx
+                y $ &+ (.-y position) dy
+                z $ &+ (.-z position) dz
+              ; println ([] x0 y0 z0) |=> $ [] dx dy dz
+              set! (.-x position) x
+              set! (.-y position) y
+              set! (.-z position) z
+              .!lookAt camera $ new-lookat-point
+              .!render @*global-renderer @*global-scene camera
         |tween-move-camera! $ quote
           defn tween-move-camera! (control)
             let
@@ -1497,69 +1596,55 @@
                       .!lookAt camera $ new-lookat-point
                       .!render @*global-renderer @*global-scene camera
                 _ $ println "\"unknown camera control:" control
+        |rotate-viewer-by! $ quote
+          defn rotate-viewer-by! (x)
+            let
+                camera @*global-camera
+              swap! *viewer-angle &+ x
+              .!lookAt camera $ new-lookat-point
+              .!render @*global-renderer @*global-scene camera
         |handle-control-events $ quote
           defn handle-control-events () $ start-control-loop! 10
-            fn (elapsed states)
+            fn (elapsed states delta)
               let
                   l-move $ :left-move states
                   r-move $ :right-move states
+                  r-delta $ :right-move delta
+                  l-delta $ :left-move delta
                   camera @*global-camera
-                  lifting? $ :left-a? states
-                if
-                  or
-                    not= l-move $ [] 0 0
-                    not= r-move $ [] 0 0
-                  if
-                    or
-                      not= l-move $ [] 0 0
-                      and lifting? $ not= 0 (last r-move)
-                    let-sugar
-                        position $ .-position camera
-                        shift $ * 0.25 0.2 @*viewer-y-shift
-                        virtual-length $ js/Math.sqrt
-                          + 1 $ js/Math.pow shift 2
-                        mx $ * elapsed (nth l-move 0)
-                        mz $ * elapsed (nth l-move 1)
-                        step-length $ js/Math.sqrt
-                          + (* mx mx) (* mz mz)
-                        a $ &- @*viewer-angle
-                          * 1 $ &/ &PI 2
-                        ([] dx dz)
-                          &c* ([] mx mz)
-                            [] (cos a) (sin a)
-                        x $ &+ (.-x position) (/ dx virtual-length)
-                        y $ +
-                          *
-                            if (> mz 0) 1 -1
-                            , shift $ / step-length virtual-length
-                          if lifting?
-                            &+ (.-y position)
-                              * elapsed $ nth r-move 1
-                            .-y position
-                        z $ &+ (.-z position)
-                          / (negate dz) virtual-length
-                      set! (.-x position) x
-                      set! (.-y position) y
-                      set! (.-z position) z
-                      .!lookAt camera $ new-lookat-point
-                      .!render @*global-renderer @*global-scene camera
-                if
-                  and
-                    not $ :left-a? states
-                    not= 0 $ nth r-move 0
-                  do
-                    swap! *viewer-angle &+ $ * -0.01 (nth r-move 0) elapsed
-                    do
-                      .!lookAt camera $ new-lookat-point
-                      .!render @*global-renderer @*global-scene camera
-                if
-                  and
-                    not $ :left-a? states
-                    not= 0 $ nth r-move 1
-                  do
-                    swap! *viewer-y-shift &+ $ * 0.1 (nth r-move 1) elapsed
-                    .!lookAt camera $ new-lookat-point
-                    .!render @*global-renderer @*global-scene camera
+                  left-a? $ :left-a? states
+                  right-b? $ :right-b? states
+                ; println "\"L" l-move "\"R" r-move
+                when
+                  not= 0 $ nth l-move 1
+                  move-viewer-by! 0 0 $ negate
+                    * 0.6 elapsed $ nth l-move 1
+                when
+                  not= 0 $ nth l-move 0
+                  rotate-viewer-by! $ * -0.01 elapsed (nth l-move 0)
+                when
+                  and (not left-a?)
+                    not= ([] 0 0) r-move
+                  move-viewer-by!
+                    * 0.6 elapsed $ nth r-move 0
+                    * 0.6 elapsed $ nth r-move 1
+                    , 0
+                when
+                  and left-a? $ not= 0 (nth r-delta 1)
+                  shift-viewer-by! $ * 1 (nth r-delta 1) elapsed
+                when
+                  and left-a? $ not= 0 (nth r-delta 0)
+                  rotate-viewer-by! $ * -0.1 (nth r-delta 0) elapsed
+                when right-b? $ let
+                    shift @*viewer-y-shift
+                  cond
+                      < shift -0.06
+                      shift-viewer-by! $ * 2 elapsed
+                    (> shift 0.06)
+                      shift-viewer-by! $ * -2 elapsed
+                    (< (js/Math.abs shift) 0.06)
+                      shift-viewer-by! false
+                    true nil
         |handle-key-event $ quote
           defn handle-key-event (event)
             let
@@ -1599,6 +1684,8 @@
                     &* 1 $ cos a
                     , 0
                       &* -1 $ sin a
+        |half-pi $ quote
+          def half-pi $ * 0.5 &PI
         |tween-call $ quote
           defn tween-call (n d f)
             &doseq
@@ -1616,18 +1703,55 @@
                 , options
             if
               some? $ :background options
-              .setClearColor @*global-renderer (:background options) 1
+              .!setClearColor @*global-renderer (:background options) 1
             set! (.-gammaFactor @*global-renderer) 22
-            .setPixelRatio @*global-renderer $ either js/window.devicePixelRatio 1
-            .setSize @*global-renderer js/window.innerWidth js/window.innerHeight
-            .addEventListener canvas-el |click $ fn (event) (on-canvas-click event)
-            .addEventListener js/window |resize $ fn (event)
+            .!setPixelRatio @*global-renderer $ either js/window.devicePixelRatio 1
+            .!setSize @*global-renderer js/window.innerWidth js/window.innerHeight
+            .!addEventListener canvas-el |click $ fn (event) (on-canvas-click event)
+            .!addEventListener js/window |resize $ fn (event)
               set! (.-aspect @*global-camera) (/ js/window.innerWidth js/window.innerHeight)
-              .updateProjectionMatrix @*global-camera
-              .setSize @*global-renderer js/window.innerWidth js/window.innerHeight
-              .render @*global-renderer @*global-scene @*global-camera
+              .!updateProjectionMatrix @*global-camera
+              .!setSize @*global-renderer js/window.innerWidth js/window.innerHeight
+              .!render @*global-renderer @*global-scene @*global-camera
         |clear-cache! $ quote
           defn clear-cache! () $ ; "\"TODO memof..."
+        |to-viewer-axis $ quote
+          defn to-viewer-axis (x y z)
+            let
+                length $ sqrt
+                  + (pow x 2) (pow y 2) (pow z 2)
+                angle @*viewer-angle
+                project-distance 20
+                shift @*viewer-y-shift
+                v-angle $ js/Math.atan (/ shift project-distance)
+                from-y $ []
+                  -> y
+                    * $ js/Math.cos (+ v-angle half-pi)
+                    * $ js/Math.cos angle
+                  -> y $ *
+                    js/Math.sin $ + v-angle half-pi
+                  -> y
+                    * $ js/Math.cos (+ v-angle half-pi)
+                    * $ js/Math.sin angle
+                    negate
+                from-x $ wo-log
+                  []
+                    -> x $ *
+                      js/Math.cos $ - angle half-pi
+                    , 0 $ -> x
+                      * $ js/Math.sin (- angle half-pi)
+                      negate
+                from-z $ []
+                  -> z (negate)
+                    * $ js/Math.cos v-angle
+                    * $ js/Math.cos angle
+                  -> z (negate)
+                    * $ js/Math.sin v-angle
+                  -> z (negate)
+                    * $ js/Math.cos v-angle
+                    * $ js/Math.sin angle
+                    negate
+              -> from-x (&v+ from-y) (&v+ from-z)
         |defcomp $ quote
           defmacro defcomp (comp-name params & body)
             ; assert "\"expected symbol of comp-name" $ symbol? comp-name
