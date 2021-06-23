@@ -303,8 +303,10 @@
             let
                 cursor $ :cursor states
                 state $ or (:data states)
-                  {} (:w-ratio 0.4) (:z-base 0) (:z-inc 0) (:z-inc-size 0) (:rotate-inc 1) (:rotate-inc 0)
+                  {} (:w-ratio 0.4) (:z-base 0) (:z-inc 0) (:z-inc-size 1) (:rotate-inc 1) (:rotate-inc-size 1)
                 w-ratio $ :w-ratio state
+                z-base $ :z-base state
+                z-inc $ :z-inc state
                 multiplier $ let
                     x 0
                     y 0
@@ -312,13 +314,20 @@
                     rest-space $ - 1 (pow x 2) (pow y 2) (pow w 2)
                     z_ $ if (>= rest-space 0) (sqrt rest-space) 0
                   wo-log $ [] x y z_ w
+                calc-points $ fn (p0 next)
+                  apply-args
+                      []
+                      , p0 $ js/Math.ceil (:rotate-inc-size state)
+                    fn (acc p n)
+                      if (<= n 0) acc $ recur (conj acc p) (&q* next p) (dec n)
               group ({}) element-axis
-                group ({}) & $ -> (range 4)
+                group ({}) & $ ->
+                  range $ js/Math.ceil (:z-inc-size state)
                   mapcat $ fn (idx)
                     let
                         points $ calc-points
-                          q+ ([] 8 5 0 0)
-                            v-scale ([] 0 0 2 0) idx
+                          q+ ([] 8 5 z-base 0)
+                            v-scale ([] 0 0 z-inc 0) idx
                           , multiplier
                       []
                         group ({}) & $ -> points
@@ -328,20 +337,11 @@
                           :position $ [] 0 0 0
                           :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 1) (:transparent false)
                 comp-point (v-scale multiplier 10) true
-                sphere $ {} (:radius 2) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
-                  :position $ [] -10 20 0
-                  :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 1) (:transparent true)
-                  :event $ {}
-                    :control $ fn (states delta elapse d!)
-                      let
-                          dx $ * 0.04 elapse (nth delta 1)
-                          w2 $ + dx w-ratio
-                        d! cursor $ assoc state :w-ratio
-                          cond
-                              > w2 1
-                              , 1
-                            (< w2 0) 0
-                            true w2
+                comp-control state cursor :w-ratio ([] 2 2 12) 0.04 $ [] 0 1
+                comp-control state cursor :z-base ([] 12 12 1) 1 $ [] -20 60
+                comp-control state cursor :z-inc ([] 13 13 4) 1 $ [] 2 20
+                comp-control state cursor :z-inc-size ([] 17 14 4) 1 $ [] 1 6
+                comp-control state cursor :rotate-inc-size ([] -4 4 -20) 2 $ [] 1 20
         |zero-point $ quote
           def zero-point $ [] 0 0 0
         |comp-point $ quote
@@ -360,20 +360,13 @@
         |w-hint-fn $ quote
           defn w-hint-fn (ratio factor)
             [] 0 (* ratio factor) 0
-        |calc-points $ quote
-          defn calc-points (p0 next)
-            apply-args
-                []
-                , p0 12
-              fn (acc p n)
-                if (<= n 0) acc $ recur (conj acc p) (&q* next p) (dec n)
         |element-axis $ quote
           def element-axis $ group ({})
             line $ {}
-              :points $ [] ([] -100 0 0) zero-point ([] 100 0 0) zero-point ([] 0 100 0) zero-point ([] 0 -100 0)
+              :points $ [] ([] -20 0 0) zero-point ([] 20 0 0) zero-point ([] 0 20 0) zero-point ([] 0 -20 0)
               :material cover-line
             line $ {}
-              :points $ [][] (0 0 200) (0 0 -200)
+              :points $ [][] (0 0 20) (0 0 -20)
               :material $ assoc cover-line :color 0xffff99
         |comp-fade-rotate $ quote
           defcomp comp-fade-rotate () (; "\"TODO not in use")
@@ -392,6 +385,23 @@
                   line $ {} (:points points)
                     :position $ [] 0 0 0
                     :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 1) (:transparent false)
+        |comp-control $ quote
+          defcomp comp-control (state cursor field position speed bound)
+            sphere $ {} (:radius 2) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
+              :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.3) (:transparent true)
+              :event $ {}
+                :control $ fn (states delta elapse d!) (; println "\"delta" delta)
+                  let
+                      dx $ * speed elapse (nth delta 1)
+                      w2 $ + dx (get state field)
+                      up $ nth bound 1
+                      low $ nth bound 0
+                    d! cursor $ assoc state field
+                      cond
+                          > w2 up
+                          , up
+                        (< w2 low) low
+                        true w2
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.cursor $ {}
@@ -1658,8 +1668,8 @@
                   and (not left-a?) (not left-b?)
                     not= ([] 0 0) r-move
                   move-viewer-by!
-                    * 0.6 elapsed $ nth r-move 0
-                    * 0.6 elapsed $ nth r-move 1
+                    * 0.4 elapsed $ nth r-move 0
+                    * 0.4 elapsed $ nth r-move 1
                     , 0
                 when
                   and left-a? $ not= 0 (nth r-delta 1)
