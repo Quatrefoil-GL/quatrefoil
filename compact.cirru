@@ -318,9 +318,9 @@
           defn w-hint-fn (ratio factor)
             [] 0 (* ratio factor) 0
         |comp-control $ quote
-          defcomp comp-control (state cursor field position speed bound)
-            sphere $ {} (:radius 2) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
-              :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.3) (:transparent true)
+          defcomp comp-control (state cursor field position speed bound color)
+            sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
+              :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
               :event $ {}
                 :control $ fn (states delta elapse d!) (; println "\"delta" delta)
                   let
@@ -369,7 +369,7 @@
             let
                 cursor $ :cursor states
                 state $ or (:data states)
-                  {} (:w-ratio 0.4) (:z-base 0) (:z-inc 0) (:z-inc-size 1) (:rotate-inc 1) (:rotate-inc-size 1) (:show-labels? true)
+                  {} (:w-ratio 0.4) (:z-base 0) (:z-inc 0) (:z-inc-size 1) (:rotate-inc 1) (:a-w 0) (:rotate-inc-size 1) (:show-labels? true)
                 w-ratio $ :w-ratio state
                 z-base $ :z-base state
                 z-inc $ :z-inc state
@@ -392,7 +392,8 @@
                   mapcat $ fn (idx)
                     let
                         points $ calc-points
-                          q+ ([] 8 5 z-base 0)
+                          q+
+                            [] 8 5 z-base $ :a-w state
                             v-scale ([] 0 0 z-inc 0) idx
                           , multiplier
                       []
@@ -404,17 +405,20 @@
                           :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 1) (:transparent false)
                 comp-point (v-scale multiplier 10) true
                 if (:show-labels? state)
-                  comp-labels ([] 8 5 z-base 0) (v-scale multiplier 10)
-                comp-control state cursor :w-ratio ([] 4 2 12) 0.04 $ [] 0 1
-                comp-control state cursor :z-base ([] 12 12 1) 1 $ [] -20 60
-                comp-control state cursor :z-inc ([] 13 16 4) 1 $ [] 2 20
-                comp-control state cursor :z-inc-size ([] 18 15 4) 1 $ [] 1 6
-                comp-control state cursor :rotate-inc-size ([] -4 4 -20) 2 $ [] 1 20
+                  comp-labels
+                    [] 8 5 z-base $ :a-w state
+                    v-scale multiplier 10
+                comp-control state cursor :w-ratio ([] 4 2 12) 0.04 ([] 0 1) 0xffff55
+                comp-control state cursor :z-base ([] 12 12 1) 1 ([] -20 60) 0xffff55
+                comp-control state cursor :a-w ([] 12 22 1) 2 ([] 0 20) 0x77ffcc
+                comp-control state cursor :z-inc ([] 13 14 4) 1 ([] 0.4 20) 0xffff55
+                comp-control state cursor :z-inc-size ([] 18 15 1) 1 ([] 1 6) 0xff55ff
+                comp-control state cursor :rotate-inc-size ([] -4 4 -20) 2 ([] 1 20) 0xff55ff
                 comp-toggle state cursor :show-labels?
         |comp-toggle $ quote
           defcomp comp-toggle (state cursor field)
-            sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
-              :position $ [] 40 10 10
+            sphere $ {} (:radius 0.8) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
+              :position $ [] 30 0 0
               :material $ {} (:kind :mesh-basic) (:color 0x8855ff) (:opacity 0.3) (:transparent true)
               :event $ {}
                 :click $ fn (e d!)
