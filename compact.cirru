@@ -298,12 +298,78 @@
           quatrefoil.math :refer $ q* &q* v-scale q+ invert
           quatrefoil.app.materials :refer $ cover-line
       :defs $ {}
+        |comp-labels $ quote
+          defcomp comp-labels (a-position b-position)
+            group ({})
+              text $ {} (:text "\"b") (:size 2) (:height 0.1) (:position b-position)
+                :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
+              text $ {} (:text "\"a") (:size 2) (:height 0.1) (:position a-position)
+                :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
+              text $ {} (:text "\"z") (:size 2) (:height 0.1)
+                :position $ [] 0 0 20
+                :material $ {} (:kind :mesh-lambert) (:color 0x664488) (:opacity 0.9) (:transparent true)
+              text $ {} (:text "\"y") (:size 2) (:height 0.1)
+                :position $ [] 0 20 0
+                :material $ {} (:kind :mesh-lambert) (:color 0x664488) (:opacity 0.9) (:transparent true)
+              text $ {} (:text "\"x") (:size 2) (:height 0.1)
+                :position $ [] 20 0 0
+                :material $ {} (:kind :mesh-lambert) (:color 0x664488) (:opacity 0.9) (:transparent true)
+        |w-hint-fn $ quote
+          defn w-hint-fn (ratio factor)
+            [] 0 (* ratio factor) 0
+        |comp-control $ quote
+          defcomp comp-control (state cursor field position speed bound)
+            sphere $ {} (:radius 2) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
+              :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.3) (:transparent true)
+              :event $ {}
+                :control $ fn (states delta elapse d!) (; println "\"delta" delta)
+                  let
+                      dx $ * speed elapse (nth delta 1)
+                      w2 $ + dx (get state field)
+                      up $ nth bound 1
+                      low $ nth bound 0
+                    d! cursor $ assoc state field
+                      cond
+                          > w2 up
+                          , up
+                        (< w2 low) low
+                        true w2
+        |comp-point $ quote
+          defcomp comp-point (position first?)
+            group ({})
+              sphere $ {} (:radius 0.5) (:position position)
+                :material $ {} (:kind :mesh-standard) (:opacity 0.6) (:transparent true)
+                  :color $ if first? 0xffaa88 0xcc88cc
+              tube $ {} (:points-fn w-hint-fn)
+                :factor $ last position
+                :radius 0.1
+                :tubularSegments 400
+                :radialSegments 20
+                :position position
+                :material $ {} (:kind :mesh-standard) (:color 0xdd0088) (:opacity 0.6) (:transparent false)
+        |comp-fade-rotate $ quote
+          defcomp comp-fade-rotate () (; "\"TODO not in use")
+            group ({}) & $ identity
+              let
+                  inverted-p $ invert multiplier
+                  p0 $ q+ ([] 8 5 0 0)
+                    v-scale ([] 0 0 6 0) 1
+                  p1 $ &q* multiplier p0
+                  p2 $ &q* p1 inverted-p
+                  points $ [] p0 p1 p2
+                []
+                  group ({}) & $ -> points
+                    map-indexed $ fn (idx p)
+                      comp-point p $ = 0 idx
+                  line $ {} (:points points)
+                    :position $ [] 0 0 0
+                    :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 1) (:transparent false)
         |comp-multiply $ quote
           defcomp comp-multiply (states)
             let
                 cursor $ :cursor states
                 state $ or (:data states)
-                  {} (:w-ratio 0.4) (:z-base 0) (:z-inc 0) (:z-inc-size 1) (:rotate-inc 1) (:rotate-inc-size 1)
+                  {} (:w-ratio 0.4) (:z-base 0) (:z-inc 0) (:z-inc-size 1) (:rotate-inc 1) (:rotate-inc-size 1) (:show-labels? true)
                 w-ratio $ :w-ratio state
                 z-base $ :z-base state
                 z-inc $ :z-inc state
@@ -337,29 +403,24 @@
                           :position $ [] 0 0 0
                           :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 1) (:transparent false)
                 comp-point (v-scale multiplier 10) true
-                comp-control state cursor :w-ratio ([] 2 2 12) 0.04 $ [] 0 1
+                if (:show-labels? state)
+                  comp-labels ([] 8 5 z-base 0) (v-scale multiplier 10)
+                comp-control state cursor :w-ratio ([] 4 2 12) 0.04 $ [] 0 1
                 comp-control state cursor :z-base ([] 12 12 1) 1 $ [] -20 60
-                comp-control state cursor :z-inc ([] 13 13 4) 1 $ [] 2 20
-                comp-control state cursor :z-inc-size ([] 17 14 4) 1 $ [] 1 6
+                comp-control state cursor :z-inc ([] 13 16 4) 1 $ [] 2 20
+                comp-control state cursor :z-inc-size ([] 18 15 4) 1 $ [] 1 6
                 comp-control state cursor :rotate-inc-size ([] -4 4 -20) 2 $ [] 1 20
+                comp-toggle state cursor :show-labels?
+        |comp-toggle $ quote
+          defcomp comp-toggle (state cursor field)
+            sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
+              :position $ [] 40 10 10
+              :material $ {} (:kind :mesh-basic) (:color 0x8855ff) (:opacity 0.3) (:transparent true)
+              :event $ {}
+                :click $ fn (e d!)
+                  d! cursor $ update state field not
         |zero-point $ quote
           def zero-point $ [] 0 0 0
-        |comp-point $ quote
-          defcomp comp-point (position first?)
-            group ({})
-              sphere $ {} (:radius 0.5) (:position position)
-                :material $ {} (:kind :mesh-standard) (:opacity 0.6) (:transparent true)
-                  :color $ if first? 0xffaa88 0xcc88cc
-              tube $ {} (:points-fn w-hint-fn)
-                :factor $ last position
-                :radius 0.1
-                :tubularSegments 400
-                :radialSegments 20
-                :position position
-                :material $ {} (:kind :mesh-standard) (:color 0xdd0088) (:opacity 0.6) (:transparent false)
-        |w-hint-fn $ quote
-          defn w-hint-fn (ratio factor)
-            [] 0 (* ratio factor) 0
         |element-axis $ quote
           def element-axis $ group ({})
             line $ {}
@@ -368,40 +429,6 @@
             line $ {}
               :points $ [][] (0 0 20) (0 0 -20)
               :material $ assoc cover-line :color 0xffff99
-        |comp-fade-rotate $ quote
-          defcomp comp-fade-rotate () (; "\"TODO not in use")
-            group ({}) & $ identity
-              let
-                  inverted-p $ invert multiplier
-                  p0 $ q+ ([] 8 5 0 0)
-                    v-scale ([] 0 0 6 0) 1
-                  p1 $ &q* multiplier p0
-                  p2 $ &q* p1 inverted-p
-                  points $ [] p0 p1 p2
-                []
-                  group ({}) & $ -> points
-                    map-indexed $ fn (idx p)
-                      comp-point p $ = 0 idx
-                  line $ {} (:points points)
-                    :position $ [] 0 0 0
-                    :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 1) (:transparent false)
-        |comp-control $ quote
-          defcomp comp-control (state cursor field position speed bound)
-            sphere $ {} (:radius 2) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
-              :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.3) (:transparent true)
-              :event $ {}
-                :control $ fn (states delta elapse d!) (; println "\"delta" delta)
-                  let
-                      dx $ * speed elapse (nth delta 1)
-                      w2 $ + dx (get state field)
-                      up $ nth bound 1
-                      low $ nth bound 0
-                    d! cursor $ assoc state field
-                      cond
-                          > w2 up
-                          , up
-                        (< w2 low) low
-                        true w2
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.cursor $ {}
