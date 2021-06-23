@@ -1506,6 +1506,7 @@
           quatrefoil.app.updater :refer $ [] updater
           "\"three" :as THREE
           touch-control.core :refer $ render-control! control-states start-control-loop! clear-control-loop!
+          "\"mobile-detect" :default mobile-detect
       :defs $ {}
         |dispatch! $ quote
           defn dispatch! (op op-data)
@@ -1523,11 +1524,12 @@
             render-app!
             add-watch *store :changes $ fn (store prev) (render-app!)
             set! js/window.onkeydown handle-key-event
-            render-control!
-            handle-control-events
+            when mobile? (render-control!) (handle-control-events)
             println "|App started!"
         |reload! $ quote
-          defn reload! () (clear-cache!) (clear-control-loop!) (handle-control-events) (remove-watch *store :changes)
+          defn reload! () (clear-cache!)
+            when mobile? (clear-control-loop!) (handle-control-events)
+            remove-watch *store :changes
             add-watch *store :changes $ fn (store prev) (render-app!)
             render-app!
             set! js/window.onkeydown handle-key-event
@@ -1541,6 +1543,8 @@
         |render-app! $ quote
           defn render-app! () (; println "|Render app:")
             render-canvas! (comp-container @*store) dispatch!
+        |mobile? $ quote
+          def mobile? $ .!mobile (new mobile-detect js/window.navigator.userAgent)
       :proc $ quote ()
     |quatrefoil.core $ {}
       :ns $ quote
