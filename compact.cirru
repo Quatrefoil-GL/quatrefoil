@@ -298,54 +298,42 @@
           quatrefoil.math :refer $ q* &q* v-scale q+ invert
           quatrefoil.app.materials :refer $ cover-line
       :defs $ {}
-        |comp-multiply $ quote
-          defcomp comp-multiply () $ group ({})
-            line $ {}
-              :points $ [] ([] -100 0 0) zero-point ([] 100 0 0) zero-point ([] 0 100 0) zero-point ([] 0 -100 0)
-              :material cover-line
-            line $ {}
-              :points $ [][] (0 0 200) (0 0 -200)
-              :material $ assoc cover-line :color 0xffff99
-            , &
-              identity $ concat &
-                -> (range 4)
-                  map $ fn (idx)
-                    let
-                        points $ calc-points
-                          q+ ([] 8 5 0 0)
-                            v-scale ([] 0 0 2 0) idx
-                          , multiplier
-                      []
-                        group ({}) & $ -> points
-                          map-indexed $ fn (idx p)
-                            comp-point p $ = 0 idx
-                        line $ {} (:points points)
-                          :position $ [] 0 0 0
-                          :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 1) (:transparent false)
-              , &
-                identity $ let
-                    inverted-p $ invert multiplier
-                    p0 $ q+ ([] 8 5 0 0)
-                      v-scale ([] 0 0 6 0) 1
-                    p1 $ &q* multiplier p0
-                    p2 $ &q* p1 inverted-p
-                    points $ [] p0 p1 p2
-                  []
-                    group ({}) & $ -> points
-                      map-indexed $ fn (idx p)
-                        comp-point p $ = 0 idx
-                    line $ {} (:points points)
-                      :position $ [] 0 0 0
-                      :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 1) (:transparent false)
-                ; sphere $ {} (:radius 40)
-                  :position $ [] 0 0 0
-                  :material $ {} (:kind :mesh-basic) (:opacity 0.2) (:transparent true) (:color 0xcccc88)
-                comp-point (v-scale multiplier 10) true
-                box $ {} (:width 40) (:height 40) (:depth 0.04)
-                  :position $ [] 0 0 6
-                  :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.4) (:transparent true)
-        |zero-point $ quote
-          def zero-point $ [] 0 0 0
+        |comp-labels $ quote
+          defcomp comp-labels (a-position b-position)
+            group ({})
+              text $ {} (:text "\"b") (:size 2) (:height 0.1) (:position b-position)
+                :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
+              text $ {} (:text "\"a") (:size 2) (:height 0.1) (:position a-position)
+                :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
+              text $ {} (:text "\"z") (:size 2) (:height 0.1)
+                :position $ [] 0 0 20
+                :material $ {} (:kind :mesh-lambert) (:color 0x664488) (:opacity 0.9) (:transparent true)
+              text $ {} (:text "\"y") (:size 2) (:height 0.1)
+                :position $ [] 0 20 0
+                :material $ {} (:kind :mesh-lambert) (:color 0x664488) (:opacity 0.9) (:transparent true)
+              text $ {} (:text "\"x") (:size 2) (:height 0.1)
+                :position $ [] 20 0 0
+                :material $ {} (:kind :mesh-lambert) (:color 0x664488) (:opacity 0.9) (:transparent true)
+        |w-hint-fn $ quote
+          defn w-hint-fn (ratio factor)
+            [] 0 (* ratio factor) 0
+        |comp-control $ quote
+          defcomp comp-control (state cursor field position speed bound color)
+            sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
+              :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
+              :event $ {}
+                :control $ fn (states delta elapse d!) (; println "\"delta" delta)
+                  let
+                      dx $ * speed elapse (nth delta 1)
+                      w2 $ + dx (get state field)
+                      up $ nth bound 1
+                      low $ nth bound 0
+                    d! cursor $ assoc state field
+                      cond
+                          > w2 up
+                          , up
+                        (< w2 low) low
+                        true w2
         |comp-point $ quote
           defcomp comp-point (position first?)
             group ({})
@@ -359,24 +347,92 @@
                 :radialSegments 20
                 :position position
                 :material $ {} (:kind :mesh-standard) (:color 0xdd0088) (:opacity 0.6) (:transparent false)
-        |w-hint-fn $ quote
-          defn w-hint-fn (ratio factor)
-            [] 0 (* ratio factor) 0
-        |multiplier $ quote
-          def multiplier $ let
-              x 0
-              y 0
-              w 0.6
-              rest-space $ - 1 (pow x 2) (pow y 2) (pow w 2)
-              z_ $ if (>= rest-space 0) (sqrt rest-space) 0
-            w-log $ [] x y z_ w
-        |calc-points $ quote
-          defn calc-points (p0 next)
-            apply-args
+        |comp-fade-rotate $ quote
+          defcomp comp-fade-rotate () (; "\"TODO not in use")
+            group ({}) & $ identity
+              let
+                  inverted-p $ invert multiplier
+                  p0 $ q+ ([] 8 5 0 0)
+                    v-scale ([] 0 0 6 0) 1
+                  p1 $ &q* multiplier p0
+                  p2 $ &q* p1 inverted-p
+                  points $ [] p0 p1 p2
                 []
-                , p0 12
-              fn (acc p n)
-                if (<= n 0) acc $ recur (conj acc p) (&q* next p) (dec n)
+                  group ({}) & $ -> points
+                    map-indexed $ fn (idx p)
+                      comp-point p $ = 0 idx
+                  line $ {} (:points points)
+                    :position $ [] 0 0 0
+                    :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 1) (:transparent false)
+        |comp-multiply $ quote
+          defcomp comp-multiply (states)
+            let
+                cursor $ :cursor states
+                state $ or (:data states)
+                  {} (:w-ratio 0.4) (:z-base 0) (:z-inc 0) (:z-inc-size 1) (:rotate-inc 1) (:a-w 0) (:rotate-inc-size 1) (:show-labels? true)
+                w-ratio $ :w-ratio state
+                z-base $ :z-base state
+                z-inc $ :z-inc state
+                multiplier $ let
+                    x 0
+                    y 0
+                    w w-ratio
+                    rest-space $ - 1 (pow x 2) (pow y 2) (pow w 2)
+                    z_ $ if (>= rest-space 0) (sqrt rest-space) 0
+                  wo-log $ [] x y z_ w
+                calc-points $ fn (p0 next)
+                  apply-args
+                      []
+                      , p0 $ js/Math.ceil (:rotate-inc-size state)
+                    fn (acc p n)
+                      if (<= n 0) acc $ recur (conj acc p) (&q* next p) (dec n)
+              group ({}) element-axis
+                group ({}) & $ ->
+                  range $ js/Math.ceil (:z-inc-size state)
+                  mapcat $ fn (idx)
+                    let
+                        points $ calc-points
+                          q+
+                            [] 8 5 z-base $ :a-w state
+                            v-scale ([] 0 0 z-inc 0) idx
+                          , multiplier
+                      []
+                        group ({}) & $ -> points
+                          map-indexed $ fn (idx p)
+                            comp-point p $ = 0 idx
+                        line $ {} (:points points)
+                          :position $ [] 0 0 0
+                          :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 1) (:transparent false)
+                comp-point (v-scale multiplier 10) true
+                if (:show-labels? state)
+                  comp-labels
+                    [] 8 5 z-base $ :a-w state
+                    v-scale multiplier 10
+                comp-control state cursor :w-ratio ([] 4 2 12) 0.04 ([] 0 1) 0xffff55
+                comp-control state cursor :z-base ([] 12 12 1) 1 ([] -20 60) 0xffff55
+                comp-control state cursor :a-w ([] 12 22 1) 2 ([] 0 20) 0x77ffcc
+                comp-control state cursor :z-inc ([] 13 14 4) 1 ([] 0.4 20) 0xffff55
+                comp-control state cursor :z-inc-size ([] 18 15 1) 1 ([] 1 6) 0xff55ff
+                comp-control state cursor :rotate-inc-size ([] -4 4 -20) 2 ([] 1 20) 0xff55ff
+                comp-toggle state cursor :show-labels?
+        |comp-toggle $ quote
+          defcomp comp-toggle (state cursor field)
+            sphere $ {} (:radius 0.8) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
+              :position $ [] 30 0 0
+              :material $ {} (:kind :mesh-basic) (:color 0x8855ff) (:opacity 0.3) (:transparent true)
+              :event $ {}
+                :click $ fn (e d!)
+                  d! cursor $ update state field not
+        |zero-point $ quote
+          def zero-point $ [] 0 0 0
+        |element-axis $ quote
+          def element-axis $ group ({})
+            line $ {}
+              :points $ [] ([] -20 0 0) zero-point ([] 20 0 0) zero-point ([] 0 20 0) zero-point ([] 0 -20 0)
+              :material cover-line
+            line $ {}
+              :points $ [][] (0 0 20) (0 0 -20)
+              :material $ assoc cover-line :color 0xffff99
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.cursor $ {}
@@ -414,6 +470,16 @@
           defn set-position! (object position)
             if (some? position)
               let[] (x y z) position $ .set (.-position object) x y z
+        |on-control-event $ quote
+          defn on-control-event (states delta elapsed)
+            if (some? @*focused-coord)
+              let
+                  coord @*focused-coord
+                  element-tree @*global-tree
+                  target-el $ find-element element-tree coord
+                  maybe-handler $ -> target-el (get :event) (get :control)
+                if (some? maybe-handler) (maybe-handler states delta elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
+              println "\"no focused coord to control" @*focused-coord
         |create-sphere-element $ quote
           defn create-sphere-element (params position rotation scale material event coord)
             let
@@ -430,6 +496,7 @@
               set! (.-receiveShadow object3d) true
               ; .log js/console |Sphere: object3d
               , object3d
+        |*focused-coord $ quote (defatom *focused-coord nil)
         |create-box-element $ quote
           defn create-box-element (params position rotation scale material event coord)
             let
@@ -677,12 +744,12 @@
               set! (.-y mouse)
                 - 1 $ * 2
                   / (.-clientY event) js/window.innerHeight
-              .setFromCamera raycaster mouse @*global-camera
+              .!setFromCamera raycaster mouse @*global-camera
               let
-                  intersects $ .intersectObjects raycaster
+                  intersects $ .!intersectObjects raycaster
                     let
                         children $ to-js-data ([])
-                        collect! $ fn (x) (.push children x)
+                        collect! $ fn (x) (.!push children x)
                       collect-children @*global-scene collect!
                       , children
                   maybe-target $ aget intersects 0
@@ -692,7 +759,12 @@
                       coord $ -> maybe-target .-object .-coord
                       target-el $ find-element element-tree coord
                       maybe-handler $ -> target-el (get :event) (get :click)
-                    if (some? maybe-handler) (maybe-handler event @*proxied-dispatch) (println "|Found no handler for" coord)
+                    if (some? coord)
+                      do
+                        if (some? maybe-handler) (maybe-handler event @*proxied-dispatch) (println "|no handler" coord)
+                        reset! *focused-coord coord
+                        println "\"focus to" coord
+                      do (reset! *focused-coord nil) (println "\"lose focus")
         |set-rotation! $ quote
           defn set-rotation! (object3d rotation)
             if (some? rotation)
@@ -832,7 +904,7 @@
                   :lines $ comp-lines
                   :shapes $ comp-shapes
                   :triflorum $ comp-triflorum
-                  :multiply $ comp-multiply
+                  :multiply $ comp-multiply (>> states :multiply)
                   :mirror $ comp-mirror (>> states :mirror)
                   :fly $ comp-fly-city (>> states :fly)
                 if (not= tab :portal)
@@ -1465,6 +1537,7 @@
           quatrefoil.app.updater :refer $ [] updater
           "\"three" :as THREE
           touch-control.core :refer $ render-control! control-states start-control-loop! clear-control-loop!
+          "\"mobile-detect" :default mobile-detect
       :defs $ {}
         |dispatch! $ quote
           defn dispatch! (op op-data)
@@ -1482,11 +1555,12 @@
             render-app!
             add-watch *store :changes $ fn (store prev) (render-app!)
             set! js/window.onkeydown handle-key-event
-            render-control!
-            handle-control-events
+            when mobile? (render-control!) (handle-control-events)
             println "|App started!"
         |reload! $ quote
-          defn reload! () (clear-cache!) (clear-control-loop!) (handle-control-events) (remove-watch *store :changes)
+          defn reload! () (clear-cache!)
+            when mobile? (clear-control-loop!) (handle-control-events)
+            remove-watch *store :changes
             add-watch *store :changes $ fn (store prev) (render-app!)
             render-app!
             set! js/window.onkeydown handle-key-event
@@ -1500,12 +1574,14 @@
         |render-app! $ quote
           defn render-app! () (; println "|Render app:")
             render-canvas! (comp-container @*store) dispatch!
+        |mobile? $ quote
+          def mobile? $ .!mobile (new mobile-detect js/window.navigator.userAgent)
       :proc $ quote ()
     |quatrefoil.core $ {}
       :ns $ quote
         ns quatrefoil.core $ :require
           [] quatrefoil.dsl.diff :refer $ [] diff-tree
-          [] quatrefoil.dsl.object3d-dom :refer $ [] build-tree on-canvas-click
+          [] quatrefoil.dsl.object3d-dom :refer $ [] build-tree on-canvas-click on-control-event
           [] quatrefoil.util.core :refer $ [] purify-tree
           [] quatrefoil.dsl.patch :refer $ [] apply-changes
           quatrefoil.schema :refer $ Component
@@ -1550,7 +1626,7 @@
                 apply-changes @*tmp-changes
               build-tree ([]) (purify-tree markup)
             reset! *global-tree markup
-            .render @*global-renderer @*global-scene @*global-camera
+            .!render @*global-renderer @*global-scene @*global-camera
         |move-viewer-by! $ quote
           defn move-viewer-by! (x0 y0 z0)
             let-sugar
@@ -1614,6 +1690,7 @@
                   camera @*global-camera
                   left-a? $ :left-a? states
                   right-b? $ :right-b? states
+                  left-b? $ :left-b? states
                 ; println "\"L" l-move "\"R" r-move
                 when
                   not= 0 $ nth l-move 1
@@ -1623,11 +1700,11 @@
                   not= 0 $ nth l-move 0
                   rotate-viewer-by! $ * -0.01 elapsed (nth l-move 0)
                 when
-                  and (not left-a?)
+                  and (not left-a?) (not left-b?)
                     not= ([] 0 0) r-move
                   move-viewer-by!
-                    * 0.6 elapsed $ nth r-move 0
-                    * 0.6 elapsed $ nth r-move 1
+                    * 0.4 elapsed $ nth r-move 0
+                    * 0.4 elapsed $ nth r-move 1
                     , 0
                 when
                   and left-a? $ not= 0 (nth r-delta 1)
@@ -1645,6 +1722,11 @@
                     (< (js/Math.abs shift) 0.06)
                       shift-viewer-by! false
                     true nil
+                when
+                  and left-b? $ or
+                    not= r-move $ [] 0 0
+                    not= r-delta $ [] 0 0
+                  on-control-event r-move r-delta elapsed
         |handle-key-event $ quote
           defn handle-key-event (event)
             let
