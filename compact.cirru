@@ -1476,6 +1476,7 @@
         |replace-camera $ quote
           defn replace-camera (target coord op-data) (; "\"make sure that camera is stable")
             let
+                params $ :params op-data
                 fov $ :fov params
                 aspect $ :aspect params
                 near $ :near params
