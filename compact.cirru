@@ -765,6 +765,7 @@
                         reset! *focused-coord coord
                         println "\"focus to" coord
                       do (reset! *focused-coord nil) (println "\"lose focus")
+                  do (reset! *focused-coord nil) (println "\"lose focus")
         |set-rotation! $ quote
           defn set-rotation! (object3d rotation)
             if (some? rotation)
@@ -1163,7 +1164,10 @@
               (and (= :text (:name tree) (:name prev-tree)) (not= (:params tree) (:params prev-tree)))
                 collect! $ [] coord :replace-element (purify-tree tree)
               (and (= (:name tree) (:name prev-tree)) (not= (:params tree) (:params prev-tree)))
-                collect! $ [] coord :replace-element (purify-tree tree)
+                if
+                  = (:name tree) :camera
+                  collect! $ [] coord :replace-camera (purify-tree tree)
+                  collect! $ [] coord :replace-element (purify-tree tree)
               true $ do
                 ; diff-params (:params prev-tree) (:params tree) coord collect!
                 if
@@ -1439,10 +1443,10 @@
               set! (.-needsUpdate material) true
         |replace-element $ quote
           defn replace-element (target coord op-data)
-            if (empty? coord) (.warn js/console "|Cannot replace with empty coord!")
+            if (empty? coord) (js/console.warn "|Cannot replace with empty coord!")
               let
                   parent $ reach-object3d @*global-scene (butlast coord)
-                .replaceBy parent (last coord) (build-tree coord op-data)
+                .!replaceBy parent (last coord) (build-tree coord op-data)
         |apply-changes $ quote
           defn apply-changes (changes)
             ; println "\"changes" (count changes) changes
@@ -1462,12 +1466,32 @@
                   :add-element $ add-element target coord op-data
                   :remove-element $ remove-element target coord
                   :replace-element $ replace-element target coord op-data
+                  :replace-camera $ replace-camera target coord op-data
                   :change-position $ set-position! target
                     either op-data $ [] 0 0 0
                   :change-rotation $ set-rotation! target
                     either op-data $ [] 0 0 0
                   :change-scale $ set-scale! target
                     either op-data $ [] 0 0 0
+        |replace-camera $ quote
+          defn replace-camera (target coord op-data) (; "\"make sure that camera is stable")
+            let
+                fov $ :fov params
+                aspect $ :aspect params
+                near $ :near params
+                far $ :far params
+              if
+                not= fov $ .-fov target
+                set! (.-fov target) fov
+              if
+                not= near $ .-near target
+                set! (.-near target) fov
+              if
+                not= aspect $ .-aspect target
+                set! (.-aspect target) fov
+              if
+                not= far $ .-far target
+                set! (.-far target) fov
         |remove-element $ quote
           defn remove-element (target coord)
             if (empty? coord) (js/console.warn "|Cannot remove by empty coord!")
