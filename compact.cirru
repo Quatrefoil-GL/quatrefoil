@@ -21,6 +21,7 @@
               comp-tab :triflorum |Triflorum ([] 0 0 0) on-change
               comp-tab :mirror "\"Mirror.. <3" ([] -40 -15 0) on-change
               comp-tab :fly "\"Fly" ([] 0 -15 0) on-change
+              comp-tab :quat-tree "\"Quat... Tree" ([] -40 -30 0) on-change
         |comp-tab $ quote
           defcomp comp-tab (k title position on-change)
             box
@@ -856,6 +857,7 @@
           quatrefoil.app.comp.triflorum :refer $ comp-triflorum
           quatrefoil.app.comp.multiply :refer $ comp-multiply
           quatrefoil.app.comp.mirror :refer $ comp-mirror
+          quatrefoil.app.comp.quat-tree :refer $ comp-quat-tree
       :defs $ {}
         |comp-demo $ quote
           defcomp comp-demo () $ group ({})
@@ -908,6 +910,7 @@
                   :multiply $ comp-multiply (>> states :multiply)
                   :mirror $ comp-mirror (>> states :mirror)
                   :fly $ comp-fly-city (>> states :fly)
+                  :quat-tree $ comp-quat-tree
                 if (not= tab :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
@@ -935,6 +938,13 @@
         |invert $ quote
           defn invert (a)
             let[] (x y z w) a $ v-scale (conjugate a) (q-length a)
+        |&q- $ quote
+          defn &q- (a b)
+            let-sugar
+                  [] x y z w
+                  , a
+                ([] x1 y1 z1 w1) b
+              [] (- x x1) (- y y1) (- z z1) (- w w1)
         |v-scale $ quote
           defn v-scale (v n)
             let[] (x y z w) v $ [] (&* n x) (&* n y) (&* n z)
@@ -987,7 +997,7 @@
         |&q* $ quote
           defn &q* (a b)
             &let
-              v $ .toArray
+              v $ .!toArray
                 .multiply
                   new THREE/Quaternion (nth a 0) (nth a 1) (nth a 2) (nth a 3)
                   new THREE/Quaternion (nth b 0) (nth b 1) (nth b 2) (nth b 3)
@@ -1293,6 +1303,89 @@
         |main-branch-fn $ quote
           defn main-branch-fn (ratio factor)
             [] 0 (* -20 ratio) 0
+      :proc $ quote ()
+      :configs $ {}
+    |quatrefoil.app.comp.quat-tree $ {}
+      :ns $ quote
+        ns quatrefoil.app.comp.quat-tree $ :require
+          quatrefoil.alias :refer $ group box sphere text line tube ambient-light
+          quatrefoil.core :refer $ defcomp
+          quatrefoil.math :refer $ q* &q* v-scale q+ &q+ &q- invert q-length
+          quatrefoil.app.materials :refer $ cover-line
+      :defs $ {}
+        |comp-quat-tree $ quote
+          defcomp comp-quat-tree () $ let
+              p0 $ [] 0 0 0 0
+              l0 $ [] 0 40 20 30
+              lines $ generate-lines p0 l0 6 :root
+            group ({})
+              ambient-light $ {} (:color 0x444422)
+              group ({}) & $ -> lines
+                mapcat $ fn (line)
+                  let
+                      from $ :from line
+                      to $ :to line
+                      v $ &q- to from
+                      size $ q-length v
+                      w $ nth to 3
+                      hang $ {} (:from to)
+                        :to $ [] (nth to 0)
+                          + (nth to 1)
+                            nth (:line line) 3
+                          nth to 2
+                    []
+                      tube $ {} (:points-fn straight-fn) (:factor line)
+                        :radius $ * 0.04 size
+                        :tubular-segments 4
+                        :radial-segments 4
+                        :position $ [] -10 0 0
+                        :material $ assoc tube-material :color
+                          pick-color $ :name line
+                      tube $ {} (:points-fn straight-fn) (:factor hang) (:radius 0.1) (:tubular-segments 4) (:radial-segments 4)
+                        :position $ [] -10 0 0
+                        :material leaf-material
+        |straight-fn $ quote
+          defn straight-fn (t factor)
+            let-sugar
+                  [] x1 y1 z1
+                  &map:get factor :from
+                ([] x2 y2 z2) (&map:get factor :to)
+              []
+                &+ (&* x1 t)
+                  &* x2 $ &- 1 t
+                &+ (&* y1 t)
+                  &* y2 $ &- 1 t
+                &+ (&* z1 t)
+                  &* z2 $ &- 1 t
+        |tube-material $ quote
+          def tube-material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
+        |generate-lines $ quote
+          defn generate-lines (base l0 level name)
+            let
+                line-to $ &q+ base l0
+              concat
+                [] $ {} (:from base) (:to line-to) (:name name) (:line l0)
+                if (> level 0)
+                  -> transformers $ mapcat
+                    fn (info)
+                      let
+                          trans $ :vector info
+                          name $ :name info
+                        generate-lines line-to (&q* l0 trans) (dec level) name
+                  []
+        |transformers $ quote
+          def transformers $ []
+            {} (:name :a)
+              :vector $ [] 0.3 0.1 0.1 0.7
+            {} (:name :b)
+              :vector $ [] 0.2 -0.3 -0.33 0.7
+            {} (:name :c)
+              :vector $ [] -0.44 0.12 0.33 0.6
+        |leaf-material $ quote
+          def leaf-material $ {} (:kind :mesh-standard) (:color 0x66cc55) (:opacity 0.5) (:transparent true)
+        |pick-color $ quote
+          defn pick-color (name)
+            case-default name 0xffffff (:a 0xbbaaff) (:b 0x88bbff) (:c 0x77ccaa)
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.app.comp.mirror $ {}
@@ -1765,8 +1858,8 @@
                 "\"ArrowUp" $ if shift?
                   tween-move-camera! $ [] :shift 1
                   tween-move-camera! $ [] :move 0 2 0
-                "\"ArrowLeft" $ tween-move-camera! ([] :angle 0.04)
-                "\"ArrowRight" $ tween-move-camera! ([] :angle -0.04)
+                "\"a" $ tween-move-camera! ([] :angle 0.04)
+                "\"d" $ tween-move-camera! ([] :angle -0.04)
                 "\"b" $ tween-move-camera!
                   [] :angle 1.653959 $ ; "\"manual value for turn back"
                 "\"w" $ &let (a @*viewer-angle)
@@ -1779,13 +1872,13 @@
                     &* -2 $ cos a
                     , 0
                       &* 2 $ sin a
-                "\"a" $ &let
+                "\"ArrowLeft" $ &let
                   a $ &+ @*viewer-angle (&/ &PI 2)
                   tween-move-camera! $ [] :move
                     &* 1 $ cos a
                     , 0
                       &* -1 $ sin a
-                "\"d" $ &let
+                "\"ArrowRight" $ &let
                   a $ &- @*viewer-angle (&/ &PI 2)
                   tween-move-camera! $ [] :move
                     &* 1 $ cos a
