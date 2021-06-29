@@ -55,6 +55,8 @@
               :rotation $ :rotation props
               :event $ :event props
               :children $ arrange-children children
+        |directional-light $ quote
+          defn directional-light (props & children) (create-element :directional-light props children)
         |perspective-camera $ quote
           defn perspective-camera (props & children) (create-element :perspective-camera props children)
         |shape $ quote
@@ -91,6 +93,8 @@
           defn rect-area-light (props & children) (create-element :rect-area-light props children)
         |text $ quote
           defn text (props & children) (create-element :text props children)
+        |spot-light $ quote
+          defn spot-light (props & children) (create-element :spot-light props children)
         |plane-reflector $ quote
           defn plane-reflector (props & children) (create-element :plane-reflector props children)
         |flat-values $ quote
@@ -528,6 +532,20 @@
               set-position! object3d position
               set-scale! object3d scale
               , object3d
+        |create-spot-light $ quote
+          defn create-spot-light (params position)
+            let
+                color $ :color params
+                intensity $ :intensity params
+                distance $ :distance params
+                angle $ or (:angle params) (* 0.5 &PI)
+                penumbra $ or (:penumbra params) 0.5
+                decay $ or (:decay params) 1.5
+                object3d $ new THREE/SpotLight color intensity distance angle penumbra decay
+              set! (.-castShadow object3d) true
+              set-position! object3d position
+              js/console.log |Light: object3d
+              , object3d
         |create-spline-element $ quote
           defn create-spline-element (params position rotation scale material)
             let
@@ -600,6 +618,16 @@
                   to-js-data $ dissoc material :kind
               set! (.-side m) THREE/DoubleSide
               , m
+        |create-directional-light $ quote
+          defn create-directional-light (params position)
+            let
+                color $ :color params
+                intensity $ :intensity params
+                object3d $ new THREE/DirectionalLight color intensity
+              set! (.-castShadow object3d) true
+              set-position! object3d position
+              js/console.log "|directional light:" object3d
+              , object3d
         |create-polyhedron-element $ quote
           defn create-polyhedron-element (params position rotation scale material)
             let
@@ -657,6 +685,8 @@
                 :box $ create-box-element params position rotation scale material event coord
                 :sphere $ create-sphere-element params position rotation scale material event coord
                 :point-light $ create-point-light params position
+                :spot-light $ create-spot-light params position
+                :directional-light $ create-directional-light params position
                 :ambient-light $ create-ambient-light params position
                 :rect-area-light $ create-rect-area-light params position rotation
                 :perspective-camera $ create-perspective-camera params position
@@ -1016,7 +1046,7 @@
     |quatrefoil.app.comp.shapes $ {}
       :ns $ quote
         ns quatrefoil.app.comp.shapes $ :require
-          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text torus shape rect-area-light polyhedron plane-reflector parametric buffer-object flat-values ambient-light
+          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text torus shape rect-area-light polyhedron plane-reflector parametric buffer-object flat-values ambient-light directional-light spot-light
           quatrefoil.core :refer $ defcomp
           "\"three" :as THREE
       :defs $ {}
@@ -1063,7 +1093,7 @@
                   + (* 10 &PI v) (* 3 &PI u)
               * 8 v
         |paper-material $ quote
-          def paper-material $ {} (:kind :mesh-standard) (:roughness 0.9) (; :emissive 0x6611ee) (:metalness 0.1) (:transparent false) (:color 0x2222bb)
+          def paper-material $ {} (:kind :mesh-standard) (:roughness 0.99) (; :emissive 0x6611ee) (:metalness 0.02) (:transparent false) (:color 0x6666ff)
         |paper-fn $ quote
           defn paper-fn (u v idx)
             let
@@ -1091,19 +1121,30 @@
               point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 400) (:position position)
         |comp-quilling $ quote
           defcomp comp-quilling () $ group ({})
-            comp-bubble $ [] 0 -80 0
-            comp-bubble $ [] 0 80 0
+            ; comp-bubble $ [] 0 -80 0
+            ; comp-bubble $ [] 0 80 0
             ; comp-bubble $ [] 60 40 0
             ; comp-bubble $ [] -80 40 0
             ; comp-bubble $ [] 0 40 80
             ; comp-bubble $ [] 0 40 -60
             ; ambient-light $ {} (:color 0x8888dd) (:intensity 0.8)
+            spot-light $ {} (:color 0xffffff) (:intensity 1)
+              :position $ [] 0 100 0
+              :distance 400
+            spot-light $ {} (:color 0xffffff) (:intensity 1)
+              :position $ [] 100 0 0
+              :distance 400
+            spot-light $ {} (:color 0xffffff) (:intensity 1)
+              :position $ [] 0 0 100
+              :distance 400
             , &
               -> 12 (range)
                 map $ fn (idx)
                   parametric $ {} (:func paper-fn) (:data idx) (:slices 80) (:stacks 80)
                     :position $ [] 0 -40 0
                     :material paper-material
+        |box-material $ quote
+          def box-material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
       :proc $ quote ()
       :configs $ {} (:extension nil)
     |quatrefoil.dsl.diff $ {}
