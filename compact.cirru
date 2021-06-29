@@ -7,7 +7,7 @@
     |quatrefoil.app.comp.portal $ {}
       :ns $ quote
         ns quatrefoil.app.comp.portal $ :require
-          quatrefoil.alias :refer $ group box sphere text
+          quatrefoil.alias :refer $ group box sphere text ambient-light point-light
           quatrefoil.core :refer $ defcomp
       :defs $ {}
         |comp-portal $ quote
@@ -15,13 +15,16 @@
             group ({})
               comp-tab :todolist |Todolist ([] -40 30 0) on-change
               comp-tab :demo |Demo ([] 0 30 0) on-change
-              comp-tab :lines |Lines ([] 0 15 0) on-change
-              comp-tab :shapes |Shapes ([] -40 15 0) on-change
-              comp-tab :multiply |Multiply ([] -40 0 0) on-change
-              comp-tab :triflorum |Triflorum ([] 0 0 0) on-change
-              comp-tab :mirror "\"Mirror.. <3" ([] -40 -15 0) on-change
-              comp-tab :fly "\"Fly" ([] 0 -15 0) on-change
-              comp-tab :quat-tree "\"Quat... Tree" ([] -40 -30 0) on-change
+              comp-tab :lines |Lines ([] 0 20 0) on-change
+              comp-tab :shapes |Shapes ([] -40 20 0) on-change
+              comp-tab :multiply |Multiply ([] -40 10 0) on-change
+              comp-tab :triflorum |Triflorum ([] 0 10 0) on-change
+              comp-tab :mirror "\"Mirror.. <3" ([] -40 -0 0) on-change
+              comp-tab :fly "\"Fly" ([] 0 0 0) on-change
+              comp-tab :quat-tree "\"Quat... Tree" ([] -40 -10 0) on-change
+              comp-tab :quilling "\"Quilling" ([] -0 -10 0) on-change
+              point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
+                :position $ [] 20 40 50
         |comp-tab $ quote
           defcomp comp-tab (k title position on-change)
             box
@@ -205,6 +208,8 @@
             tube $ {} (:points-fn tube-fn) (:radius 0.8) (:tubular-segments 400) (:radial-segments 20)
               :position $ [] -10 0 0
               :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
+            point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
+              :position $ [] 20 40 50
         |tube-fn $ quote
           defn tube-fn (t factor)
             []
@@ -294,7 +299,7 @@
     |quatrefoil.app.comp.multiply $ {}
       :ns $ quote
         ns quatrefoil.app.comp.multiply $ :require
-          quatrefoil.alias :refer $ group box sphere text line tube
+          quatrefoil.alias :refer $ group box sphere text line tube point-light
           quatrefoil.core :refer $ defcomp
           quatrefoil.math :refer $ q* &q* v-scale q+ invert
           quatrefoil.app.materials :refer $ cover-line
@@ -416,6 +421,8 @@
                 comp-control state cursor :z-inc-size ([] 18 15 1) 1 ([] 1 6) 0xff55ff
                 comp-control state cursor :rotate-inc-size ([] -4 4 -20) 2 ([] 1 20) 0xff55ff
                 comp-toggle state cursor :show-labels?
+                point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
+                  :position $ [] 20 40 50
         |comp-toggle $ quote
           defcomp comp-toggle (state cursor field)
             sphere $ {} (:radius 0.8) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
@@ -776,7 +783,7 @@
             if (some? tree)
               let
                   object3d $ create-shape (assoc tree :children nil) coord
-                  children $ -> (:children tree) (to-pairs)
+                  children $ -> (:children tree) (.to-list)
                     map $ fn (entry)
                       update entry 1 $ fn (child)
                         build-tree
@@ -830,12 +837,13 @@
           defn create-parametric-element (params position rotation scale material)
             let
                 func $ either (:func params)
-                  fn (a b) ([] a b 0)
+                  fn (a b data) ([] a b 0)
+                data $ :data params
                 slices $ either (:slices params) 10
                 stacks $ either (:stacks params) 10
                 geometry $ new THREE/ParametricGeometry
                   fn (u v target)
-                    let[] (x y z) (func u v) (.set target x y z)
+                    let[] (x y z) (func u v data) (.!set target x y z)
                   , slices stacks
                 object3d $ new THREE/Mesh geometry (create-material material)
               set! (.-castShadow object3d) true
@@ -853,7 +861,7 @@
           quatrefoil.app.comp.todolist :refer $ comp-todolist
           quatrefoil.app.comp.portal :refer $ comp-portal
           quatrefoil.app.comp.lines :refer $ comp-lines comp-fly-city
-          quatrefoil.app.comp.shapes :refer $ comp-shapes
+          quatrefoil.app.comp.shapes :refer $ comp-shapes comp-quilling
           quatrefoil.app.comp.triflorum :refer $ comp-triflorum
           quatrefoil.app.comp.multiply :refer $ comp-multiply
           quatrefoil.app.comp.mirror :refer $ comp-mirror
@@ -911,11 +919,12 @@
                   :mirror $ comp-mirror (>> states :mirror)
                   :fly $ comp-fly-city (>> states :fly)
                   :quat-tree $ comp-quat-tree
+                  :quilling $ comp-quilling
                 if (not= tab :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
-                ambient-light $ {} (:color 0xaa6666)
-                point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
+                ambient-light $ {} (:color 0x666666)
+                ; point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                   :position $ [] 20 40 50
                 ; point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
                   :position $ [] 0 60 0
@@ -1007,7 +1016,7 @@
     |quatrefoil.app.comp.shapes $ {}
       :ns $ quote
         ns quatrefoil.app.comp.shapes $ :require
-          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text torus shape rect-area-light polyhedron plane-reflector parametric buffer-object flat-values
+          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text torus shape rect-area-light polyhedron plane-reflector parametric buffer-object flat-values ambient-light
           quatrefoil.core :refer $ defcomp
           "\"three" :as THREE
       :defs $ {}
@@ -1034,17 +1043,7 @@
               :detail 0
               :position $ [] 20 10 10
               :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0x9498c5)
-            parametric $ {}
-              :func $ fn (u v)
-                [] (* 8 u)
-                  +
-                    * 1 $ sin
-                      + (* 5 &PI v) (* 8 &PI u)
-                    * 1 $ cos
-                      + (* 10 &PI v) (* 3 &PI u)
-                  * 8 v
-              :slices 40
-              :stacks 40
+            parametric $ {} (:func wave-fn) (:slices 40) (:stacks 40)
               :position $ [] 20 -10 10
               :material $ {} (:kind :mesh-lambert) (:opacity 0.6) (:transparent true) (:color 0xfefea5)
             buffer-object $ {}
@@ -1052,6 +1051,59 @@
               :indices $ flat-values (0 1 2) (0 2 3) (1 2 3)
               :position $ [] 30 -10 10
               :material $ {} (:kind :mesh-lambert) (:opacity 0.8) (:transparent true) (:color 0xfe2ec5)
+            point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
+              :position $ [] 20 40 50
+        |wave-fn $ quote
+          defn wave-fn (u v data)
+            [] (* 8 u)
+              +
+                * 1 $ sin
+                  + (* 5 &PI v) (* 8 &PI u)
+                * 1 $ cos
+                  + (* 10 &PI v) (* 3 &PI u)
+              * 8 v
+        |paper-material $ quote
+          def paper-material $ {} (:kind :mesh-standard) (:roughness 0.9) (; :emissive 0x6611ee) (:metalness 0.1) (:transparent false) (:color 0x2222bb)
+        |paper-fn $ quote
+          defn paper-fn (u v idx)
+            let
+                scale 10
+                t $ * u &PI 1.8
+                t2 $ * 6.7 t
+                t3 $ * 4.2 t
+                r $ + 2
+                  * 0.6 (pow v 3) (pow idx 1.9)
+                  * 0.8 scale $ pow v 3
+                  * 6 $ * (sin t2)
+                    sin $ * 0.5 idx
+                x $ * r (cos t)
+                y $ * r (sin t)
+                h $ +
+                  * v scale (+ 1 u) 4 $ pow 0.9 (/ idx 4)
+                  * 4 $ sin t3
+              [] x h y
+        |bubble-material $ quote
+          def bubble-material $ {} (:kind :mesh-basic) (:color 0xffffff) (:opacity 1) (:transparent true)
+        |comp-bubble $ quote
+          defn comp-bubble (position)
+            group ({})
+              sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0xffffff) (:emissiveIntensity 1) (:roughness 0) (:position position) (:material bubble-material)
+              point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 400) (:position position)
+        |comp-quilling $ quote
+          defcomp comp-quilling () $ group ({})
+            comp-bubble $ [] 0 -80 0
+            comp-bubble $ [] 0 80 0
+            ; comp-bubble $ [] 60 40 0
+            ; comp-bubble $ [] -80 40 0
+            ; comp-bubble $ [] 0 40 80
+            ; comp-bubble $ [] 0 40 -60
+            ; ambient-light $ {} (:color 0x8888dd) (:intensity 0.8)
+            , &
+              -> 12 (range)
+                map $ fn (idx)
+                  parametric $ {} (:func paper-fn) (:data idx) (:slices 80) (:stacks 80)
+                    :position $ [] 0 -40 0
+                    :material paper-material
       :proc $ quote ()
       :configs $ {} (:extension nil)
     |quatrefoil.dsl.diff $ {}
@@ -1308,7 +1360,7 @@
     |quatrefoil.app.comp.quat-tree $ {}
       :ns $ quote
         ns quatrefoil.app.comp.quat-tree $ :require
-          quatrefoil.alias :refer $ group box sphere text line tube ambient-light
+          quatrefoil.alias :refer $ group box sphere text line tube ambient-light point-light
           quatrefoil.core :refer $ defcomp
           quatrefoil.math :refer $ q* &q* v-scale q+ &q+ &q- invert q-length
           quatrefoil.app.materials :refer $ cover-line
@@ -1320,6 +1372,8 @@
               lines $ generate-lines p0 l0 6 :root
             group ({})
               ambient-light $ {} (:color 0x444422)
+              point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
+                :position $ [] 20 40 50
               group ({}) & $ -> lines
                 mapcat $ fn (line)
                   let
@@ -1468,7 +1522,7 @@
                 recur $ :tree tree
               true $ update tree :children
                 fn (children)
-                  -> children (to-pairs)
+                  -> children (.to-list)
                     map $ fn (entry)
                       update entry 1 $ fn (child) (purify-tree child)
                     pairs-map
@@ -1528,7 +1582,7 @@
                 material $ .-material target
               ; js/console.log target
               &doseq
-                entry $ to-pairs op-data
+                entry $ .to-list op-data
                 let[] (param new-value) entry $ case-default param (js/console.log "|Unknown param:" param)
                   :color $ .set (.-color material) (new THREE/Color new-value)
                   :opacity $ set! (.-opacity material) new-value
