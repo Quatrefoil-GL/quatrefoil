@@ -23,6 +23,7 @@
               comp-tab :fly "\"Fly" ([] 0 0 0) on-change
               comp-tab :quat-tree "\"Quat... Tree" ([] -40 -10 0) on-change
               comp-tab :quilling "\"Quilling" ([] -0 -10 0) on-change
+              comp-tab :hopf "\"Hopf" ([] -40 -20 0) on-change
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 20 40 50
         |comp-tab $ quote
@@ -36,6 +37,94 @@
                 :position $ [] 0 0 4
                 :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
       :proc $ quote ()
+    |quatrefoil.app.comp.hopf $ {}
+      :ns $ quote
+        ns quatrefoil.app.comp.hopf $ :require
+          quatrefoil.alias :refer $ group box sphere text line tube point-light
+          quatrefoil.core :refer $ defcomp
+          quatrefoil.math :refer $ q* &q* v-scale &v+ q+ invert &c* &c+ &c- c-length
+          quatrefoil.app.materials :refer $ cover-line
+      :defs $ {}
+        |comp-hopf $ quote
+          defcomp comp-hopf (states)
+            let
+                cursor $ :cursor states
+                state $ or (:data states)
+                  {}
+                    :from $ [] 2 0
+                    :to $ [] 2 0.1
+                    :size 32
+                    :circle? false
+                from $ :from state
+                to $ :to state
+                step $ &c- to from
+                move-length $ c-length step
+                r0 $ / move-length 2
+                  sin $ / &PI (:size state)
+                th0 $ js/Math.atan (last step) (first step)
+                th1 $ + th0 (* 0.5 &PI)
+                center $ w-log
+                  &c+ from $ []
+                    * r0 $ cos th1
+                    * r0 $ sin th1
+                th2 $ / (* 2 &PI) (:size state)
+              group ({})
+                point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
+                  :position $ [] 0 60 0
+                group ({}) & $ -> (:size state) (range)
+                  map $ fn (idx)
+                    let-sugar
+                        x $ + (first center)
+                          * r0 $ cos (* idx th2)
+                        y $ + (last center)
+                          * r0 $ sin (* idx th2)
+                        th $ js/Math.atan y x
+                        r $ js/Math.sqrt
+                          + (pow x 2) (pow y 2)
+                        angle $ js/Math.atan r 2
+                        s0 $ * 2
+                          - 1 $ pow (cos angle) 2
+                        cr $ + s0 r
+                        c0 $ []
+                          * cr $ cos th
+                          * cr $ sin th
+                          , 0
+                        h $ * r (sin angle)
+                        w $ * r (cos angle)
+                        th2 $ + th (* 0.5 &PI)
+                        vx $ []
+                          * r $ cos th
+                          * r $ sin th
+                          , 0
+                        vy $ []
+                          * w $ cos th2
+                          * w $ sin th2
+                          , h
+                      println "\"point" x y
+                      tube $ {} (:points-fn circle-fn)
+                        :factor $ {} (:c0 c0) (:x vx) (:y vy)
+                        :radius 0.04
+                        :tubular-segments 80
+                        :radial-segments 8
+                        :position $ [] -10 0 0
+                        :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
+        |circle-fn $ quote
+          defn circle-fn (t factor)
+            let
+                c0 $ :c0 factor
+                vx $ :x factor
+                vy $ :y factor
+                th $ * t 2 &PI
+              rotate-place $ v-scale
+                &v+ c0 $ &v+
+                  v-scale vx $ cos th
+                  v-scale vy $ sin th
+                , 10
+        |rotate-place $ quote
+          defn rotate-place (v)
+            let[] (x y z) v $ [] x z (negate y)
+      :proc $ quote ()
+      :configs $ {}
     |quatrefoil.alias $ {}
       :ns $ quote
         ns quatrefoil.alias $ :require
@@ -896,6 +985,7 @@
           quatrefoil.app.comp.multiply :refer $ comp-multiply
           quatrefoil.app.comp.mirror :refer $ comp-mirror
           quatrefoil.app.comp.quat-tree :refer $ comp-quat-tree
+          quatrefoil.app.comp.hopf :refer $ comp-hopf
       :defs $ {}
         |comp-demo $ quote
           defcomp comp-demo () $ group ({})
@@ -950,6 +1040,7 @@
                   :fly $ comp-fly-city (>> states :fly)
                   :quat-tree $ comp-quat-tree
                   :quilling $ comp-quilling
+                  :hopf $ comp-hopf (>> states :hopf)
                 if (not= tab :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
@@ -988,6 +1079,17 @@
           defn v-scale (v n)
             let[] (x y z w) v $ [] (&* n x) (&* n y) (&* n z)
               &* n $ either w 0
+        |&c- $ quote
+          defn &c- (a b)
+            let-sugar
+                  [] x0 y0
+                  , a
+                ([] x1 y1) b
+              [] (- x0 x1) (- y0 y1)
+        |c-length $ quote
+          defn c-length (v)
+            let[] (x y) v $ js/Math.sqrt
+              + (js/Math.pow x 2) (js/Math.pow y 2)
         |conjugate $ quote
           defn conjugate (a)
             let[] (x y z w) a $ [] (&- 0 x) (&- 0 y) (&- 0 z) w
@@ -1999,7 +2101,8 @@
             if
               some? $ :background options
               .!setClearColor @*global-renderer (:background options) 1
-            set! (.-gammaFactor @*global-renderer) 22
+            ; set! (.-physicallyCorrectLights @*global-renderer) true
+            ; set! (.-gammaFactor @*global-renderer) 22
             .!setPixelRatio @*global-renderer $ either js/window.devicePixelRatio 1
             .!setSize @*global-renderer js/window.innerWidth js/window.innerHeight
             .!addEventListener canvas-el |click $ fn (event) (on-canvas-click event)
