@@ -44,6 +44,7 @@
           quatrefoil.core :refer $ defcomp
           quatrefoil.math :refer $ q* &q* v-scale &v+ q+ invert &c* &c+ &c- c-length
           quatrefoil.app.materials :refer $ cover-line
+          quatrefoil.comp.control :refer $ comp-control comp-2d-control
       :defs $ {}
         |comp-hopf $ quote
           defcomp comp-hopf (states)
@@ -52,26 +53,32 @@
                 state $ or (:data states)
                   {}
                     :from $ [] 2 0
-                    :to $ [] 2 0.1
+                    :r0 4
                     :size 32
-                    :circle? false
-                from $ :from state
-                to $ :to state
-                step $ &c- to from
-                move-length $ c-length step
-                r0 $ / move-length 2
-                  sin $ / &PI (:size state)
-                th0 $ js/Math.atan (last step) (first step)
-                th1 $ + th0 (* 0.5 &PI)
-                center $ w-log
-                  &c+ from $ []
-                    * r0 $ cos th1
-                    * r0 $ sin th1
-                th2 $ / (* 2 &PI) (:size state)
+                    :scale 1
+                size $ js/Math.round (:size state)
+                r0 $ :r0 state
+                center $ :from state
+                th2 $ / (* 2 &PI) size
               group ({})
                 point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
                   :position $ [] 0 60 0
-                group ({}) & $ -> (:size state) (range)
+                comp-2d-control state cursor :from ([] 30 0 0) 0.1 0xffff55
+                comp-control state cursor :r0 ([] 34 0 0) 0.1 ([] 0.1 100) 0x5555ff
+                comp-control state cursor :size ([] 40 0 0) 1 ([] 10 200) 0x5555ff
+                comp-control state cursor :scale ([] 44 0 0) 0.1 ([] 0.2 20) 0x5555ff
+                tube $ {} (:points-fn circle-fn)
+                  :factor $ {}
+                    :c0 $ w-log ([] & center 0)
+                    :x $ [] r0 0 0
+                    :y $ [] 0 r0 0
+                    :scale $ :scale state
+                  :radius 0.04
+                  :tubular-segments 80
+                  :radial-segments 8
+                  :position $ [] -10 0 0
+                  :material $ {} (:kind :mesh-standard) (:color 0x7777ff) (:opacity 1) (:transparent true)
+                group ({}) & $ -> size (range)
                   map $ fn (idx)
                     let-sugar
                         x $ + (first center)
@@ -100,9 +107,10 @@
                           * w $ cos th2
                           * w $ sin th2
                           , h
-                      println "\"point" x y
+                      ; println "\"point" x y
                       tube $ {} (:points-fn circle-fn)
                         :factor $ {} (:c0 c0) (:x vx) (:y vy)
+                          :scale $ :scale state
                         :radius 0.04
                         :tubular-segments 80
                         :radial-segments 8
@@ -115,11 +123,12 @@
                 vx $ :x factor
                 vy $ :y factor
                 th $ * t 2 &PI
+                scale $ :scale factor
               rotate-place $ v-scale
                 &v+ c0 $ &v+
                   v-scale vx $ cos th
                   v-scale vy $ sin th
-                , 10
+                , scale
         |rotate-place $ quote
           defn rotate-place (v)
             let[] (x y z) v $ [] x z (negate y)
@@ -395,6 +404,7 @@
           quatrefoil.alias :refer $ group box sphere text line tube point-light
           quatrefoil.core :refer $ defcomp
           quatrefoil.math :refer $ q* &q* v-scale q+ invert
+          quatrefoil.comp.control :refer $ comp-control
           quatrefoil.app.materials :refer $ cover-line
       :defs $ {}
         |comp-labels $ quote
@@ -416,23 +426,6 @@
         |w-hint-fn $ quote
           defn w-hint-fn (ratio factor)
             [] 0 (* ratio factor) 0
-        |comp-control $ quote
-          defcomp comp-control (state cursor field position speed bound color)
-            sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
-              :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
-              :event $ {}
-                :control $ fn (states delta elapse d!) (; println "\"delta" delta)
-                  let
-                      dx $ * speed elapse (nth delta 1)
-                      w2 $ + dx (get state field)
-                      up $ nth bound 1
-                      low $ nth bound 0
-                    d! cursor $ assoc state field
-                      cond
-                          > w2 up
-                          , up
-                        (< w2 low) low
-                        true w2
         |comp-point $ quote
           defcomp comp-point (position first?)
             group ({})
@@ -1393,6 +1386,46 @@
               fn (acc x)
                 assoc acc x $ &get m x
       :proc $ quote ()
+    |quatrefoil.comp.control $ {}
+      :ns $ quote
+        ns quatrefoil.comp.control $ :require
+          quatrefoil.alias :refer $ group box sphere text line tube point-light
+          quatrefoil.core :refer $ defcomp
+          quatrefoil.math :refer $ q* &q* v-scale q+ invert
+          quatrefoil.app.materials :refer $ cover-line
+      :defs $ {}
+        |comp-control $ quote
+          defcomp comp-control (state cursor field position speed bound color)
+            sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
+              :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
+              :event $ {}
+                :control $ fn (states delta elapse d!) (; println "\"delta" delta)
+                  let
+                      dx $ * speed elapse (nth delta 1)
+                      w2 $ + dx (get state field)
+                      up $ nth bound 1
+                      low $ nth bound 0
+                    d! cursor $ assoc state field
+                      cond
+                          > w2 up
+                          , up
+                        (< w2 low) low
+                        true w2
+        |comp-2d-control $ quote
+          defcomp comp-2d-control (state cursor field position speed color)
+            sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
+              :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
+              :event $ {}
+                :control $ fn (states delta elapse d!) (; println "\"delta" delta)
+                  let-sugar
+                        [] x0 y0
+                        get state field
+                      dx $ * speed elapse (nth delta 0)
+                      dy $ * speed elapse (nth delta 1)
+                    d! cursor $ assoc state field
+                      [] (+ x0 dx) (+ y0 dy)
+      :proc $ quote ()
+      :configs $ {}
     |quatrefoil.app.comp.triflorum $ {}
       :ns $ quote
         ns quatrefoil.app.comp.triflorum $ :require
