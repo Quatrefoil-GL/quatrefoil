@@ -52,52 +52,54 @@
                 cursor $ :cursor states
                 state $ or (:data states)
                   {}
-                    :from $ [] 2 0
-                    :r0 4
-                    :size 32
-                    :scale 1
+                    :from $ [] 0 0
+                    :r0 1
+                    :size 10
+                    :scale 10
                 size $ js/Math.round (:size state)
                 r0 $ :r0 state
                 center $ :from state
-                th2 $ / (* 2 &PI) size
+                th-step $ / (* 2 &PI) size
               group ({})
                 point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
                   :position $ [] 0 60 0
                 comp-2d-control state cursor :from ([] 30 0 0) 0.1 0xffff55
                 comp-control state cursor :r0 ([] 34 0 0) 0.1 ([] 0.1 100) 0x5555ff
                 comp-control state cursor :size ([] 40 0 0) 1 ([] 10 200) 0x5555ff
-                comp-control state cursor :scale ([] 44 0 0) 0.1 ([] 0.2 20) 0x5555ff
-                tube $ {} (:points-fn circle-fn)
+                comp-control state cursor :scale ([] 44 0 0) 1 ([] 1 100) 0x5555ff
+                sphere $ {} (:radius 0.4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
+                  :position $ [] 0 0 0
+                  :material $ {} (:kind :mesh-basic) (:color 0xffffff) (:opacity 0.3) (:transparent true)
+                tube $ {} (:points-fn guide-circle-fn)
                   :factor $ {}
-                    :c0 $ w-log ([] & center 0)
+                    :c0 $ [] & center 0
                     :x $ [] r0 0 0
                     :y $ [] 0 r0 0
                     :scale $ :scale state
                   :radius 0.04
                   :tubular-segments 80
                   :radial-segments 8
-                  :position $ [] -10 0 0
-                  :material $ {} (:kind :mesh-standard) (:color 0x7777ff) (:opacity 1) (:transparent true)
+                  :position $ [] 0 0 0
+                  :material $ {} (:kind :mesh-standard) (:color 0x7777ff) (:opacity 0.4) (:transparent true)
                 group ({}) & $ -> size (range)
                   map $ fn (idx)
-                    let-sugar
+                    let
                         x $ + (first center)
-                          * r0 $ cos (* idx th2)
+                          * r0 $ cos (* idx th-step)
                         y $ + (last center)
-                          * r0 $ sin (* idx th2)
-                        th $ js/Math.atan y x
-                        r $ js/Math.sqrt
-                          + (pow x 2) (pow y 2)
-                        angle $ js/Math.atan r 2
-                        s0 $ * 2
-                          - 1 $ pow (cos angle) 2
-                        cr $ + s0 r
-                        c0 $ []
-                          * cr $ cos th
-                          * cr $ sin th
+                          * r0 $ sin (* idx th-step)
+                        th $ get-angle x y
+                        len $ c-length ([] x y)
+                        r $ c-length ([] len 2)
+                        vertical-angle $ get-angle 2 len
+                        left-edge $ - len r
+                        rail-r len
+                        rail-center $ []
+                          * rail-r $ cos th
+                          * rail-r $ sin th
                           , 0
-                        h $ * r (sin angle)
-                        w $ * r (cos angle)
+                        h $ * r (sin vertical-angle)
+                        w $ * r (cos vertical-angle)
                         th2 $ + th (* 0.5 &PI)
                         vx $ []
                           * r $ cos th
@@ -109,12 +111,12 @@
                           , h
                       ; println "\"point" x y
                       tube $ {} (:points-fn circle-fn)
-                        :factor $ {} (:c0 c0) (:x vx) (:y vy)
+                        :factor $ {} (:c0 rail-center) (:x vx) (:y vy)
                           :scale $ :scale state
-                        :radius 0.04
+                        :radius 0.08
                         :tubular-segments 80
                         :radial-segments 8
-                        :position $ [] -10 0 0
+                        :position $ [] 0 0 0
                         :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
         |circle-fn $ quote
           defn circle-fn (t factor)
@@ -124,13 +126,36 @@
                 vy $ :y factor
                 th $ * t 2 &PI
                 scale $ :scale factor
-              rotate-place $ v-scale
+              rotate-yz $ v-scale
                 &v+ c0 $ &v+
                   v-scale vx $ cos th
                   v-scale vy $ sin th
                 , scale
-        |rotate-place $ quote
-          defn rotate-place (v)
+        |guide-circle-fn $ quote
+          defn guide-circle-fn (t factor)
+            let
+                c0 $ :c0 factor
+                vx $ :x factor
+                vy $ :y factor
+                th $ * t 2 &PI
+                scale $ :scale factor
+              rotate-yz $ v-scale
+                &v+ c0 $ &v+
+                  v-scale vx $ cos th
+                  v-scale vy $ sin th
+                , scale
+        |get-angle $ quote
+          defn get-angle (x y)
+            cond
+                > x 0
+                js/Math.atan $ / y x
+              (< x 0)
+                + &PI $ js/Math.atan (/ y x)
+              (> y 0) (* 0.5 &PI)
+              (< y 0) (* -0.5 &PI)
+              true 0
+        |rotate-yz $ quote
+          defn rotate-yz (v)
             let[] (x y z) v $ [] x z (negate y)
       :proc $ quote ()
       :configs $ {}
