@@ -54,70 +54,88 @@
                   {}
                     :from $ [] 0 0
                     :r0 1
+                    :delta-r 0
                     :size 10
                     :scale 10
+                    :layers 1
                 size $ js/Math.round (:size state)
+                layers $ js/Math.round (:layers state)
                 r0 $ :r0 state
+                d-r $ :delta-r state
                 center $ :from state
                 th-step $ / (* 2 &PI) size
               group ({})
                 point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
                   :position $ [] 0 60 0
-                comp-2d-control state cursor :from ([] 30 0 0) 0.1 0xffff55
-                comp-control state cursor :r0 ([] 34 0 0) 0.1 ([] 0.1 100) 0x5555ff
-                comp-control state cursor :size ([] 40 0 0) 1 ([] 10 200) 0x5555ff
-                comp-control state cursor :scale ([] 44 0 0) 1 ([] 1 100) 0x5555ff
+                group
+                  {} $ :position ([] 0 8 0)
+                  comp-2d-control state cursor :from ([] 30 0 0) 0.1 0xffff55
+                  comp-control state cursor :r0 ([] 34 0 0) 0.1 ([] 0.1 100) 0x5555ff
+                  comp-control state cursor :size ([] 40 0 0) 1 ([] 10 200) 0xaaaaff
+                  comp-control state cursor :scale ([] 44 0 0) 1 ([] 1 100) 0x5555ff
+                  comp-control state cursor :delta-r ([] 44 -4 0) 0.2 ([] 0 10) 0x55ffaa
+                  comp-control state cursor :layers ([] 48 -4 0) 1 ([] 0 10) 0x5555ff
                 sphere $ {} (:radius 0.4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
                   :position $ [] 0 0 0
                   :material $ {} (:kind :mesh-basic) (:color 0xffffff) (:opacity 0.3) (:transparent true)
-                tube $ {} (:points-fn guide-circle-fn)
-                  :factor $ {}
-                    :c0 $ [] & center 0
-                    :x $ [] r0 0 0
-                    :y $ [] 0 r0 0
-                    :scale $ :scale state
-                  :radius 0.04
-                  :tubular-segments 80
-                  :radial-segments 8
-                  :position $ [] 0 0 0
-                  :material $ {} (:kind :mesh-standard) (:color 0x7777ff) (:opacity 0.4) (:transparent true)
-                group ({}) & $ -> size (range)
+                group ({}) & $ -> layers (range)
                   map $ fn (idx)
-                    let
-                        x $ + (first center)
-                          * r0 $ cos (* idx th-step)
-                        y $ + (last center)
-                          * r0 $ sin (* idx th-step)
-                        th $ get-angle x y
-                        len $ c-length ([] x y)
-                        r $ c-length ([] len 2)
-                        vertical-angle $ get-angle 2 len
-                        left-edge $ - len r
-                        rail-r len
-                        rail-center $ []
-                          * rail-r $ cos th
-                          * rail-r $ sin th
-                          , 0
-                        h $ * r (sin vertical-angle)
-                        w $ * r (cos vertical-angle)
-                        th2 $ + th (* 0.5 &PI)
-                        vx $ []
-                          * r $ cos th
-                          * r $ sin th
-                          , 0
-                        vy $ []
-                          * w $ cos th2
-                          * w $ sin th2
-                          , h
-                      ; println "\"point" x y
-                      tube $ {} (:points-fn circle-fn)
-                        :factor $ {} (:c0 rail-center) (:x vx) (:y vy)
+                    tube $ {} (:points-fn guide-circle-fn)
+                      :factor $ let
+                          r $ + r0 (* idx d-r)
+                        {}
+                          :c0 $ [] & center 0
+                          :x $ [] r 0 0
+                          :y $ [] 0 r 0
                           :scale $ :scale state
-                        :radius 0.08
-                        :tubular-segments 80
-                        :radial-segments 8
-                        :position $ [] 0 0 0
-                        :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
+                      :radius 0.04
+                      :tubular-segments 80
+                      :radial-segments 8
+                      :position $ [] 0 0 0
+                      :material $ {} (:kind :mesh-standard) (:color 0x7777ff) (:opacity 0.4) (:transparent true)
+                group ({}) & $ -> layers (range)
+                  mapcat $ fn (l-idx)
+                    -> size (range)
+                      map $ fn (idx)
+                        let
+                            r1 $ + r0 (* d-r l-idx)
+                            x $ + (first center)
+                              * r1 $ cos (* idx th-step)
+                            y $ + (last center)
+                              * r1 $ sin (* idx th-step)
+                            th $ get-angle x y
+                            len $ c-length ([] x y)
+                            r $ c-length ([] len 2)
+                            vertical-angle $ get-angle 2 len
+                            left-edge $ - len r
+                            rail-r len
+                            rail-center $ []
+                              * rail-r $ cos th
+                              * rail-r $ sin th
+                              , 0
+                            h $ * r (sin vertical-angle)
+                            w $ * r (cos vertical-angle)
+                            th2 $ + th (* 0.5 &PI)
+                            vx $ []
+                              * r $ cos th
+                              * r $ sin th
+                              , 0
+                            vy $ []
+                              * w $ cos th2
+                              * w $ sin th2
+                              , h
+                          ; println "\"point" x y
+                          tube $ {} (:points-fn circle-fn)
+                            :factor $ {} (:c0 rail-center) (:x vx) (:y vy)
+                              :scale $ :scale state
+                            :radius 0.08
+                            :tubular-segments 80
+                            :radial-segments 8
+                            :position $ [] 0 0 0
+                            :material $ {} (:kind :mesh-standard)
+                              :color $ layer-color l-idx
+                              :opacity 1
+                              :transparent true
         |circle-fn $ quote
           defn circle-fn (t factor)
             let
@@ -157,6 +175,9 @@
         |rotate-yz $ quote
           defn rotate-yz (v)
             let[] (x y z) v $ [] x z (negate y)
+        |layer-color $ quote
+          defn layer-color (idx)
+            case-default idx 0xaaaaff (0 0xffb400) (2 0xd80aff) (1 0x00ff85) (3 0x00fff9) (4 0xff66aa)
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.alias $ {}
