@@ -14,10 +14,10 @@
     "vite": "^2.3.8"
   },
   "dependencies": {
-    "@calcit/procs": "^0.4.3",
+    "@calcit/procs": "^0.4.4",
     "@quamolit/touch-control": "^0.0.3",
     "mobile-detect": "^1.4.5",
     "shortid": "^2.2.16",
-    "three": "^0.129.0"
+    "three": "^0.130.0"
   }
 }
