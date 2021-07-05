@@ -44,7 +44,7 @@
           quatrefoil.core :refer $ defcomp
           quatrefoil.math :refer $ q* &q* v-scale &v+ q+ invert &c* &c+ &c- c-length
           quatrefoil.app.materials :refer $ cover-line
-          quatrefoil.comp.control :refer $ comp-control comp-2d-control
+          quatrefoil.comp.control :refer $ comp-control comp-2d-control comp-toggle
       :defs $ {}
         |comp-hopf $ quote
           defcomp comp-hopf (states)
@@ -58,6 +58,7 @@
                     :size 10
                     :scale 10
                     :layers 1
+                    :spiral? false
                 size $ js/Math.ceil (:size state)
                 layers $ js/Math.ceil (:layers state)
                 r0 $ :r0 state
@@ -65,17 +66,19 @@
                 center $ :from state
                 th-step $ / (* 2 &PI) size
                 scale $ :scale state
+                spiral? $ :spiral? state
               group ({})
                 point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 600)
                   :position $ [] 0 100 0
                 group
                   {} $ :position ([] 0 8 0)
                   comp-2d-control state cursor :from ([] 30 0 0) 0.1 0xffff55
-                  comp-control state cursor :r0 ([] 34 0 0) 0.1 ([] 0.1 100) 0x5555ff
+                  comp-control state cursor :r0 ([] 34 0 0) 0.1 ([] 0.02 100) 0x5555ff
                   comp-control state cursor :size ([] 40 0 0) 1 ([] 1 200) 0xaaaaff
                   comp-control state cursor :scale ([] 44 0 0) 1 ([] 1 100) 0x5555ff
-                  comp-control state cursor :delta-r ([] 44 -4 0) 0.2 ([] 0 10) 0x55ffaa
+                  comp-control state cursor :delta-r ([] 44 -4 0) 0.2 ([] 0 40) 0x55ffaa
                   comp-control state cursor :layers ([] 48 -4 0) 1 ([] 1 10) 0x5555ff
+                  comp-toggle state cursor :spiral? ([] 48 8 0) 0xaaffdd
                 sphere $ {} (:radius 0.4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
                   :position $ [] 0 0 0
                   :material $ {} (:kind :mesh-basic) (:color 0xffffff) (:opacity 0.3) (:transparent true)
@@ -96,6 +99,9 @@
                       map $ fn (idx)
                         let
                             r1 $ + r0 (* d-r l-idx)
+                              if spiral?
+                                * idx $ / d-r size
+                                , 0
                             x $ + (first center)
                               * r1 $ cos (* idx th-step)
                             y $ + (last center)
@@ -233,8 +239,6 @@
           defn polyhedron (props & children) (create-element :polyhedron props children)
         |parametric $ quote
           defn parametric (props & children) (create-element :parametric props children)
-        |camera $ quote
-          defn camera (props & children) (create-element :camera props children)
         |box $ quote
           defn box (props & children) (create-element :box props children)
         |ambient-light $ quote
@@ -458,7 +462,7 @@
           quatrefoil.alias :refer $ group box sphere text line tube point-light
           quatrefoil.core :refer $ defcomp
           quatrefoil.math :refer $ q* &q* v-scale q+ invert
-          quatrefoil.comp.control :refer $ comp-control
+          quatrefoil.comp.control :refer $ comp-control comp-toggle
           quatrefoil.app.materials :refer $ cover-line
       :defs $ {}
         |comp-labels $ quote
@@ -560,17 +564,9 @@
                 comp-control state cursor :z-inc ([] 13 14 4) 1 ([] 0.4 20) 0xffff55
                 comp-control state cursor :z-inc-size ([] 18 15 1) 1 ([] 1 6) 0xff55ff
                 comp-control state cursor :rotate-inc-size ([] -4 4 -20) 2 ([] 1 20) 0xff55ff
-                comp-toggle state cursor :show-labels?
+                comp-toggle state cursor :show-labels? ([] 30 0 0) 0x8855ff
                 point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                   :position $ [] 20 40 50
-        |comp-toggle $ quote
-          defcomp comp-toggle (state cursor field)
-            sphere $ {} (:radius 0.8) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
-              :position $ [] 30 0 0
-              :material $ {} (:kind :mesh-basic) (:color 0x8855ff) (:opacity 0.3) (:transparent true)
-              :event $ {}
-                :click $ fn (e d!)
-                  d! cursor $ update state field not
         |zero-point $ quote
           def zero-point $ [] 0 0 0
         |element-axis $ quote
@@ -1417,7 +1413,7 @@
                 collect! $ [] coord :replace-element (purify-tree tree)
               (and (= (:name tree) (:name prev-tree)) (not= (:params tree) (:params prev-tree)))
                 if
-                  = (:name tree) :camera
+                  = (:name tree) :perspective-camera
                   collect! $ [] coord :replace-camera (purify-tree tree)
                   collect! $ [] coord :replace-element (purify-tree tree)
               true $ do
@@ -1478,6 +1474,13 @@
                       dy $ * speed elapse (nth delta 1)
                     d! cursor $ assoc state field
                       [] (+ x0 dx) (+ y0 dy)
+        |comp-toggle $ quote
+          defcomp comp-toggle (state cursor field position color)
+            sphere $ {} (:radius 0.8) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
+              :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
+              :event $ {}
+                :click $ fn (e d!)
+                  d! cursor $ update state field not
       :proc $ quote ()
       :configs $ {}
     |quatrefoil.app.comp.triflorum $ {}
