@@ -1,0 +1,15 @@
+{
+  "short_name": "Qua149",
+  "name": "Qua149",
+  "icons": [
+    {
+      "src": "http://cdn.tiye.me/logo/quamolit.png",
+      "sizes": "400x400"
+    }
+  ],
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#eeeeff",
+  "theme_color": "#eeeeff"
+}

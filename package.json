@@ -11,6 +11,7 @@
   "author": "jiyinyiyong",
   "license": "MIT",
   "devDependencies": {
+    "bottom-tip": "^0.1.2-a3",
     "vite": "^2.3.8"
   },
   "dependencies": {
