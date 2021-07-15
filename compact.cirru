@@ -556,6 +556,49 @@
                   assoc-in tasks
                     [] (first op-data) :text
                     last op-data
+    |quatrefoil.app.comp.lorenz-attractor $ {}
+      :ns $ quote
+        ns quatrefoil.app.comp.lorenz-attractor $ :require
+          quatrefoil.alias :refer $ group box sphere text line tube point-light ambient-light
+          quatrefoil.core :refer $ defcomp
+          quatrefoil.math :refer $ q* &q* v-scale q+ invert
+          quatrefoil.comp.control :refer $ comp-control comp-toggle
+          quatrefoil.app.materials :refer $ cover-line
+      :defs $ {}
+        |comp-lorenz-attractor $ quote
+          defcomp comp-lorenz-attractor (states)
+            let
+                state $ or (:data states)
+                  {} (:a 1) (:b 1) (:c 1)
+              group ({})
+                line $ {}
+                  :points $ gen-lorenz-seq 9000 0.006 10 28 (/ 8 3)
+                  :position $ [] 0 0 0
+                  :material $ {} (:kind :line-basic) (:color 0xffdd00) (:opacity 1) (:transparent true) (:linewidth 1) (:gapSize 0.5) (:dashSize 0.5)
+                ambient-light $ {} (:color 0x444422)
+                point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
+                  :position $ [] 0 60 0
+        |gen-lorenz-seq $ quote
+          defn gen-lorenz-seq (steps dt a b c)
+            apply-args
+                []
+                , 2 3 4 steps
+              fn (acc x y z n) (; println "\"trace" x y z n)
+                if (<= n 0) acc $ let
+                    dx $ * dt
+                      * a $ - y x
+                    dy $ * dt
+                      -
+                        * x $ - b z
+                        , y
+                    dz $ * dt
+                      - (* x y) (* c z)
+                  recur
+                    conj acc $ v-scale ([] x y z) 4
+                    + x dx
+                    + y dy
+                    + z dz
+                    dec n
     |quatrefoil.app.comp.multiply $ {}
       :ns $ quote
         ns quatrefoil.app.comp.multiply $ :require
@@ -851,9 +894,9 @@
                   ps $ new js/Array
                   &doseq
                     p $ :points params
-                    .push ps $ new THREE/Vector3 & p
+                    .!push ps $ new THREE/Vector3 & p
                   , ps
-                geometry $ -> (new THREE/BufferGeometry) (.setFromPoints points)
+                geometry $ -> (new THREE/BufferGeometry) (.!setFromPoints points)
                 object3d $ new THREE/Line geometry (create-material material)
               set-position! object3d position
               set-rotation! object3d rotation
@@ -1234,7 +1277,7 @@
                   let
                       child $ last entry
                     ; js/console.log |Child: child entry
-                    .addBy object3d (first entry) child
+                    .!addBy object3d (first entry) child
                 , object3d
               new THREE/Object3D
         |load-file $ quote
@@ -1586,6 +1629,7 @@
           quatrefoil.app.comp.mirror :refer $ comp-mirror
           quatrefoil.app.comp.quat-tree :refer $ comp-quat-tree
           quatrefoil.app.comp.hopf :refer $ comp-hopf
+          quatrefoil.app.comp.lorenz-attractor :refer $ comp-lorenz-attractor
       :defs $ {}
         |comp-container $ quote
           defcomp comp-container (store)
@@ -1618,6 +1662,7 @@
                   :quat-tree $ comp-quat-tree
                   :quilling $ comp-quilling
                   :hopf $ comp-hopf (>> states :hopf)
+                  :lorenz $ comp-lorenz-attractor (>> states :lorenz)
                 if (not= tab :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
@@ -1739,6 +1784,7 @@
               comp-tab :quat-tree "\"Quat... Tree" ([] -40 -10 0) on-change
               comp-tab :quilling "\"Quilling" ([] -0 -10 0) on-change
               comp-tab :hopf "\"Hopf" ([] -40 -20 0) on-change
+              comp-tab :lorenz "\"Lorenz" ([] -0 -20 0) on-change
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 20 40 50
     |quatrefoil.app.comp.shapes $ {}
