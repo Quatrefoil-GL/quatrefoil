@@ -12,13 +12,13 @@
   "license": "MIT",
   "devDependencies": {
     "bottom-tip": "^0.1.2-a3",
-    "vite": "^2.3.8"
+    "vite": "^2.4.2"
   },
   "dependencies": {
-    "@calcit/procs": "^0.4.4",
+    "@calcit/procs": "^0.4.10",
     "@quamolit/touch-control": "^0.0.3",
     "mobile-detect": "^1.4.5",
     "shortid": "^2.2.16",
-    "three": "^0.130.0"
+    "three": "^0.130.1"
   }
 }
