@@ -565,21 +565,57 @@
           quatrefoil.comp.control :refer $ comp-control comp-toggle
           quatrefoil.app.materials :refer $ cover-line
       :defs $ {}
+        |initial-config $ quote
+          def initial-config $ {} (:a 10) (:b 28)
+            :c $ / 8 3
+            :size 3000
+            :unit 0.006
+            :scale 1
         |comp-lorenz-attractor $ quote
           defcomp comp-lorenz-attractor (states)
             let
+                cursor $ :cursor states
                 state $ or (:data states)
-                  {} (:a 1) (:b 1) (:c 1)
+                  {} (:a 10) (:b 28)
+                    :c $ / 8 3
+                    :size 3000
+                    :unit 0.006
+                    :scale 4
+                a $ :a state
+                b $ :b state
+                c $ :c state
+                size $ :size state
+                unit $ :unit state
+                scale $ :scale state
               group ({})
                 line $ {}
-                  :points $ gen-lorenz-seq 9000 0.006 10 28 (/ 8 3)
+                  :points $ gen-lorenz-seq (.round size) unit a b c scale
                   :position $ [] 0 0 0
                   :material $ {} (:kind :line-basic) (:color 0xffdd00) (:opacity 1) (:transparent true) (:linewidth 1) (:gapSize 0.5) (:dashSize 0.5)
+                group ({})
+                  comp-control state cursor :size ([] 10 10 160) 100 ([] 10 80000) 0xffff55
+                  comp-control state cursor :unit ([] 15 10 160) 0.0001 ([] 0.00001 1) 0xffff55
+                  comp-control state cursor :scale ([] 20 10 160) 0.1 ([] 0.1 10) 0xec8afa
+                  comp-control state cursor :a ([] 20 4 160) 0.5 ([] -100 100) 0xaaaaff
+                  comp-control state cursor :b ([] 26 4 160) 0.5 ([] -100 100) 0xaaaaff
+                  comp-control state cursor :c ([] 32 4 160) 0.5 ([] -100 100) 0xaaaaff
+                  sphere $ {} (:radius 1) (:emissive 0xffffff) (:color 0xff0000) (:emissiveIntensity 1)
+                    :position $ [] 50 4 160
+                    :material $ {} (:kind :mesh-basic) (:color 0xff0000) (:opacity 1) (:transparent true)
+                    :event $ {}
+                      :click $ fn (e d!)
+                        d! cursor $ merge state initial-config
+                text $ {}
+                  :text $ str (.format a 3) &newline (.format b 3) &newline (.format c 3)
+                  :size 2
+                  :height 1
+                  :position $ [] 30 0 150
+                  :material $ {} (:kind :mesh-lambert) (:color 0x555544)
                 ambient-light $ {} (:color 0x444422)
                 point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
                   :position $ [] 0 60 0
         |gen-lorenz-seq $ quote
-          defn gen-lorenz-seq (steps dt a b c)
+          defn gen-lorenz-seq (steps dt a b c scale)
             apply-args
                 []
                 , 2 3 4 steps
@@ -594,7 +630,7 @@
                     dz $ * dt
                       - (* x y) (* c z)
                   recur
-                    conj acc $ v-scale ([] x y z) 4
+                    conj acc $ v-scale ([] x y z) scale
                     + x dx
                     + y dy
                     + z dz
