@@ -195,7 +195,7 @@
               .!lookAt camera $ new-lookat-point
               .!render @*global-renderer @*global-scene camera
         |init-renderer! $ quote
-          defn init-renderer! (canvas-el options) (.init RectAreaLightUniformsLib)
+          defn init-renderer! (canvas-el options) (.!init RectAreaLightUniformsLib)
             reset! *global-renderer $ new THREE/WebGLRenderer
               &let
                 options $ to-js-data
