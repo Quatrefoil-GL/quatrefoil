@@ -140,62 +140,11 @@
           quatrefoil.comp.control :refer $ comp-control comp-2d-control comp-toggle
           "\"three" :as THREE
       :defs $ {}
-        |comp-helicoid $ quote
-          defcomp comp-helicoid (states)
-            let
-                cursor $ :cursor states
-                state $ or (:data states)
-                  {} (:speed 48) (:bend 0) (:radius 20)
-              group ({})
-                tube $ {} (:points-fn helicoid-fn) (:factor state) (:radius 0.2) (:tubular-segments 400) (:radial-segments 12)
-                  :position $ [] 0 0 0
-                  :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
-                tube $ {} (:points-fn helicoid-fn-2) (:factor state) (:radius 0.2) (:tubular-segments 400) (:radial-segments 12)
-                  :position $ [] 0 0 0
-                  :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
-                parametric $ {} (:func surface-fn) (:data state) (:slices 100) (:stacks 100)
-                  :position $ [] 0 0 0
-                  :material $ {} (:kind :mesh-lambert) (:opacity 0.8) (:transparent true) (:color 0x5e5ed5)
-                point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
-                  :position $ [] 20 40 50
-                comp-control state cursor :speed ([] 40 10 0) 0.3 ([] 0 100) 0xffffdd
-                comp-control state cursor :bend ([] 48 10 0) 0.01 ([] 0 10) 0xaaaaff
-                comp-control state cursor :radius ([] 56 10 0) 0.4 ([] 1 60) 0xaa7777
-        |helicoid-fn $ quote
-          defn helicoid-fn (t state)
-            let
-                r $ :radius state
-                v $ :speed state
-                angle $ * t &PI
-                rot-angle $ * v (squeezing-01 t)
-              rotate-wave (- t 0.5) (:bend state)
-                []
-                  * r (js/Math.sin angle) (js/Math.cos rot-angle)
-                  * r $ js/Math.cos angle
-                  * r (js/Math.sin angle) (js/Math.sin rot-angle)
-        |surface-fn $ quote
-          defn surface-fn (t d state)
-            let
-                r $ :radius state
-                v $ :speed state
-                angle $ * t &PI
-                rot-angle $ * v (squeezing-01 t)
-                out-r $ * r (js/Math.tan angle)
-                distance $ / r (js/Math.cos angle)
-                y0 $ - r distance
-                angle2 $ - (* 0.5 &PI) angle
-                theta $ * 2 angle2 (- d 0.5)
-                narrow? $ < (js/Math.abs angle2) 0.001
-                dx $ if narrow?
-                  * 2 r $ - d 0.5
-                  * r (js/Math.tan angle) (js/Math.sin theta)
-                dy $ if narrow? r
-                  + y0 $ * r (js/Math.tan angle) (js/Math.cos theta)
-              rotate-wave (- t 0.5) (:bend state)
-                []
-                  * dx $ js/Math.cos rot-angle
-                  - r dy
-                  * dx $ js/Math.sin rot-angle
+        |squeezing-01 $ quote
+          defn squeezing-01 (t0)
+            + 0.5 $ /
+              js/Math.asin $ - (* 2 t0) 1
+              , &PI
         |helicoid-fn-2 $ quote
           defn helicoid-fn-2 (t state)
             let
@@ -209,11 +158,62 @@
                   * r (js/Math.sin angle) (js/Math.cos rot-angle)
                   * r $ js/Math.cos angle
                   * r (js/Math.sin angle) (js/Math.sin rot-angle)
-        |squeezing-01 $ quote
-          defn squeezing-01 (t0)
-            + 0.5 $ /
-              js/Math.asin $ - (* 2 t0) 1
-              , &PI
+        |comp-helicoid $ quote
+          defcomp comp-helicoid (states)
+            let
+                cursor $ :cursor states
+                state $ or (:data states)
+                  {} (:speed 48) (:bend 0) (:radius 20)
+              group ({})
+                tube $ {} (:points-fn helicoid-fn) (:factor state) (:radius 0.2) (:tubular-segments 800) (:radial-segments 12)
+                  :position $ [] 0 0 0
+                  :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
+                tube $ {} (:points-fn helicoid-fn-2) (:factor state) (:radius 0.2) (:tubular-segments 400) (:radial-segments 12)
+                  :position $ [] 0 0 0
+                  :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
+                parametric $ {} (:func surface-fn) (:data state) (:slices 100) (:stacks 100)
+                  :position $ [] 0 0 0
+                  :material $ {} (:kind :mesh-lambert) (:opacity 0.8) (:transparent true) (:color 0x5e5ed5)
+                point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
+                  :position $ [] 20 40 50
+                comp-control state cursor :speed ([] 40 10 0) 0.3 ([] 0 100) 0xffffdd
+                comp-control state cursor :bend ([] 48 10 0) 0.01 ([] 0 10) 0xaaaaff
+                comp-control state cursor :radius ([] 56 10 0) 0.4 ([] 1 60) 0xaa7777
+        |surface-fn $ quote
+          defn surface-fn (t d state)
+            let
+                r $ :radius state
+                v $ :speed state
+                angle $ &* t &PI
+                rot-angle $ &* v (squeezing-01 t)
+                out-r $ &* r (js/Math.tan angle)
+                distance $ &/ r (js/Math.cos angle)
+                y0 $ &- r distance
+                angle2 $ &- (&* 0.5 &PI) angle
+                theta $ * 2 angle2 (- d 0.5)
+                narrow? $ &< (js/Math.abs angle2) 0.001
+                dx $ if narrow?
+                  * 2 r $ - d 0.5
+                  * r (js/Math.tan angle) (js/Math.sin theta)
+                dy $ if narrow? r
+                  &+ y0 $ * r (js/Math.tan angle) (js/Math.cos theta)
+              rotate-wave (&- t 0.5) (:bend state)
+                []
+                  &* dx $ js/Math.cos rot-angle
+                  &- r dy
+                  &* dx $ js/Math.sin rot-angle
+        |helicoid-fn $ quote
+          defn helicoid-fn (t state)
+            let
+                r $ :radius state
+                v $ :speed state
+                angle $ * t &PI
+                rot-angle $ * v (squeezing-01 t)
+              rotate-wave (- t 0.5) (:bend state)
+                []
+                  * r (js/Math.sin angle) (js/Math.cos rot-angle)
+                  * r $ js/Math.cos angle
+                  * r (js/Math.sin angle) (js/Math.sin rot-angle)
         |rotate-wave $ quote
           defn rotate-wave (dx bend v)
             let
