@@ -138,6 +138,7 @@
           quatrefoil.math :refer $ q* &q* v-scale &v+ q+ invert &c* &c+ &c- c-length
           quatrefoil.app.materials :refer $ cover-line
           quatrefoil.comp.control :refer $ comp-control comp-2d-control comp-toggle
+          "\"three" :as THREE
       :defs $ {}
         |comp-helicoid $ quote
           defcomp comp-helicoid () $ group ({})
@@ -147,7 +148,7 @@
             tube $ {} (:points-fn helicoid-fn-2) (:factor 20) (:radius 0.2) (:tubular-segments 800) (:radial-segments 12)
               :position $ [] 0 0 0
               :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
-            parametric $ {} (:func surface-fn) (:data 20) (:slices 200) (:stacks 200)
+            parametric $ {} (:func surface-fn) (:data 20) (:slices 200) (:stacks 100)
               :position $ [] 0 0 0
               :material $ {} (:kind :mesh-lambert) (:opacity 0.8) (:transparent true) (:color 0x5e5ed5)
             point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
@@ -155,17 +156,18 @@
         |helicoid-fn $ quote
           defn helicoid-fn (t r)
             let
-                v 32
+                v 48
                 angle $ * t &PI
                 rot-angle $ * v (squeezing-01 t)
-              []
-                * r (js/Math.sin angle) (js/Math.cos rot-angle)
-                * r $ - 1 (js/Math.cos angle)
-                * r (js/Math.sin angle) (js/Math.sin rot-angle)
+              rotate-wave (- t 0.5)
+                []
+                  * r (js/Math.sin angle) (js/Math.cos rot-angle)
+                  * r $ js/Math.cos angle
+                  * r (js/Math.sin angle) (js/Math.sin rot-angle)
         |surface-fn $ quote
           defn surface-fn (t d r)
             let
-                v 32
+                v 48
                 angle $ * t &PI
                 rot-angle $ * v (squeezing-01 t)
                 out-r $ * r (js/Math.tan angle)
@@ -179,29 +181,41 @@
                   * r (js/Math.tan angle) (js/Math.sin theta)
                 dy $ if narrow? r
                   + y0 $ * r (js/Math.tan angle) (js/Math.cos theta)
-              ; println $ []
-                * dx $ js/Math.cos rot-angle
-                , dy
+              rotate-wave (- t 0.5)
+                []
+                  * dx $ js/Math.cos rot-angle
+                  - r dy
                   * dx $ js/Math.sin rot-angle
-              []
-                * dx $ js/Math.cos rot-angle
-                , dy $ * dx (js/Math.sin rot-angle)
         |helicoid-fn-2 $ quote
           defn helicoid-fn-2 (t r)
             let
-                v 32
+                v 48
                 angle $ * t &PI
                 rot-angle $ + &PI
                   * v $ squeezing-01 t
-              []
-                * r (js/Math.sin angle) (js/Math.cos rot-angle)
-                * r $ - 1 (js/Math.cos angle)
-                * r (js/Math.sin angle) (js/Math.sin rot-angle)
+              rotate-wave (- t 0.5)
+                []
+                  * r (js/Math.sin angle) (js/Math.cos rot-angle)
+                  * r $ js/Math.cos angle
+                  * r (js/Math.sin angle) (js/Math.sin rot-angle)
         |squeezing-01 $ quote
           defn squeezing-01 (t0)
             + 0.5 $ /
               js/Math.asin $ - (* 2 t0) 1
               , &PI
+        |rotate-wave $ quote
+          defn rotate-wave (dx v)
+            let
+                q1 $ new THREE/Quaternion (nth v 0) (nth v 1) (nth v 2) 0
+                q2 $ new THREE/Quaternion 0 0 0
+              .!setFromAxisAngle q2 (new THREE/Vector3 1 0 0) (* 0.8 &PI dx)
+              ; js/console.log q2
+              let
+                  ret $ -> q1
+                    .!premultiply $ .!invert (.!clone q2)
+                    .!multiply q2
+                ; js/console.log ret
+                [] (.-x ret) (.-y ret) (.-z ret)
     |quatrefoil.core $ {}
       :ns $ quote
         ns quatrefoil.core $ :require
