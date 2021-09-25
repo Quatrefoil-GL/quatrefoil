@@ -130,6 +130,59 @@
         |*viewer-angle $ quote
           defatom *viewer-angle $ &/ &PI 2
         |*global-tree $ quote (defatom *global-tree nil)
+    |quatrefoil.app.comp.helicoid $ {}
+      :ns $ quote
+        ns quatrefoil.app.comp.helicoid $ :require
+          quatrefoil.alias :refer $ group box sphere text line tube point-light parametric
+          quatrefoil.core :refer $ defcomp
+          quatrefoil.math :refer $ q* &q* v-scale &v+ q+ invert &c* &c+ &c- c-length
+          quatrefoil.app.materials :refer $ cover-line
+          quatrefoil.comp.control :refer $ comp-control comp-2d-control comp-toggle
+      :defs $ {}
+        |comp-helicoid $ quote
+          defcomp comp-helicoid () $ group ({})
+            tube $ {} (:points-fn helicoid-fn) (:factor 20) (:radius 0.2) (:tubular-segments 80) (:radial-segments 12)
+              :position $ [] 0 0 0
+              :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
+            parametric $ {} (:func surface-fn) (:data 20) (:slices 20) (:stacks 20)
+              :position $ [] 0 0 0
+              :material $ {} (:kind :mesh-lambert) (:opacity 0.6) (:transparent true) (:color 0xfefea5)
+            point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
+              :position $ [] 20 40 50
+        |helicoid-fn $ quote
+          defn helicoid-fn (t r)
+            let
+                v 12
+                angle $ * t &PI
+                rot-angle $ * v t
+              []
+                * r (js/Math.sin angle) (js/Math.cos rot-angle)
+                * r $ - 1 (js/Math.cos angle)
+                * r (js/Math.sin angle) (js/Math.sin rot-angle)
+        |surface-fn $ quote
+          defn surface-fn (t d r)
+            let
+                v 12
+                angle $ * t &PI
+                rot-angle $ * v t
+                out-r $ * r (js/Math.tan angle)
+                distance $ / r (js/Math.cos angle)
+                y0 $ - r distance
+                angle2 $ - (* 0.5 &PI) angle
+                theta $ * 2 angle2 (- d 0.5)
+                narrow? $ < (js/Math.abs angle2) 0
+                dx $ if narrow?
+                  * 2 r $ - d 0.5
+                  * r (js/Math.tan angle) (js/Math.sin theta)
+                dy $ if narrow? 0
+                  + y0 $ * r (js/Math.tan angle) (js/Math.cos theta)
+              ; println $ []
+                * dx $ js/Math.cos rot-angle
+                , dy
+                  * dx $ js/Math.sin rot-angle
+              []
+                * dx $ js/Math.cos rot-angle
+                , dy $ * dx (js/Math.sin rot-angle)
     |quatrefoil.core $ {}
       :ns $ quote
         ns quatrefoil.core $ :require
@@ -523,7 +576,7 @@
                 reset! *store store
         |reload! $ quote
           defn reload! () $ if (some? build-errors) (hud! "\"error" build-errors)
-            do (hud! "\"inactive" nil) (clear-cache!)
+            do (hud! "\"ok~" nil) (clear-cache!)
               when mobile? (clear-control-loop!) (handle-control-events)
               remove-watch *store :changes
               add-watch *store :changes $ fn (store prev) (render-app!)
@@ -1666,6 +1719,7 @@
           quatrefoil.app.comp.quat-tree :refer $ comp-quat-tree
           quatrefoil.app.comp.hopf :refer $ comp-hopf
           quatrefoil.app.comp.lorenz-attractor :refer $ comp-lorenz-attractor
+          quatrefoil.app.comp.helicoid :refer $ comp-helicoid
       :defs $ {}
         |comp-container $ quote
           defcomp comp-container (store)
@@ -1699,6 +1753,7 @@
                   :quilling $ comp-quilling
                   :hopf $ comp-hopf (>> states :hopf)
                   :lorenz $ comp-lorenz-attractor (>> states :lorenz)
+                  :helicoid $ comp-helicoid
                 if (not= tab :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
@@ -1821,6 +1876,7 @@
               comp-tab :quilling "\"Quilling" ([] -0 -10 0) on-change
               comp-tab :hopf "\"Hopf" ([] -40 -20 0) on-change
               comp-tab :lorenz "\"Lorenz" ([] -0 -20 0) on-change
+              comp-tab :helicoid "\"Helicoid" ([] -40 -30 0) on-change
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 20 40 50
     |quatrefoil.app.comp.shapes $ {}
