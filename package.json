@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@calcit/procs": "^0.4.35",
+    "@calcit/std": "^0.0.1-a2",
     "@quamolit/touch-control": "^0.0.6",
     "mobile-detect": "^1.4.5",
     "shortid": "^2.2.16",
