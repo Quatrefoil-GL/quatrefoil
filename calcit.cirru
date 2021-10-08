@@ -8524,6 +8524,19 @@
                   :type :expr
                   :at 1620913086755
                   :by |-pxyJ-2j
+                |r $ {}
+                  :data $ {}
+                    |T $ {} (:text "|\"@calcit/std") (:type :leaf) (:at 1633621395427) (:by |-pxyJ-2j)
+                    |j $ {} (:text |:refer) (:type :leaf) (:at 1633621396280) (:by |-pxyJ-2j)
+                    |r $ {}
+                      :data $ {}
+                        |T $ {} (:text |rand) (:type :leaf) (:at 1633621397080) (:by |-pxyJ-2j)
+                      :type :expr
+                      :at 1633621396600
+                      :by |-pxyJ-2j
+                  :type :expr
+                  :at 1633621390552
+                  :by |-pxyJ-2j
               :type :expr
               :at 1620913085546
               :by |-pxyJ-2j
@@ -27516,6 +27529,16 @@
                       :by |-pxyJ-2j
                   :type :expr
                   :at 1621445291342
+                  :by |-pxyJ-2j
+                |x $ {}
+                  :data $ {}
+                    |T $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1633621419953) (:text "|\"@calcit/std")
+                    |j $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1633621419953) (:text |:refer)
+                    |r $ {} (:type :expr) (:by |-pxyJ-2j) (:at 1633621419953)
+                      :data $ {}
+                        |T $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1633621419953) (:text |rand)
+                  :type :expr
+                  :at 1633621419953
                   :by |-pxyJ-2j
               :type :expr
               :at 1621445291342

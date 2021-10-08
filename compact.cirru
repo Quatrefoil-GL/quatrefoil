@@ -498,6 +498,7 @@
     |quatrefoil.math $ {}
       :ns $ quote
         ns quatrefoil.math $ :require ("\"three" :as THREE)
+          "\"@calcit/std" :refer $ rand
       :defs $ {}
         |&c* $ quote
           defn &c* (a b)
@@ -1857,6 +1858,7 @@
           quatrefoil.alias :refer $ group box sphere shape text line spline tube plane-reflector point-light
           quatrefoil.core :refer $ defcomp
           quatrefoil.math :refer $ v-scale rand-around
+          "\"@calcit/std" :refer $ rand
       :defs $ {}
         |heart-path $ quote
           def heart-path $ [][] (:move-to 25 25) (:bezier-curve-to 25 25 20 50 0 50) (:bezier-curve-to -30 50 -30 15 -30 15) (:bezier-curve-to -30 -5 -10 -27 25 -45) (:bezier-curve-to 60 -22 80 -5 80 15) (:bezier-curve-to 80 15 80 50 50 50) (:bezier-curve-to 35 50 25 25 25 25)
