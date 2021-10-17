@@ -2,7 +2,7 @@
 {} (:package |quatrefoil)
   :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
     :modules $ [] |touch-control/ |pointed-prompt/
-    :version |0.0.5
+    :version |0.0.6
   :files $ {}
     |quatrefoil.app.comp.lines $ {}
       :ns $ quote
@@ -1023,6 +1023,7 @@
           "\"three/examples/jsm/helpers/RectAreaLightHelper" :refer $ RectAreaLightHelper
           "\"three/examples/jsm/objects/Reflector" :refer $ Reflector
           "\"three/examples/jsm/loaders/FontLoader" :refer $ Font
+          "\"three/examples/jsm/geometries/ParametricGeometry" :refer $ ParametricGeometry
       :defs $ {}
         |create-line-element $ quote
           defn create-line-element (params position rotation scale material)
@@ -1305,7 +1306,7 @@
                 data $ :data params
                 slices $ either (:slices params) 10
                 stacks $ either (:stacks params) 10
-                geometry $ new THREE/ParametricGeometry
+                geometry $ new ParametricGeometry
                   fn (u v target)
                     let[] (x y z) (func u v data) (.!set target x y z)
                   , slices stacks

@@ -1,6 +1,6 @@
 
 {}
-  :configs $ {} (:reload-fn |quatrefoil.app.main/reload!) (:port 6001) (:output |src) (:compact-output? true) (:storage-key |calcit.cirru) (:version |0.0.5)
+  :configs $ {} (:reload-fn |quatrefoil.app.main/reload!) (:port 6001) (:output |src) (:compact-output? true) (:storage-key |calcit.cirru) (:version |0.0.6)
     :modules $ [] |touch-control/ |pointed-prompt/
     :init-fn |quatrefoil.app.main/main!
     :extension |.cljs
@@ -18657,7 +18657,7 @@
                           |j $ {}
                             :data $ {}
                               |T $ {} (:text |new) (:type :leaf) (:at 1622133147338) (:by |-pxyJ-2j)
-                              |j $ {} (:text |THREE/ParametricGeometry) (:type :leaf) (:at 1622133203668) (:by |-pxyJ-2j)
+                              |j $ {} (:text |ParametricGeometry) (:type :leaf) (:at 1634456570222) (:by |-pxyJ-2j)
                               |r $ {}
                                 :data $ {}
                                   |T $ {} (:text |fn) (:type :leaf) (:at 1622133893498) (:by |-pxyJ-2j)
@@ -20323,6 +20323,19 @@
                     |r $ {}
                       :data $ {}
                         |T $ {} (:text |Font) (:type :leaf) (:at 1634454462254) (:by |-pxyJ-2j)
+                      :type :expr
+                      :at 1634454460783
+                      :by |-pxyJ-2j
+                  :type :expr
+                  :at 1634454453214
+                  :by |-pxyJ-2j
+                |yr $ {}
+                  :data $ {}
+                    |T $ {} (:text "|\"three/examples/jsm/geometries/ParametricGeometry") (:type :leaf) (:at 1634456563222) (:by |-pxyJ-2j)
+                    |j $ {} (:text |:refer) (:type :leaf) (:at 1634454460502) (:by |-pxyJ-2j)
+                    |r $ {}
+                      :data $ {}
+                        |T $ {} (:text |ParametricGeometry) (:type :leaf) (:at 1634456490737) (:by |-pxyJ-2j)
                       :type :expr
                       :at 1634454460783
                       :by |-pxyJ-2j
