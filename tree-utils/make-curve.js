@@ -1,20 +1,16 @@
-
-import * as THREE from 'three';
+import * as THREE from "three";
 // import { SceneUtils } from "three/examples/jsm/utils/SceneUtils";
 
 // https://threejs.org/docs/#api/en/geometries/TubeGeometry
 
-export let makeCurve = (f, factor = 1) => {
-
+export let make_tube_curve = (f, factor = 1) => {
   class CustomSinCurve extends THREE.Curve {
-
-    constructor( scale = 1 ) {
+    constructor(scale = 1) {
       super();
       this.scale = scale;
     }
 
-    getPoint(t, optionalTarget = new THREE.Vector3() ) {
-
+    getPoint(t, optionalTarget = new THREE.Vector3()) {
       let t2 = isNaN(t) ? 1 : t;
 
       let v = f(t2, factor);
@@ -25,9 +21,9 @@ export let makeCurve = (f, factor = 1) => {
 
       // console.log("point:", v, tx, ty, tz);
 
-      return optionalTarget.set( tx, ty, tz ).multiplyScalar( this.scale );
+      return optionalTarget.set(tx, ty, tz).multiplyScalar(this.scale);
     }
   }
 
   return new CustomSinCurve();
-}
+};

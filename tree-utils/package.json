@@ -1,0 +1,13 @@
+{
+  "name": "@quamolit/quatrefoil-utils",
+  "version": "0.0.2",
+  "description": "js helpers for quatrefoil",
+  "main": "./index.js",
+  "scripts": {},
+  "repository": "git@github.com:Quamolit/quatrefoil.calcit.git",
+  "author": "jiyinyiyong",
+  "license": "MIT",
+  "peerDependencies": {
+    "three": "*"
+  }
+}

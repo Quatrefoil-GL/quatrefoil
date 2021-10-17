@@ -258,6 +258,14 @@ buffer-object $ {}
     1 2 3
 ```
 
+### JS methods
+
+some helpers are split in npm package:
+
+```bash
+yarn add @quamolit/quatrefoil-utils
+```
+
 ### Develop
 
 Relies on https://github.com/calcit-lang/calcit_runner.rs .

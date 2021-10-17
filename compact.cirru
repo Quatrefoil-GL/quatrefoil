@@ -2,13 +2,14 @@
 {} (:package |quatrefoil)
   :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
     :modules $ [] |touch-control/ |pointed-prompt/
-    :version |0.0.3
+    :version |0.0.4
   :files $ {}
     |quatrefoil.app.comp.lines $ {}
       :ns $ quote
         ns quatrefoil.app.comp.lines $ :require
           quatrefoil.alias :refer $ group box sphere text line spline tube point-light ambient-light
           quatrefoil.core :refer $ defcomp
+          "\"@calcit/std" :refer $ rand-shift
       :defs $ {}
         |comp-fly-city $ quote
           defcomp comp-fly-city (states)
@@ -45,13 +46,13 @@
                   :event $ {}
                     :click $ fn (e d!)
                       d! cursor $ assoc state :factor
-                        [] (.rand-shift 1 0.92) (.rand-shift 1 0.92) (.rand-shift 1 0.92)
+                        [] (rand-shift 1 0.92) (rand-shift 1 0.92) (rand-shift 1 0.92)
                 ambient-light $ {} (:color 0x444422)
         |make-building-data $ quote
           defn make-building-data (n)
             -> (range n)
               map $ fn (i)
-                [] (.rand-shift 0 160) (.rand-shift 0 160) (.rand-shift 12 8) (.rand-shift 8 6) (.rand-shift 60 50)
+                [] (rand-shift 0 160) (rand-shift 0 160) (rand-shift 12 8) (rand-shift 8 6) (rand-shift 60 50)
         |forward-lines $ quote
           def forward-lines $ -> (range 20)
             map $ fn (idx)
@@ -581,7 +582,7 @@
     |quatrefoil.app.main $ {}
       :ns $ quote
         ns quatrefoil.app.main $ :require
-          "\"./alter-object3d" :refer $ inject_bang
+          "\"@quamolit/quatrefoil-utils" :refer $ inject-tree-methods
           quatrefoil.core :refer $ render-canvas! *global-tree clear-cache! init-renderer! handle-key-event handle-control-events
           quatrefoil.app.comp.container :refer $ comp-container
           quatrefoil.dsl.object3d-dom :refer $ on-canvas-click
@@ -596,7 +597,7 @@
           defn render-app! () (; println "|Render app:")
             render-canvas! (comp-container @*store) dispatch!
         |main! $ quote
-          defn main! () (load-console-formatter!) (inject_bang)
+          defn main! () (load-console-formatter!) (inject-tree-methods)
             let
                 canvas-el $ js/document.querySelector |canvas
               init-renderer! canvas-el $ {} (:background 0x110022)
@@ -1017,7 +1018,7 @@
           quatrefoil.util.core :refer $ purify-tree collect-children find-element scale-zero
           "\"three" :as THREE
           quatrefoil.globals :refer $ *global-renderer *global-camera *global-scene *global-tree *proxied-dispatch
-          "\"./make-curve" :refer $ makeCurve createMultiMaterialMesh
+          "\"@quamolit/quatrefoil-utils" :refer $ make-tube-curve
           "\"three/examples/jsm/helpers/RectAreaLightHelper" :refer $ RectAreaLightHelper
           "\"three/examples/jsm/objects/Reflector" :refer $ Reflector
       :defs $ {}
@@ -1378,7 +1379,7 @@
                 points-fn $ :points-fn params
                 factor $ :factor params
                 geometry $ ->
-                  new THREE/TubeGeometry (makeCurve points-fn factor)
+                  new THREE/TubeGeometry (make-tube-curve points-fn factor)
                     -> (:tubular-segments params)
                       either $ :tubular params
                       either 40
