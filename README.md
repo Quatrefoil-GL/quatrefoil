@@ -272,8 +272,10 @@ Relies on https://github.com/calcit-lang/calcit_runner.rs .
 
 ```bash
 yarn
+
+# also get calcit deps in `~/.config/calcit/modules/`
+
 cr --emit-js -1
-cp assets/* js/out/
 yarn vite
 ```
 

@@ -2,7 +2,7 @@
 {} (:package |quatrefoil)
   :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
     :modules $ [] |touch-control/ |pointed-prompt/
-    :version |0.0.4
+    :version |0.0.5
   :files $ {}
     |quatrefoil.app.comp.lines $ {}
       :ns $ quote
@@ -1017,10 +1017,12 @@
         ns quatrefoil.dsl.object3d-dom $ :require
           quatrefoil.util.core :refer $ purify-tree collect-children find-element scale-zero
           "\"three" :as THREE
+          "\"three/examples/jsm/geometries/TextGeometry" :refer $ TextGeometry
           quatrefoil.globals :refer $ *global-renderer *global-camera *global-scene *global-tree *proxied-dispatch
           "\"@quamolit/quatrefoil-utils" :refer $ make-tube-curve
           "\"three/examples/jsm/helpers/RectAreaLightHelper" :refer $ RectAreaLightHelper
           "\"three/examples/jsm/objects/Reflector" :refer $ Reflector
+          "\"three/examples/jsm/loaders/FontLoader" :refer $ Font
       :defs $ {}
         |create-line-element $ quote
           defn create-line-element (params position rotation scale material)
@@ -1123,7 +1125,7 @@
         |create-text-element $ quote
           defn create-text-element (params position rotation scale material)
             let
-                geometry $ new THREE/TextGeometry
+                geometry $ new TextGeometry
                   or (:text params) |Quatrefoil
                   to-js-data $ assoc params :font font-resource
                 object3d $ new THREE/Mesh geometry (create-material material)
@@ -1271,7 +1273,7 @@
             if (some? position)
               let[] (x y z) position $ .set (.-position object) x y z
         |font-resource $ quote
-          def font-resource $ new THREE/Font
+          def font-resource $ new Font
             js/JSON.parse $ load-file |assets/hind.json
         |create-torus-element $ quote
           defn create-torus-element (params position rotation scale material)

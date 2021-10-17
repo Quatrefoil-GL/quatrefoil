@@ -1,6 +1,6 @@
 
 {}
-  :configs $ {} (:reload-fn |quatrefoil.app.main/reload!) (:port 6001) (:output |src) (:compact-output? true) (:storage-key |calcit.cirru) (:version |0.0.4)
+  :configs $ {} (:reload-fn |quatrefoil.app.main/reload!) (:port 6001) (:output |src) (:compact-output? true) (:storage-key |calcit.cirru) (:version |0.0.5)
     :modules $ [] |touch-control/ |pointed-prompt/
     :init-fn |quatrefoil.app.main/main!
     :extension |.cljs
@@ -16340,7 +16340,7 @@
                           |j $ {}
                             :data $ {}
                               |D $ {} (:text |new) (:type :leaf) (:at 1620025210611) (:by |-pxyJ-2j)
-                              |T $ {} (:text |THREE/TextGeometry) (:type :leaf) (:at 1620025209764) (:by |-pxyJ-2j) (:id |A0PGj2LbI27)
+                              |T $ {} (:text |TextGeometry) (:type :leaf) (:at 1634454395364) (:by |-pxyJ-2j) (:id |A0PGj2LbI27)
                               |j $ {}
                                 :data $ {}
                                   |T $ {} (:text |or) (:type :leaf) (:at 1624350496654) (:by |-pxyJ-2j) (:id |CEC86l9_Pvq)
@@ -18232,7 +18232,7 @@
               |r $ {}
                 :data $ {}
                   |D $ {} (:text |new) (:type :leaf) (:at 1620022922041) (:by |-pxyJ-2j)
-                  |T $ {} (:text |THREE/Font) (:type :leaf) (:at 1620022921263) (:by |-pxyJ-2j) (:id |Tu5yr_ZLy_L)
+                  |T $ {} (:text |Font) (:type :leaf) (:at 1634454443294) (:by |-pxyJ-2j) (:id |Tu5yr_ZLy_L)
                   |j $ {}
                     :data $ {}
                       |D $ {} (:text |js/JSON.parse) (:type :leaf) (:at 1620023157034) (:by |-pxyJ-2j)
@@ -20316,6 +20316,19 @@
                   :type :expr
                   :at 1621444477137
                   :by |-pxyJ-2j
+                |yj $ {}
+                  :data $ {}
+                    |T $ {} (:text "|\"three/examples/jsm/loaders/FontLoader") (:type :leaf) (:at 1634454456014) (:by |-pxyJ-2j)
+                    |j $ {} (:text |:refer) (:type :leaf) (:at 1634454460502) (:by |-pxyJ-2j)
+                    |r $ {}
+                      :data $ {}
+                        |T $ {} (:text |Font) (:type :leaf) (:at 1634454462254) (:by |-pxyJ-2j)
+                      :type :expr
+                      :at 1634454460783
+                      :by |-pxyJ-2j
+                  :type :expr
+                  :at 1634454453214
+                  :by |-pxyJ-2j
                 |T $ {} (:text |:require) (:type :leaf) (:at 1583600289679) (:by |root) (:id |2TS0m1cPIL)
                 |j $ {}
                   :data $ {}
@@ -20344,6 +20357,19 @@
                   :at 1583601731708
                   :by |-pxyJ-2j
                   :id |OAajkQj4l
+                |t $ {}
+                  :data $ {}
+                    |T $ {} (:text "|\"three/examples/jsm/geometries/TextGeometry") (:type :leaf) (:at 1634454403744) (:by |-pxyJ-2j)
+                    |j $ {} (:text |:refer) (:type :leaf) (:at 1634454408330) (:by |-pxyJ-2j)
+                    |r $ {}
+                      :data $ {}
+                        |T $ {} (:text |TextGeometry) (:type :leaf) (:at 1634454415438) (:by |-pxyJ-2j)
+                      :type :expr
+                      :at 1634454409586
+                      :by |-pxyJ-2j
+                  :type :expr
+                  :at 1634454400699
+                  :by |-pxyJ-2j
                 |v $ {}
                   :data $ {}
                     |T $ {} (:text |quatrefoil.globals) (:type :leaf) (:at 1620059991838) (:by |-pxyJ-2j)
