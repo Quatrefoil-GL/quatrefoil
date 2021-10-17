@@ -131,103 +131,6 @@
         |*viewer-angle $ quote
           defatom *viewer-angle $ &/ &PI 2
         |*global-tree $ quote (defatom *global-tree nil)
-    |quatrefoil.app.comp.helicoid $ {}
-      :ns $ quote
-        ns quatrefoil.app.comp.helicoid $ :require
-          quatrefoil.alias :refer $ group box sphere text line tube point-light parametric
-          quatrefoil.core :refer $ defcomp
-          quatrefoil.math :refer $ q* &q* v-scale &v+ q+ invert &c* &c+ &c- c-length
-          quatrefoil.app.materials :refer $ cover-line
-          quatrefoil.comp.control :refer $ comp-control comp-2d-control comp-toggle
-          "\"three" :as THREE
-      :defs $ {}
-        |squeezing-01 $ quote
-          defn squeezing-01 (t0)
-            + 0.5 $ /
-              js/Math.asin $ - (* 2 t0) 1
-              , &PI
-        |helicoid-fn-2 $ quote
-          defn helicoid-fn-2 (t state)
-            let
-                r $ :radius state
-                v $ :speed state
-                angle $ * t &PI
-                rot-angle $ + &PI
-                  * v $ squeezing-01 t
-              rotate-wave (- t 0.5) (:bend state)
-                []
-                  * r (js/Math.sin angle) (js/Math.cos rot-angle)
-                  * r $ js/Math.cos angle
-                  * r (js/Math.sin angle) (js/Math.sin rot-angle)
-        |comp-helicoid $ quote
-          defcomp comp-helicoid (states)
-            let
-                cursor $ :cursor states
-                state $ or (:data states)
-                  {} (:speed 48) (:bend 0) (:radius 20)
-              group ({})
-                tube $ {} (:points-fn helicoid-fn) (:factor state) (:radius 0.2) (:tubular-segments 800) (:radial-segments 12)
-                  :position $ [] 0 0 0
-                  :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
-                tube $ {} (:points-fn helicoid-fn-2) (:factor state) (:radius 0.2) (:tubular-segments 400) (:radial-segments 12)
-                  :position $ [] 0 0 0
-                  :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
-                parametric $ {} (:func surface-fn) (:data state) (:slices 100) (:stacks 100)
-                  :position $ [] 0 0 0
-                  :material $ {} (:kind :mesh-lambert) (:opacity 0.8) (:transparent true) (:color 0x5e5ed5)
-                point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
-                  :position $ [] 20 40 50
-                comp-control state cursor :speed ([] 40 10 0) 0.3 ([] 0 100) 0xffffdd
-                comp-control state cursor :bend ([] 48 10 0) 0.01 ([] 0 10) 0xaaaaff
-                comp-control state cursor :radius ([] 56 10 0) 0.4 ([] 1 60) 0xaa7777
-        |surface-fn $ quote
-          defn surface-fn (t d state)
-            let
-                r $ :radius state
-                v $ :speed state
-                angle $ &* t &PI
-                rot-angle $ &* v (squeezing-01 t)
-                out-r $ &* r (js/Math.tan angle)
-                distance $ &/ r (js/Math.cos angle)
-                y0 $ &- r distance
-                angle2 $ &- (&* 0.5 &PI) angle
-                theta $ * 2 angle2 (- d 0.5)
-                narrow? $ &< (js/Math.abs angle2) 0.001
-                dx $ if narrow?
-                  * 2 r $ - d 0.5
-                  * r (js/Math.tan angle) (js/Math.sin theta)
-                dy $ if narrow? r
-                  &+ y0 $ * r (js/Math.tan angle) (js/Math.cos theta)
-              rotate-wave (&- t 0.5) (:bend state)
-                []
-                  &* dx $ js/Math.cos rot-angle
-                  &- r dy
-                  &* dx $ js/Math.sin rot-angle
-        |helicoid-fn $ quote
-          defn helicoid-fn (t state)
-            let
-                r $ :radius state
-                v $ :speed state
-                angle $ * t &PI
-                rot-angle $ * v (squeezing-01 t)
-              rotate-wave (- t 0.5) (:bend state)
-                []
-                  * r (js/Math.sin angle) (js/Math.cos rot-angle)
-                  * r $ js/Math.cos angle
-                  * r (js/Math.sin angle) (js/Math.sin rot-angle)
-        |rotate-wave $ quote
-          defn rotate-wave (dx bend v)
-            let
-                q1 $ new THREE/Quaternion (nth v 0) (nth v 1) (nth v 2) 0
-                q2 $ new THREE/Quaternion 0 0 0
-              .!setFromAxisAngle q2 (new THREE/Vector3 1 0 0) (* bend &PI dx)
-              ; js/console.log q2
-              let
-                  ret $ -> q1
-                    .!premultiply $ .!invert (.!clone q2)
-                    .!multiply q2
-                ; js/console.log ret
-                [] (.-x ret) (.-y ret) (.-z ret)
     |quatrefoil.core $ {}
       :ns $ quote
         ns quatrefoil.core $ :require
@@ -655,85 +558,6 @@
                   assoc-in tasks
                     [] (first op-data) :text
                     last op-data
-    |quatrefoil.app.comp.lorenz-attractor $ {}
-      :ns $ quote
-        ns quatrefoil.app.comp.lorenz-attractor $ :require
-          quatrefoil.alias :refer $ group box sphere text line tube point-light ambient-light
-          quatrefoil.core :refer $ defcomp
-          quatrefoil.math :refer $ q* &q* v-scale q+ invert
-          quatrefoil.comp.control :refer $ comp-control comp-toggle
-          quatrefoil.app.materials :refer $ cover-line
-      :defs $ {}
-        |initial-config $ quote
-          def initial-config $ {} (:a 10) (:b 28)
-            :c $ / 8 3
-            :size 3000
-            :unit 0.006
-            :scale 1
-        |comp-lorenz-attractor $ quote
-          defcomp comp-lorenz-attractor (states)
-            let
-                cursor $ :cursor states
-                state $ or (:data states)
-                  {} (:a 10) (:b 28)
-                    :c $ / 8 3
-                    :size 3000
-                    :unit 0.006
-                    :scale 4
-                a $ :a state
-                b $ :b state
-                c $ :c state
-                size $ :size state
-                unit $ :unit state
-                scale $ :scale state
-              group ({})
-                line $ {}
-                  :points $ gen-lorenz-seq (.round size) unit a b c scale
-                  :position $ [] 0 0 0
-                  :material $ {} (:kind :line-basic) (:color 0xffdd00) (:opacity 1) (:transparent true) (:linewidth 1) (:gapSize 0.5) (:dashSize 0.5)
-                group ({})
-                  comp-control state cursor :size ([] 10 10 160) 100 ([] 10 80000) 0xffff55
-                  comp-control state cursor :unit ([] 15 10 160) 0.0001 ([] 0.00001 1) 0xffff55
-                  comp-control state cursor :scale ([] 20 10 160) 0.1 ([] 0.1 10) 0xec8afa
-                  comp-control state cursor :a ([] 20 4 160) 0.5 ([] -100 100) 0xaaaaff
-                  comp-control state cursor :b ([] 26 4 160) 0.5 ([] -100 100) 0xaaaaff
-                  comp-control state cursor :c ([] 32 4 160) 0.5 ([] -100 100) 0xaaaaff
-                  sphere $ {} (:radius 1) (:emissive 0xffffff) (:color 0xff0000) (:emissiveIntensity 1)
-                    :position $ [] 50 4 160
-                    :material $ {} (:kind :mesh-basic) (:color 0xff0000) (:opacity 1) (:transparent true)
-                    :event $ {}
-                      :click $ fn (e d!)
-                        d! cursor $ merge state initial-config
-                text $ {}
-                  :text $ str (.format a 3) &newline (.format b 3) &newline (.format c 3)
-                  :size 2
-                  :height 1
-                  :position $ [] 30 0 150
-                  :material $ {} (:kind :mesh-lambert) (:color 0x555544)
-                ambient-light $ {} (:color 0x444422)
-                point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
-                  :position $ [] 0 60 0
-        |gen-lorenz-seq $ quote
-          defn gen-lorenz-seq (steps dt a b c scale)
-            apply-args
-                []
-                , 2 3 4 steps
-              fn (acc x y z n) (; println "\"trace" x y z n)
-                if (<= n 0) acc $ let
-                    dx $ * dt
-                      * a $ - y x
-                    dy $ * dt
-                      -
-                        * x $ - b z
-                        , y
-                    dz $ * dt
-                      - (* x y) (* c z)
-                  recur
-                    conj acc $ v-scale ([] x y z) scale
-                    + x dx
-                    + y dy
-                    + z dz
-                    dec n
     |quatrefoil.app.comp.multiply $ {}
       :ns $ quote
         ns quatrefoil.app.comp.multiply $ :require
@@ -1440,161 +1264,6 @@
               ; js/console.log "|Area Light:" object3d
               .add object3d $ new RectAreaLightHelper object3d
               , object3d
-    |quatrefoil.app.comp.hopf $ {}
-      :ns $ quote
-        ns quatrefoil.app.comp.hopf $ :require
-          quatrefoil.alias :refer $ group box sphere text line tube point-light
-          quatrefoil.core :refer $ defcomp
-          quatrefoil.math :refer $ q* &q* v-scale &v+ q+ invert &c* &c+ &c- c-length
-          quatrefoil.app.materials :refer $ cover-line
-          quatrefoil.comp.control :refer $ comp-control comp-2d-control comp-toggle
-      :defs $ {}
-        |comp-hopf $ quote
-          defcomp comp-hopf (states)
-            let
-                cursor $ :cursor states
-                state $ or (:data states)
-                  {}
-                    :from $ [] 0 0
-                    :r0 1
-                    :delta-r 0
-                    :size 10
-                    :scale 10
-                    :layers 1
-                    :spiral? false
-                size $ js/Math.ceil (:size state)
-                layers $ js/Math.ceil (:layers state)
-                r0 $ :r0 state
-                d-r $ :delta-r state
-                center $ :from state
-                th-step $ / (* 2 &PI) size
-                scale $ :scale state
-                spiral? $ :spiral? state
-              group ({})
-                point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 600)
-                  :position $ [] 0 100 0
-                group
-                  {} $ :position ([] 0 8 0)
-                  comp-2d-control state cursor :from ([] 30 0 0) 0.1 0xffff55
-                  comp-control state cursor :r0 ([] 34 0 0) 0.1 ([] 0.02 100) 0x5555ff
-                  comp-control state cursor :size ([] 40 0 0) 1 ([] 1 200) 0xaaaaff
-                  comp-control state cursor :scale ([] 44 0 0) 1 ([] 1 100) 0x5555ff
-                  comp-control state cursor :delta-r ([] 44 -4 0) 0.2 ([] 0 40) 0x55ffaa
-                  comp-control state cursor :layers ([] 48 -4 0) 1 ([] 1 10) 0x5555ff
-                  comp-toggle state cursor :spiral? ([] 48 8 0) 0xaaffdd
-                sphere $ {} (:radius 0.4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
-                  :position $ [] 0 0 0
-                  :material $ {} (:kind :mesh-basic) (:color 0xffffff) (:opacity 0.3) (:transparent true)
-                group ({}) & $ -> layers (range)
-                  map $ fn (idx)
-                    tube $ {} (:points-fn lowed-circle-fn)
-                      :factor $ let
-                          r $ + r0 (* idx d-r)
-                        [] ([] & center 0) ([] r 0 0) ([] 0 r 0) scale
-                      :radius 0.04
-                      :tubular-segments 80
-                      :radial-segments 8
-                      :position $ [] 0 0 0
-                      :material $ {} (:kind :mesh-standard) (:color 0x7777ff) (:opacity 0.4) (:transparent true)
-                group ({}) & $ -> layers (range)
-                  map $ fn (l-idx)
-                    group ({}) & $ -> size (range)
-                      map $ fn (idx)
-                        let
-                            r1 $ + r0 (* d-r l-idx)
-                              if spiral?
-                                * idx $ / d-r size
-                                , 0
-                            x $ + (first center)
-                              * r1 $ cos (* idx th-step)
-                            y $ + (last center)
-                              * r1 $ sin (* idx th-step)
-                            th $ get-angle x y
-                            len $ c-length ([] x y)
-                            r $ c-length ([] len 2)
-                            vertical-angle $ get-angle 2 len
-                            left-edge $ - len r
-                            rail-r len
-                            rail-center $ []
-                              * rail-r $ cos th
-                              * rail-r $ sin th
-                              , 0
-                            h $ * r (sin vertical-angle)
-                            w $ * r (cos vertical-angle)
-                            th2 $ + th (* 0.5 &PI)
-                            vx $ []
-                              * r $ cos th
-                              * r $ sin th
-                              , 0
-                            vy $ []
-                              * w $ cos th2
-                              * w $ sin th2
-                              , h
-                          ; println "\"point" x y
-                          tube $ {} (:points-fn lowed-circle-fn)
-                            :factor $ [] rail-center vx vy scale
-                            :radius 0.08
-                            :tubular-segments $ if
-                              &> (&* scale r) 10
-                              , 100 60
-                            :radial-segments 3
-                            :position $ [] 0 0 0
-                            :material $ {} (:kind :mesh-standard)
-                              :color $ layer-color l-idx
-                              :opacity 1
-                              :transparent true
-        |lowed-circle-fn $ quote
-          defn lowed-circle-fn (t factor)
-            let
-                c0 $ &list:nth factor 0
-                vx $ &list:nth factor 1
-                vy $ &list:nth factor 2
-                scale $ &list:nth factor 3
-                th $ &* t const-2PI
-                cos-v $ js/Math.cos th
-                sin-v $ js/Math.sin th
-              []
-                &* scale $ -> (&list:nth c0 0)
-                  &+ $ &* cos-v (&list:nth vx 0)
-                  &+ $ &* sin-v (&list:nth vy 0)
-                &* scale $ -> (&list:nth c0 2)
-                  &+ $ &* cos-v (&list:nth vx 2)
-                  &+ $ &* sin-v (&list:nth vy 2)
-                negate $ &* scale
-                  -> (&list:nth c0 1)
-                    &+ $ &* cos-v (&list:nth vx 1)
-                    &+ $ &* sin-v (&list:nth vy 1)
-        |rotate-yz $ quote
-          defn rotate-yz (v)
-            let[] (x y z) v $ [] x z (negate y)
-        |const-2PI $ quote
-          def const-2PI $ &* 2 &PI
-        |get-angle $ quote
-          defn get-angle (x y)
-            cond
-                > x 0
-                js/Math.atan $ / y x
-              (< x 0)
-                + &PI $ js/Math.atan (/ y x)
-              (> y 0) (* 0.5 &PI)
-              (< y 0) (* -0.5 &PI)
-              true 0
-        |circle-fn $ quote
-          defn circle-fn (t factor)
-            let
-                c0 $ &list:nth factor 0
-                vx $ &list:nth factor 1
-                vy $ &list:nth factor 2
-                scale $ &list:nth factor 3
-                th $ &* t const-2PI
-              rotate-yz $ v-scale
-                &v+ c0 $ &v+
-                  v-scale vx $ js/Math.cos th
-                  v-scale vy $ js/Math.sin th
-                , scale
-        |layer-color $ quote
-          defn layer-color (idx)
-            case-default idx 0xaaaaff (0 0xaaaa00) (1 0x685aff) (2 0x00ff85) (3 0x00fff9) (4 0xff66aa)
     |quatrefoil.cursor $ {}
       :ns $ quote (ns quatrefoil.cursor)
       :defs $ {}
@@ -1766,9 +1435,6 @@
           quatrefoil.app.comp.multiply :refer $ comp-multiply
           quatrefoil.app.comp.mirror :refer $ comp-mirror
           quatrefoil.app.comp.quat-tree :refer $ comp-quat-tree
-          quatrefoil.app.comp.hopf :refer $ comp-hopf
-          quatrefoil.app.comp.lorenz-attractor :refer $ comp-lorenz-attractor
-          quatrefoil.app.comp.helicoid :refer $ comp-helicoid
       :defs $ {}
         |comp-container $ quote
           defcomp comp-container (store)
@@ -1800,9 +1466,6 @@
                   :fly $ comp-fly-city (>> states :fly)
                   :quat-tree $ comp-quat-tree
                   :quilling $ comp-quilling
-                  :hopf $ comp-hopf (>> states :hopf)
-                  :lorenz $ comp-lorenz-attractor (>> states :lorenz)
-                  :helicoid $ comp-helicoid (>> states :helicoid)
                 if (not= tab :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
@@ -1924,9 +1587,6 @@
               comp-tab :fly "\"Fly" ([] 0 0 0) on-change
               comp-tab :quat-tree "\"Quat... Tree" ([] -40 -10 0) on-change
               comp-tab :quilling "\"Quilling" ([] -0 -10 0) on-change
-              comp-tab :hopf "\"Hopf" ([] -40 -20 0) on-change
-              comp-tab :lorenz "\"Lorenz" ([] -0 -20 0) on-change
-              comp-tab :helicoid "\"Helicoid" ([] -40 -30 0) on-change
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 20 40 50
     |quatrefoil.app.comp.shapes $ {}
