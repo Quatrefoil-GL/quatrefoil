@@ -2,7 +2,7 @@
 {} (:package |quatrefoil)
   :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
     :modules $ [] |touch-control/ |pointed-prompt/
-    :version |0.0.6
+    :version |0.0.7
   :files $ {}
     |quatrefoil.app.comp.lines $ {}
       :ns $ quote
@@ -333,16 +333,17 @@
                 when
                   and left-a? $ not= 0 (nth r-delta 0)
                   rotate-viewer-by! $ * -0.1 (nth r-delta 0) elapsed
-                when right-b? $ let
-                    shift @*viewer-y-shift
-                  cond
-                      < shift -0.06
-                      shift-viewer-by! $ * 2 elapsed
-                    (> shift 0.06)
-                      shift-viewer-by! $ * -2 elapsed
-                    (< (js/Math.abs shift) 0.06)
-                      shift-viewer-by! false
-                    true nil
+                when (and left-b? right-b?)
+                  let
+                      shift @*viewer-y-shift
+                    cond
+                        < shift -0.06
+                        shift-viewer-by! $ * 2 elapsed
+                      (> shift 0.06)
+                        shift-viewer-by! $ * -2 elapsed
+                      (< (js/Math.abs shift) 0.06)
+                        shift-viewer-by! false
+                      true nil
                 when
                   and left-b? $ or
                     not= r-move $ [] 0 0
@@ -431,7 +432,7 @@
           defn &q* (a b)
             &let
               v $ .!toArray
-                .multiply
+                .!multiply
                   new THREE/Quaternion (nth a 0) (nth a 1) (nth a 2) (nth a 3)
                   new THREE/Quaternion (nth b 0) (nth b 1) (nth b 2) (nth b 3)
               [] (aget v 0) (aget v 1) (aget v 2) (aget v 3)
@@ -558,6 +559,44 @@
                   assoc-in tasks
                     [] (first op-data) :text
                     last op-data
+    |quatrefoil.app.comp.control $ {}
+      :ns $ quote
+        ns quatrefoil.app.comp.control $ :require
+          quatrefoil.alias :refer $ group box sphere text line tube point-light
+          quatrefoil.core :refer $ defcomp
+          quatrefoil.math :refer $ q* &q* v-scale q+ invert
+          quatrefoil.comp.control :refer $ comp-position-point comp-value comp-value-2d
+      :defs $ {}
+        |comp-control-demo $ quote
+          defcomp comp-control-demo (states)
+            let
+                cursor $ :cursor states
+                state $ or (:data states)
+                  {}
+                    :p0 $ [] 0 0 0
+                    :v0 0
+                    :v1 $ [] 1 1
+              group ({})
+                comp-position-point (:p0 state) 0.1 0xffaaaa $ fn (next d!)
+                  d! cursor $ assoc state :p0 next
+                comp-value (:v0 state) ([] 10 0 0) 0.2 ([] -2 20) 0xccaaff $ fn (v1 d!)
+                  d! cursor $ assoc state :v0 v1
+                text $ {}
+                  :position $ [] 10 -4 0
+                  :text $ str (:v0 state)
+                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
+                  :size 2
+                  :height 1
+                comp-value-2d (:v1 state) ([] 0 10 0) 0.2 0xccaaff $ fn (v d!)
+                  d! cursor $ assoc state :v1 v
+                text $ {}
+                  :position $ [] 0 14 0
+                  :text $ str (:v1 state)
+                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
+                  :size 2
+                  :height 1
+                point-light $ {} (:color 0xffffff) (:intensity 1) (:distance 200)
+                  :position $ [] 20 40 50
     |quatrefoil.app.comp.multiply $ {}
       :ns $ quote
         ns quatrefoil.app.comp.multiply $ :require
@@ -988,14 +1027,14 @@
               set-scale! object3d scale
               , object3d
         |on-control-event $ quote
-          defn on-control-event (states delta elapsed)
+          defn on-control-event (move delta elapsed)
             if (some? @*focused-coord)
               let
                   coord @*focused-coord
                   element-tree @*global-tree
                   target-el $ find-element element-tree coord
                   maybe-handler $ -> target-el (get :event) (get :control)
-                if (some? maybe-handler) (maybe-handler states delta elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
+                if (some? maybe-handler) (maybe-handler move delta elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
               println "\"no focused coord to control" @*focused-coord
         |on-canvas-click $ quote
           defn on-canvas-click (event)
@@ -1382,8 +1421,9 @@
         ns quatrefoil.comp.control $ :require
           quatrefoil.alias :refer $ group box sphere text line tube point-light
           quatrefoil.core :refer $ defcomp
-          quatrefoil.math :refer $ q* &q* v-scale q+ invert
+          quatrefoil.math :refer $ q* &q* v-scale q+ invert &v+
           quatrefoil.app.materials :refer $ cover-line
+          quatrefoil.core :refer $ to-viewer-axis
       :defs $ {}
         |comp-2d-control $ quote
           defcomp comp-2d-control (state cursor field position speed color)
@@ -1398,6 +1438,51 @@
                       dy $ * speed elapse (nth delta 1)
                     d! cursor $ assoc state field
                       [] (+ x0 dx) (+ y0 dy)
+        |comp-position-point $ quote
+          defcomp comp-position-point (position speed color on-change)
+            sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
+              :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
+              :event $ {}
+                :control $ fn (states delta elapse d!) (; println "\"delta" delta)
+                  let
+                      next-pos $ &v+ position
+                        to-viewer-axis
+                          * speed $ nth delta 0
+                          * speed $ nth delta 1
+                          , 0
+                    on-change next-pos d!
+        |comp-value-2d $ quote
+          defcomp comp-value-2d (v position speed color on-change)
+            sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
+              :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
+              :event $ {}
+                :control $ fn (states delta elapse d!) (; println "\"delta" delta)
+                  let-sugar
+                        [] x0 y0
+                        , v
+                      dx $ * speed elapse (nth delta 0)
+                      dy $ * speed elapse (nth delta 1)
+                    on-change
+                      [] (+ x0 dx) (+ y0 dy)
+                      , d!
+        |comp-value $ quote
+          defcomp comp-value (value position speed bound color on-change)
+            sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
+              :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
+              :event $ {}
+                :control $ fn (move delta elapse d!) (; println "\"delta" delta)
+                  let
+                      dx $ * speed elapse (nth delta 1)
+                      w2 $ + dx value
+                      up $ nth bound 1
+                      low $ nth bound 0
+                    on-change
+                      cond
+                          > w2 up
+                          , up
+                        (< w2 low) low
+                        true w2
+                      , d!
         |comp-toggle $ quote
           defcomp comp-toggle (state cursor field position color)
             sphere $ {} (:radius 0.8) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
@@ -1410,7 +1495,7 @@
             sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
               :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
               :event $ {}
-                :control $ fn (states delta elapse d!) (; println "\"delta" delta)
+                :control $ fn (move delta elapse d!) (; println "\"delta" delta)
                   let
                       dx $ * speed elapse (nth delta 1)
                       w2 $ + dx (get state field)
@@ -1435,6 +1520,7 @@
           quatrefoil.app.comp.multiply :refer $ comp-multiply
           quatrefoil.app.comp.mirror :refer $ comp-mirror
           quatrefoil.app.comp.quat-tree :refer $ comp-quat-tree
+          quatrefoil.app.comp.control :refer $ comp-control-demo
       :defs $ {}
         |comp-container $ quote
           defcomp comp-container (store)
@@ -1466,6 +1552,7 @@
                   :fly $ comp-fly-city (>> states :fly)
                   :quat-tree $ comp-quat-tree
                   :quilling $ comp-quilling
+                  :control $ comp-control-demo (>> states :control)
                 if (not= tab :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
@@ -1587,6 +1674,7 @@
               comp-tab :fly "\"Fly" ([] 0 0 0) on-change
               comp-tab :quat-tree "\"Quat... Tree" ([] -40 -10 0) on-change
               comp-tab :quilling "\"Quilling" ([] -0 -10 0) on-change
+              comp-tab :control "\"Control Demo" ([] -40 -20 0) on-change
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 20 40 50
     |quatrefoil.app.comp.shapes $ {}
