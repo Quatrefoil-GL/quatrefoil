@@ -4,7 +4,8 @@ Quatrefoil
 
 > Render Three.js with Respo style code(experimental).
 
-Demo http://repo.quamolit.org/quatrefoil.calcit/
+Demo(Chrome with a touch screen) http://r.tiye.me/Quatrefoil-GL/quatrefoil/
+
 
 ### Shortcuts for viewport movememnt
 
