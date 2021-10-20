@@ -405,6 +405,9 @@
         ns quatrefoil.math $ :require ("\"three" :as THREE)
           "\"@calcit/std" :refer $ rand
       :defs $ {}
+        |c-length2 $ quote
+          defn c-length2 (v)
+            let[] (x y) v $ + (js/Math.pow x 2) (js/Math.pow y 2)
         |&c* $ quote
           defn &c* (a b)
             let-sugar
@@ -453,14 +456,21 @@
         |&v+ $ quote
           defn &v+ (a b)
             let[] (x y z) a $ let[] (x2 y2 z2) b
-              [] (+ x x2) (+ y y2) (+ z z2)
+              [] (&+ x x2) (&+ y y2) (&+ z z2)
+        |&v- $ quote
+          defn &v- (a b)
+            let[] (x y z) a $ let[] (x2 y2 z2) b
+              [] (&- x x2) (&- y y2) (&- z z2)
+        |q-length2 $ quote
+          defn q-length2 (a)
+            let[] (x y z w) a $ + (pow x 2) (pow y 2) (pow z 2) (pow w 2)
         |q-length $ quote
           defn q-length (a)
             let[] (x y z w) a $ sqrt
               + (pow x 2) (pow y 2) (pow z 2) (pow w 2)
-        |conjugate $ quote
-          defn conjugate (a)
-            let[] (x y z w) a $ [] (&- 0 x) (&- 0 y) (&- 0 z) w
+        |q-scale $ quote
+          defn q-scale (v n)
+            let[] (x y z w) v $ [] (&* n x) (&* n y) (&* n z) (&* n w)
         |v-scale $ quote
           defn v-scale (v n)
             let[] (x y z w) v $ [] (&* n x) (&* n y) (&* n z)
@@ -469,10 +479,18 @@
           defn q+ (& xs)
             foldl xs ([] 0 0 0 0)
               fn (acc x) (&q+ acc x)
+        |q- $ quote
+          defn q- (& xs)
+            foldl (rest xs) (first xs)
+              fn (acc x) (&q- acc x)
         |v+ $ quote
           defn v+ (& xs)
             foldl xs ([] 0 0 0)
               fn (acc x) (&v+ acc x)
+        |v- $ quote
+          defn v- (& xs)
+            foldl (rest xs) (first xs)
+              fn (acc x) (&v- acc x)
         |rand-around $ quote
           defn rand-around (base x)
             + base (rand x) (* -0.5 x)
@@ -480,9 +498,16 @@
           defn c-length (v)
             let[] (x y) v $ js/Math.sqrt
               + (js/Math.pow x 2) (js/Math.pow y 2)
-        |invert $ quote
-          defn invert (a)
-            let[] (x y z w) a $ v-scale (conjugate a) (q-length a)
+        |q-inverse $ quote
+          defn q-inverse (a)
+            q-scale (q-conjugate a)
+              &/ 1 $ q-length2 a
+        |c-conjutate $ quote
+          defn c-conjutate (a)
+            let[] (x y) a $ [] (&- 0 x) w
+        |q-conjugate $ quote
+          defn q-conjugate (a)
+            let[] (x y z w) a $ [] (&- 0 x) (&- 0 y) (&- 0 z) w
     |quatrefoil.app.main $ {}
       :ns $ quote
         ns quatrefoil.app.main $ :require
@@ -564,7 +589,7 @@
         ns quatrefoil.app.comp.control $ :require
           quatrefoil.alias :refer $ group box sphere text line tube point-light
           quatrefoil.core :refer $ defcomp
-          quatrefoil.math :refer $ q* &q* v-scale q+ invert
+          quatrefoil.math :refer $ q* &q* v-scale q+
           quatrefoil.comp.control :refer $ comp-position-point comp-value comp-value-2d
       :defs $ {}
         |comp-control-demo $ quote
@@ -676,7 +701,7 @@
         ns quatrefoil.app.comp.quat-tree $ :require
           quatrefoil.alias :refer $ group box sphere text line tube ambient-light point-light
           quatrefoil.core :refer $ defcomp
-          quatrefoil.math :refer $ q* &q* v-scale q+ &q+ &q- invert q-length
+          quatrefoil.math :refer $ q* &q* v-scale q+ &q+ &q- q-length
           quatrefoil.app.materials :refer $ cover-line
       :defs $ {}
         |leaf-material $ quote
@@ -1300,7 +1325,7 @@
         ns quatrefoil.comp.control $ :require
           quatrefoil.alias :refer $ group box sphere text line tube point-light
           quatrefoil.core :refer $ defcomp
-          quatrefoil.math :refer $ q* &q* v-scale q+ invert &v+
+          quatrefoil.math :refer $ q* &q* v-scale q+ &v+
           quatrefoil.app.materials :refer $ cover-line
           quatrefoil.core :refer $ to-viewer-axis
       :defs $ {}
