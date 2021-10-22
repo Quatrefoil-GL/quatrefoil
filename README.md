@@ -4,7 +4,8 @@ Quatrefoil
 
 > Render Three.js with Respo style code(experimental).
 
-Demo http://repo.quamolit.org/quatrefoil.calcit/
+Demo(Chrome with a touch screen) http://r.tiye.me/Quatrefoil-GL/quatrefoil/
+
 
 ### Shortcuts for viewport movememnt
 
@@ -256,6 +257,35 @@ buffer-object $ {}
     0 1 2
     0 2 3
     1 2 3
+```
+
+### Component
+
+move point's visual position on canvas:
+
+```cirru
+quatrefoil.comp.control/comp-position-point (:p0 state)
+  , 0.1 0xffaaaa
+  fn (next d!)
+    d! cursor $ assoc state :p0 next
+```
+
+change value using a point:
+
+```cirru
+quatrefoil.comp.control/comp-value (:v0 state)
+  [] 10 0 0
+  , 0.2 ([] -2 20) 0xccaaff $ fn (v1 d!)
+    d! cursor $ assoc state :v0 v1
+```
+
+change a 2d value using a point:
+
+```cirru
+quatrefoil.comp.control/comp-value-2d (:v1 state)
+  [] 0 10 0
+  , 0.2 0xccaaff $ fn (v d!)
+    d! cursor $ assoc state :v1 v
 ```
 
 ### JS methods
