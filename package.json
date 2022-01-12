@@ -12,15 +12,15 @@
   "license": "MIT",
   "devDependencies": {
     "bottom-tip": "^0.1.2",
-    "vite": "^2.6.10"
+    "vite": "^2.7.10"
   },
   "dependencies": {
-    "@calcit/procs": "^0.5.0-a11",
+    "@calcit/procs": "^0.5.15",
     "@calcit/std": "^0.0.1",
     "@quamolit/quatrefoil-utils": "^0.0.2",
     "@quamolit/touch-control": "^0.0.6",
     "mobile-detect": "^1.4.5",
     "shortid": "^2.2.16",
-    "three": "^0.133.1"
+    "three": "^0.136.0"
   }
 }
