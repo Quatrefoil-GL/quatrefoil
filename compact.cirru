@@ -2,7 +2,7 @@
 {} (:package |quatrefoil)
   :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
     :modules $ [] |touch-control/ |pointed-prompt/
-    :version |0.0.8
+    :version |0.0.9
   :entries $ {}
   :files $ {}
     |quatrefoil.app.comp.lines $ {}
@@ -135,10 +135,10 @@
     |quatrefoil.core $ {}
       :ns $ quote
         ns quatrefoil.core $ :require
-          [] quatrefoil.dsl.diff :refer $ [] diff-tree
-          [] quatrefoil.dsl.object3d-dom :refer $ [] build-tree on-canvas-click on-control-event
-          [] quatrefoil.util.core :refer $ [] purify-tree
-          [] quatrefoil.dsl.patch :refer $ [] apply-changes
+          quatrefoil.dsl.diff :refer $ diff-tree
+          quatrefoil.dsl.object3d-dom :refer $ build-tree on-canvas-click on-control-event
+          quatrefoil.util.core :refer $ purify-tree
+          quatrefoil.dsl.patch :refer $ apply-changes
           quatrefoil.schema :refer $ Component
           "\"three" :as THREE
           quatrefoil.globals :refer $ *global-tree *global-camera *global-renderer *global-scene *proxied-dispatch *viewer-angle *viewer-y-shift
@@ -174,6 +174,14 @@
               js/setTimeout
                 fn () $ f i
                 * d i
+        |hslx $ quote
+          defn hslx (h s l)
+            let
+                c $ new THREE/Color
+              .!getHex $ .!setHSL c
+                .fract $ / h 360
+                .fract $ / s 100
+                .fract $ / l 100
         |move-viewer-by! $ quote
           defn move-viewer-by! (x0 y0 z0)
             let-sugar
@@ -435,11 +443,10 @@
         |&q* $ quote
           defn &q* (a b)
             &let
-              v $ .!toArray
-                .!multiply
-                  new THREE/Quaternion (nth a 0) (nth a 1) (nth a 2) (nth a 3)
-                  new THREE/Quaternion (nth b 0) (nth b 1) (nth b 2) (nth b 3)
-              [] (aget v 0) (aget v 1) (aget v 2) (aget v 3)
+              v $ .!multiply
+                new THREE/Quaternion (nth a 0) (nth a 1) (nth a 2) (nth a 3)
+                new THREE/Quaternion (nth b 0) (nth b 1) (nth b 2) (nth b 3)
+              [] (.-x v) (.-y v) (.-z v) (.-w v)
         |&q+ $ quote
           defn &q+ (a b)
             let-sugar
@@ -1552,13 +1559,16 @@
       :ns $ quote
         ns quatrefoil.app.comp.portal $ :require
           quatrefoil.alias :refer $ group box sphere text ambient-light point-light
-          quatrefoil.core :refer $ defcomp
+          quatrefoil.core :refer $ defcomp hslx
       :defs $ {}
         |comp-tab $ quote
           defcomp comp-tab (k title position on-change)
             box
               {} (:width 16) (:height 4) (:depth 6) (:position position)
-                :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6) (:transparent true)
+                :material $ {} (:kind :mesh-lambert)
+                  :color $ hslx 60 43 65
+                  :opacity 0.6
+                  :transparent true
                 :event $ {}
                   :click $ fn (e d!) (on-change k d!)
               text $ {} (:text title) (:size 4) (:height 1)
@@ -1704,7 +1714,7 @@
                     , change
                   target $ reach-object3d @*global-scene coord
                 ; js/console.log |Change: op coord op-data
-                case-default op (js/console.log "|Unknown op:" op)
+                case-default op (js/console.warn "|Unknown op:" op)
                   :add-material $ update-material target coord op-data
                   :update-material $ update-material target coord op-data
                   :remove-material $ remove-material target coord op-data
@@ -1720,7 +1730,7 @@
                   :change-rotation $ set-rotation! target
                     either op-data $ [] 0 0 0
                   :change-scale $ set-scale! target
-                    either op-data $ [] 0 0 0
+                    either op-data $ [] 1 1 1
         |update-material $ quote
           defn update-material (target coord op-data) (; println "|Update material" coord op-data)
             let
