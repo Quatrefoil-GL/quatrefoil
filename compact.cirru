@@ -2,7 +2,8 @@
 {} (:package |quatrefoil)
   :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
     :modules $ [] |touch-control/ |pointed-prompt/
-    :version |0.0.7
+    :version |0.0.8
+  :entries $ {}
   :files $ {}
     |quatrefoil.app.comp.lines $ {}
       :ns $ quote
@@ -796,7 +797,7 @@
           defn create-line-element (params position rotation scale material)
             let
                 points $ &let
-                  ps $ new js/Array
+                  ps $ js-array
                   &doseq
                     p $ :points params
                     .!push ps $ new THREE/Vector3 & p
@@ -811,15 +812,15 @@
           defn create-shape (element coord)
             ; js/console.log |Element: element $ :coord element
             let
-                params $ :params element
-                position $ :position element
-                scale $ :scale element
-                rotation $ :rotation element
-                material $ either (:material element)
+                params $ &record:get element :params
+                position $ &record:get element :position
+                scale $ &record:get element :scale
+                rotation $ &record:get element :rotation
+                material $ either (&record:get element :material)
                   {} (:kind :mesh-basic) (:color 0xa0a0a0)
-                event $ :event element
-              case-default (:name element)
-                do (.warn js/console "|Unknown element" element) (new js/Object3D)
+                event $ either element :event
+              case-default (&record:get element :name)
+                do (js/console.warn "|Unknown element" element) (new js/Object3D)
                 :scene @*global-scene
                 :group $ create-group-element params position rotation scale
                 :box $ create-box-element params position rotation scale material event coord
@@ -918,11 +919,11 @@
                   either (:indices params) ([])
                 geometry $ new THREE/BufferGeometry
                 object3d $ do
-                  .setAttribute geometry "\"position" $ new THREE/BufferAttribute vertices 3
+                  .!setAttribute geometry "\"position" $ new THREE/BufferAttribute vertices 3
                   if
                     > (.-length indices) 0
-                    .setIndex geometry indices
-                  .computeVertexNormals geometry
+                    .!setIndex geometry indices
+                  .!computeVertexNormals geometry
                   new THREE/Mesh geometry $ create-material material
               set! (.-castShadow object3d) true
               set! (.-receiveShadow object3d) true
@@ -971,7 +972,7 @@
                       do
                         if (some? maybe-handler) (maybe-handler event @*proxied-dispatch) (println "|no handler" coord)
                         reset! *focused-coord coord
-                        println "\"focus to" coord
+                        ; println "\"focus to" coord
                       do (reset! *focused-coord nil) (println "\"lose focus")
                   do (reset! *focused-coord nil) (println "\"lose focus")
         |create-directional-light $ quote
@@ -987,7 +988,7 @@
         |set-scale! $ quote
           defn set-scale! (object scale)
             if (some? scale)
-              let[] (x y z) scale $ .set (.-scale object) (scale-zero x) (scale-zero y) (scale-zero z)
+              let[] (x y z) scale $ .!set (.-scale object) (scale-zero x) (scale-zero y) (scale-zero z)
         |*focused-coord $ quote (defatom *focused-coord nil)
         |create-polyhedron-element $ quote
           defn create-polyhedron-element (params position rotation scale material)
@@ -1010,7 +1011,7 @@
           defn create-material (material)
             &let
               m $ case-default (:kind material)
-                do (.warn js/console "|Unknown material:" material)
+                do (js/console.warn "|Unknown material:" material)
                   new THREE/LineBasicMaterial $ to-js-data (dissoc material :kind)
                 :line-basic $ new THREE/LineBasicMaterial
                   to-js-data $ dissoc material :kind
@@ -1039,7 +1040,7 @@
         |set-position! $ quote
           defn set-position! (object position)
             if (some? position)
-              let[] (x y z) position $ .set (.-position object) x y z
+              let[] (x y z) position $ .!set (.-position object) x y z
         |font-resource $ quote
           def font-resource $ new Font
             js/JSON.parse $ load-file |assets/hind.json
@@ -1124,9 +1125,9 @@
                 curve $ new THREE/CatmullRomCurve3
                   js-array & $ -> points0
                     map $ fn (p) (new THREE/Vector3 & p)
-                points $ .getPoints curve
+                points $ .!getPoints curve
                   * 16 $ count points0
-                geometry $ -> (new THREE/BufferGeometry) (.setFromPoints points)
+                geometry $ -> (new THREE/BufferGeometry) (.!setFromPoints points)
                 object3d $ new THREE/Line geometry (create-material material)
               set! (.-castShadow object3d) true
               set! (.-receiveShadow object3d) true
@@ -1138,10 +1139,10 @@
           defn write-shape-path! (s op)
             key-match op
                 :move-to x y
-                .moveTo s x y
-              (:line-to x y) (.lineTo s x y)
-              (:quadratic-curve-to x0 y0 x1 y1) (.quadraticCurveTo s x0 y0 x1 y1)
-              (:bezier-curve-to x0 y0 x1 y1 x2 y2) (.bezierCurveTo s x0 y0 x1 y1 x2 y2)
+                .!moveTo s x y
+              (:line-to x y) (.!lineTo s x y)
+              (:quadratic-curve-to x0 y0 x1 y1) (.!quadraticCurveTo s x0 y0 x1 y1)
+              (:bezier-curve-to x0 y0 x1 y1 x2 y2) (.!bezierCurveTo s x0 y0 x1 y1 x2 y2)
               _ $ js/console.log "\"Unknown shape path" op
         |create-tube-element $ quote
           defn create-tube-element (params position rotation scale material)
@@ -1190,7 +1191,7 @@
         |set-rotation! $ quote
           defn set-rotation! (object3d rotation)
             if (some? rotation)
-              let[] (x y z) rotation $ .set (.-rotation object3d) x y z
+              let[] (x y z) rotation $ .!set (.-rotation object3d) x y z
         |create-rect-area-light $ quote
           defn create-rect-area-light (params position rotation)
             let
@@ -1200,12 +1201,12 @@
                 height $ :height params
                 look-at $ :look-at params
                 object3d $ new THREE/RectAreaLight color intensity width height
-              .lookAt object3d & look-at
+              .!lookAt object3d & look-at
               set! (.-castShadow object3d) true
               set-position! object3d position
               set-rotation! object3d rotation
               ; js/console.log "|Area Light:" object3d
-              .add object3d $ new RectAreaLightHelper object3d
+              .!add object3d $ new RectAreaLightHelper object3d
               , object3d
     |quatrefoil.cursor $ {}
       :ns $ quote (ns quatrefoil.cursor)
@@ -1693,7 +1694,7 @@
             if (empty? coord) (js/console.warn "|Cannot remove by empty coord!")
               let
                   parent $ reach-object3d @*global-scene (butlast coord)
-                .addBy parent (last coord) (build-tree coord op-data)
+                .!addBy parent (last coord) (build-tree coord op-data)
         |apply-changes $ quote
           defn apply-changes (changes)
             ; println "\"changes" (count changes) changes
@@ -1728,7 +1729,7 @@
               &doseq
                 entry $ .to-list op-data
                 let[] (param new-value) entry $ case-default param (js/console.log "|Unknown param:" param)
-                  :color $ .set (.-color material) (new THREE/Color new-value)
+                  :color $ .!set (.-color material) (new THREE/Color new-value)
                   :opacity $ set! (.-opacity material) new-value
                   :transparent $ set! (.-transparent material) new-value
               set! (.-needsUpdate material) true
@@ -1754,10 +1755,10 @@
             if (empty? coord) (js/console.warn "|Cannot remove by empty coord!")
               let
                   parent $ reach-object3d @*global-scene (butlast coord)
-                .removeBy parent $ last coord
+                .!removeBy parent $ last coord
         |remove-children $ quote
           defn remove-children (target coord op-data)
-            &doseq (child-key op-data) (.removeBy target child-key)
+            &doseq (child-key op-data) (.!removeBy target child-key)
         |replace-camera $ quote
           defn replace-camera (target coord op-data) (; "\"make sure that camera is stable")
             let
@@ -1784,7 +1785,7 @@
               let-sugar
                     [] k tree
                     , entry
-                .addBy target k $ build-tree (conj coord k) tree
+                .!addBy target k $ build-tree (conj coord k) tree
     |quatrefoil.util.core $ {}
       :ns $ quote
         ns quatrefoil.util.core $ :require
@@ -1807,7 +1808,7 @@
           defn reach-object3d (object3d coord)
             if (empty? coord) object3d $ let
                 cursor $ first coord
-              recur (.reachBy object3d cursor) (rest coord)
+              recur (.!reachBy object3d cursor) (rest coord)
         |purify-tree $ quote
           defn purify-tree (tree)
             cond

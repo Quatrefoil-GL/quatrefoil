@@ -1,6 +1,6 @@
 {
   "name": "quatrefoil",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "ClojureScript workflow using Calcit Editor",
   "main": "index.js",
   "scripts": {},
