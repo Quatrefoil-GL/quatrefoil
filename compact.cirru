@@ -2,15 +2,16 @@
 {} (:package |quatrefoil)
   :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
     :modules $ [] |touch-control/ |pointed-prompt/
-    :version |0.0.9
+    :version |0.0.10
   :entries $ {}
   :files $ {}
     |quatrefoil.app.comp.lines $ {}
       :ns $ quote
         ns quatrefoil.app.comp.lines $ :require
-          quatrefoil.alias :refer $ group box sphere text line spline tube point-light ambient-light
+          quatrefoil.alias :refer $ group box sphere text line mesh-line spline tube point-light ambient-light
           quatrefoil.core :refer $ defcomp
           "\"@calcit/std" :refer $ rand-shift
+          "\"three" :as THREE
       :defs $ {}
         |comp-fly-city $ quote
           defcomp comp-fly-city (states)
@@ -70,8 +71,12 @@
               :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
             line $ {}
               :points $ [] ([] 0 0 0) ([] 3 3 4) ([] 1 4 6) ([] -2 8 0) ([] 2 5 1)
-              :position $ [] 0 0 0
+              :position $ [] 0 -10 0
               :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 0.9) (:transparent true) (:linewidth 4) (:gapSize 0.5) (:dashSize 0.5)
+            mesh-line $ {}
+              :points $ [] ([] 0 0 0) ([] 3 3 4) ([] 1 4 6) ([] -2 8 0) ([] 2 5 1)
+              :position $ [] 5 -10 0
+              :material $ {} (:kind :mesh-line) (:color 0xaaaaff) (:transparent true) (:opacity 0.4) (:depthTest true) (:lineWidth 0.5)
             spline $ {}
               :points $ [] ([] 10 10 0) ([] 8 0 0) ([] 18 0 0) ([] 19 6 4) ([] 15 6 4) ([] 13 8 0) ([] 12 5 1)
               :position $ [] 0 0 0
@@ -637,6 +642,8 @@
       :defs $ {}
         |parametric $ quote
           defn parametric (props & children) (create-element :parametric props children)
+        |mesh-line $ quote
+          defn mesh-line (props & children) (create-element :mesh-line props children)
         |rect-area-light $ quote
           defn rect-area-light (props & children) (create-element :rect-area-light props children)
         |box $ quote
@@ -799,6 +806,7 @@
           "\"three/examples/jsm/objects/Reflector" :refer $ Reflector
           "\"three/examples/jsm/loaders/FontLoader" :refer $ Font
           "\"three/examples/jsm/geometries/ParametricGeometry" :refer $ ParametricGeometry
+          "\"three.meshline" :refer $ MeshLine MeshLineMaterial MeshLineRaycast
       :defs $ {}
         |create-line-element $ quote
           defn create-line-element (params position rotation scale material)
@@ -840,6 +848,7 @@
                 :perspective-camera $ create-perspective-camera params position
                 :text $ create-text-element params position rotation scale material
                 :line $ create-line-element params position rotation scale material
+                :mesh-line $ create-mesh-line-element params position rotation scale material
                 :spline $ create-spline-element params position rotation scale material
                 :torus $ create-torus-element params position rotation scale material
                 :tube $ create-tube-element params position rotation scale material
@@ -1030,6 +1039,8 @@
                   to-js-data $ dissoc material :kind
                 :mesh-standard $ new THREE/MeshStandardMaterial
                   to-js-data $ dissoc material :kind
+                :mesh-line $ new MeshLineMaterial
+                  to-js-data $ dissoc material :kind
               set! (.-side m) THREE/DoubleSide
               , m
         |create-box-element $ quote
@@ -1091,6 +1102,26 @@
               set-position! object3d position
               set-rotation! object3d rotation
               set-scale! object3d scale
+              , object3d
+        |create-mesh-line-element $ quote
+          defn create-mesh-line-element (params position rotation scale material)
+            let
+                points $ &let
+                  ps $ js-array
+                  &doseq
+                    p $ :points params
+                    .!push ps $ new THREE/Vector3 & p
+                  , ps
+                geometry $ -> (new THREE/BufferGeometry) (.!setFromPoints points)
+                line $ let
+                    l $ new MeshLine
+                  .!setGeometry l geometry
+                  , l
+                object3d $ new THREE/Mesh line (create-material material)
+              set-position! object3d position
+              set-rotation! object3d rotation
+              set-scale! object3d scale
+              set! (.-raycast object3d) MeshLineRaycast
               , object3d
         |create-shape-element $ quote
           defn create-shape-element (params position rotation scale material)
@@ -1742,6 +1773,7 @@
                   :color $ .!set (.-color material) (new THREE/Color new-value)
                   :opacity $ set! (.-opacity material) new-value
                   :transparent $ set! (.-transparent material) new-value
+                  :lineWidth $ set! (.-lineWidth material) new-value
               set! (.-needsUpdate material) true
         |replace-element $ quote
           defn replace-element (target coord op-data)

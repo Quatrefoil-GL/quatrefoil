@@ -7,7 +7,6 @@
       "sizes": "400x400"
     }
   ],
-  "start_url": "/",
   "display": "minimal-ui",
   "orientation": "any",
   "background_color": "#eeeeff",

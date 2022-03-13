@@ -1,6 +1,6 @@
 {
   "name": "quatrefoil",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "ClojureScript workflow using Calcit Editor",
   "main": "index.js",
   "scripts": {},
@@ -21,6 +21,7 @@
     "@quamolit/touch-control": "^0.0.6",
     "mobile-detect": "^1.4.5",
     "shortid": "^2.2.16",
+    "three.meshline": "^1.4.0",
     "three": "^0.138.3"
   }
 }
