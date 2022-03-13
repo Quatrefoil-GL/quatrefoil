@@ -601,7 +601,7 @@
           quatrefoil.alias :refer $ group box sphere text line tube point-light
           quatrefoil.core :refer $ defcomp hslx
           quatrefoil.math :refer $ q* &q* v-scale q+
-          quatrefoil.comp.control :refer $ comp-position-point comp-value comp-value-2d
+          quatrefoil.comp.control :refer $ comp-pin-point comp-value comp-value-2d
       :defs $ {}
         |comp-control-demo $ quote
           defcomp comp-control-demo (states)
@@ -613,16 +613,17 @@
                     :v0 0
                     :v1 $ [] 1 1
               group ({})
-                comp-position-point (:p0 state) 0.1 0xffaaaa $ fn (next d!)
-                  d! cursor $ assoc state :p0 next
+                comp-pin-point
+                  {} (:speed 0.1) (:color 0xddaaff) (:radius 1) (:opacity 1)
+                    :position $ :p0 state
+                  fn (next d!)
+                    d! cursor $ assoc state :p0 next
                 comp-value
-                  {}
+                  {} (:speed 0.2) (:show-text? true)
                     :value $ :v0 state
                     :position $ [] 10 0 0
-                    :speed 0.2
                     :bound $ [] -2 20
                     :color $ hslx 10 90 80
-                    :show-text? true
                   fn (v1 d!)
                     d! cursor $ assoc state :v0 v1
                 comp-value-2d (:v1 state) ([] 0 10 0) 0.2 0xccaaff $ fn (v d!)
@@ -1381,19 +1382,6 @@
                       dy $ * speed elapse (nth delta 1)
                     d! cursor $ assoc state field
                       [] (+ x0 dx) (+ y0 dy)
-        |comp-position-point $ quote
-          defcomp comp-position-point (position speed color on-change)
-            sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
-              :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
-              :event $ {}
-                :control $ fn (states delta elapse d!) (; println "\"delta" delta)
-                  let
-                      next-pos $ &v+ position
-                        to-viewer-axis
-                          * speed $ nth delta 0
-                          * speed $ nth delta 1
-                          , 0
-                    on-change next-pos d!
         |comp-value-2d $ quote
           defcomp comp-value-2d (v position speed color on-change)
             sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
@@ -1420,7 +1408,8 @@
                 {} $ :position (:position options)
                 sphere $ {} (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0)
                   :radius $ or (:radius options) 1
-                  :material $ {} (:kind :mesh-lambert) (:color color) (:opacity 0.6) (:transparent true)
+                  :material $ {} (:kind :mesh-lambert) (:color color) (:transparent true)
+                    :opacity $ either (:opacity options) 0.6
                   :event $ {}
                     :control $ fn (move delta elapse d!) (; println "\"delta" delta)
                       let
@@ -1467,6 +1456,25 @@
                           , up
                         (< w2 low) low
                         true w2
+        |comp-pin-point $ quote
+          defcomp comp-pin-point (options on-change)
+            let
+                position $ or (:position options) ([] 0 0 0)
+                speed $ or (:speed options) 1
+              sphere $ {} (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0) (:position position)
+                :radius $ or (:radius options) 1
+                :material $ {} (:kind :mesh-lambert) (:transparent true)
+                  :color $ either (:color options) 0xaaaaff
+                  :opacity $ either (:opacity options) 0.7
+                :event $ {}
+                  :control $ fn (states delta elapse d!) (; println "\"delta" delta)
+                    let
+                        next-pos $ &v+ position
+                          to-viewer-axis
+                            * speed $ nth delta 0
+                            * speed $ nth delta 1
+                            , 0
+                      on-change next-pos d!
     |quatrefoil.app.comp.container $ {}
       :ns $ quote
         ns quatrefoil.app.comp.container $ :require
