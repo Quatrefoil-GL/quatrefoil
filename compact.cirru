@@ -1392,7 +1392,7 @@
                 text-color $ either (:text-color options) color
               group ({})
                 sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0) (:position position)
-                  :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
+                  :material $ {} (:kind :mesh-lambert) (:color color) (:opacity 0.7) (:transparent true)
                   :event $ {}
                     :control $ fn (states delta elapse d!) (; println "\"delta" delta)
                       let-sugar
