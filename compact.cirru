@@ -2,7 +2,7 @@
 {} (:package |quatrefoil)
   :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
     :modules $ [] |touch-control/ |pointed-prompt/
-    :version |0.0.10
+    :version |0.0.11
   :entries $ {}
   :files $ {}
     |quatrefoil.app.comp.lines $ {}
@@ -632,6 +632,8 @@
                     :position $ [] 0 10 0
                     :speed 0.2
                     :color 0xccaaff
+                    :show-text? true
+                    :fract-length 3
                   fn (v d!)
                     d! cursor $ assoc state :v1 v
                 point-light $ {} (:color 0xffffff) (:intensity 1) (:distance 200)
@@ -1390,8 +1392,10 @@
                 speed $ either (:speed options) 1
                 color $ either (:color options) 0xaaaaff
                 text-color $ either (:text-color options) color
-              group ({})
-                sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0) (:position position)
+                fract-len $ either (:fract-length options) 2
+              group
+                {} $ :position (:position options)
+                sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0)
                   :material $ {} (:kind :mesh-lambert) (:color color) (:opacity 0.7) (:transparent true)
                   :event $ {}
                     :control $ fn (states delta elapse d!) (; println "\"delta" delta)
@@ -1405,8 +1409,11 @@
                           , d!
                 if (:show-text? options)
                   text $ {}
-                    :position $ [] 0 14 0
-                    :text $ str v
+                    :position $ [] -2 2 0
+                    :text $ str
+                      .!toFixed (nth v 0) fract-len
+                      , "\", "
+                        .!toFixed (nth v 1) fract-len
                     :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                     :size 2
                     :height 1

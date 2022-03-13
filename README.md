@@ -2,7 +2,7 @@
 Quatrefoil: Three.js in Respo style
 ----
 
-Docs https://r.tiye.me/Quatrefoil-GL/guidebook/ .
+Docs https://github.com/Quatrefoil-GL/guidebook .
 
 Demo(Chrome with a touch screen) http://r.tiye.me/Quatrefoil-GL/quatrefoil/ .
 
