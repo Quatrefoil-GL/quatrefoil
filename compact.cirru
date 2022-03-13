@@ -626,14 +626,14 @@
                     :color $ hslx 10 90 80
                   fn (v1 d!)
                     d! cursor $ assoc state :v0 v1
-                comp-value-2d (:v1 state) ([] 0 10 0) 0.2 0xccaaff $ fn (v d!)
-                  d! cursor $ assoc state :v1 v
-                text $ {}
-                  :position $ [] 0 14 0
-                  :text $ str (:v1 state)
-                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
-                  :size 2
-                  :height 1
+                comp-value-2d
+                  {}
+                    :value $ :v1 state
+                    :position $ [] 0 10 0
+                    :speed 0.2
+                    :color 0xccaaff
+                  fn (v d!)
+                    d! cursor $ assoc state :v1 v
                 point-light $ {} (:color 0xffffff) (:intensity 1) (:distance 200)
                   :position $ [] 20 40 50
     |quatrefoil.alias $ {}
@@ -1383,19 +1383,33 @@
                     d! cursor $ assoc state field
                       [] (+ x0 dx) (+ y0 dy)
         |comp-value-2d $ quote
-          defcomp comp-value-2d (v position speed color on-change)
-            sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
-              :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
-              :event $ {}
-                :control $ fn (states delta elapse d!) (; println "\"delta" delta)
-                  let-sugar
-                        [] x0 y0
-                        , v
-                      dx $ * speed elapse (nth delta 0)
-                      dy $ * speed elapse (nth delta 1)
-                    on-change
-                      [] (+ x0 dx) (+ y0 dy)
-                      , d!
+          defcomp comp-value-2d (options on-change)
+            let
+                v $ :value options
+                position $ :position options
+                speed $ either (:speed options) 1
+                color $ either (:color options) 0xaaaaff
+                text-color $ either (:text-color options) color
+              group ({})
+                sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0) (:position position)
+                  :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
+                  :event $ {}
+                    :control $ fn (states delta elapse d!) (; println "\"delta" delta)
+                      let-sugar
+                            [] x0 y0
+                            , v
+                          dx $ * speed elapse (nth delta 0)
+                          dy $ * speed elapse (nth delta 1)
+                        on-change
+                          [] (+ x0 dx) (+ y0 dy)
+                          , d!
+                if (:show-text? options)
+                  text $ {}
+                    :position $ [] 0 14 0
+                    :text $ str v
+                    :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
+                    :size 2
+                    :height 1
         |comp-value $ quote
           defcomp comp-value (options on-change)
             let
