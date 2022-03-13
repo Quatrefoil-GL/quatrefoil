@@ -183,10 +183,8 @@
           defn hslx (h s l)
             let
                 c $ new THREE/Color
-              .!getHex $ .!setHSL c
-                .fract $ / h 360
-                .fract $ / s 100
-                .fract $ / l 100
+              .!getHex $ w-js-log
+                .!setHSL c (/ h 360) (/ s 100) (/ l 100)
         |move-viewer-by! $ quote
           defn move-viewer-by! (x0 y0 z0)
             let-sugar
@@ -601,7 +599,7 @@
       :ns $ quote
         ns quatrefoil.app.comp.control $ :require
           quatrefoil.alias :refer $ group box sphere text line tube point-light
-          quatrefoil.core :refer $ defcomp
+          quatrefoil.core :refer $ defcomp hslx
           quatrefoil.math :refer $ q* &q* v-scale q+
           quatrefoil.comp.control :refer $ comp-position-point comp-value comp-value-2d
       :defs $ {}
@@ -617,14 +615,16 @@
               group ({})
                 comp-position-point (:p0 state) 0.1 0xffaaaa $ fn (next d!)
                   d! cursor $ assoc state :p0 next
-                comp-value (:v0 state) ([] 10 0 0) 0.2 ([] -2 20) 0xccaaff $ fn (v1 d!)
-                  d! cursor $ assoc state :v0 v1
-                text $ {}
-                  :position $ [] 10 -4 0
-                  :text $ str (:v0 state)
-                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
-                  :size 2
-                  :height 1
+                comp-value
+                  {}
+                    :value $ :v0 state
+                    :position $ [] 10 0 0
+                    :speed 0.2
+                    :bound $ [] -2 20
+                    :color $ hslx 10 90 80
+                    :show-text? true
+                  fn (v1 d!)
+                    d! cursor $ assoc state :v0 v1
                 comp-value-2d (:v1 state) ([] 0 10 0) 0.2 0xccaaff $ fn (v d!)
                   d! cursor $ assoc state :v1 v
                 text $ {}
@@ -1409,23 +1409,40 @@
                       [] (+ x0 dx) (+ y0 dy)
                       , d!
         |comp-value $ quote
-          defcomp comp-value (value position speed bound color on-change)
-            sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
-              :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
-              :event $ {}
-                :control $ fn (move delta elapse d!) (; println "\"delta" delta)
-                  let
-                      dx $ * speed elapse (nth delta 1)
-                      w2 $ + dx value
-                      up $ nth bound 1
-                      low $ nth bound 0
-                    on-change
-                      cond
-                          > w2 up
-                          , up
-                        (< w2 low) low
-                        true w2
-                      , d!
+          defcomp comp-value (options on-change)
+            let
+                value $ :value options
+                speed $ or (:speed options) 1
+                color $ either (:color options) 0xffffff
+                text-color $ either (:text-color options) color
+                bound $ or (:bound options) ([] 0 1)
+              group
+                {} $ :position (:position options)
+                sphere $ {} (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0)
+                  :radius $ or (:radius options) 1
+                  :material $ {} (:kind :mesh-lambert) (:color color) (:opacity 0.6) (:transparent true)
+                  :event $ {}
+                    :control $ fn (move delta elapse d!) (; println "\"delta" delta)
+                      let
+                          dx $ * speed elapse (nth delta 1)
+                          w2 $ + dx value
+                          up $ nth bound 1
+                          low $ nth bound 0
+                        on-change
+                          cond
+                              > w2 up
+                              , up
+                            (< w2 low) low
+                            true w2
+                          , d!
+                if (:show-text? options)
+                  text $ {}
+                    :position $ [] -1.6 2 0
+                    :text $ .!toFixed value
+                      either (:fract-length options) 2
+                    :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
+                    :size 2
+                    :height 0.5
         |comp-toggle $ quote
           defcomp comp-toggle (state cursor field position color)
             sphere $ {} (:radius 0.8) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
