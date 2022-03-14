@@ -2,7 +2,7 @@
 {} (:package |quatrefoil)
   :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
     :modules $ [] |touch-control/ |pointed-prompt/
-    :version |0.0.12
+    :version |0.0.13
   :entries $ {}
   :files $ {}
     |quatrefoil.app.comp.lines $ {}
@@ -210,9 +210,8 @@
           defn init-renderer! (canvas-el options) (.!init RectAreaLightUniformsLib)
             reset! *global-renderer $ new THREE/WebGLRenderer
               &let
-                options $ to-js-data
-                  {} (:canvas nil) (:antialias true)
-                set! (.-canvas options) canvas-el
+                options $ js-object (:canvas nil) (:antialias true)
+                -> options .-canvas $ set! canvas-el
                 , options
             if
               some? $ :background options
@@ -669,7 +668,7 @@
               :scale $ :scale props
               :material $ :material props
               :rotation $ :rotation props
-              :event $ :event props
+              :event $ or (:on props) (:event props)
               :children $ arrange-children children
         |point-light $ quote
           defn point-light (props & children) (create-element :point-light props children)
@@ -835,7 +834,7 @@
                 rotation $ &record:get element :rotation
                 material $ either (&record:get element :material)
                   {} (:kind :mesh-basic) (:color 0xa0a0a0)
-                event $ either element :event
+                event $ &record:get element :event
               case-default (&record:get element :name)
                 do (js/console.warn "|Unknown element" element) (new js/Object3D)
                 :scene @*global-scene
@@ -907,7 +906,8 @@
               set! (.-coord object3d) coord
               set! (.-castShadow object3d) true
               set! (.-receiveShadow object3d) true
-              ; .log js/console |Sphere: object3d
+              set! (.-event object3d) event
+              ; js/console.log |Sphere: object3d
               , object3d
         |create-text-element $ quote
           defn create-text-element (params position rotation scale material)
@@ -973,19 +973,20 @@
                   / (.-clientY event) js/window.innerHeight
               .!setFromCamera raycaster mouse @*global-camera
               let
-                  intersects $ .!intersectObjects raycaster
-                    let
-                        children $ to-js-data ([])
+                  intersects $ ->
+                    .!intersectObjects raycaster $ let
+                        children $ js-array
                         collect! $ fn (x) (.!push children x)
                       collect-children @*global-scene collect!
                       , children
-                  maybe-target $ aget intersects 0
+                    .!filter $ fn (target pos _xs) (-> target .-object .-event some?)
                 ; js/console.log intersects
-                if (some? maybe-target)
+                if-let
+                  maybe-target $ .-0 intersects
                   let
                       coord $ -> maybe-target .-object .-coord
                       target-el $ find-element element-tree coord
-                      maybe-handler $ -> target-el (get :event) (get :click)
+                      maybe-handler $ -> target-el :event :click
                     if (some? coord)
                       do
                         if (some? maybe-handler) (maybe-handler event @*proxied-dispatch) (println "|no handler" coord)
@@ -1056,6 +1057,7 @@
               set! (.-castShadow object3d) true
               set! (.-receiveShadow object3d) true
               set! (.-coord object3d) coord
+              set! (.-event object3d) event
               , object3d
         |set-position! $ quote
           defn set-position! (object position)
@@ -1553,7 +1555,7 @@
               {} (:width 16) (:height 4) (:depth 6)
                 :position $ [] 60 30 0
                 :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
-                :event $ {}
+                :on $ {}
                   :click $ fn (e d!) (on-back d!)
               text $ {} (:text |Back) (:size 4) (:height 2)
                 :position $ [] 0 0 10
@@ -1645,7 +1647,7 @@
                   :color $ hslx 60 43 65
                   :opacity 0.6
                   :transparent true
-                :event $ {}
+                :on $ {}
                   :click $ fn (e d!) (on-change k d!)
               text $ {} (:text title) (:size 4) (:height 1)
                 :position $ [] 0 0 4
@@ -1921,7 +1923,7 @@
                 =seq? (:args markup) prev-args
                 identical? (:states markup) prev-states
         |find-element $ quote
-          defn find-element (tree coord) (; .log js/console |Find... tree coord)
+          defn find-element (tree coord) (; js/console.log |Find... tree coord)
             if (comp? tree)
               recur (:tree tree) coord
               if (empty? coord) tree $ let
@@ -1934,8 +1936,8 @@
                   , nil
         |collect-children $ quote
           defn collect-children (element collect!)
-            .forEach (.-children element)
-              fn (child idx _) (; .log js/console |Child: child) (collect! child)
+            .!forEach (.-children element)
+              fn (child idx _) (; js/console.log |Child: child) (collect! child)
                 if
                   some? $ .-children child
                   collect-children child collect!
