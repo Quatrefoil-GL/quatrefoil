@@ -2,14 +2,16 @@
 {} (:package |quatrefoil)
   :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
     :modules $ [] |touch-control/ |pointed-prompt/
-    :version |0.0.7
+    :version |0.0.13
+  :entries $ {}
   :files $ {}
     |quatrefoil.app.comp.lines $ {}
       :ns $ quote
         ns quatrefoil.app.comp.lines $ :require
-          quatrefoil.alias :refer $ group box sphere text line spline tube point-light ambient-light
+          quatrefoil.alias :refer $ group box sphere text line mesh-line spline tube point-light ambient-light
           quatrefoil.core :refer $ defcomp
           "\"@calcit/std" :refer $ rand-shift
+          "\"three" :as THREE
       :defs $ {}
         |comp-fly-city $ quote
           defcomp comp-fly-city (states)
@@ -69,8 +71,12 @@
               :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
             line $ {}
               :points $ [] ([] 0 0 0) ([] 3 3 4) ([] 1 4 6) ([] -2 8 0) ([] 2 5 1)
-              :position $ [] 0 0 0
+              :position $ [] 0 -10 0
               :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 0.9) (:transparent true) (:linewidth 4) (:gapSize 0.5) (:dashSize 0.5)
+            mesh-line $ {}
+              :points $ [] ([] 0 0 0) ([] 3 3 4) ([] 1 4 6) ([] -2 8 0) ([] 2 5 1)
+              :position $ [] 5 -10 0
+              :material $ {} (:kind :mesh-line) (:color 0xaaaaff) (:transparent true) (:opacity 0.4) (:depthTest true) (:lineWidth 0.5)
             spline $ {}
               :points $ [] ([] 10 10 0) ([] 8 0 0) ([] 18 0 0) ([] 19 6 4) ([] 15 6 4) ([] 13 8 0) ([] 12 5 1)
               :position $ [] 0 0 0
@@ -134,10 +140,10 @@
     |quatrefoil.core $ {}
       :ns $ quote
         ns quatrefoil.core $ :require
-          [] quatrefoil.dsl.diff :refer $ [] diff-tree
-          [] quatrefoil.dsl.object3d-dom :refer $ [] build-tree on-canvas-click on-control-event
-          [] quatrefoil.util.core :refer $ [] purify-tree
-          [] quatrefoil.dsl.patch :refer $ [] apply-changes
+          quatrefoil.dsl.diff :refer $ diff-tree
+          quatrefoil.dsl.object3d-dom :refer $ build-tree on-canvas-click on-control-event
+          quatrefoil.util.core :refer $ purify-tree
+          quatrefoil.dsl.patch :refer $ apply-changes
           quatrefoil.schema :refer $ Component
           "\"three" :as THREE
           quatrefoil.globals :refer $ *global-tree *global-camera *global-renderer *global-scene *proxied-dispatch *viewer-angle *viewer-y-shift
@@ -173,6 +179,11 @@
               js/setTimeout
                 fn () $ f i
                 * d i
+        |hslx $ quote
+          defn hslx (h s l)
+            let
+                c $ new THREE/Color
+              .!getHex $ .!setHSL c (/ h 360) (/ s 100) (/ l 100)
         |move-viewer-by! $ quote
           defn move-viewer-by! (x0 y0 z0)
             let-sugar
@@ -199,9 +210,8 @@
           defn init-renderer! (canvas-el options) (.!init RectAreaLightUniformsLib)
             reset! *global-renderer $ new THREE/WebGLRenderer
               &let
-                options $ to-js-data
-                  {} (:canvas nil) (:antialias true)
-                set! (.-canvas options) canvas-el
+                options $ js-object (:canvas nil) (:antialias true)
+                -> options .-canvas $ set! canvas-el
                 , options
             if
               some? $ :background options
@@ -434,11 +444,10 @@
         |&q* $ quote
           defn &q* (a b)
             &let
-              v $ .!toArray
-                .!multiply
-                  new THREE/Quaternion (nth a 0) (nth a 1) (nth a 2) (nth a 3)
-                  new THREE/Quaternion (nth b 0) (nth b 1) (nth b 2) (nth b 3)
-              [] (aget v 0) (aget v 1) (aget v 2) (aget v 3)
+              v $ .!multiply
+                new THREE/Quaternion (nth a 0) (nth a 1) (nth a 2) (nth a 3)
+                new THREE/Quaternion (nth b 0) (nth b 1) (nth b 2) (nth b 3)
+              [] (.-x v) (.-y v) (.-z v) (.-w v)
         |&q+ $ quote
           defn &q+ (a b)
             let-sugar
@@ -588,9 +597,9 @@
       :ns $ quote
         ns quatrefoil.app.comp.control $ :require
           quatrefoil.alias :refer $ group box sphere text line tube point-light
-          quatrefoil.core :refer $ defcomp
+          quatrefoil.core :refer $ defcomp hslx
           quatrefoil.math :refer $ q* &q* v-scale q+
-          quatrefoil.comp.control :refer $ comp-position-point comp-value comp-value-2d
+          quatrefoil.comp.control :refer $ comp-pin-point comp-value comp-value-2d
       :defs $ {}
         |comp-control-demo $ quote
           defcomp comp-control-demo (states)
@@ -602,24 +611,29 @@
                     :v0 0
                     :v1 $ [] 1 1
               group ({})
-                comp-position-point (:p0 state) 0.1 0xffaaaa $ fn (next d!)
-                  d! cursor $ assoc state :p0 next
-                comp-value (:v0 state) ([] 10 0 0) 0.2 ([] -2 20) 0xccaaff $ fn (v1 d!)
-                  d! cursor $ assoc state :v0 v1
-                text $ {}
-                  :position $ [] 10 -4 0
-                  :text $ str (:v0 state)
-                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
-                  :size 2
-                  :height 1
-                comp-value-2d (:v1 state) ([] 0 10 0) 0.2 0xccaaff $ fn (v d!)
-                  d! cursor $ assoc state :v1 v
-                text $ {}
-                  :position $ [] 0 14 0
-                  :text $ str (:v1 state)
-                  :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
-                  :size 2
-                  :height 1
+                comp-pin-point
+                  {} (:speed 0.1) (:color 0xddaaff) (:radius 1) (:opacity 1)
+                    :position $ :p0 state
+                  fn (next d!)
+                    d! cursor $ assoc state :p0 next
+                comp-value
+                  {} (:speed 0.2) (:show-text? true)
+                    :value $ :v0 state
+                    :position $ [] 10 0 0
+                    :bound $ [] -2 20
+                    :color $ hslx 10 90 80
+                  fn (v1 d!)
+                    d! cursor $ assoc state :v0 v1
+                comp-value-2d
+                  {}
+                    :value $ :v1 state
+                    :position $ [] 0 10 0
+                    :speed 0.2
+                    :color 0xccaaff
+                    :show-text? true
+                    :fract-length 3
+                  fn (v d!)
+                    d! cursor $ assoc state :v1 v
                 point-light $ {} (:color 0xffffff) (:intensity 1) (:distance 200)
                   :position $ [] 20 40 50
     |quatrefoil.alias $ {}
@@ -629,6 +643,8 @@
       :defs $ {}
         |parametric $ quote
           defn parametric (props & children) (create-element :parametric props children)
+        |mesh-line $ quote
+          defn mesh-line (props & children) (create-element :mesh-line props children)
         |rect-area-light $ quote
           defn rect-area-light (props & children) (create-element :rect-area-light props children)
         |box $ quote
@@ -652,7 +668,7 @@
               :scale $ :scale props
               :material $ :material props
               :rotation $ :rotation props
-              :event $ :event props
+              :event $ or (:on props) (:event props)
               :children $ arrange-children children
         |point-light $ quote
           defn point-light (props & children) (create-element :point-light props children)
@@ -791,12 +807,13 @@
           "\"three/examples/jsm/objects/Reflector" :refer $ Reflector
           "\"three/examples/jsm/loaders/FontLoader" :refer $ Font
           "\"three/examples/jsm/geometries/ParametricGeometry" :refer $ ParametricGeometry
+          "\"three.meshline" :refer $ MeshLine MeshLineMaterial MeshLineRaycast
       :defs $ {}
         |create-line-element $ quote
           defn create-line-element (params position rotation scale material)
             let
                 points $ &let
-                  ps $ new js/Array
+                  ps $ js-array
                   &doseq
                     p $ :points params
                     .!push ps $ new THREE/Vector3 & p
@@ -811,15 +828,15 @@
           defn create-shape (element coord)
             ; js/console.log |Element: element $ :coord element
             let
-                params $ :params element
-                position $ :position element
-                scale $ :scale element
-                rotation $ :rotation element
-                material $ either (:material element)
+                params $ &record:get element :params
+                position $ &record:get element :position
+                scale $ &record:get element :scale
+                rotation $ &record:get element :rotation
+                material $ either (&record:get element :material)
                   {} (:kind :mesh-basic) (:color 0xa0a0a0)
-                event $ :event element
-              case-default (:name element)
-                do (.warn js/console "|Unknown element" element) (new js/Object3D)
+                event $ &record:get element :event
+              case-default (&record:get element :name)
+                do (js/console.warn "|Unknown element" element) (new js/Object3D)
                 :scene @*global-scene
                 :group $ create-group-element params position rotation scale
                 :box $ create-box-element params position rotation scale material event coord
@@ -832,6 +849,7 @@
                 :perspective-camera $ create-perspective-camera params position
                 :text $ create-text-element params position rotation scale material
                 :line $ create-line-element params position rotation scale material
+                :mesh-line $ create-mesh-line-element params position rotation scale material
                 :spline $ create-spline-element params position rotation scale material
                 :torus $ create-torus-element params position rotation scale material
                 :tube $ create-tube-element params position rotation scale material
@@ -888,7 +906,8 @@
               set! (.-coord object3d) coord
               set! (.-castShadow object3d) true
               set! (.-receiveShadow object3d) true
-              ; .log js/console |Sphere: object3d
+              set! (.-event object3d) event
+              ; js/console.log |Sphere: object3d
               , object3d
         |create-text-element $ quote
           defn create-text-element (params position rotation scale material)
@@ -918,11 +937,11 @@
                   either (:indices params) ([])
                 geometry $ new THREE/BufferGeometry
                 object3d $ do
-                  .setAttribute geometry "\"position" $ new THREE/BufferAttribute vertices 3
+                  .!setAttribute geometry "\"position" $ new THREE/BufferAttribute vertices 3
                   if
                     > (.-length indices) 0
-                    .setIndex geometry indices
-                  .computeVertexNormals geometry
+                    .!setIndex geometry indices
+                  .!computeVertexNormals geometry
                   new THREE/Mesh geometry $ create-material material
               set! (.-castShadow object3d) true
               set! (.-receiveShadow object3d) true
@@ -954,24 +973,25 @@
                   / (.-clientY event) js/window.innerHeight
               .!setFromCamera raycaster mouse @*global-camera
               let
-                  intersects $ .!intersectObjects raycaster
-                    let
-                        children $ to-js-data ([])
+                  intersects $ ->
+                    .!intersectObjects raycaster $ let
+                        children $ js-array
                         collect! $ fn (x) (.!push children x)
                       collect-children @*global-scene collect!
                       , children
-                  maybe-target $ aget intersects 0
+                    .!filter $ fn (target pos _xs) (-> target .-object .-event some?)
                 ; js/console.log intersects
-                if (some? maybe-target)
+                if-let
+                  maybe-target $ .-0 intersects
                   let
                       coord $ -> maybe-target .-object .-coord
                       target-el $ find-element element-tree coord
-                      maybe-handler $ -> target-el (get :event) (get :click)
+                      maybe-handler $ -> target-el :event :click
                     if (some? coord)
                       do
                         if (some? maybe-handler) (maybe-handler event @*proxied-dispatch) (println "|no handler" coord)
                         reset! *focused-coord coord
-                        println "\"focus to" coord
+                        ; println "\"focus to" coord
                       do (reset! *focused-coord nil) (println "\"lose focus")
                   do (reset! *focused-coord nil) (println "\"lose focus")
         |create-directional-light $ quote
@@ -987,7 +1007,7 @@
         |set-scale! $ quote
           defn set-scale! (object scale)
             if (some? scale)
-              let[] (x y z) scale $ .set (.-scale object) (scale-zero x) (scale-zero y) (scale-zero z)
+              let[] (x y z) scale $ .!set (.-scale object) (scale-zero x) (scale-zero y) (scale-zero z)
         |*focused-coord $ quote (defatom *focused-coord nil)
         |create-polyhedron-element $ quote
           defn create-polyhedron-element (params position rotation scale material)
@@ -1010,7 +1030,7 @@
           defn create-material (material)
             &let
               m $ case-default (:kind material)
-                do (.warn js/console "|Unknown material:" material)
+                do (js/console.warn "|Unknown material:" material)
                   new THREE/LineBasicMaterial $ to-js-data (dissoc material :kind)
                 :line-basic $ new THREE/LineBasicMaterial
                   to-js-data $ dissoc material :kind
@@ -1021,6 +1041,8 @@
                 :mesh-lambert $ new THREE/MeshLambertMaterial
                   to-js-data $ dissoc material :kind
                 :mesh-standard $ new THREE/MeshStandardMaterial
+                  to-js-data $ dissoc material :kind
+                :mesh-line $ new MeshLineMaterial
                   to-js-data $ dissoc material :kind
               set! (.-side m) THREE/DoubleSide
               , m
@@ -1035,11 +1057,12 @@
               set! (.-castShadow object3d) true
               set! (.-receiveShadow object3d) true
               set! (.-coord object3d) coord
+              set! (.-event object3d) event
               , object3d
         |set-position! $ quote
           defn set-position! (object position)
             if (some? position)
-              let[] (x y z) position $ .set (.-position object) x y z
+              let[] (x y z) position $ .!set (.-position object) x y z
         |font-resource $ quote
           def font-resource $ new Font
             js/JSON.parse $ load-file |assets/hind.json
@@ -1084,6 +1107,26 @@
               set-rotation! object3d rotation
               set-scale! object3d scale
               , object3d
+        |create-mesh-line-element $ quote
+          defn create-mesh-line-element (params position rotation scale material)
+            let
+                points $ &let
+                  ps $ js-array
+                  &doseq
+                    p $ :points params
+                    .!push ps $ new THREE/Vector3 & p
+                  , ps
+                geometry $ -> (new THREE/BufferGeometry) (.!setFromPoints points)
+                line $ let
+                    l $ new MeshLine
+                  .!setGeometry l geometry
+                  , l
+                object3d $ new THREE/Mesh line (create-material material)
+              set-position! object3d position
+              set-rotation! object3d rotation
+              set-scale! object3d scale
+              set! (.-raycast object3d) MeshLineRaycast
+              , object3d
         |create-shape-element $ quote
           defn create-shape-element (params position rotation scale material)
             let
@@ -1124,9 +1167,9 @@
                 curve $ new THREE/CatmullRomCurve3
                   js-array & $ -> points0
                     map $ fn (p) (new THREE/Vector3 & p)
-                points $ .getPoints curve
+                points $ .!getPoints curve
                   * 16 $ count points0
-                geometry $ -> (new THREE/BufferGeometry) (.setFromPoints points)
+                geometry $ -> (new THREE/BufferGeometry) (.!setFromPoints points)
                 object3d $ new THREE/Line geometry (create-material material)
               set! (.-castShadow object3d) true
               set! (.-receiveShadow object3d) true
@@ -1138,10 +1181,10 @@
           defn write-shape-path! (s op)
             key-match op
                 :move-to x y
-                .moveTo s x y
-              (:line-to x y) (.lineTo s x y)
-              (:quadratic-curve-to x0 y0 x1 y1) (.quadraticCurveTo s x0 y0 x1 y1)
-              (:bezier-curve-to x0 y0 x1 y1 x2 y2) (.bezierCurveTo s x0 y0 x1 y1 x2 y2)
+                .!moveTo s x y
+              (:line-to x y) (.!lineTo s x y)
+              (:quadratic-curve-to x0 y0 x1 y1) (.!quadraticCurveTo s x0 y0 x1 y1)
+              (:bezier-curve-to x0 y0 x1 y1 x2 y2) (.!bezierCurveTo s x0 y0 x1 y1 x2 y2)
               _ $ js/console.log "\"Unknown shape path" op
         |create-tube-element $ quote
           defn create-tube-element (params position rotation scale material)
@@ -1190,7 +1233,7 @@
         |set-rotation! $ quote
           defn set-rotation! (object3d rotation)
             if (some? rotation)
-              let[] (x y z) rotation $ .set (.-rotation object3d) x y z
+              let[] (x y z) rotation $ .!set (.-rotation object3d) x y z
         |create-rect-area-light $ quote
           defn create-rect-area-light (params position rotation)
             let
@@ -1200,12 +1243,12 @@
                 height $ :height params
                 look-at $ :look-at params
                 object3d $ new THREE/RectAreaLight color intensity width height
-              .lookAt object3d & look-at
+              .!lookAt object3d & look-at
               set! (.-castShadow object3d) true
               set-position! object3d position
               set-rotation! object3d rotation
               ; js/console.log "|Area Light:" object3d
-              .add object3d $ new RectAreaLightHelper object3d
+              .!add object3d $ new RectAreaLightHelper object3d
               , object3d
     |quatrefoil.cursor $ {}
       :ns $ quote (ns quatrefoil.cursor)
@@ -1342,51 +1385,75 @@
                       dy $ * speed elapse (nth delta 1)
                     d! cursor $ assoc state field
                       [] (+ x0 dx) (+ y0 dy)
-        |comp-position-point $ quote
-          defcomp comp-position-point (position speed color on-change)
-            sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
-              :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
-              :event $ {}
-                :control $ fn (states delta elapse d!) (; println "\"delta" delta)
-                  let
-                      next-pos $ &v+ position
-                        to-viewer-axis
-                          * speed $ nth delta 0
-                          * speed $ nth delta 1
-                          , 0
-                    on-change next-pos d!
         |comp-value-2d $ quote
-          defcomp comp-value-2d (v position speed color on-change)
-            sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
-              :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
-              :event $ {}
-                :control $ fn (states delta elapse d!) (; println "\"delta" delta)
-                  let-sugar
-                        [] x0 y0
-                        , v
-                      dx $ * speed elapse (nth delta 0)
-                      dy $ * speed elapse (nth delta 1)
-                    on-change
-                      [] (+ x0 dx) (+ y0 dy)
-                      , d!
+          defcomp comp-value-2d (options on-change)
+            let
+                v $ :value options
+                position $ :position options
+                speed $ either (:speed options) 1
+                color $ either (:color options) 0xaaaaff
+                text-color $ either (:text-color options) color
+                fract-len $ either (:fract-length options) 2
+              group
+                {} $ :position (:position options)
+                sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0)
+                  :material $ {} (:kind :mesh-lambert) (:color color) (:opacity 0.7) (:transparent true)
+                  :event $ {}
+                    :control $ fn (states delta elapse d!) (; println "\"delta" delta)
+                      let-sugar
+                            [] x0 y0
+                            , v
+                          dx $ * speed elapse (nth delta 0)
+                          dy $ * speed elapse (nth delta 1)
+                        on-change
+                          [] (+ x0 dx) (+ y0 dy)
+                          , d!
+                if (:show-text? options)
+                  text $ {}
+                    :position $ [] -2 2 0
+                    :text $ str
+                      .!toFixed (nth v 0) fract-len
+                      , "\", "
+                        .!toFixed (nth v 1) fract-len
+                    :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
+                    :size 2
+                    :height 1
         |comp-value $ quote
-          defcomp comp-value (value position speed bound color on-change)
-            sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
-              :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
-              :event $ {}
-                :control $ fn (move delta elapse d!) (; println "\"delta" delta)
-                  let
-                      dx $ * speed elapse (nth delta 1)
-                      w2 $ + dx value
-                      up $ nth bound 1
-                      low $ nth bound 0
-                    on-change
-                      cond
-                          > w2 up
-                          , up
-                        (< w2 low) low
-                        true w2
-                      , d!
+          defcomp comp-value (options on-change)
+            let
+                value $ :value options
+                speed $ or (:speed options) 1
+                color $ either (:color options) 0xffffff
+                text-color $ either (:text-color options) color
+                bound $ or (:bound options) ([] 0 1)
+              group
+                {} $ :position (:position options)
+                sphere $ {} (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0)
+                  :radius $ or (:radius options) 1
+                  :material $ {} (:kind :mesh-lambert) (:color color) (:transparent true)
+                    :opacity $ either (:opacity options) 0.6
+                  :event $ {}
+                    :control $ fn (move delta elapse d!) (; println "\"delta" delta)
+                      let
+                          dx $ * speed elapse (nth delta 1)
+                          w2 $ + dx value
+                          up $ nth bound 1
+                          low $ nth bound 0
+                        on-change
+                          cond
+                              > w2 up
+                              , up
+                            (< w2 low) low
+                            true w2
+                          , d!
+                if (:show-text? options)
+                  text $ {}
+                    :position $ [] -1.6 2 0
+                    :text $ .!toFixed value
+                      either (:fract-length options) 2
+                    :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
+                    :size 2
+                    :height 0.5
         |comp-toggle $ quote
           defcomp comp-toggle (state cursor field position color)
             sphere $ {} (:radius 0.8) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
@@ -1411,6 +1478,25 @@
                           , up
                         (< w2 low) low
                         true w2
+        |comp-pin-point $ quote
+          defcomp comp-pin-point (options on-change)
+            let
+                position $ or (:position options) ([] 0 0 0)
+                speed $ or (:speed options) 1
+              sphere $ {} (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0) (:position position)
+                :radius $ or (:radius options) 1
+                :material $ {} (:kind :mesh-lambert) (:transparent true)
+                  :color $ either (:color options) 0xaaaaff
+                  :opacity $ either (:opacity options) 0.7
+                :event $ {}
+                  :control $ fn (states delta elapse d!) (; println "\"delta" delta)
+                    let
+                        next-pos $ &v+ position
+                          to-viewer-axis
+                            * speed $ nth delta 0
+                            * speed $ nth delta 1
+                            , 0
+                      on-change next-pos d!
     |quatrefoil.app.comp.container $ {}
       :ns $ quote
         ns quatrefoil.app.comp.container $ :require
@@ -1469,7 +1555,7 @@
               {} (:width 16) (:height 4) (:depth 6)
                 :position $ [] 60 30 0
                 :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
-                :event $ {}
+                :on $ {}
                   :click $ fn (e d!) (on-back d!)
               text $ {} (:text |Back) (:size 4) (:height 2)
                 :position $ [] 0 0 10
@@ -1551,14 +1637,17 @@
       :ns $ quote
         ns quatrefoil.app.comp.portal $ :require
           quatrefoil.alias :refer $ group box sphere text ambient-light point-light
-          quatrefoil.core :refer $ defcomp
+          quatrefoil.core :refer $ defcomp hslx
       :defs $ {}
         |comp-tab $ quote
           defcomp comp-tab (k title position on-change)
             box
               {} (:width 16) (:height 4) (:depth 6) (:position position)
-                :material $ {} (:kind :mesh-lambert) (:color 0xccc80) (:opacity 0.6) (:transparent true)
-                :event $ {}
+                :material $ {} (:kind :mesh-lambert)
+                  :color $ hslx 60 43 65
+                  :opacity 0.6
+                  :transparent true
+                :on $ {}
                   :click $ fn (e d!) (on-change k d!)
               text $ {} (:text title) (:size 4) (:height 1)
                 :position $ [] 0 0 4
@@ -1693,7 +1782,7 @@
             if (empty? coord) (js/console.warn "|Cannot remove by empty coord!")
               let
                   parent $ reach-object3d @*global-scene (butlast coord)
-                .addBy parent (last coord) (build-tree coord op-data)
+                .!addBy parent (last coord) (build-tree coord op-data)
         |apply-changes $ quote
           defn apply-changes (changes)
             ; println "\"changes" (count changes) changes
@@ -1703,7 +1792,7 @@
                     , change
                   target $ reach-object3d @*global-scene coord
                 ; js/console.log |Change: op coord op-data
-                case-default op (js/console.log "|Unknown op:" op)
+                case-default op (js/console.warn "|Unknown op:" op)
                   :add-material $ update-material target coord op-data
                   :update-material $ update-material target coord op-data
                   :remove-material $ remove-material target coord op-data
@@ -1719,7 +1808,7 @@
                   :change-rotation $ set-rotation! target
                     either op-data $ [] 0 0 0
                   :change-scale $ set-scale! target
-                    either op-data $ [] 0 0 0
+                    either op-data $ [] 1 1 1
         |update-material $ quote
           defn update-material (target coord op-data) (; println "|Update material" coord op-data)
             let
@@ -1728,9 +1817,10 @@
               &doseq
                 entry $ .to-list op-data
                 let[] (param new-value) entry $ case-default param (js/console.log "|Unknown param:" param)
-                  :color $ .set (.-color material) (new THREE/Color new-value)
+                  :color $ .!set (.-color material) (new THREE/Color new-value)
                   :opacity $ set! (.-opacity material) new-value
                   :transparent $ set! (.-transparent material) new-value
+                  :lineWidth $ set! (.-lineWidth material) new-value
               set! (.-needsUpdate material) true
         |replace-element $ quote
           defn replace-element (target coord op-data)
@@ -1754,10 +1844,10 @@
             if (empty? coord) (js/console.warn "|Cannot remove by empty coord!")
               let
                   parent $ reach-object3d @*global-scene (butlast coord)
-                .removeBy parent $ last coord
+                .!removeBy parent $ last coord
         |remove-children $ quote
           defn remove-children (target coord op-data)
-            &doseq (child-key op-data) (.removeBy target child-key)
+            &doseq (child-key op-data) (.!removeBy target child-key)
         |replace-camera $ quote
           defn replace-camera (target coord op-data) (; "\"make sure that camera is stable")
             let
@@ -1784,7 +1874,7 @@
               let-sugar
                     [] k tree
                     , entry
-                .addBy target k $ build-tree (conj coord k) tree
+                .!addBy target k $ build-tree (conj coord k) tree
     |quatrefoil.util.core $ {}
       :ns $ quote
         ns quatrefoil.util.core $ :require
@@ -1807,7 +1897,7 @@
           defn reach-object3d (object3d coord)
             if (empty? coord) object3d $ let
                 cursor $ first coord
-              recur (.reachBy object3d cursor) (rest coord)
+              recur (.!reachBy object3d cursor) (rest coord)
         |purify-tree $ quote
           defn purify-tree (tree)
             cond
@@ -1833,7 +1923,7 @@
                 =seq? (:args markup) prev-args
                 identical? (:states markup) prev-states
         |find-element $ quote
-          defn find-element (tree coord) (; .log js/console |Find... tree coord)
+          defn find-element (tree coord) (; js/console.log |Find... tree coord)
             if (comp? tree)
               recur (:tree tree) coord
               if (empty? coord) tree $ let
@@ -1846,8 +1936,8 @@
                   , nil
         |collect-children $ quote
           defn collect-children (element collect!)
-            .forEach (.-children element)
-              fn (child idx _) (; .log js/console |Child: child) (collect! child)
+            .!forEach (.-children element)
+              fn (child idx _) (; js/console.log |Child: child) (collect! child)
                 if
                   some? $ .-children child
                   collect-children child collect!
