@@ -2,7 +2,7 @@
 {} (:package |quatrefoil)
   :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
     :modules $ [] |touch-control/ |pointed-prompt/
-    :version |0.0.13
+    :version |0.0.14
   :entries $ {}
   :files $ {}
     |quatrefoil.app.comp.lines $ {}
@@ -265,6 +265,10 @@
                     &* 1 $ cos a
                     , 0
                       &* -1 $ sin a
+        |refine-strength $ quote
+          defn refine-strength (x)
+            &* x $ sqrt
+              js/Math.abs $ &* x 0.02
         |>> $ quote
           defn >> (states k)
             let
@@ -314,8 +318,8 @@
           defn handle-control-events () $ start-control-loop! 10
             fn (elapsed states delta)
               let
-                  l-move $ :left-move states
-                  r-move $ :right-move states
+                  l-move $ map (:left-move states) refine-strength
+                  r-move $ map (:right-move states) refine-strength
                   r-delta $ :right-move delta
                   l-delta $ :left-move delta
                   camera @*global-camera
