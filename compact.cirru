@@ -2,7 +2,7 @@
 {} (:package |quatrefoil)
   :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
     :modules $ [] |touch-control/ |pointed-prompt/
-    :version |0.0.11
+    :version |0.0.12
   :entries $ {}
   :files $ {}
     |quatrefoil.app.comp.lines $ {}
@@ -183,8 +183,7 @@
           defn hslx (h s l)
             let
                 c $ new THREE/Color
-              .!getHex $ w-js-log
-                .!setHSL c (/ h 360) (/ s 100) (/ l 100)
+              .!getHex $ .!setHSL c (/ h 360) (/ s 100) (/ l 100)
         |move-viewer-by! $ quote
           defn move-viewer-by! (x0 y0 z0)
             let-sugar

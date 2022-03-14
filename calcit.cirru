@@ -2912,28 +2912,25 @@
                   |D $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107352281) (:text |let)
                   |b $ {} (:type :expr) (:by |-pxyJ-2j) (:at 1647107701232)
                     :data $ {}
-                      |T $ {} (:type :expr) (:by |-pxyJ-2j) (:at 1647188136790)
+                      |T $ {} (:type :expr) (:by |-pxyJ-2j) (:at 1647107357196)
                         :data $ {}
-                          |T $ {} (:type :expr) (:by |-pxyJ-2j) (:at 1647107357196)
+                          |T $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107370598) (:text |.!setHSL)
+                          |b $ {} (:type :expr) (:by |-pxyJ-2j) (:at 1647107366500)
                             :data $ {}
-                              |T $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107370598) (:text |.!setHSL)
-                              |b $ {} (:type :expr) (:by |-pxyJ-2j) (:at 1647107366500)
-                                :data $ {}
-                                  |T $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107366911) (:text |/)
-                                  |b $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107374502) (:text |h)
-                                  |h $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107376468) (:text |360)
-                              |h $ {} (:type :expr) (:by |-pxyJ-2j) (:at 1647107519128)
-                                :data $ {}
-                                  |T $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107519482) (:text |/)
-                                  |b $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107520075) (:text |s)
-                                  |h $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107521327) (:text |100)
-                              |l $ {} (:type :expr) (:by |-pxyJ-2j) (:at 1647107519128)
-                                :data $ {}
-                                  |T $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107519482) (:text |/)
-                                  |b $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107524163) (:text |l)
-                                  |h $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107521327) (:text |100)
-                              |X $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107661051) (:text |c)
-                          |D $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647188140092) (:text |w-js-log)
+                              |T $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107366911) (:text |/)
+                              |b $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107374502) (:text |h)
+                              |h $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107376468) (:text |360)
+                          |h $ {} (:type :expr) (:by |-pxyJ-2j) (:at 1647107519128)
+                            :data $ {}
+                              |T $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107519482) (:text |/)
+                              |b $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107520075) (:text |s)
+                              |h $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107521327) (:text |100)
+                          |l $ {} (:type :expr) (:by |-pxyJ-2j) (:at 1647107519128)
+                            :data $ {}
+                              |T $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107519482) (:text |/)
+                              |b $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107524163) (:text |l)
+                              |h $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107521327) (:text |100)
+                          |X $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107661051) (:text |c)
                       |D $ {} (:type :leaf) (:by |-pxyJ-2j) (:at 1647107704119) (:text |.!getHex)
           |move-viewer-by! $ {}
             :data $ {}
@@ -30575,7 +30572,7 @@
           :at 1583600289679
           :by nil
           :id |Op25nOdaBSE
-  :configs $ {} (:reload-fn |quatrefoil.app.main/reload!) (:port 6001) (:output |src) (:compact-output? true) (:storage-key |calcit.cirru) (:version |0.0.11)
+  :configs $ {} (:reload-fn |quatrefoil.app.main/reload!) (:port 6001) (:output |src) (:compact-output? true) (:storage-key |calcit.cirru) (:version |0.0.12)
     :modules $ [] |touch-control/ |pointed-prompt/
     :init-fn |quatrefoil.app.main/main!
     :extension |.cljs
