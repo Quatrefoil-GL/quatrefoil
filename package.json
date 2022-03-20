@@ -1,7 +1,7 @@
 {
   "name": "quatrefoil",
-  "version": "0.0.15",
-  "description": "ClojureScript workflow using Calcit Editor",
+  "version": "0.0.16",
+  "description": "Calcit-js wrapper on three.js",
   "main": "index.js",
   "scripts": {},
   "repository": {
@@ -15,7 +15,7 @@
     "vite": "^2.8.6"
   },
   "dependencies": {
-    "@calcit/procs": "^0.5.25",
+    "@calcit/procs": "^0.5.26",
     "@calcit/std": "^0.0.1",
     "@quamolit/quatrefoil-utils": "^0.0.2",
     "@quamolit/touch-control": "^0.0.6",

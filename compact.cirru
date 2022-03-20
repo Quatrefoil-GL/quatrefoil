@@ -2,13 +2,13 @@
 {} (:package |quatrefoil)
   :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
     :modules $ [] |touch-control/ |pointed-prompt/
-    :version |0.0.15
+    :version |0.0.16
   :entries $ {}
   :files $ {}
     |quatrefoil.app.comp.lines $ {}
       :ns $ quote
         ns quatrefoil.app.comp.lines $ :require
-          quatrefoil.alias :refer $ group box sphere text line mesh-line spline tube point-light ambient-light
+          quatrefoil.alias :refer $ group box sphere text line line-segments mesh-line spline tube point-light ambient-light
           quatrefoil.core :refer $ defcomp
           "\"@calcit/std" :refer $ rand-shift
           "\"three" :as THREE
@@ -77,6 +77,16 @@
               :points $ [] ([] 0 0 0) ([] 3 3 4) ([] 1 4 6) ([] -2 8 0) ([] 2 5 1)
               :position $ [] 5 -10 0
               :material $ {} (:kind :mesh-line) (:color 0xaaaaff) (:transparent true) (:opacity 0.4) (:depthTest true) (:lineWidth 0.5)
+            line-segments $ {}
+              :segments $ []
+                [] ([] 0 0 0) ([] 3 3 4)
+                [] ([] 1 4 6) ([] -2 8 0)
+              :position $ [] 10 -10 0
+              :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 0.9) (:transparent true) (:linewidth 4) (:gapSize 0.5) (:dashSize 0.5)
+            line-segments $ {}
+              :points $ [] ([] 0 0 0) ([] 3 3 4) ([] 1 4 6) ([] -2 8 0)
+              :position $ [] 15 -10 0
+              :material $ {} (:kind :line-dashed) (:color 0xaaaaff) (:opacity 0.9) (:transparent true) (:linewidth 4) (:gapSize 0.5) (:dashSize 0.5)
             spline $ {}
               :points $ [] ([] 10 10 0) ([] 8 0 0) ([] 18 0 0) ([] 19 6 4) ([] 15 6 4) ([] 13 8 0) ([] 12 5 1)
               :position $ [] 0 0 0
@@ -647,6 +657,8 @@
       :defs $ {}
         |parametric $ quote
           defn parametric (props & children) (create-element :parametric props children)
+        |line-segments $ quote
+          defn line-segments (props & children) (create-element :line-segments props children)
         |mesh-line $ quote
           defn mesh-line (props & children) (create-element :mesh-line props children)
         |rect-area-light $ quote
@@ -853,6 +865,7 @@
                 :perspective-camera $ create-perspective-camera params position
                 :text $ create-text-element params position rotation scale material
                 :line $ create-line-element params position rotation scale material
+                :line-segments $ create-line-segments-element params position rotation scale material
                 :mesh-line $ create-mesh-line-element params position rotation scale material
                 :spline $ create-spline-element params position rotation scale material
                 :torus $ create-torus-element params position rotation scale material
@@ -1007,6 +1020,29 @@
               set! (.-castShadow object3d) true
               set-position! object3d position
               js/console.log "|directional light:" object3d
+              , object3d
+        |create-line-segments-element $ quote
+          defn create-line-segments-element (params position rotation scale material)
+            let
+                points $ &let
+                  ps $ js-array
+                  if
+                    some? $ :segments params
+                    &doseq
+                      segment $ :segments params
+                      let
+                          p0 $ nth segment 0
+                          p1 $ nth segment 1
+                        .!push ps (new THREE/Vector3 & p0) (new THREE/Vector3 & p1)
+                    &doseq
+                      p $ :points params
+                      .!push ps $ new THREE/Vector3 & p
+                  , ps
+                geometry $ -> (new THREE/BufferGeometry) (.!setFromPoints points)
+                object3d $ new THREE/LineSegments geometry (create-material material)
+              set-position! object3d position
+              set-rotation! object3d rotation
+              set-scale! object3d scale
               , object3d
         |set-scale! $ quote
           defn set-scale! (object scale)
