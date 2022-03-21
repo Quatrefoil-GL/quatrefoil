@@ -41,6 +41,11 @@
   resolved "https://registry.yarnpkg.com/@quamolit/touch-control/-/touch-control-0.0.6.tgz#5406df9ae3c1829574ccdbd2b78786d819ab8a70"
   integrity sha512-2fdKRWvVgCZT/LL8SLGh7xi7Oi2mKgLAAPGvlUiwCvXZLQDQa4rgrDQ4dO/oRQUGiAE7tiQlct7DwzM34rtPRg==
 
+"@quatrefoil/meshline@^1.3.0-a1":
+  version "1.3.0-a1"
+  resolved "https://registry.yarnpkg.com/@quatrefoil/meshline/-/meshline-1.3.0-a1.tgz#900821ec05c7cf504afac337ef5fdf7c44e540b8"
+  integrity sha512-9YsktvIpAktkyLVXPNLWXn9b6K+RId4A5gHRWKlfQ+Pf0HOmzyNmpTUrT2M0SWSdY7/IIUAofX+Ndlzl2Ode7g==
+
 bottom-tip@^0.1.3:
   version "0.1.3"
   resolved "https://registry.yarnpkg.com/bottom-tip/-/bottom-tip-0.1.3.tgz#ad3a4bcc8c3d5b5c6dac68fd3d140bf18efc50f8"
@@ -323,11 +328,6 @@ supports-preserve-symlinks-flag@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz#6eda4bd344a3c94aea376d4cc31bc77311039e09"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
-
-three.meshline@^1.4.0:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/three.meshline/-/three.meshline-1.4.0.tgz#2a483cbd99cd5f74cf6ee5c253a9a4b4a8169178"
-  integrity sha512-A8IsiMrWP8zmHisGDAJ76ZD7t/dOF/oCe/FUKNE6Bu01ZYEx8N6IlU/1Plb2aOZtAuWM2A8s8qS3hvY0OFuvOw==
 
 three@^0.138.3:
   version "0.138.3"

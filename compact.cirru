@@ -2,7 +2,7 @@
 {} (:package |quatrefoil)
   :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
     :modules $ [] |touch-control/ |pointed-prompt/
-    :version |0.0.16
+    :version |0.0.17
   :entries $ {}
   :files $ {}
     |quatrefoil.app.comp.lines $ {}
@@ -823,7 +823,7 @@
           "\"three/examples/jsm/objects/Reflector" :refer $ Reflector
           "\"three/examples/jsm/loaders/FontLoader" :refer $ Font
           "\"three/examples/jsm/geometries/ParametricGeometry" :refer $ ParametricGeometry
-          "\"three.meshline" :refer $ MeshLine MeshLineMaterial MeshLineRaycast
+          "\"@quatrefoil/meshline" :refer $ MeshLine MeshLineMaterial MeshLineRaycast
       :defs $ {}
         |create-line-element $ quote
           defn create-line-element (params position rotation scale material)
