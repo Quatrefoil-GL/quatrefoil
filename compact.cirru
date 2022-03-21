@@ -2,7 +2,7 @@
 {} (:package |quatrefoil)
   :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
     :modules $ [] |touch-control/ |pointed-prompt/
-    :version |0.0.17
+    :version |0.0.18
   :entries $ {}
   :files $ {}
     |quatrefoil.app.comp.lines $ {}
@@ -160,6 +160,7 @@
           "\"three/examples/jsm/lights/RectAreaLightUniformsLib" :refer $ RectAreaLightUniformsLib
           touch-control.core :refer $ render-control! control-states start-control-loop! clear-control-loop!
           quatrefoil.math :refer $ &c* &c+ &v+
+          "\"@quatrefoil/utils" :refer $ hcl-to-hex
       :defs $ {}
         |render-canvas! $ quote
           defn render-canvas! (markup dispatch!) (; js/console.log "\"render" markup) (reset! *proxied-dispatch dispatch!)
@@ -189,6 +190,8 @@
               js/setTimeout
                 fn () $ f i
                 * d i
+        |hclx $ quote
+          defn hclx (h c l) (hcl-to-hex h c l)
         |hslx $ quote
           defn hslx (h s l)
             let
@@ -534,7 +537,7 @@
     |quatrefoil.app.main $ {}
       :ns $ quote
         ns quatrefoil.app.main $ :require
-          "\"@quamolit/quatrefoil-utils" :refer $ inject-tree-methods
+          "\"@quatrefoil/utils" :refer $ inject-tree-methods
           quatrefoil.core :refer $ render-canvas! *global-tree clear-cache! init-renderer! handle-key-event handle-control-events
           quatrefoil.app.comp.container :refer $ comp-container
           quatrefoil.dsl.object3d-dom :refer $ on-canvas-click
@@ -818,7 +821,7 @@
           "\"three" :as THREE
           "\"three/examples/jsm/geometries/TextGeometry" :refer $ TextGeometry
           quatrefoil.globals :refer $ *global-renderer *global-camera *global-scene *global-tree *proxied-dispatch
-          "\"@quamolit/quatrefoil-utils" :refer $ make-tube-curve
+          "\"@quatrefoil/utils" :refer $ make-tube-curve
           "\"three/examples/jsm/helpers/RectAreaLightHelper" :refer $ RectAreaLightHelper
           "\"three/examples/jsm/objects/Reflector" :refer $ Reflector
           "\"three/examples/jsm/loaders/FontLoader" :refer $ Font
@@ -1557,7 +1560,7 @@
       :ns $ quote
         ns quatrefoil.app.comp.container $ :require
           quatrefoil.alias :refer $ group box sphere point-light ambient-light perspective-camera scene text
-          quatrefoil.core :refer $ defcomp >>
+          quatrefoil.core :refer $ defcomp >> hclx
           quatrefoil.app.comp.todolist :refer $ comp-todolist
           quatrefoil.app.comp.portal :refer $ comp-portal
           quatrefoil.app.comp.lines :refer $ comp-lines comp-fly-city
@@ -1628,6 +1631,12 @@
               :material $ {} (:kind :mesh-lambert) (:opacity 0.6) (:color 0x9050c0)
               :event $ {}
                 :click $ fn (e d!) (d! :canvas nil)
+            sphere $ {} (:radius 8)
+              :position $ [] 30 0 0
+              :material $ {} (:kind :mesh-lambert) (:opacity 0.6)
+                :color $ hclx 160 80 70
+              :event $ {}
+                :click $ fn (e d!) (d! :canvas nil)
             group ({})
               text $ {} (:text |Quatrefoil) (:size 4) (:height 2)
                 :position $ [] -30 0 20
@@ -1637,7 +1646,9 @@
               :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.8) (:transparent true)
               :event $ {}
                 :click $ fn (e d!) (d! :canvas nil)
-            point-light $ {} (:color 0xffff55) (:intensity 2) (:distance 200)
+            ; point-light $ {} (:color 0xffff55) (:intensity 2) (:distance 200)
+              :position $ [] -10 20 0
+            point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
               :position $ [] -10 20 0
     |quatrefoil.schema $ {}
       :ns $ quote (ns quatrefoil.schema)

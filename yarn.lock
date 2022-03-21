@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@calcit/procs@^0.5.26":
-  version "0.5.26"
-  resolved "https://registry.yarnpkg.com/@calcit/procs/-/procs-0.5.26.tgz#de242c82a48cdcc01a171343934a126f826432d4"
-  integrity sha512-A8c4GgRGFpDQY/Xhk9Yn5p79DwwuejBCYuGmH/6ppdoBLeu/E9HNEpwhMBa4dMzPpu66WbvYG0/wB0nz65sivw==
+"@calcit/procs@^0.5.27":
+  version "0.5.27"
+  resolved "https://registry.yarnpkg.com/@calcit/procs/-/procs-0.5.27.tgz#b8be63dcf2ab9bbb5f66e106b3088369d5d2175b"
+  integrity sha512-bpR5Yob+dqw/Wt/g16syZvQdVvcReorV21eWuGq4hLGOdaqY4b+VA2rGyIiKgBZgRPQmdrYAMT6QzzskIgYDkA==
   dependencies:
     "@calcit/ternary-tree" "0.0.18"
     "@cirru/parser.ts" "^0.0.5"
@@ -31,11 +31,6 @@
   resolved "https://registry.yarnpkg.com/@cirru/writer.ts/-/writer.ts-0.1.3.tgz#5f54bdecaa20ba3dab16cbe6da711854138a9c0a"
   integrity sha512-vJnhmhm7we5UfQIwmZfQpF3bAFbVybzT6LbmkbQHxgijaQg3gPfNVsnSIa3g3KpmWVtvkzEx+nUy5aMwsJiV1A==
 
-"@quamolit/quatrefoil-utils@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@quamolit/quatrefoil-utils/-/quatrefoil-utils-0.0.2.tgz#8f41f5f8aa3066f87ddfe6649c41fa0af56d06c6"
-  integrity sha512-elwR11IVAsSK6B21kFyplhd1ic6+EL9XUkppwoLjGnS8tV7nbFMjTMXNihxBv99sPz/6nzZ2LgfnPM4ssUUNRw==
-
 "@quamolit/touch-control@^0.0.6":
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/@quamolit/touch-control/-/touch-control-0.0.6.tgz#5406df9ae3c1829574ccdbd2b78786d819ab8a70"
@@ -45,6 +40,13 @@
   version "1.3.0-a1"
   resolved "https://registry.yarnpkg.com/@quatrefoil/meshline/-/meshline-1.3.0-a1.tgz#900821ec05c7cf504afac337ef5fdf7c44e540b8"
   integrity sha512-9YsktvIpAktkyLVXPNLWXn9b6K+RId4A5gHRWKlfQ+Pf0HOmzyNmpTUrT2M0SWSdY7/IIUAofX+Ndlzl2Ode7g==
+
+"@quatrefoil/utils@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@quatrefoil/utils/-/utils-0.0.3.tgz#bd66a843e248b20c0a7f15587e858ce9e727e1fa"
+  integrity sha512-78Z8DhA1ppWMvSfIaTQoJ/OTfTzRaynBD1QHLgcl/kON0C2Qj8egIACU1n6f+tHPRmUR9FkpLu/9uQPNIcWl/Q==
+  dependencies:
+    d3-color "^3.0.1"
 
 bottom-tip@^0.1.3:
   version "0.1.3"
@@ -62,6 +64,11 @@ camelize@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/camelize/-/camelize-1.0.0.tgz#164a5483e630fa4321e5af07020e531831b2609b"
   integrity sha1-FkpUg+Yw+kMh5a8HAg5TGDGyYJs=
+
+d3-color@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/d3-color/-/d3-color-3.0.1.tgz#03316e595955d1fcd39d9f3610ad41bb90194d0a"
+  integrity sha512-6/SlHkDOBLyQSJ1j1Ghs82OIUXpKWlR0hCsw0XrLSQhuUPuCSmLQ1QPH98vpnQxMUQM2/gfAkUEWsupVpd9JGw==
 
 dom-walk@^0.1.0:
   version "0.1.2"
