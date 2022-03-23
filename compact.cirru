@@ -2,7 +2,7 @@
 {} (:package |quatrefoil)
   :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
     :modules $ [] |touch-control/ |pointed-prompt/
-    :version |0.0.18
+    :version |0.0.19
   :entries $ {}
   :files $ {}
     |quatrefoil.app.comp.lines $ {}
@@ -616,7 +616,7 @@
           quatrefoil.alias :refer $ group box sphere text line tube point-light
           quatrefoil.core :refer $ defcomp hslx
           quatrefoil.math :refer $ q* &q* v-scale q+
-          quatrefoil.comp.control :refer $ comp-pin-point comp-value comp-value-2d
+          quatrefoil.comp.control :refer $ comp-pin-point comp-value comp-value-2d comp-switch
       :defs $ {}
         |comp-control-demo $ quote
           defcomp comp-control-demo (states)
@@ -627,6 +627,7 @@
                     :p0 $ [] 0 0 0
                     :v0 0
                     :v1 $ [] 1 1
+                    :on? false
               group ({})
                 comp-pin-point
                   {} (:speed 0.1) (:label "\"C") (:color 0xddaaff) (:radius 1) (:opacity 1)
@@ -651,6 +652,12 @@
                     :fract-length 3
                   fn (v d!)
                     d! cursor $ assoc state :v1 v
+                comp-switch
+                  {} (:label "\"Status") (:color 0xaa88ff)
+                    :value $ :on? state
+                    :position $ [] 20 0 0
+                  fn (v d!)
+                    d! cursor $ assoc state :on? v
                 point-light $ {} (:color 0xffffff) (:intensity 1) (:distance 200)
                   :position $ [] 20 40 50
     |quatrefoil.alias $ {}
@@ -1502,30 +1509,6 @@
                     :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                     :size 2
                     :height 0.5
-        |comp-toggle $ quote
-          defcomp comp-toggle (state cursor field position color)
-            sphere $ {} (:radius 0.8) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
-              :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
-              :event $ {}
-                :click $ fn (e d!)
-                  d! cursor $ update state field not
-        |comp-control $ quote
-          defcomp comp-control (state cursor field position speed bound color)
-            sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
-              :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
-              :event $ {}
-                :control $ fn (move delta elapse d!) (; println "\"delta" delta)
-                  let
-                      dx $ * speed elapse (nth delta 1)
-                      w2 $ + dx (get state field)
-                      up $ nth bound 1
-                      low $ nth bound 0
-                    d! cursor $ assoc state field
-                      cond
-                          > w2 up
-                          , up
-                        (< w2 low) low
-                        true w2
         |comp-pin-point $ quote
           defcomp comp-pin-point (options on-change)
             let
@@ -1556,6 +1539,32 @@
                     :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                     :size 2
                     :height 0.5
+        |comp-switch $ quote
+          defn comp-switch (options on-toggle)
+            let
+                value $ :value options
+                color $ either (:color options) 0xffffff
+                text-color $ either (:text-color options) color
+                label $ :label options
+              group
+                {} $ :position (:position options)
+                sphere $ {} (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0)
+                  :radius $ &*
+                    or (:radius options) 1
+                    if value 1 0.8
+                  :material $ {} (:kind :mesh-lambert) (:color color) (:transparent true)
+                    :opacity $ if value
+                      either (:opacity options) 0.8
+                      , 0.3
+                  :event $ {}
+                    :click $ fn (e d!)
+                      on-toggle (not value) d!
+                text $ {}
+                  :position $ [] 1.6 -0.8 0
+                  :text $ or label "\"On"
+                  :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
+                  :size 2
+                  :height 0.5
     |quatrefoil.app.comp.container $ {}
       :ns $ quote
         ns quatrefoil.app.comp.container $ :require
