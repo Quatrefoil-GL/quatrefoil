@@ -2,7 +2,7 @@
 {} (:package |quatrefoil)
   :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
     :modules $ [] |touch-control/ |pointed-prompt/
-    :version |0.0.19
+    :version |0.0.20
   :entries $ {}
   :files $ {}
     |quatrefoil.app.comp.lines $ {}
@@ -147,6 +147,7 @@
         |*viewer-angle $ quote
           defatom *viewer-angle $ &/ &PI 2
         |*global-tree $ quote (defatom *global-tree nil)
+        |*global-composer $ quote (defatom *global-composer nil)
     |quatrefoil.core $ {}
       :ns $ quote
         ns quatrefoil.core $ :require
@@ -156,8 +157,10 @@
           quatrefoil.dsl.patch :refer $ apply-changes
           quatrefoil.schema :refer $ Component
           "\"three" :as THREE
-          quatrefoil.globals :refer $ *global-tree *global-camera *global-renderer *global-scene *proxied-dispatch *viewer-angle *viewer-y-shift
+          quatrefoil.globals :refer $ *global-tree *global-camera *global-renderer *global-composer *global-scene *proxied-dispatch *viewer-angle *viewer-y-shift
           "\"three/examples/jsm/lights/RectAreaLightUniformsLib" :refer $ RectAreaLightUniformsLib
+          "\"three/examples/jsm/postprocessing/EffectComposer" :refer $ EffectComposer
+          "\"three/examples/jsm/postprocessing/RenderPass" :refer $ RenderPass
           touch-control.core :refer $ render-control! control-states start-control-loop! clear-control-loop!
           quatrefoil.math :refer $ &c* &c+ &v+
           "\"@quatrefoil/utils" :refer $ hcl-to-hex
@@ -172,7 +175,7 @@
                 apply-changes @*tmp-changes
               build-tree ([]) (purify-tree markup)
             reset! *global-tree markup
-            .!render @*global-renderer @*global-scene @*global-camera
+            .!render @*global-composer
         |defcomp $ quote
           defmacro defcomp (comp-name params & body)
             ; assert "\"expected symbol of comp-name" $ symbol? comp-name
@@ -211,21 +214,30 @@
               set! (.-y position) y
               set! (.-z position) z
               .!lookAt camera $ new-lookat-point
-              .!render @*global-renderer @*global-scene camera
+              .!render @*global-composer
         |rotate-viewer-by! $ quote
           defn rotate-viewer-by! (x)
             let
                 camera @*global-camera
               swap! *viewer-angle &+ x
               .!lookAt camera $ new-lookat-point
-              .!render @*global-renderer @*global-scene camera
+              .!render @*global-composer
         |init-renderer! $ quote
           defn init-renderer! (canvas-el options) (.!init RectAreaLightUniformsLib)
             reset! *global-renderer $ new THREE/WebGLRenderer
+              js-object (:canvas canvas-el) (:antialias true)
+            if (:shadow-map? options)
               &let
-                options $ js-object (:canvas nil) (:antialias true)
-                -> options .-canvas $ set! canvas-el
-                , options
+                m $ -> @*global-renderer .-shadowMap
+                -> m .-enabled $ set! true
+                -> m .-type $ set! THREE/VSMShadowMap
+            reset! *global-composer $ new EffectComposer @*global-renderer
+            let
+                render-scene $ new RenderPass @*global-scene @*global-camera
+              .!addPass @*global-composer render-scene
+            &doseq
+              pass $ either (:composer-passes options) ([])
+              .!addPass @*global-composer pass
             if
               some? $ :background options
               .!setClearColor @*global-renderer (:background options) 1
@@ -233,12 +245,14 @@
             ; set! (.-gammaFactor @*global-renderer) 22
             .!setPixelRatio @*global-renderer $ either js/window.devicePixelRatio 1
             .!setSize @*global-renderer js/window.innerWidth js/window.innerHeight
+            .!setSize @*global-composer js/window.innerWidth js/window.innerHeight
             .!addEventListener canvas-el |click $ fn (event) (on-canvas-click event)
             .!addEventListener js/window |resize $ fn (event)
               set! (.-aspect @*global-camera) (/ js/window.innerWidth js/window.innerHeight)
               .!updateProjectionMatrix @*global-camera
               .!setSize @*global-renderer js/window.innerWidth js/window.innerHeight
-              .!render @*global-renderer @*global-scene @*global-camera
+              .!setSize @*global-composer js/window.innerWidth js/window.innerHeight
+              .!render @*global-composer
         |handle-key-event $ quote
           defn handle-key-event (event)
             let
@@ -396,13 +410,13 @@
                     do
                       swap! *viewer-y-shift &+ $ / shift 10
                       .!lookAt camera $ new-lookat-point
-                      .!render @*global-renderer @*global-scene camera
+                      .!render @*global-composer
                 (:angle angle)
                   tween-call 20 5 $ fn (i)
                     swap! *viewer-angle &+ $ / angle 10
                     do
                       .!lookAt camera $ new-lookat-point
-                      .!render @*global-renderer @*global-scene camera
+                      .!render @*global-composer
                 (:move dx dy dz)
                   tween-call 20 5 $ fn (i)
                     let-sugar
@@ -414,7 +428,7 @@
                       set! (.-y position) y
                       set! (.-z position) z
                       .!lookAt camera $ new-lookat-point
-                      .!render @*global-renderer @*global-scene camera
+                      .!render @*global-composer
                 _ $ println "\"unknown camera control:" control
         |half-pi $ quote
           def half-pi $ * 0.5 &PI
@@ -426,7 +440,7 @@
               if (= x false) (reset! *viewer-y-shift 0)
                 swap! *viewer-y-shift &+ $ * 2 x
               .!lookAt camera $ new-lookat-point
-              .!render @*global-renderer @*global-scene camera
+              .!render @*global-composer
     |quatrefoil.math $ {}
       :ns $ quote
         ns quatrefoil.math $ :require ("\"three" :as THREE)
@@ -547,15 +561,22 @@
           "\"mobile-detect" :default mobile-detect
           "\"bottom-tip" :default hud!
           "\"./calcit.build-errors" :default build-errors
+          quatrefoil.dsl.object3d-dom :refer $ set-perspective-camera!
+          "\"three/examples/jsm/postprocessing/UnrealBloomPass" :refer $ UnrealBloomPass
       :defs $ {}
         |render-app! $ quote
           defn render-app! () (; println "|Render app:")
             render-canvas! (comp-container @*store) dispatch!
         |main! $ quote
           defn main! () (load-console-formatter!) (inject-tree-methods)
+            set-perspective-camera! $ {} (:fov 45) (:near 0.1) (:far 1000)
+              :position $ [] 0 0 100
+              :aspect $ / js/window.innerWidth js/window.innerHeight
             let
                 canvas-el $ js/document.querySelector |canvas
               init-renderer! canvas-el $ {} (:background 0x110022)
+                ; :composer-passes $ []
+                  new UnrealBloomPass (new THREE/Vector2 js/window.innerWidth js/window.innerHeight) 1.5 0.4 0.85
             render-app!
             add-watch *store :changes $ fn (store prev) (render-app!)
             set! js/window.onkeydown handle-key-event
@@ -872,7 +893,6 @@
                 :directional-light $ create-directional-light params position
                 :ambient-light $ create-ambient-light params position
                 :rect-area-light $ create-rect-area-light params position rotation
-                :perspective-camera $ create-perspective-camera params position
                 :text $ create-text-element params position rotation scale material
                 :line $ create-line-element params position rotation scale material
                 :line-segments $ create-line-segments-element params position rotation scale material
@@ -946,6 +966,7 @@
               set-position! object3d position
               set-rotation! object3d rotation
               set-scale! object3d scale
+              set! (.-castShadow object3d) true
               , object3d
         |create-group-element $ quote
           defn create-group-element (params position rotation scale)
@@ -1127,15 +1148,15 @@
               set-position! object3d position
               set-scale! object3d scale
               , object3d
-        |create-perspective-camera $ quote
-          defn create-perspective-camera (params position)
+        |set-perspective-camera! $ quote
+          defn set-perspective-camera! (params)
             let
                 fov $ :fov params
                 aspect $ :aspect params
                 near $ :near params
                 far $ :far params
                 object3d $ new THREE/PerspectiveCamera fov aspect near far
-              set-position! object3d position
+              set-position! object3d $ :position params
               reset! *global-camera object3d
               , object3d
         |create-parametric-element $ quote
@@ -1588,11 +1609,6 @@
                   {} $ :tab :portal
                 tab $ :tab state
               scene ({})
-                perspective-camera $ {} (:fov 45)
-                  :aspect $ / js/window.innerWidth js/window.innerHeight
-                  :near 0.1
-                  :far 1000
-                  :position $ [] 0 0 100
                 case-default tab
                   comp-portal $ fn (next d!)
                     d! cursor $ assoc state :tab next
@@ -1612,7 +1628,7 @@
                 if (not= tab :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
-                ambient-light $ {} (:color 0x666666)
+                ambient-light $ {} (:color 0x666666) (:intencity 1)
                 ; point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                   :position $ [] 20 40 50
                 ; point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
@@ -1878,7 +1894,6 @@
                   :add-element $ add-element target coord op-data
                   :remove-element $ remove-element target coord
                   :replace-element $ replace-element target coord op-data
-                  :replace-camera $ replace-camera target coord op-data
                   :change-position $ set-position! target
                     either op-data $ [] 0 0 0
                   :change-rotation $ set-rotation! target
@@ -1924,26 +1939,6 @@
         |remove-children $ quote
           defn remove-children (target coord op-data)
             &doseq (child-key op-data) (.!removeBy target child-key)
-        |replace-camera $ quote
-          defn replace-camera (target coord op-data) (; "\"make sure that camera is stable")
-            let
-                params $ :params op-data
-                fov $ :fov params
-                aspect $ :aspect params
-                near $ :near params
-                far $ :far params
-              if
-                not= fov $ .-fov target
-                set! (.-fov target) fov
-              if
-                not= near $ .-near target
-                set! (.-near target) fov
-              if
-                not= aspect $ .-aspect target
-                set! (.-aspect target) fov
-              if
-                not= far $ .-far target
-                set! (.-far target) fov
         |add-children $ quote
           defn add-children (target coord op-data)
             &doseq (entry op-data)
@@ -2142,10 +2137,7 @@
               (and (= :text (:name tree) (:name prev-tree)) (not= (:params tree) (:params prev-tree)))
                 collect! $ [] coord :replace-element (purify-tree tree)
               (and (= (:name tree) (:name prev-tree)) (not= (:params tree) (:params prev-tree)))
-                if
-                  = (:name tree) :perspective-camera
-                  collect! $ [] coord :replace-camera (purify-tree tree)
-                  collect! $ [] coord :replace-element (purify-tree tree)
+                collect! $ [] coord :replace-element (purify-tree tree)
               true $ do
                 ; diff-params (:params prev-tree) (:params tree) coord collect!
                 if
