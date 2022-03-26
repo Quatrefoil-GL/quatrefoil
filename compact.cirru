@@ -2,7 +2,7 @@
 {} (:package |quatrefoil)
   :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!)
     :modules $ [] |touch-control/ |pointed-prompt/
-    :version |0.0.20
+    :version |0.0.21
   :entries $ {}
   :files $ {}
     |quatrefoil.app.comp.lines $ {}
@@ -31,13 +31,13 @@
                         :event $ {}
                           :click $ fn (e d!) (d! :demo nil)
                 sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
-                  :position $ [] 30 120 40
+                  :position $ [] 30 30 40
                   :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.8) (:transparent true)
                   :event $ {}
                     :click $ fn (e d!)
                       d! cursor $ assoc state :buildings (make-building-data 80)
                 point-light $ {} (:color 0xffff55) (:intensity 2) (:distance 600)
-                  :position $ [] 30 120 40
+                  :position $ [] 30 20 40
                 tube $ {} (:points-fn cloud-fn) (:radius 0.6) (:tubular-segments 1600) (:radial-segments 4)
                   :factor $ :factor state
                   :position $ [] 0 200 0
@@ -574,7 +574,7 @@
               :aspect $ / js/window.innerWidth js/window.innerHeight
             let
                 canvas-el $ js/document.querySelector |canvas
-              init-renderer! canvas-el $ {} (:background 0x110022)
+              init-renderer! canvas-el $ {} (:background 0x110022) (:shadow-map? true)
                 ; :composer-passes $ []
                   new UnrealBloomPass (new THREE/Vector2 js/window.innerWidth js/window.innerHeight) 1.5 0.4 0.85
             render-app!
@@ -757,8 +757,6 @@
           defn buffer-object (props & children) (create-element :buffer-object props children)
         |plane-reflector $ quote
           defn plane-reflector (props & children) (create-element :plane-reflector props children)
-        |perspective-camera $ quote
-          defn perspective-camera (props & children) (create-element :perspective-camera props children)
     |quatrefoil.app.comp.quat-tree $ {}
       :ns $ quote
         ns quatrefoil.app.comp.quat-tree $ :require
@@ -914,7 +912,8 @@
                 object3d $ new THREE/PointLight color intensity distance
               set! (.-castShadow object3d) true
               set-position! object3d position
-              ; js/console.log |Light: object3d
+              -> object3d .-shadow .-bias $ set! -0.005
+              js/console.log |Light: object3d
               , object3d
         |create-ambient-light $ quote
           defn create-ambient-light (params position)
@@ -936,6 +935,7 @@
                 decay $ or (:decay params) 1.5
                 object3d $ new THREE/SpotLight color intensity distance angle penumbra decay
               set! (.-castShadow object3d) true
+              -> object3d .-shadow .-bias $ set! -0.0005
               set-position! object3d position
               js/console.log |Light: object3d
               , object3d
@@ -967,6 +967,7 @@
               set-rotation! object3d rotation
               set-scale! object3d scale
               set! (.-castShadow object3d) true
+              set! (.-receiveShadow object3d) true
               , object3d
         |create-group-element $ quote
           defn create-group-element (params position rotation scale)
@@ -1049,6 +1050,7 @@
                 intensity $ :intensity params
                 object3d $ new THREE/DirectionalLight color intensity
               set! (.-castShadow object3d) true
+              -> object3d .-shadow .-bias $ set! -0.0005
               set-position! object3d position
               js/console.log "|directional light:" object3d
               , object3d
@@ -1332,7 +1334,7 @@
     |quatrefoil.app.comp.triflorum $ {}
       :ns $ quote
         ns quatrefoil.app.comp.triflorum $ :require
-          quatrefoil.alias :refer $ group box sphere text line tube polyhedron
+          quatrefoil.alias :refer $ group box sphere text line tube polyhedron point-light
           quatrefoil.core :refer $ defcomp
           quatrefoil.math :refer $ v+ v-scale
       :defs $ {}
@@ -1383,6 +1385,8 @@
                 tube $ {} (:points-fn main-branch-fn) (:radius 0.7) (:tubularSegments 20) (:radialSegments 8)
                   :position $ [] 0 0 0
                   :material $ {} (:kind :mesh-standard) (:color 0x336622) (:opacity 1) (:transparent true)
+                point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
+                  :position $ [] 0 20 50
         |yarn-fn $ quote
           defn yarn-fn (ratio i)
             let
@@ -1589,7 +1593,7 @@
     |quatrefoil.app.comp.container $ {}
       :ns $ quote
         ns quatrefoil.app.comp.container $ :require
-          quatrefoil.alias :refer $ group box sphere point-light ambient-light perspective-camera scene text
+          quatrefoil.alias :refer $ group box sphere point-light ambient-light scene text
           quatrefoil.core :refer $ defcomp >> hclx
           quatrefoil.app.comp.todolist :refer $ comp-todolist
           quatrefoil.app.comp.portal :refer $ comp-portal
@@ -1674,7 +1678,7 @@
             ; point-light $ {} (:color 0xffff55) (:intensity 2) (:distance 200)
               :position $ [] -10 20 0
             point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
-              :position $ [] -10 20 0
+              :position $ [] 10 20 10
     |quatrefoil.schema $ {}
       :ns $ quote (ns quatrefoil.schema)
       :defs $ {}
@@ -1689,7 +1693,7 @@
     |quatrefoil.app.comp.mirror $ {}
       :ns $ quote
         ns quatrefoil.app.comp.mirror $ :require
-          quatrefoil.alias :refer $ group box sphere shape text line spline tube plane-reflector point-light
+          quatrefoil.alias :refer $ group box sphere shape text line spline tube plane-reflector point-light ambient-light
           quatrefoil.core :refer $ defcomp
           quatrefoil.math :refer $ v-scale rand-around
           "\"@calcit/std" :refer $ rand
@@ -1702,29 +1706,29 @@
                 cursor $ :cursor states
                 state $ either (:data states)
                   {} $ :v 0
-              group ({}) &
-                -> (range 2)
+              group ({})
+                group ({}) & $ -> (range 2)
                   map $ fn (i)
                     plane-reflector $ {} (:width 40) (:height 40) (:color 0xffaaaa)
                       :rotation $ [] (rand-around 0 1) (rand-around 0 1) (rand-around 0 1)
                       :position $ [] (rand-around 0 100) (rand-around 0 100) (rand-around 0 -20)
-                , &
-                  -> (range 200)
-                    map $ fn (x)
-                      shape $ {} (:path heart-path)
-                        :scale $ v-scale ([] 1 1 1)
-                          pow (rand 0.26) 1.4
-                        :rotation $ [] (rand-around 0 1) (rand-around 0 1) (rand-around 0 1)
-                        :position $ [] (rand-around 0 100) (rand-around 0 100) (rand-around 20 80)
-                        :material $ {} (:kind :mesh-lambert) (:opacity 0.8) (:transparent true) (:color 0xff2225)
-                  box $ {} (:width 4) (:height 4) (:depth 4)
-                    :position $ [] 0 0 0
-                    :material $ {} (:kind :mesh-lambert) (:color 0xcccc33) (:opacity 0.6)
-                    :event $ {}
-                      :click $ fn (e d!)
-                        d! cursor $ assoc state :v (rand 1)
-                  point-light $ {} (:color 0xff8888) (:intensity 1.4) (:distance 200)
-                    :position $ [] -20 0 0
+                group ({}) & $ -> (range 60)
+                  map $ fn (x)
+                    shape $ {} (:path heart-path)
+                      :scale $ v-scale ([] 1 1 1)
+                        pow (rand 0.26) 1.4
+                      :rotation $ [] (rand-around 0 1) (rand-around 0 1) (rand-around 0 1)
+                      :position $ [] (rand-around 0 50) (rand-around 0 50) (rand-around 20 80)
+                      :material $ {} (:kind :mesh-lambert) (:opacity 0.5) (:transparent true) (:color 0xff2225)
+                box $ {} (:width 4) (:height 4) (:depth 4)
+                  :position $ [] 0 0 0
+                  :material $ {} (:kind :mesh-lambert) (:color 0xcccc33) (:opacity 0.6)
+                  :event $ {}
+                    :click $ fn (e d!)
+                      d! cursor $ assoc state :v (rand 1)
+                point-light $ {} (:color 0xff8888) (:intensity 2) (:distance 200)
+                  :position $ [] 10 0 0
+                ambient-light $ {} (:color 0x666666) (:intencity 1)
     |quatrefoil.app.comp.portal $ {}
       :ns $ quote
         ns quatrefoil.app.comp.portal $ :require
@@ -1762,7 +1766,7 @@
     |quatrefoil.app.comp.shapes $ {}
       :ns $ quote
         ns quatrefoil.app.comp.shapes $ :require
-          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text torus shape rect-area-light polyhedron plane-reflector parametric buffer-object flat-values ambient-light directional-light spot-light
+          quatrefoil.alias :refer $ group box sphere point-light scene text torus shape rect-area-light polyhedron plane-reflector parametric buffer-object flat-values ambient-light directional-light spot-light
           quatrefoil.core :refer $ defcomp
           "\"three" :as THREE
       :defs $ {}
@@ -2155,7 +2159,7 @@
     |quatrefoil.app.comp.todolist $ {}
       :ns $ quote
         ns quatrefoil.app.comp.todolist $ :require
-          quatrefoil.alias :refer $ group box sphere point-light perspective-camera scene text
+          quatrefoil.alias :refer $ group box sphere point-light scene text
           quatrefoil.core :refer $ defcomp
           pointed-prompt.core :refer $ prompt-at!
       :defs $ {}
@@ -2213,3 +2217,5 @@
                   map-indexed $ fn (idx task)
                     [] (:id task) (comp-task task idx)
                   pairs-map
+              point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
+                :position $ [] 0 20 50
