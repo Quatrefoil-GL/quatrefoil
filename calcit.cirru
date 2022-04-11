@@ -7836,22 +7836,9 @@
                 :by |-pxyJ-2j
               |yxL $ {}
                 :data $ {}
-                  |5 $ {} (:text |when) (:type :leaf) (:at 1624440595752) (:by |-pxyJ-2j)
-                  |D $ {} (:text |mobile?) (:type :leaf) (:at 1624440537029) (:by |-pxyJ-2j)
-                  |T $ {}
-                    :data $ {}
-                      |T $ {} (:text |render-control!) (:type :leaf) (:at 1624277896324) (:by |-pxyJ-2j)
-                    :type :expr
-                    :at 1624277895972
-                    :by |-pxyJ-2j
-                  |j $ {}
-                    :data $ {}
-                      |T $ {} (:text |handle-control-events) (:type :leaf) (:at 1624440600305) (:by |-pxyJ-2j)
-                    :type :expr
-                    :at 1624440600305
-                    :by |-pxyJ-2j
+                  |T $ {} (:text |render-control!) (:type :leaf) (:at 1624277896324) (:by |-pxyJ-2j)
                 :type :expr
-                :at 1624440531892
+                :at 1624277895972
                 :by |-pxyJ-2j
               |yyT $ {}
                 :data $ {}
@@ -7968,6 +7955,12 @@
                 :at 1583600289679
                 :by nil
                 :id |L6Xvp_8f4k
+              |yy $ {}
+                :data $ {}
+                  |T $ {} (:text |handle-control-events) (:type :leaf) (:at 1624440600305) (:by |-pxyJ-2j)
+                :type :expr
+                :at 1624440600305
+                :by |-pxyJ-2j
               |T $ {} (:text |defn) (:type :leaf) (:at 1583600289679) (:by |root) (:id |0PJNask-DXx)
               |j $ {} (:text |main!) (:type :leaf) (:at 1620023731588) (:by |-pxyJ-2j)
               |r $ {}
@@ -8244,22 +8237,15 @@
                     :data $ {}
                       |vD $ {}
                         :data $ {}
-                          |D $ {} (:text |when) (:type :leaf) (:at 1624440609214) (:by |-pxyJ-2j)
-                          |L $ {} (:text |mobile?) (:type :leaf) (:at 1624440609214) (:by |-pxyJ-2j)
-                          |P $ {}
-                            :data $ {}
-                              |T $ {} (:text |clear-control-loop!) (:type :leaf) (:at 1624440619256) (:by |-pxyJ-2j)
-                            :type :expr
-                            :at 1624440619256
-                            :by |-pxyJ-2j
-                          |R $ {}
-                            :data $ {}
-                              |T $ {} (:text |handle-control-events) (:type :leaf) (:at 1624440609214) (:by |-pxyJ-2j)
-                            :type :expr
-                            :at 1624440609214
-                            :by |-pxyJ-2j
+                          |T $ {} (:text |clear-control-loop!) (:type :leaf) (:at 1624440619256) (:by |-pxyJ-2j)
                         :type :expr
-                        :at 1624440607909
+                        :at 1624440619256
+                        :by |-pxyJ-2j
+                      |vL $ {}
+                        :data $ {}
+                          |T $ {} (:text |handle-control-events) (:type :leaf) (:at 1624440609214) (:by |-pxyJ-2j)
+                        :type :expr
+                        :at 1624440609214
                         :by |-pxyJ-2j
                       |vT $ {}
                         :data $ {}
@@ -8344,27 +8330,6 @@
                 :by |-pxyJ-2j
             :type :expr
             :at 1626358716532
-            :by |-pxyJ-2j
-          |mobile? $ {}
-            :data $ {}
-              |T $ {} (:text |def) (:type :leaf) (:at 1624440537424) (:by |-pxyJ-2j)
-              |j $ {} (:text |mobile?) (:type :leaf) (:at 1624440537424) (:by |-pxyJ-2j)
-              |r $ {}
-                :data $ {}
-                  |T $ {} (:text |.!mobile) (:type :leaf) (:at 1624440571739) (:by |-pxyJ-2j)
-                  |j $ {}
-                    :data $ {}
-                      |D $ {} (:text |new) (:type :leaf) (:at 1624440574804) (:by |-pxyJ-2j)
-                      |T $ {} (:text |mobile-detect) (:type :leaf) (:at 1624440573628) (:by |-pxyJ-2j)
-                      |j $ {} (:text |js/window.navigator.userAgent) (:type :leaf) (:at 1624440586951) (:by |-pxyJ-2j)
-                    :type :expr
-                    :at 1624440573071
-                    :by |-pxyJ-2j
-                :type :expr
-                :at 1624440537424
-                :by |-pxyJ-2j
-            :type :expr
-            :at 1624440537424
             :by |-pxyJ-2j
         :proc $ {}
           :data $ {}
@@ -8456,14 +8421,6 @@
                       :by |-pxyJ-2j
                   :type :expr
                   :at 1624277861116
-                  :by |-pxyJ-2j
-                |yy $ {}
-                  :data $ {}
-                    |T $ {} (:text "|\"mobile-detect") (:type :leaf) (:at 1624440546168) (:by |-pxyJ-2j)
-                    |j $ {} (:text |:default) (:type :leaf) (:at 1624440548548) (:by |-pxyJ-2j)
-                    |r $ {} (:text |mobile-detect) (:type :leaf) (:at 1624440549133) (:by |-pxyJ-2j)
-                  :type :expr
-                  :at 1624440544280
                   :by |-pxyJ-2j
                 |T $ {} (:text |:require) (:type :leaf) (:at 1583600289679) (:by |root) (:id |S6oFFJOth2U)
                 |h $ {}

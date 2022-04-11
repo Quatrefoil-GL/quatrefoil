@@ -558,7 +558,6 @@
           quatrefoil.app.updater :refer $ [] updater
           "\"three" :as THREE
           touch-control.core :refer $ render-control! control-states start-control-loop! clear-control-loop!
-          "\"mobile-detect" :default mobile-detect
           "\"bottom-tip" :default hud!
           "\"./calcit.build-errors" :default build-errors
           quatrefoil.dsl.object3d-dom :refer $ set-perspective-camera!
@@ -580,7 +579,8 @@
             render-app!
             add-watch *store :changes $ fn (store prev) (render-app!)
             set! js/window.onkeydown handle-key-event
-            when mobile? (render-control!) (handle-control-events)
+            render-control!
+            handle-control-events
             println "|App started!"
         |*store $ quote
           defatom *store $ {}
@@ -598,15 +598,11 @@
                 reset! *store store
         |reload! $ quote
           defn reload! () $ if (some? build-errors) (hud! "\"error" build-errors)
-            do (hud! "\"ok~" nil) (clear-cache!)
-              when mobile? (clear-control-loop!) (handle-control-events)
-              remove-watch *store :changes
+            do (hud! "\"ok~" nil) (clear-cache!) (clear-control-loop!) (handle-control-events) (remove-watch *store :changes)
               add-watch *store :changes $ fn (store prev) (render-app!)
               render-app!
               set! js/window.onkeydown handle-key-event
               println "|Code updated."
-        |mobile? $ quote
-          def mobile? $ .!mobile (new mobile-detect js/window.navigator.userAgent)
     |quatrefoil.app.updater $ {}
       :ns $ quote
         ns quatrefoil.app.updater $ :require
