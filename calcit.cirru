@@ -4897,10 +4897,6 @@
                                                       |i $ {} (:at 1652084955527) (:by |-pxyJ-2j) (:text |1) (:type :leaf)
                                                       |j $ {} (:at 1652083082749) (:by |-pxyJ-2j) (:text |1) (:type :leaf)
                                                       |l $ {} (:at 1652083077482) (:by |-pxyJ-2j) (:text |) (:type :leaf)
-                          |e $ {} (:at 1652085438557) (:by |-pxyJ-2j) (:type :expr)
-                            :data $ {}
-                              |T $ {} (:at 1652085439760) (:by |-pxyJ-2j) (:text |:wireframe) (:type :leaf)
-                              |b $ {} (:at 1652085441860) (:by |-pxyJ-2j) (:text |true) (:type :leaf)
                           |h $ {} (:at 1652082078084) (:by |-pxyJ-2j) (:type :expr)
                             :data $ {}
                               |T $ {} (:at 1652082080501) (:by |-pxyJ-2j) (:text |:material) (:type :leaf)

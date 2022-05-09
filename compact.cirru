@@ -517,7 +517,6 @@
                 {} (:id :color) (:size 4) (:type :u8)
                   :buffer $ concat &
                     [] ([] 1 0 0 1) ([] 0 1 0 1) ([] 0 0 1 1 )
-              :wireframe true
               :material $ {} (:kind :raw-shader)
                 :uniforms $ {}
                 :vertexShader $ inline-shader "\"demo.vert"
