@@ -1,6 +1,6 @@
 
 {} (:package |quatrefoil)
-  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.0.21)
+  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.0.22)
     :modules $ [] |touch-control/ |pointed-prompt/
   :entries $ {}
   :files $ {}
@@ -29,11 +29,12 @@
         |create-element $ quote
           defn create-element (el-name props children)
             %{} Shape (:name el-name)
-              :params $ -> props (dissoc :material) (dissoc :event) (dissoc :position) (dissoc :scale) (dissoc :rotation)
+              :params $ -> props (dissoc :material) (dissoc :event) (dissoc :position) (dissoc :scale) (dissoc :rotation) (dissoc :attributes) (dissoc :on) (dissoc :event)
               :position $ :position props
               :scale $ :scale props
               :material $ :material props
               :rotation $ :rotation props
+              :attributes $ :attributes props
               :event $ or (:on props) (:event props)
               :children $ arrange-children children
         |directional-light $ quote
@@ -63,6 +64,8 @@
           defn rect-area-light (props & children) (create-element :rect-area-light props children)
         |scene $ quote
           defn scene (props & children) (create-element :scene props children)
+        |shader-mesh $ quote
+          defn shader-mesh (props & children) (create-element :shader-mesh props children)
         |shape $ quote
           defn shape (props & children) (create-element :shape props children)
         |sphere $ quote
@@ -118,6 +121,7 @@
                   :quat-tree $ comp-quat-tree
                   :quilling $ comp-quilling
                   :control $ comp-control-demo (>> states :control)
+                  :shader $ comp-shader
                 if (not= tab :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
@@ -169,6 +173,7 @@
           quatrefoil.app.comp.mirror :refer $ comp-mirror
           quatrefoil.app.comp.quat-tree :refer $ comp-quat-tree
           quatrefoil.app.comp.control :refer $ comp-control-demo
+          quatrefoil.app.comp.shader :refer $ comp-shader
     |quatrefoil.app.comp.control $ {}
       :defs $ {}
         |comp-control-demo $ quote
@@ -397,6 +402,7 @@
               comp-tab :fly "\"Fly" ([] 0 0 0) on-change
               comp-tab :quat-tree "\"Quat... Tree" ([] -40 -10 0) on-change
               comp-tab :quilling "\"Quilling" ([] -0 -10 0) on-change
+              comp-tab :shader "\"Shader" ([] -40 -20 0) on-change
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 20 40 50
         |comp-tab $ quote
@@ -496,6 +502,35 @@
       :ns $ quote
         ns quatrefoil.app.comp.quat-tree $ :require
           quatrefoil.alias :refer $ group box sphere text line tube ambient-light point-light
+          quatrefoil.core :refer $ defcomp
+          quatrefoil.math :refer $ q* &q* v-scale q+ &q+ &q- q-length
+          quatrefoil.app.materials :refer $ cover-line
+    |quatrefoil.app.comp.shader $ {}
+      :defs $ {}
+        |comp-shader $ quote
+          defcomp comp-shader () $ group ({})
+            shader-mesh $ {}
+              :attributes $ []
+                {} (:id :position) (:size 3) (:type :f32)
+                  :buffer $ concat &
+                    [] ([] -10 -20 0) ([] 50 0 0) ([] 13 30 0)
+                {} (:id :color) (:size 4) (:type :u8)
+                  :buffer $ concat &
+                    [] ([] 1 0 0 1) ([] 0 1 0 1) ([] 0 0 1 1 )
+              :material $ {} (:kind :raw-shader)
+                :uniforms $ {}
+                :vertexShader $ inline-shader "\"demo.vert"
+                :fragmentShader $ inline-shader "\"demo.frag"
+                :wireframe false
+                :transparent false
+            point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
+              :position $ [] 20 40 50
+        |inline-shader $ quote
+          defmacro inline-shader (name)
+            read-file $ str "\"shaders/" name
+      :ns $ quote
+        ns quatrefoil.app.comp.shader $ :require
+          quatrefoil.alias :refer $ group box sphere text line tube ambient-light point-light shader-mesh
           quatrefoil.core :refer $ defcomp
           quatrefoil.math :refer $ q* &q* v-scale q+ &q+ &q- q-length
           quatrefoil.app.materials :refer $ cover-line
@@ -1436,6 +1471,9 @@
                 if
                   not= (:scale prev-tree) (:scale tree)
                   collect! $ [] coord :change-scale (:scale tree)
+                if
+                  not= (:attributes prev-tree) (:attributes tree)
+                  collect! $ [] coord :change-attributes (:attributes tree)
                 diff-material (:material prev-tree) (:material tree) coord collect!
                 diff-events (:event prev-tree) (:event tree) coord collect!
                 diff-children (:children prev-tree) (:children tree) coord collect!
@@ -1589,6 +1627,11 @@
                   to-js-data $ dissoc material :kind
                 :mesh-line $ new MeshLineMaterial
                   to-js-data $ dissoc material :kind
+                :raw-shader $ new THREE/RawShaderMaterial
+                  let
+                      options $ to-js-data (dissoc material :kind)
+                    set! (.-side options) THREE/DoubleSide
+                    , options
               set! (.-side m) THREE/DoubleSide
               , m
         |create-mesh-line-element $ quote
@@ -1656,7 +1699,7 @@
               set! (.-castShadow object3d) true
               set-position! object3d position
               -> object3d .-shadow .-bias $ set! -0.005
-              js/console.log |Light: object3d
+              ; js/console.log |Light: object3d
               , object3d
         |create-polyhedron-element $ quote
           defn create-polyhedron-element (params position rotation scale material)
@@ -1690,6 +1733,22 @@
               set-rotation! object3d rotation
               ; js/console.log "|Area Light:" object3d
               .!add object3d $ new RectAreaLightHelper object3d
+              , object3d
+        |create-shader-mesh $ quote
+          defn create-shader-mesh (attributes params position rotation scale material)
+            let
+                vertices $ new js/Float32Array
+                  js-array & $ either (:vertices params) ([])
+                geometry $ let
+                    g $ new THREE/BufferGeometry
+                  set-geometry-attributes! g attributes
+                  , g
+                object3d $ new THREE/Mesh geometry (create-material material)
+              set! (.-castShadow object3d) true
+              set! (.-receiveShadow object3d) true
+              set-position! object3d position
+              set-rotation! object3d rotation
+              set-scale! object3d scale
               , object3d
         |create-shape $ quote
           defn create-shape (element coord)
@@ -1725,6 +1784,7 @@
                 :plane-reflector $ create-plane-reflector params position rotation scale
                 :parametric $ create-parametric-element params position rotation scale material
                 :buffer-object $ create-buffer-object-element params position rotation scale material
+                :shader-mesh $ create-shader-mesh (&record:get element :attributes) params position rotation scale material
         |create-shape-element $ quote
           defn create-shape-element (params position rotation scale material)
             let
@@ -1887,6 +1947,20 @@
                   maybe-handler $ -> target-el (get :event) (get :control)
                 if (some? maybe-handler) (maybe-handler move delta elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
               println "\"no focused coord to control" @*focused-coord
+        |set-geometry-attributes! $ quote
+          defn set-geometry-attributes! (g attributes)
+            &doseq (info attributes)
+              let
+                  name $ turn-string (:id info)
+                  buffer $ :buffer info
+                  size $ :size info
+                  type $ :type info
+                  attr $ case-default type
+                    do (js/console.warn "\"use f32 as default attribute type")
+                      new THREE/Float32BufferAttribute (js-array & buffer) size
+                    :f32 $ new THREE/Float32BufferAttribute (js-array & buffer) size
+                    :u8 $ new THREE/Float32BufferAttribute (js-array & buffer) size
+                .!setAttribute g name attr
         |set-perspective-camera! $ quote
           defn set-perspective-camera! (params)
             let
@@ -1948,7 +2022,7 @@
                 .!addBy parent (last coord) (build-tree coord op-data)
         |apply-changes $ quote
           defn apply-changes (changes)
-            ; println "\"changes" (count changes) changes
+            ; js/console.log "\"changes" (count changes) changes
             &doseq (change changes)
               let-sugar
                     [] coord op op-data
@@ -1971,6 +2045,7 @@
                     either op-data $ [] 0 0 0
                   :change-scale $ set-scale! target
                     either op-data $ [] 1 1 1
+                  :change-attributes $ set-geometry-attributes! (.-geometry target) op-data
         |remove-children $ quote
           defn remove-children (target coord op-data)
             &doseq (child-key op-data) (.!removeBy target child-key)
@@ -2009,11 +2084,16 @@
                   :opacity $ set! (.-opacity material) new-value
                   :transparent $ set! (.-transparent material) new-value
                   :lineWidth $ set! (.-lineWidth material) new-value
+                  :uniforms $ set! (.-uniforms material) (to-js-data new-value)
+                  :fragmentShader $ set! (.-fragmentShader material) new-value
+                  :vertexShader $ set! (.-vertexShader material) new-value
+                  :wireframe $ set! (.-wireframe material) new-value
               set! (.-needsUpdate material) true
       :ns $ quote
         ns quatrefoil.dsl.patch $ :require
-          [] quatrefoil.dsl.object3d-dom :refer $ [] build-tree set-position! set-rotation! set-scale! create-material
+          quatrefoil.dsl.object3d-dom :refer $ [] build-tree set-position! set-rotation! set-scale! create-material
           [] quatrefoil.util.core :refer $ [] reach-object3d scale-zero
+          quatrefoil.dsl.object3d-dom :refer $ set-geometry-attributes!
           quatrefoil.globals :refer $ *global-scene
           "\"three" :as THREE
     |quatrefoil.globals $ {}
@@ -2140,7 +2220,7 @@
     |quatrefoil.schema $ {}
       :defs $ {}
         |Component $ quote (defrecord Component :name :tree)
-        |Shape $ quote (defrecord Shape :name :params :position :scale :rotation :material :event :children)
+        |Shape $ quote (defrecord Shape :name :params :position :scale :rotation :material :event :attributes :children)
         |comp? $ quote
           defn comp? (x)
             and (record? x) (.matches? Component x)
