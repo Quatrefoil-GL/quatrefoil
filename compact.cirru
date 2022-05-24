@@ -1,6 +1,6 @@
 
 {} (:package |quatrefoil)
-  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.0.22)
+  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.0.23)
     :modules $ [] |touch-control/ |pointed-prompt/
   :entries $ {}
   :files $ {}
@@ -417,11 +417,12 @@
                   :click $ fn (e d!) (on-change k d!)
               text $ {} (:text title) (:size 4) (:height 1)
                 :position $ [] 0 0 4
-                :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
+                :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true)
+                  :color $ hsluvx 0 30 96
       :ns $ quote
         ns quatrefoil.app.comp.portal $ :require
           quatrefoil.alias :refer $ group box sphere text ambient-light point-light
-          quatrefoil.core :refer $ defcomp hslx
+          quatrefoil.core :refer $ defcomp hslx hsluvx
     |quatrefoil.app.comp.quat-tree $ {}
       :defs $ {}
         |comp-quat-tree $ quote
@@ -1155,6 +1156,12 @@
                       &* -1 $ sin a
         |hclx $ quote
           defn hclx (h c l) (hcl-to-hex h c l)
+        |hsluvx $ quote
+          defn hsluvx (h c l)
+            let
+                color $ new THREE/Color
+                rgb-arr $ hsluvToRgb (js-array h c l)
+              .!getHex $ .!setRGB color (.-0 rgb-arr) (.-1 rgb-arr) (.-2 rgb-arr)
         |hslx $ quote
           defn hslx (h s l)
             let
@@ -1335,6 +1342,7 @@
           touch-control.core :refer $ render-control! control-states start-control-loop! clear-control-loop!
           quatrefoil.math :refer $ &c* &c+ &v+
           "\"@quatrefoil/utils" :refer $ hcl-to-hex
+          "\"hsluv" :refer $ hsluvToRgb
     |quatrefoil.cursor $ {}
       :defs $ {}
         |update-states $ quote
