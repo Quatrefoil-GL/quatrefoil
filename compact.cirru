@@ -1,6 +1,6 @@
 
 {} (:package |quatrefoil)
-  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.0.23)
+  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.0.24)
     :modules $ [] |touch-control/ |pointed-prompt/
   :entries $ {}
   :files $ {}
@@ -68,6 +68,9 @@
           defn shader-mesh (props & children) (create-element :shader-mesh props children)
         |shape $ quote
           defn shape (props & children) (create-element :shape props children)
+        |some-object $ quote
+          defn some-object (props)
+            create-element :some-object props $ []
         |sphere $ quote
           defn sphere (props & children) (create-element :sphere props children)
         |spline $ quote
@@ -122,10 +125,11 @@
                   :quilling $ comp-quilling
                   :control $ comp-control-demo (>> states :control)
                   :shader $ comp-shader
+                  :gltf $ comp-gltf
                 if (not= tab :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
-                ambient-light $ {} (:color 0x666666) (:intencity 1)
+                ambient-light $ {} (:color 0x666666) (:intensity 1)
                 ; point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                   :position $ [] 20 40 50
                 ; point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
@@ -161,9 +165,18 @@
               :position $ [] -10 20 0
             point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
               :position $ [] 10 20 10
+        |comp-gltf $ quote
+          defn comp-gltf () $ group ({})
+            some-object $ {} (:key :sakura)
+              :object-loaded? $ some? (get @*loaded-objects :sakura)
+              :position $ [] 0 -100 -100
+              :scale $ [] 200 200 200
+            point-light $ {} (:color 0x555555) (:intensity 2.4) (:distance 800)
+              :position $ [] 10 100 100
+            ambient-light $ {} (:color 0xaaaaaa) (:intensity 1)
       :ns $ quote
         ns quatrefoil.app.comp.container $ :require
-          quatrefoil.alias :refer $ group box sphere point-light ambient-light scene text
+          quatrefoil.alias :refer $ group box sphere point-light ambient-light scene text some-object
           quatrefoil.core :refer $ defcomp >> hclx
           quatrefoil.app.comp.todolist :refer $ comp-todolist
           quatrefoil.app.comp.portal :refer $ comp-portal
@@ -174,6 +187,7 @@
           quatrefoil.app.comp.quat-tree :refer $ comp-quat-tree
           quatrefoil.app.comp.control :refer $ comp-control-demo
           quatrefoil.app.comp.shader :refer $ comp-shader
+          quatrefoil.globals :refer $ *loaded-objects
     |quatrefoil.app.comp.control $ {}
       :defs $ {}
         |comp-control-demo $ quote
@@ -403,6 +417,7 @@
               comp-tab :quat-tree "\"Quat... Tree" ([] -40 -10 0) on-change
               comp-tab :quilling "\"Quilling" ([] -0 -10 0) on-change
               comp-tab :shader "\"Shader" ([] -40 -20 0) on-change
+              comp-tab :gltf "\"GLTF" ([] 0 -20 0) on-change
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 20 40 50
         |comp-tab $ quote
@@ -824,7 +839,7 @@
                 ; js/console.log |Dispatch: op op-data store
                 reset! *store store
         |main! $ quote
-          defn main! () (load-console-formatter!) (inject-tree-methods)
+          defn main! () (load-console-formatter!) (inject-tree-methods) (start-loading-sakura!)
             set-perspective-camera! $ {} (:fov 45) (:near 0.1) (:far 1000)
               :position $ [] 0 0 100
               :aspect $ / js/window.innerWidth js/window.innerHeight
@@ -849,10 +864,27 @@
         |render-app! $ quote
           defn render-app! () (; println "|Render app:")
             render-canvas! (comp-container @*store) dispatch!
+        |start-loading-sakura! $ quote
+          defn start-loading-sakura! () $ let
+              loader $ new GLTFLoader
+              dracoLoader $ new DRACOLoader
+            .!setDecoderPath dracoLoader "\"https://cdn.tiye.me/gltf/"
+            .!setDRACOLoader loader dracoLoader
+            .load loader "\"https://cdn.tiye.me/gltf/fantasy_sakura/scene.gltf"
+              fn (gltf)
+                set!
+                  .-cachedHash $ .-scene gltf
+                  , "\"sakura"
+                swap! *loaded-objects assoc :sakura $ .-scene gltf
+                js/console.info "\"gltf loaded"
+                render-app!
+              fn $ xhr
+              fn (err) (js/console.log err)
       :ns $ quote
         ns quatrefoil.app.main $ :require
           "\"@quatrefoil/utils" :refer $ inject-tree-methods
           quatrefoil.core :refer $ render-canvas! *global-tree clear-cache! init-renderer! handle-key-event handle-control-events
+          quatrefoil.globals :refer $ *loaded-objects
           quatrefoil.app.comp.container :refer $ comp-container
           quatrefoil.dsl.object3d-dom :refer $ on-canvas-click
           quatrefoil.app.updater :refer $ [] updater
@@ -862,6 +894,8 @@
           "\"./calcit.build-errors" :default build-errors
           quatrefoil.dsl.object3d-dom :refer $ set-perspective-camera!
           "\"three/examples/jsm/postprocessing/UnrealBloomPass" :refer $ UnrealBloomPass
+          "\"three/examples/jsm/loaders/GLTFLoader" :refer $ GLTFLoader
+          "\"three/examples/jsm/loaders/DRACOLoader" :refer $ DRACOLoader
     |quatrefoil.app.materials $ {}
       :defs $ {}
         |cover-line $ quote
@@ -1770,7 +1804,7 @@
                   {} (:kind :mesh-basic) (:color 0xa0a0a0)
                 event $ &record:get element :event
               case-default (&record:get element :name)
-                do (js/console.warn "|Unknown element" element) (new js/Object3D)
+                do (js/console.warn "|Unknown element" element) (new THREE/Object3D)
                 :scene @*global-scene
                 :group $ create-group-element params position rotation scale
                 :box $ create-box-element params position rotation scale material event coord
@@ -1793,6 +1827,7 @@
                 :parametric $ create-parametric-element params position rotation scale material
                 :buffer-object $ create-buffer-object-element params position rotation scale material
                 :shader-mesh $ create-shader-mesh (&record:get element :attributes) params position rotation scale material
+                :some-object $ create-some-object params position rotation scale material
         |create-shape-element $ quote
           defn create-shape-element (params position rotation scale material)
             let
@@ -1809,6 +1844,21 @@
               set-position! object3d position
               set-rotation! object3d rotation
               set-scale! object3d scale
+              , object3d
+        |create-some-object $ quote
+          defn create-some-object (params position rotation scale material)
+            let
+                object3d $ new THREE/Object3D 
+                obj $ get @*loaded-objects (:key params)
+              set-position! object3d position
+              set-rotation! object3d rotation
+              set-scale! object3d scale
+              set! (.-castShadow object3d) true
+              set! (.-receiveShadow object3d) true
+              ; set! (.-coord object3d) coord
+              ; set! (.-event object3d) event
+              if (some? obj) (.!add object3d obj)
+                js/console.warn "\"object not loaded for" $ :key params
               , object3d
         |create-sphere-element $ quote
           defn create-sphere-element (params position rotation scale material event coord)
@@ -2004,6 +2054,7 @@
       :ns $ quote
         ns quatrefoil.dsl.object3d-dom $ :require
           quatrefoil.util.core :refer $ purify-tree collect-children find-element scale-zero
+          quatrefoil.globals :refer $ *loaded-objects
           "\"three" :as THREE
           "\"three/examples/jsm/geometries/TextGeometry" :refer $ TextGeometry
           quatrefoil.globals :refer $ *global-renderer *global-camera *global-scene *global-tree *proxied-dispatch
@@ -2112,6 +2163,8 @@
         |*global-scene $ quote
           defatom *global-scene $ new THREE/Scene
         |*global-tree $ quote (defatom *global-tree nil)
+        |*loaded-objects $ quote
+          defatom *loaded-objects $ {}
         |*proxied-dispatch $ quote (defatom *proxied-dispatch nil)
         |*viewer-angle $ quote
           defatom *viewer-angle $ &/ &PI 2

@@ -19,6 +19,10 @@ cr --emit-js -1
 yarn vite
 ```
 
+### Credits
+
+GLTF used in the demo: [fantasy-sakura](https://sketchfab.com/3d-models/fantasy-sakura-43f5b135e5af438cb706bbcb5bdf3cf1)
+
 ### License
 
 MIT
