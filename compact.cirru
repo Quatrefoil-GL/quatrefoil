@@ -1,7 +1,7 @@
 
 {} (:package |quatrefoil)
-  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.0.24)
-    :modules $ [] |touch-control/ |pointed-prompt/
+  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.0.25)
+    :modules $ [] |touch-control/ |pointed-prompt/ |quaternion/
   :entries $ {}
   :files $ {}
     |quatrefoil.alias $ {}
@@ -236,7 +236,7 @@
         ns quatrefoil.app.comp.control $ :require
           quatrefoil.alias :refer $ group box sphere text line tube point-light
           quatrefoil.core :refer $ defcomp hslx
-          quatrefoil.math :refer $ q* &q* v-scale q+
+          quaternion.core :refer $ q* &q* v-scale q+
           quatrefoil.comp.control :refer $ comp-pin-point comp-value comp-value-2d comp-switch
     |quatrefoil.app.comp.lines $ {}
       :defs $ {}
@@ -399,7 +399,8 @@
         ns quatrefoil.app.comp.mirror $ :require
           quatrefoil.alias :refer $ group box sphere shape text line spline tube plane-reflector point-light ambient-light
           quatrefoil.core :refer $ defcomp
-          quatrefoil.math :refer $ v-scale rand-around
+          quatrefoil.math :refer $ rand-around
+          quaternion.core :refer $ v-scale
           "\"@calcit/std" :refer $ rand
     |quatrefoil.app.comp.portal $ {}
       :defs $ {}
@@ -519,7 +520,7 @@
         ns quatrefoil.app.comp.quat-tree $ :require
           quatrefoil.alias :refer $ group box sphere text line tube ambient-light point-light
           quatrefoil.core :refer $ defcomp
-          quatrefoil.math :refer $ q* &q* v-scale q+ &q+ &q- q-length
+          quaternion.core :refer $ q* &q* v-scale q+ &q+ &q- q-length
           quatrefoil.app.materials :refer $ cover-line
     |quatrefoil.app.comp.shader $ {}
       :defs $ {}
@@ -548,7 +549,7 @@
         ns quatrefoil.app.comp.shader $ :require
           quatrefoil.alias :refer $ group box sphere text line tube ambient-light point-light shader-mesh
           quatrefoil.core :refer $ defcomp
-          quatrefoil.math :refer $ q* &q* v-scale q+ &q+ &q- q-length
+          quaternion.core :refer $ q* &q* v-scale q+ &q+ &q- q-length
           quatrefoil.app.materials :refer $ cover-line
     |quatrefoil.app.comp.shapes $ {}
       :defs $ {}
@@ -821,7 +822,7 @@
         ns quatrefoil.app.comp.triflorum $ :require
           quatrefoil.alias :refer $ group box sphere text line tube polyhedron point-light
           quatrefoil.core :refer $ defcomp
-          quatrefoil.math :refer $ v+ v-scale
+          quaternion.core :refer $ v+ v-scale
     |quatrefoil.app.main $ {}
       :defs $ {}
         |*store $ quote
@@ -1074,7 +1075,7 @@
         ns quatrefoil.comp.control $ :require
           quatrefoil.alias :refer $ group box sphere text line tube point-light
           quatrefoil.core :refer $ defcomp
-          quatrefoil.math :refer $ q* &q* v-scale q+ &v+
+          quaternion.core :refer $ q* &q* v-scale q+ &v+
           quatrefoil.app.materials :refer $ cover-line
           quatrefoil.core :refer $ to-viewer-axis
     |quatrefoil.core $ {}
@@ -1374,7 +1375,7 @@
           "\"three/examples/jsm/postprocessing/EffectComposer" :refer $ EffectComposer
           "\"three/examples/jsm/postprocessing/RenderPass" :refer $ RenderPass
           touch-control.core :refer $ render-control! control-states start-control-loop! clear-control-loop!
-          quatrefoil.math :refer $ &c* &c+ &v+
+          quaternion.core :refer $ &c* &c+ &v+
           "\"@quatrefoil/utils" :refer $ hcl-to-hex
           "\"hsluv" :refer $ hsluvToRgb
     |quatrefoil.cursor $ {}
@@ -1993,7 +1994,7 @@
                         if (some? maybe-handler) (maybe-handler event @*proxied-dispatch) (println "|no handler" coord)
                         reset! *focused-coord coord
                         ; println "\"focus to" coord
-                      do (reset! *focused-coord nil) (println "\"lose focus")
+                      do (reset! *focused-coord nil) (eprintln "\"lose focus")
                   do (reset! *focused-coord nil) (println "\"lose focus")
         |on-control-event $ quote
           defn on-control-event (move delta elapsed)
@@ -2173,108 +2174,9 @@
         ns quatrefoil.globals $ :require ("\"three" :as THREE)
     |quatrefoil.math $ {}
       :defs $ {}
-        |&c* $ quote
-          defn &c* (a b)
-            let-sugar
-                  [] x0 y0
-                  , a
-                ([] x1 y1) b
-              []
-                - (* x0 x1) (* y0 y1)
-                + (* x0 y1) (* x1 y0)
-        |&c+ $ quote
-          defn &c+ (a b)
-            let-sugar
-                  [] x0 y0
-                  , a
-                ([] x1 y1) b
-              [] (+ x0 x1) (+ y0 y1)
-        |&c- $ quote
-          defn &c- (a b)
-            let-sugar
-                  [] x0 y0
-                  , a
-                ([] x1 y1) b
-              [] (- x0 x1) (- y0 y1)
-        |&q* $ quote
-          defn &q* (a b)
-            &let
-              v $ .!multiply
-                new THREE/Quaternion (nth a 0) (nth a 1) (nth a 2) (nth a 3)
-                new THREE/Quaternion (nth b 0) (nth b 1) (nth b 2) (nth b 3)
-              [] (.-x v) (.-y v) (.-z v) (.-w v)
-        |&q+ $ quote
-          defn &q+ (a b)
-            let-sugar
-                  [] x y z w
-                  , a
-                ([] x1 y1 z1 w1) b
-              [] (+ x x1) (+ y y1) (+ z z1) (+ w w1)
-        |&q- $ quote
-          defn &q- (a b)
-            let-sugar
-                  [] x y z w
-                  , a
-                ([] x1 y1 z1 w1) b
-              [] (- x x1) (- y y1) (- z z1) (- w w1)
-        |&v+ $ quote
-          defn &v+ (a b)
-            let[] (x y z) a $ let[] (x2 y2 z2) b
-              [] (&+ x x2) (&+ y y2) (&+ z z2)
-        |&v- $ quote
-          defn &v- (a b)
-            let[] (x y z) a $ let[] (x2 y2 z2) b
-              [] (&- x x2) (&- y y2) (&- z z2)
-        |c-conjutate $ quote
-          defn c-conjutate (a)
-            let[] (x y) a $ [] (&- 0 x) w
-        |c-length $ quote
-          defn c-length (v)
-            let[] (x y) v $ js/Math.sqrt
-              + (js/Math.pow x 2) (js/Math.pow y 2)
-        |c-length2 $ quote
-          defn c-length2 (v)
-            let[] (x y) v $ + (js/Math.pow x 2) (js/Math.pow y 2)
-        |q+ $ quote
-          defn q+ (& xs)
-            foldl xs ([] 0 0 0 0)
-              fn (acc x) (&q+ acc x)
-        |q- $ quote
-          defn q- (& xs)
-            foldl (rest xs) (first xs)
-              fn (acc x) (&q- acc x)
-        |q-conjugate $ quote
-          defn q-conjugate (a)
-            let[] (x y z w) a $ [] (&- 0 x) (&- 0 y) (&- 0 z) w
-        |q-inverse $ quote
-          defn q-inverse (a)
-            q-scale (q-conjugate a)
-              &/ 1 $ q-length2 a
-        |q-length $ quote
-          defn q-length (a)
-            let[] (x y z w) a $ sqrt
-              + (pow x 2) (pow y 2) (pow z 2) (pow w 2)
-        |q-length2 $ quote
-          defn q-length2 (a)
-            let[] (x y z w) a $ + (pow x 2) (pow y 2) (pow z 2) (pow w 2)
-        |q-scale $ quote
-          defn q-scale (v n)
-            let[] (x y z w) v $ [] (&* n x) (&* n y) (&* n z) (&* n w)
         |rand-around $ quote
           defn rand-around (base x)
             + base (rand x) (* -0.5 x)
-        |v+ $ quote
-          defn v+ (& xs)
-            foldl xs ([] 0 0 0)
-              fn (acc x) (&v+ acc x)
-        |v- $ quote
-          defn v- (& xs)
-            foldl (rest xs) (first xs)
-              fn (acc x) (&v- acc x)
-        |v-scale $ quote
-          defn v-scale (v n)
-            let[] (x y z w) v $ [] (&* n x) (&* n y) (&* n z)
-              &* n $ either w 0
       :ns $ quote
         ns quatrefoil.math $ :require ("\"three" :as THREE)
           "\"@calcit/std" :refer $ rand
