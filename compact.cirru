@@ -126,7 +126,7 @@
                   :control $ comp-control-demo (>> states :control)
                   :shader $ comp-shader
                   :gltf $ comp-gltf
-                if (not= tab :portal)
+                ; if (not= tab :portal)
                   comp-back $ fn (d!)
                     d! cursor $ assoc state :tab :portal
                 ambient-light $ {} (:color 0x666666) (:intensity 1)
@@ -169,11 +169,29 @@
           defn comp-gltf () $ group ({})
             some-object $ {} (:key :sakura)
               :object-loaded? $ some? (get @*loaded-objects :sakura)
-              :position $ [] 0 -100 -100
-              :scale $ [] 200 200 200
-            point-light $ {} (:color 0x555555) (:intensity 2.4) (:distance 800)
-              :position $ [] 10 100 100
-            ambient-light $ {} (:color 0xaaaaaa) (:intensity 1)
+              :position $ [] 0 0 0
+              :scale $ [] 1 1 1
+            some-object $ {} (:key :sakura)
+              :object-loaded? $ some? (get @*loaded-objects :sakura)
+              :position $ [] 0 0 0
+              :scale $ [] 5 5 5
+            some-object $ {} (:key :sakura)
+              :object-loaded? $ some? (get @*loaded-objects :sakura)
+              :position $ [] 0 0 0
+              :scale $ [] 20 20 20
+            some-object $ {} (:key :sakura)
+              :object-loaded? $ some? (get @*loaded-objects :sakura)
+              :position $ [] 0 0 0
+              :scale $ [] 80 80 80
+            some-object $ {} (:key :sakura)
+              :object-loaded? $ some? (get @*loaded-objects :sakura)
+              :position $ [] 0 0 0
+              :scale $ [] 160 160 160
+            point-light $ {} (:color 0x555555) (:intensity 10.4) (:distance 800)
+              :position $ [] 0 0 0
+            point-light $ {} (:color 0x555555) (:intensity 10.4) (:distance 800)
+              :position $ [] 0 -40 40
+            ambient-light $ {} (:color 0xaaaaaa) (:intensity 5)
       :ns $ quote
         ns quatrefoil.app.comp.container $ :require
           quatrefoil.alias :refer $ group box sphere point-light ambient-light scene text some-object
@@ -871,7 +889,7 @@
               dracoLoader $ new DRACOLoader
             .!setDecoderPath dracoLoader "\"https://cdn.tiye.me/gltf/"
             .!setDRACOLoader loader dracoLoader
-            .load loader "\"https://cdn.tiye.me/gltf/fantasy_sakura/scene.gltf"
+            .load loader "\"https://cdn.tiye.me/gltf/halloween-pumpkin/scene.gltf"
               fn (gltf)
                 set!
                   .-cachedHash $ .-scene gltf
@@ -1862,7 +1880,8 @@
               set! (.-receiveShadow object3d) true
               ; set! (.-coord object3d) coord
               ; set! (.-event object3d) event
-              if (some? obj) (.!add object3d obj)
+              if (some? obj)
+                .!add object3d $ .!clone obj
                 js/console.warn "\"object not loaded for" $ :key params
               , object3d
         |create-sphere-element $ quote
