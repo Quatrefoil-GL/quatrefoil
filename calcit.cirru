@@ -10752,8 +10752,19 @@
                             :data $ {}
                               |T $ %{} :Leaf (:at 1648228975912) (:by |-pxyJ-2j) (:text |:antialias)
                               |b $ %{} :Leaf (:at 1648228975912) (:by |-pxyJ-2j) (:text |true)
+              |v5 $ %{} :Expr (:at 1719947000510) (:by |-pxyJ-2j)
+                :data $ {}
+                  |T $ %{} :Leaf (:at 1719947000510) (:by |-pxyJ-2j) (:text |->)
+                  |b $ %{} :Leaf (:at 1719947000510) (:by |-pxyJ-2j) (:text |@*global-renderer)
+                  |h $ %{} :Leaf (:at 1719947000510) (:by |-pxyJ-2j) (:text |.-xr)
+                  |l $ %{} :Leaf (:at 1719947000510) (:by |-pxyJ-2j) (:text |.-enabled)
+                  |o $ %{} :Expr (:at 1719947000510) (:by |-pxyJ-2j)
+                    :data $ {}
+                      |T $ %{} :Leaf (:at 1719947000510) (:by |-pxyJ-2j) (:text |set!)
+                      |b $ %{} :Leaf (:at 1719947000510) (:by |-pxyJ-2j) (:text |true)
               |vD $ %{} :Expr (:at 1648235312703) (:by |-pxyJ-2j)
                 :data $ {}
+                  |5 $ %{} :Leaf (:at 1719947003287) (:by |-pxyJ-2j) (:text |;)
                   |D $ %{} :Leaf (:at 1648235313354) (:by |-pxyJ-2j) (:text |if)
                   |L $ %{} :Expr (:at 1648235314373) (:by |-pxyJ-2j)
                     :data $ {}
@@ -10790,6 +10801,7 @@
                               |b $ %{} :Leaf (:at 1648281839888) (:by |-pxyJ-2j) (:text |THREE/VSMShadowMap)
               |vT $ %{} :Expr (:at 1648229771545) (:by |-pxyJ-2j)
                 :data $ {}
+                  |D $ %{} :Leaf (:at 1719946567541) (:by |-pxyJ-2j) (:text |;)
                   |T $ %{} :Leaf (:at 1648229772512) (:by |-pxyJ-2j) (:text |reset!)
                   |b $ %{} :Leaf (:at 1648229780601) (:by |-pxyJ-2j) (:text |*global-composer)
                   |h $ %{} :Expr (:at 1648229804991) (:by |-pxyJ-2j)
@@ -10799,6 +10811,7 @@
                       |h $ %{} :Leaf (:at 1648229813083) (:by |-pxyJ-2j) (:text |@*global-renderer)
               |vb $ %{} :Expr (:at 1648230418024) (:by |-pxyJ-2j)
                 :data $ {}
+                  |5 $ %{} :Leaf (:at 1719946568090) (:by |-pxyJ-2j) (:text |;)
                   |D $ %{} :Leaf (:at 1648230418631) (:by |-pxyJ-2j) (:text |let)
                   |L $ %{} :Expr (:at 1648230418849) (:by |-pxyJ-2j)
                     :data $ {}
@@ -10818,6 +10831,7 @@
                       |h $ %{} :Leaf (:at 1648230507560) (:by |-pxyJ-2j) (:text |render-scene)
               |vj $ %{} :Expr (:at 1648229824462) (:by |-pxyJ-2j)
                 :data $ {}
+                  |D $ %{} :Leaf (:at 1719946569122) (:by |-pxyJ-2j) (:text |;)
                   |T $ %{} :Leaf (:at 1648229828887) (:by |-pxyJ-2j) (:text |&doseq)
                   |b $ %{} :Expr (:at 1648229829470) (:by |-pxyJ-2j)
                     :data $ {}
@@ -10889,8 +10903,36 @@
                   |j $ %{} :Leaf (:at 1620059734781) (:by |-pxyJ-2j) (:text |@*global-renderer)
                   |r $ %{} :Leaf (:at 1620059734781) (:by |-pxyJ-2j) (:text |js/window.innerWidth)
                   |v $ %{} :Leaf (:at 1620059734781) (:by |-pxyJ-2j) (:text |js/window.innerHeight)
+              |y5 $ %{} :Expr (:at 1719947314794) (:by |-pxyJ-2j)
+                :data $ {}
+                  |T $ %{} :Leaf (:at 1719947329170) (:by |-pxyJ-2j) (:text |.!setAnimationLoop)
+                  |b $ %{} :Leaf (:at 1719947330936) (:by |-pxyJ-2j) (:text |@*global-renderer)
+                  |h $ %{} :Expr (:at 1719947334434) (:by |-pxyJ-2j)
+                    :data $ {}
+                      |T $ %{} :Leaf (:at 1719947335788) (:by |-pxyJ-2j) (:text |fn)
+                      |b $ %{} :Expr (:at 1719947336450) (:by |-pxyJ-2j)
+                        :data $ {}
+                          |T $ %{} :Leaf (:at 1719947380760) (:by |-pxyJ-2j) (:text |&)
+                          |b $ %{} :Leaf (:at 1719947381698) (:by |-pxyJ-2j) (:text |aa)
+                      |e $ %{} :Expr (:at 1719947386873) (:by |-pxyJ-2j)
+                        :data $ {}
+                          |D $ %{} :Leaf (:at 1719947402993) (:by |-pxyJ-2j) (:text |;)
+                          |T $ %{} :Leaf (:at 1719947388948) (:by |-pxyJ-2j) (:text |js/console.log)
+                          |b $ %{} :Leaf (:at 1719947390846) (:by |-pxyJ-2j) (:text "|\"loop")
+                          |h $ %{} :Leaf (:at 1719947392990) (:by |-pxyJ-2j) (:text |aa)
+                      |h $ %{} :Expr (:at 1719947341747) (:by |-pxyJ-2j)
+                        :data $ {}
+                          |T $ %{} :Leaf (:at 1719947341747) (:by |-pxyJ-2j) (:text |.!updateProjectionMatrix)
+                          |b $ %{} :Leaf (:at 1719947341747) (:by |-pxyJ-2j) (:text |@*global-camera)
+                      |l $ %{} :Expr (:at 1719947344826) (:by |-pxyJ-2j)
+                        :data $ {}
+                          |b $ %{} :Leaf (:at 1719947344826) (:by |-pxyJ-2j) (:text |.!render)
+                          |h $ %{} :Leaf (:at 1719947344826) (:by |-pxyJ-2j) (:text |@*global-renderer)
+                          |l $ %{} :Leaf (:at 1719947344826) (:by |-pxyJ-2j) (:text |@*global-scene)
+                          |o $ %{} :Leaf (:at 1719947344826) (:by |-pxyJ-2j) (:text |@*global-camera)
               |yD $ %{} :Expr (:at 1648229968350) (:by |-pxyJ-2j)
                 :data $ {}
+                  |D $ %{} :Leaf (:at 1719946572916) (:by |-pxyJ-2j) (:text |;)
                   |T $ %{} :Leaf (:at 1648229972230) (:by |-pxyJ-2j) (:text |.!setSize)
                   |b $ %{} :Leaf (:at 1648229977283) (:by |-pxyJ-2j) (:text |@*global-composer)
                   |h $ %{} :Leaf (:at 1648229979547) (:by |-pxyJ-2j) (:text |js/window.innerWidth)
@@ -10921,6 +10963,12 @@
                       |j $ %{} :Expr (:at 1620060674818) (:by |-pxyJ-2j)
                         :data $ {}
                           |T $ %{} :Leaf (:at 1620060674818) (:by |-pxyJ-2j) (:text |event)
+                      |n $ %{} :Expr (:at 1719946977152) (:by |-pxyJ-2j)
+                        :data $ {}
+                          |T $ %{} :Leaf (:at 1719946983163) (:by |-pxyJ-2j) (:text |js/console.log)
+                          |b $ %{} :Leaf (:at 1719946984592) (:by |-pxyJ-2j) (:text "|\"resize")
+                          |h $ %{} :Leaf (:at 1719946987064) (:by |-pxyJ-2j) (:text |js/window.innerWidth)
+                          |l $ %{} :Leaf (:at 1719946988536) (:by |-pxyJ-2j) (:text |js/window.innerHeight)
                       |r $ %{} :Expr (:at 1620306297977) (:by |-pxyJ-2j)
                         :data $ {}
                           |D $ %{} :Leaf (:at 1620306307010) (:by |-pxyJ-2j) (:text |set!)
@@ -10945,14 +10993,30 @@
                           |v $ %{} :Leaf (:at 1620306380887) (:by |-pxyJ-2j) (:text |js/window.innerHeight)
                       |xT $ %{} :Expr (:at 1648229985675) (:by |-pxyJ-2j)
                         :data $ {}
+                          |D $ %{} :Leaf (:at 1719947130292) (:by |-pxyJ-2j) (:text |;)
                           |T $ %{} :Leaf (:at 1648229985675) (:by |-pxyJ-2j) (:text |.!setSize)
                           |b $ %{} :Leaf (:at 1648229985675) (:by |-pxyJ-2j) (:text |@*global-composer)
                           |h $ %{} :Leaf (:at 1648229985675) (:by |-pxyJ-2j) (:text |js/window.innerWidth)
                           |l $ %{} :Leaf (:at 1648229985675) (:by |-pxyJ-2j) (:text |js/window.innerHeight)
                       |z $ %{} :Expr (:at 1648229876182) (:by |-pxyJ-2j)
                         :data $ {}
+                          |D $ %{} :Leaf (:at 1719946796798) (:by |-pxyJ-2j) (:text |;)
                           |T $ %{} :Leaf (:at 1648229877721) (:by |-pxyJ-2j) (:text |.!render)
                           |b $ %{} :Leaf (:at 1648229882905) (:by |-pxyJ-2j) (:text |@*global-composer)
+                      |zD $ %{} :Expr (:at 1719946782818) (:by |-pxyJ-2j)
+                        :data $ {}
+                          |T $ %{} :Leaf (:at 1719946782818) (:by |-pxyJ-2j) (:text |.!render)
+                          |b $ %{} :Leaf (:at 1719946782818) (:by |-pxyJ-2j) (:text |@*global-renderer)
+                          |h $ %{} :Leaf (:at 1719946782818) (:by |-pxyJ-2j) (:text |@*global-scene)
+                          |l $ %{} :Leaf (:at 1719946782818) (:by |-pxyJ-2j) (:text |@*global-camera)
+              |z $ %{} :Expr (:at 1719945624624) (:by |-pxyJ-2j)
+                :data $ {}
+                  |T $ %{} :Leaf (:at 1719945624624) (:by |-pxyJ-2j) (:text |js/document.body.appendChild)
+                  |b $ %{} :Expr (:at 1719945624624) (:by |-pxyJ-2j)
+                    :data $ {}
+                      |T $ %{} :Leaf (:at 1719945720052) (:by |-pxyJ-2j) (:text |.!createButton)
+                      |b $ %{} :Leaf (:at 1719945624624) (:by |-pxyJ-2j) (:text |VRButton)
+                      |h $ %{} :Leaf (:at 1719945679200) (:by |-pxyJ-2j) (:text |@*global-renderer)
         |move-viewer-by! $ %{} :CodeEntry (:doc |)
           :code $ %{} :Expr (:at 1624391767236) (:by |-pxyJ-2j)
             :data $ {}
@@ -11267,7 +11331,9 @@
               |z $ %{} :Expr (:at 1648230382272) (:by |-pxyJ-2j)
                 :data $ {}
                   |T $ %{} :Leaf (:at 1648230385646) (:by |-pxyJ-2j) (:text |.!render)
-                  |b $ %{} :Leaf (:at 1648230389401) (:by |-pxyJ-2j) (:text |@*global-composer)
+                  |b $ %{} :Leaf (:at 1719946523511) (:by |-pxyJ-2j) (:text |@*global-renderer)
+                  |h $ %{} :Leaf (:at 1719946542147) (:by |-pxyJ-2j) (:text |@*global-scene)
+                  |l $ %{} :Leaf (:at 1719946549276) (:by |-pxyJ-2j) (:text |@*global-camera)
         |rotate-viewer-by! $ %{} :CodeEntry (:doc |)
           :code $ %{} :Expr (:at 1624392073613) (:by |-pxyJ-2j)
             :data $ {}
@@ -11981,6 +12047,13 @@
                     |h $ %{} :Expr (:at 1667223403474) (:by |-pxyJ-2j)
                       :data $ {}
                         |T $ %{} :Leaf (:at 1667223250279) (:by |-pxyJ-2j) (:text |Hsluv)
+                |zY $ %{} :Expr (:at 1719945615227) (:by |-pxyJ-2j)
+                  :data $ {}
+                    |T $ %{} :Leaf (:at 1719945615227) (:by |-pxyJ-2j) (:text "|\"three/addons/webxr/VRButton.js")
+                    |b $ %{} :Leaf (:at 1719945615227) (:by |-pxyJ-2j) (:text |:refer)
+                    |h $ %{} :Expr (:at 1719945615227) (:by |-pxyJ-2j)
+                      :data $ {}
+                        |T $ %{} :Leaf (:at 1719945615227) (:by |-pxyJ-2j) (:text |VRButton)
     |quatrefoil.cursor $ %{} :FileEntry
       :defs $ {}
         |update-states $ %{} :CodeEntry (:doc |)

@@ -1314,16 +1314,17 @@
             defn init-renderer! (canvas-el options) (.!init RectAreaLightUniformsLib)
               reset! *global-renderer $ new THREE/WebGLRenderer
                 js-object (:canvas canvas-el) (:antialias true)
-              if (:shadow-map? options)
+              -> @*global-renderer .-xr .-enabled $ set! true
+              ; if (:shadow-map? options)
                 &let
                   m $ -> @*global-renderer .-shadowMap
                   -> m .-enabled $ set! true
                   -> m .-type $ set! THREE/VSMShadowMap
-              reset! *global-composer $ new EffectComposer @*global-renderer
-              let
+              ; reset! *global-composer $ new EffectComposer @*global-renderer
+              ; let
                   render-scene $ new RenderPass @*global-scene @*global-camera
                 .!addPass @*global-composer render-scene
-              &doseq
+              ; &doseq
                 pass $ either (:composer-passes options) ([])
                 .!addPass @*global-composer pass
               if
@@ -1333,14 +1334,17 @@
               ; set! (.-gammaFactor @*global-renderer) 22
               .!setPixelRatio @*global-renderer $ either js/window.devicePixelRatio 1
               .!setSize @*global-renderer js/window.innerWidth js/window.innerHeight
-              .!setSize @*global-composer js/window.innerWidth js/window.innerHeight
+              .!setAnimationLoop @*global-renderer $ fn (& aa) (; js/console.log "\"loop" aa) (.!updateProjectionMatrix @*global-camera) (.!render @*global-renderer @*global-scene @*global-camera)
+              ; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight
               .!addEventListener canvas-el |click $ fn (event) (on-canvas-click event)
-              .!addEventListener js/window |resize $ fn (event)
+              .!addEventListener js/window |resize $ fn (event) (js/console.log "\"resize" js/window.innerWidth js/window.innerHeight)
                 set! (.-aspect @*global-camera) (/ js/window.innerWidth js/window.innerHeight)
                 .!updateProjectionMatrix @*global-camera
                 .!setSize @*global-renderer js/window.innerWidth js/window.innerHeight
-                .!setSize @*global-composer js/window.innerWidth js/window.innerHeight
-                .!render @*global-composer
+                ; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight
+                ; .!render @*global-composer
+                .!render @*global-renderer @*global-scene @*global-camera
+              js/document.body.appendChild $ .!createButton VRButton @*global-renderer
         |move-viewer-by! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn move-viewer-by! (x0 y0 z0)
@@ -1384,7 +1388,7 @@
                   apply-changes @*tmp-changes
                 build-tree ([]) (purify-tree markup)
               reset! *global-tree markup
-              .!render @*global-composer
+              .!render @*global-renderer @*global-scene @*global-camera
         |rotate-viewer-by! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn rotate-viewer-by! (x)
@@ -1496,6 +1500,7 @@
             quaternion.core :refer $ &c* &c+ &v+
             "\"@quatrefoil/utils" :refer $ hcl-to-hex
             "\"hsluv" :refer $ Hsluv
+            "\"three/addons/webxr/VRButton.js" :refer $ VRButton
     |quatrefoil.cursor $ %{} :FileEntry
       :defs $ {}
         |update-states $ %{} :CodeEntry (:doc |)
