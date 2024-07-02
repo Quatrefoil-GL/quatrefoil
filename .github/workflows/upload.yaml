@@ -19,7 +19,7 @@ jobs:
 
       - name: "compiles to js"
         run: >
-          cr --emit-js --once
+          caps --ci && cr --emit-js --once
           && cp assets/* js-out/
           && yarn && yarn vite build --base=./
 
