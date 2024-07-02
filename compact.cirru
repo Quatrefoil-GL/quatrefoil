@@ -953,7 +953,7 @@
                 dracoLoader $ new DRACOLoader
               .!setDecoderPath dracoLoader "\"https://cdn.tiye.me/gltf/"
               .!setDRACOLoader loader dracoLoader
-              .load loader "\"https://cdn.tiye.me/gltf/fantasy_sakura/scene.gltf"
+              .!load loader "\"https://cdn.tiye.me/gltf/fantasy_sakura/scene.gltf"
                 fn (gltf)
                   set!
                     .-cachedHash $ .-scene gltf
@@ -1453,7 +1453,7 @@
             defn tween-move-camera! (control)
               let
                   camera @*global-camera
-                key-match control
+                tag-match control
                     :shift shift
                     tween-call 20 5 $ fn (i)
                       do
@@ -2375,11 +2375,11 @@
         |comp? $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn comp? (x)
-              and (record? x) (.matches? Component x)
+              and (record? x) (&record:matches? Component x)
         |shape? $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn shape? (x)
-              and (record? x) (.matches? Shape x)
+              and (record? x) (&record:matches? Shape x)
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote (ns quatrefoil.schema)
     |quatrefoil.util.core $ %{} :FileEntry
