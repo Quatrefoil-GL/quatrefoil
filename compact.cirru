@@ -137,32 +137,36 @@
                     {} $ :tab :portal
                   tab $ :tab state
                 scene ({})
-                  case-default tab
-                    comp-portal $ fn (next d!)
-                      d! cursor $ assoc state :tab next
-                    :portal $ comp-portal
-                      fn (next d!)
+                  group
+                    {}
+                      :scale $ [] 0.01 0.01 0.01
+                      :position $ [] 0 1.2 -0.4
+                    case-default tab
+                      comp-portal $ fn (next d!)
                         d! cursor $ assoc state :tab next
-                    :todolist $ comp-todolist (:tasks store)
-                    :demo $ comp-demo
-                    :lines $ comp-lines
-                    :shapes $ comp-shapes
-                    :triflorum $ comp-triflorum
-                    :mirror $ comp-mirror (>> states :mirror)
-                    :fly $ comp-fly-city (>> states :fly)
-                    :quat-tree $ comp-quat-tree
-                    :quilling $ comp-quilling
-                    :control $ comp-control-demo (>> states :control)
-                    :shader $ comp-shader
-                    :gltf $ comp-gltf
-                  if (not= tab :portal)
-                    comp-back $ fn (d!)
-                      d! cursor $ assoc state :tab :portal
-                  ambient-light $ {} (:color 0x666666) (:intensity 1)
-                  ; point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
-                    :position $ [] 20 40 50
-                  ; point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
-                    :position $ [] 0 60 0
+                      :portal $ comp-portal
+                        fn (next d!)
+                          d! cursor $ assoc state :tab next
+                      :todolist $ comp-todolist (:tasks store)
+                      :demo $ comp-demo
+                      :lines $ comp-lines
+                      :shapes $ comp-shapes
+                      :triflorum $ comp-triflorum
+                      :mirror $ comp-mirror (>> states :mirror)
+                      :fly $ comp-fly-city (>> states :fly)
+                      :quat-tree $ comp-quat-tree
+                      :quilling $ comp-quilling
+                      :control $ comp-control-demo (>> states :control)
+                      :shader $ comp-shader
+                      :gltf $ comp-gltf
+                    if (not= tab :portal)
+                      comp-back $ fn (d!)
+                        d! cursor $ assoc state :tab :portal
+                    ambient-light $ {} (:color 0x666666) (:intensity 1)
+                    ; point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
+                      :position $ [] 20 40 50
+                    ; point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
+                      :position $ [] 0 60 0
         |comp-demo $ %{} :CodeEntry (:doc |)
           :code $ quote
             defcomp comp-demo () $ group ({})
@@ -933,6 +937,7 @@
               set! js/window.onkeydown handle-key-event
               render-control!
               handle-control-events
+              init-controls!
               println "|App started!"
         |reload! $ %{} :CodeEntry (:doc |)
           :code $ quote
@@ -967,7 +972,7 @@
         :code $ quote
           ns quatrefoil.app.main $ :require
             "\"@quatrefoil/utils" :refer $ inject-tree-methods
-            quatrefoil.core :refer $ render-canvas! *global-tree clear-cache! init-renderer! handle-key-event handle-control-events
+            quatrefoil.core :refer $ render-canvas! *global-tree clear-cache! init-renderer! init-controls! handle-key-event handle-control-events
             quatrefoil.globals :refer $ *loaded-objects
             quatrefoil.app.comp.container :refer $ comp-container
             quatrefoil.dsl.object3d-dom :refer $ on-canvas-click
@@ -1309,6 +1314,38 @@
               let
                   c $ new THREE/Color
                 .!getHex $ .!setHSL c (/ h 360) (/ s 100) (/ l 100)
+        |init-controls! $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defn init-controls! () $ let
+                renderer @*global-renderer
+                scene @*global-scene
+                ctrl-0 $ -> renderer .-xr (.!getController 0)
+                ctrl-1 $ -> renderer .-xr (.!getController 1)
+                ctrl-grip-0 $ -> renderer .-xr (.!getControllerGrip 0)
+                ctrl-grip-1 $ -> renderer .-xr (.!getControllerGrip 1)
+                hand-0 $ -> renderer .-xr (.!getHand 0)
+                hand-1 $ -> renderer .-xr (.!getHand 1)
+                controllerModelFactory $ new XRControllerModelFactory
+                handModelFactory $ new XRHandModelFactory
+                line-geo $ -> (new THREE/BufferGeometry)
+                  .!setFromPoints $ js-array (new THREE/Vector3 0 0 0) (new THREE/Vector3 0 0 -1)
+                line $ new THREE/Line line-geo
+              js/document.body.appendChild $ .!createButton VRButton renderer
+                js-object $ :requiredFeatures (js-array "\"hand-tracking")
+              .!add ctrl-grip-0 $ .!createControllerModel controllerModelFactory ctrl-grip-0
+              .!add ctrl-grip-1 $ .!createControllerModel controllerModelFactory ctrl-grip-1
+              .!add hand-0 $ .!createHandModel handModelFactory hand-0
+              .!add hand-1 $ .!createHandModel handModelFactory hand-1
+              .!add scene ctrl-0
+              .!add scene ctrl-1
+              .!add scene ctrl-grip-0
+              .!add scene ctrl-grip-1
+              .!add scene hand-0
+              .!add scene hand-1
+              set! (.-name line) "\"line"
+              -> line .-scale .-z $ set! 5
+              .!add ctrl-0 $ .!clone line
+              .!add ctrl-1 $ .!clone line
         |init-renderer! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn init-renderer! (canvas-el options) (.!init RectAreaLightUniformsLib)
@@ -1344,7 +1381,6 @@
                 ; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight
                 ; .!render @*global-composer
                 .!render @*global-renderer @*global-scene @*global-camera
-              js/document.body.appendChild $ .!createButton VRButton @*global-renderer
         |move-viewer-by! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn move-viewer-by! (x0 y0 z0)
@@ -1360,7 +1396,7 @@
                 set! (.-y position) y
                 set! (.-z position) z
                 .!lookAt camera $ new-lookat-point
-                .!render @*global-composer
+                .!render @*global-renderer
         |new-lookat-point $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn new-lookat-point () $ let-sugar
@@ -1396,7 +1432,7 @@
                   camera @*global-camera
                 swap! *viewer-angle &+ x
                 .!lookAt camera $ new-lookat-point
-                .!render @*global-composer
+                .!render @*global-renderer @*global-scene @*global-camera
         |shift-viewer-by! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn shift-viewer-by! (x)
@@ -1405,7 +1441,7 @@
                 if (= x false) (reset! *viewer-y-shift 0)
                   swap! *viewer-y-shift &+ $ * 2 x
                 .!lookAt camera $ new-lookat-point
-                .!render @*global-composer
+                .!render @*global-renderer @*global-scene @*global-camera
         |to-viewer-axis $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn to-viewer-axis (x y z)
@@ -1463,13 +1499,13 @@
                       do
                         swap! *viewer-y-shift &+ $ / shift 10
                         .!lookAt camera $ new-lookat-point
-                        .!render @*global-composer
+                        .!render @*global-renderer @*global-scene @*global-camera
                   (:angle angle)
                     tween-call 20 5 $ fn (i)
                       swap! *viewer-angle &+ $ / angle 10
                       do
                         .!lookAt camera $ new-lookat-point
-                        .!render @*global-composer
+                        .!render @*global-renderer @*global-scene @*global-camera
                   (:move dx dy dz)
                     tween-call 20 5 $ fn (i)
                       let-sugar
@@ -1481,7 +1517,7 @@
                         set! (.-y position) y
                         set! (.-z position) z
                         .!lookAt camera $ new-lookat-point
-                        .!render @*global-composer
+                        .!render @*global-renderer @*global-scene @*global-camera
                   _ $ println "\"unknown camera control:" control
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote
@@ -1496,6 +1532,8 @@
             "\"three/examples/jsm/lights/RectAreaLightUniformsLib" :refer $ RectAreaLightUniformsLib
             "\"three/examples/jsm/postprocessing/EffectComposer" :refer $ EffectComposer
             "\"three/examples/jsm/postprocessing/RenderPass" :refer $ RenderPass
+            "\"three/addons/webxr/XRControllerModelFactory.js" :refer $ XRControllerModelFactory
+            "\"three/addons/webxr/XRHandModelFactory.js" :refer $ XRHandModelFactory
             touch-control.core :refer $ render-control! control-states start-control-loop! clear-control-loop!
             quaternion.core :refer $ &c* &c+ &v+
             "\"@quatrefoil/utils" :refer $ hcl-to-hex
