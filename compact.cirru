@@ -442,7 +442,7 @@
                   ambient-light $ {} (:color 0x666666) (:intencity 1)
         |heart-path $ %{} :CodeEntry (:doc |)
           :code $ quote
-            def heart-path $ [][] (:move-to 25 25) (:bezier-curve-to 25 25 20 50 0 50) (:bezier-curve-to -30 50 -30 15 -30 15) (:bezier-curve-to -30 -5 -10 -27 25 -45) (:bezier-curve-to 60 -22 80 -5 80 15) (:bezier-curve-to 80 15 80 50 50 50) (:bezier-curve-to 35 50 25 25 25 25)
+            def heart-path $ [] (:: :move-to 25 25) (:: :bezier-curve-to 25 25 20 50 0 50) (:: :bezier-curve-to -30 50 -30 15 -30 15) (:: :bezier-curve-to -30 -5 -10 -27 25 -45) (:: :bezier-curve-to 60 -22 80 -5 80 15) (:: :bezier-curve-to 80 15 80 50 50 50) (:: :bezier-curve-to 35 50 25 25 25 25)
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote
           ns quatrefoil.app.comp.mirror $ :require
@@ -664,7 +664,7 @@
                 :position $ [] 0 0 0
                 :material $ {} (:kind :mesh-standard) (:opacity 0.9) (:transparent true) (:roughness 0.5) (:metalness 0.9) (:color 0x9050c0)
               shape $ {}
-                :path $ [][] (:move-to 0 0) (:line-to 7 2) (:line-to 16 10) (:line-to 20 20) (:line-to 8 17) (:line-to 4 12) (:line-to 0 0)
+                :path $ [] (:: :move-to 0 0) (:: :line-to 7 2) (:: :line-to 16 10) (:: :line-to 20 20) (:: :line-to 8 17) (:: :line-to 4 12) (:: :line-to 0 0)
                 :position $ [] 20 0 0
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0x249825)
               rect-area-light $ {} (:intensity 18) (:width 8) (:color 0xffca00) (:height 30)
@@ -1346,6 +1346,8 @@
               -> line .-scale .-z $ set! 5
               .!add ctrl-0 $ .!clone line
               .!add ctrl-1 $ .!clone line
+              listen-on-controller! ctrl-0
+              listen-on-controller! ctrl-1
         |init-renderer! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn init-renderer! (canvas-el options) (.!init RectAreaLightUniformsLib)
@@ -1381,6 +1383,28 @@
                 ; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight
                 ; .!render @*global-composer
                 .!render @*global-renderer @*global-scene @*global-camera
+        |listen-on-controller! $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defn listen-on-controller! (controller)
+              let
+                  temp-matrix $ new THREE/Matrix4
+                  raycaster $ new THREE/Raycaster
+                .!addEventListener controller "\"selectstart" $ fn (event)
+                  -> temp-matrix (.!identity)
+                    .!extractRotation $ .-matrixWorld controller
+                  -> raycaster .-ray .-origin $ .!setFromMatrixPosition (.-matrixWorld controller)
+                  -> raycaster .-ray .-direction (.!set 0 0 -1) (.!applyMatrix4 temp-matrix)
+                  let
+                      objects $ let
+                          children $ js-array
+                          collect! $ fn (x) (.!push children x)
+                        collect-children @*global-scene collect!
+                        , children
+                      intersects $ -> (.!intersectObjects raycaster objects)
+                        .!filter $ fn (target pos _xs) (-> target .-object .-event some?)
+                    if-let
+                      maybe-target $ .-0 intersects
+                      call-event-on-target! maybe-target event
         |move-viewer-by! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn move-viewer-by! (x0 y0 z0)
@@ -1396,7 +1420,7 @@
                 set! (.-y position) y
                 set! (.-z position) z
                 .!lookAt camera $ new-lookat-point
-                .!render @*global-renderer
+                .!render @*global-renderer @*global-scene @*global-camera
         |new-lookat-point $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn new-lookat-point () $ let-sugar
@@ -1523,8 +1547,8 @@
         :code $ quote
           ns quatrefoil.core $ :require
             quatrefoil.dsl.diff :refer $ diff-tree
-            quatrefoil.dsl.object3d-dom :refer $ build-tree on-canvas-click on-control-event
-            quatrefoil.util.core :refer $ purify-tree
+            quatrefoil.dsl.object3d-dom :refer $ build-tree on-canvas-click on-control-event call-event-on-target!
+            quatrefoil.util.core :refer $ purify-tree collect-children
             quatrefoil.dsl.patch :refer $ apply-changes
             quatrefoil.schema :refer $ Component
             "\"three" :as THREE
@@ -1724,6 +1748,20 @@
                       .!addBy object3d (first entry) child
                   , object3d
                 new THREE/Object3D
+        |call-event-on-target! $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defn call-event-on-target! (maybe-target event)
+              let
+                  element-tree @*global-tree
+                  coord $ -> maybe-target .-object .-coord
+                  target-el $ find-element element-tree coord
+                  maybe-handler $ -> target-el :event :click
+                if (some? coord)
+                  do
+                    if (some? maybe-handler) (maybe-handler event @*proxied-dispatch) (println "|no handler" coord)
+                    reset! *focused-coord coord
+                    ; println "\"focus to" coord
+                  do (reset! *focused-coord nil) (eprintln "\"lose focus")
         |create-ambient-light $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn create-ambient-light (params position)
@@ -2163,7 +2201,6 @@
           :code $ quote
             defn on-canvas-click (event)
               let
-                  element-tree @*global-tree
                   mouse $ new THREE/Vector2
                   raycaster $ new THREE/Raycaster
                 set! (.-x mouse)
@@ -2184,16 +2221,7 @@
                   ; js/console.log intersects
                   if-let
                     maybe-target $ .-0 intersects
-                    let
-                        coord $ -> maybe-target .-object .-coord
-                        target-el $ find-element element-tree coord
-                        maybe-handler $ -> target-el :event :click
-                      if (some? coord)
-                        do
-                          if (some? maybe-handler) (maybe-handler event @*proxied-dispatch) (println "|no handler" coord)
-                          reset! *focused-coord coord
-                          ; println "\"focus to" coord
-                        do (reset! *focused-coord nil) (eprintln "\"lose focus")
+                    call-event-on-target! maybe-target event
                     do (reset! *focused-coord nil) (println "\"lose focus")
         |on-control-event $ %{} :CodeEntry (:doc |)
           :code $ quote
