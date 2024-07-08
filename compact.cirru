@@ -1,6 +1,6 @@
 
 {} (:package |quatrefoil)
-  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.1.0-a1)
+  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.1.0-a2)
     :modules $ [] |touch-control/ |pointed-prompt/ |quaternion/
   :entries $ {}
   :files $ {}
@@ -124,7 +124,7 @@
                   :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
                   :on $ {}
                     :click $ fn (e d!) (on-back d!)
-                text $ {} (:text |Back) (:size 4) (:height 2)
+                text $ {} (:text |Back) (:size 4) (:depth 2)
                   :position $ [] 0 0 10
                   :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
         |comp-container $ %{} :CodeEntry (:doc |)
@@ -187,7 +187,7 @@
                 :event $ {}
                   :click $ fn (e d!) (d! :canvas nil)
               group ({})
-                text $ {} (:text |Quatrefoil) (:size 4) (:height 2)
+                text $ {} (:text |Quatrefoil) (:size 4) (:depth 2)
                   :position $ [] -30 0 20
                   :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
               sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
@@ -334,7 +334,7 @@
         |comp-lines $ %{} :CodeEntry (:doc |)
           :code $ quote
             defcomp comp-lines () $ group ({})
-              text $ {} (:text |Lines) (:size 4) (:height 1)
+              text $ {} (:text |Lines) (:size 4) (:depth 1)
                 :position $ [] 0 0 4
                 :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
               line $ {}
@@ -482,7 +482,7 @@
                     :transparent true
                   :on $ {}
                     :click $ fn (e d!) (on-change k d!)
-                text $ {} (:text title) (:size 4) (:height 1)
+                text $ {} (:text title) (:size 4) (:depth 1)
                   :position $ [] 0 0 4
                   :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true)
                     :color $ hsluvx 0 30 96
@@ -754,7 +754,7 @@
                   text $ {}
                     :text $ :text task
                     :size 3
-                    :height 1
+                    :depth 1
                     :position $ [] -10 0 0
                     :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.8) (:transparent true)
                 sphere $ {} (:radius 2)
@@ -1064,7 +1064,7 @@
                       :text $ str label
                       :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                       :size 2
-                      :height 0.5
+                      :depth 0.5
         |comp-switch $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn comp-switch (options on-toggle)
@@ -1091,7 +1091,7 @@
                     :text $ or label "\"On"
                     :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                     :size 2
-                    :height 0.5
+                    :depth 0.5
         |comp-value $ %{} :CodeEntry (:doc |)
           :code $ quote
             defcomp comp-value (options on-change)
@@ -1131,7 +1131,7 @@
                           either (:fract-length options) 2
                       :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                       :size 2
-                      :height 0.5
+                      :depth 0.5
         |comp-value-2d $ %{} :CodeEntry (:doc |)
           :code $ quote
             defcomp comp-value-2d (options on-change)
@@ -1167,7 +1167,7 @@
                           , "\", " $ .!toFixed (nth v 1) fract-len
                       :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                       :size 2
-                      :height 1
+                      :depth 1
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote
           ns quatrefoil.comp.control $ :require
@@ -1378,8 +1378,8 @@
               .!addEventListener canvas-el |click $ fn (event) (on-canvas-click event)
               .!addEventListener js/window |resize $ fn (event) (js/console.log "\"resize" js/window.innerWidth js/window.innerHeight)
                 set! (.-aspect @*global-camera) (/ js/window.innerWidth js/window.innerHeight)
-                .!updateProjectionMatrix @*global-camera
                 .!setSize @*global-renderer js/window.innerWidth js/window.innerHeight
+                .!updateProjectionMatrix @*global-camera
                 ; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight
                 ; .!render @*global-composer
                 .!render @*global-renderer @*global-scene @*global-camera
