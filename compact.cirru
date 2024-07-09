@@ -180,12 +180,14 @@
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.6) (:color 0x9050c0)
                 :event $ {}
                   :click $ fn (e d!) (d! :canvas nil)
+                  :gamepad $ fn (info elapsed d!) (js/console.log "\"first pad event" info)
               sphere $ {} (:radius 8)
                 :position $ [] 30 0 0
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.6)
                   :color $ hclx 160 80 70
                 :event $ {}
                   :click $ fn (e d!) (d! :canvas nil)
+                  :gamepad $ fn (info elapsed d!) (js/console.log "\"second pad event" info)
               group ({})
                 text $ {} (:text |Quatrefoil) (:size 4) (:depth 2)
                   :position $ [] -30 0 20
@@ -924,8 +926,8 @@
         |main! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn main! () (load-console-formatter!) (inject-tree-methods) (start-loading-sakura!)
-              set-perspective-camera! $ {} (:fov 45) (:near 0.1) (:far 1000)
-                :position $ [] 0 0 100
+              set-perspective-camera! $ {} (:fov 40) (:near 0.1) (:far 100)
+                :position $ [] 0 0 8
                 :aspect $ / js/window.innerWidth js/window.innerHeight
               let
                   canvas-el $ js/document.querySelector |canvas
@@ -1122,6 +1124,10 @@
                               (< w2 low) low
                               true w2
                             , d!
+                      :gamepad $ fn (info elapsed d!)
+                        on-change
+                          + value $ :dx info
+                          , d!
                   if (:show-text? options)
                     text $ {}
                       :position $ [] -1.6 2 0
@@ -1190,6 +1196,9 @@
         |clear-cache! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn clear-cache! () $ ; "\"TODO memof..."
+        |data0 $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            def data0 $ {} (:v1 0) (:v2 0) (:a 0) (:b 0) (:dx 0) (:dy 0)
         |defcomp $ %{} :CodeEntry (:doc |)
           :code $ quote
             defmacro defcomp (comp-name params & body)
@@ -1373,7 +1382,25 @@
               ; set! (.-gammaFactor @*global-renderer) 22
               .!setPixelRatio @*global-renderer $ either js/window.devicePixelRatio 1
               .!setSize @*global-renderer js/window.innerWidth js/window.innerHeight
-              .!setAnimationLoop @*global-renderer $ fn (& aa) (; js/console.log "\"loop" aa) (.!updateProjectionMatrix @*global-camera) (.!render @*global-renderer @*global-scene @*global-camera)
+              .!setAnimationLoop @*global-renderer $ fn (& aa)
+                if-let
+                  session $ -> @*global-renderer .-xr (.!getSession)
+                  let
+                      p0 $ -> session .-inputSources .?-0
+                      p1 $ -> session .-inputSources .?-1
+                    let
+                        d $ ->
+                          []
+                            if (some? p0) (read-input p0)
+                            if (some? p1) (read-input p1)
+                          filter some?
+                      if
+                        not $ empty? d
+                        on-gamepad-event
+                          last $ first d
+                          , 1
+                .!updateProjectionMatrix @*global-camera
+                .!render @*global-renderer @*global-scene @*global-camera
               ; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight
               .!addEventListener canvas-el |click $ fn (event) (on-canvas-click event)
               .!addEventListener js/window |resize $ fn (event) (js/console.log "\"resize" js/window.innerWidth js/window.innerHeight)
@@ -1432,6 +1459,34 @@
                 z2 $ &+ (.-z position)
                   &* -4 $ sin @*viewer-angle
               new THREE/Vector3 x2 y2 z2
+        |read-input $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defn read-input (p0)
+              let
+                  gamepad $ -> p0 .-gamepad
+                  axes $ .-axes gamepad
+                  buttons $ .-buttons gamepad
+                if
+                  > (.-length buttons) 5
+                  let
+                      data $ {}
+                        :v1 $ -> buttons .-0 .-value
+                        :v2 $ -> buttons .-1 .-value
+                        :a $ -> buttons .-4 .-value
+                        :b $ -> buttons .-5 .-value
+                        :dx $ -> axes .-2
+                        :dy $ -> axes .-3
+                    if (not= data data0)
+                      []
+                        turn-tag $ -> p0 .-handedness
+                        {}
+                          :v1 $ -> buttons .-0 .-value
+                          :v2 $ -> buttons .-1 .-value
+                          :a $ > (-> buttons .-4 .-value)  0.5
+                          :b $ > (-> buttons .-5 .-value) 0.5
+                          :dx $ -> axes .-2
+                          :dy $ -> axes .-3
+                  , nil
         |refine-strength $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn refine-strength (x)
@@ -1448,7 +1503,7 @@
                   apply-changes @*tmp-changes
                 build-tree ([]) (purify-tree markup)
               reset! *global-tree markup
-              .!render @*global-renderer @*global-scene @*global-camera
+              ; .!render @*global-renderer @*global-scene @*global-camera
         |rotate-viewer-by! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn rotate-viewer-by! (x)
@@ -1547,7 +1602,7 @@
         :code $ quote
           ns quatrefoil.core $ :require
             quatrefoil.dsl.diff :refer $ diff-tree
-            quatrefoil.dsl.object3d-dom :refer $ build-tree on-canvas-click on-control-event call-event-on-target!
+            quatrefoil.dsl.object3d-dom :refer $ build-tree on-canvas-click on-control-event call-event-on-target! on-gamepad-event
             quatrefoil.util.core :refer $ purify-tree collect-children
             quatrefoil.dsl.patch :refer $ apply-changes
             quatrefoil.schema :refer $ Component
@@ -2233,6 +2288,17 @@
                     target-el $ find-element element-tree coord
                     maybe-handler $ -> target-el (get :event) (get :control)
                   if (some? maybe-handler) (maybe-handler move delta elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
+                println "\"no focused coord to control" @*focused-coord
+        |on-gamepad-event $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defn on-gamepad-event (info elapsed)
+              if (some? @*focused-coord)
+                let
+                    coord @*focused-coord
+                    element-tree @*global-tree
+                    target-el $ find-element element-tree coord
+                    maybe-handler $ -> target-el (get :event) (get :gamepad)
+                  if (some? maybe-handler) (maybe-handler info elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
                 println "\"no focused coord to control" @*focused-coord
         |set-geometry-attributes! $ %{} :CodeEntry (:doc |)
           :code $ quote
