@@ -1126,7 +1126,7 @@
                             , d!
                       :gamepad $ fn (info elapsed d!)
                         on-change
-                          + value $ :dx info
+                          + value $ * elapsed (:dx info)
                           , d!
                   if (:show-text? options)
                     text $ {}
@@ -1163,6 +1163,15 @@
                           on-change
                             [] (+ x0 dx) (+ y0 dy)
                             , d!
+                      :gamepad $ fn (info elapsed d!)
+                        let
+                            x0 $ nth v 0
+                            y0 $ nth v 1
+                            dx $ * elapsed (:dx info)
+                            dy $ * elapsed (:dy info)
+                          on-change
+                            [] (+ x0 dx) (- y0 dy)
+                            , d!
                   if (:show-text? options)
                     text $ {}
                       :position $ [] -2 2 0
@@ -1193,6 +1202,13 @@
                   parent-cursor $ either (:cursor states) ([])
                   branch $ either (get states k) ({})
                 assoc branch :cursor $ append parent-cursor k
+        |camera-direction-for $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defn camera-direction-for (x y z)
+              let
+                  v $ new THREE/Vector3 x y z
+                .!applyQuaternion v $ .-quaternion @*global-camera
+                :: :v3 (.-x v) (.-y v) (.-z v)
         |clear-cache! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn clear-cache! () $ ; "\"TODO memof..."
@@ -1382,23 +1398,26 @@
               ; set! (.-gammaFactor @*global-renderer) 22
               .!setPixelRatio @*global-renderer $ either js/window.devicePixelRatio 1
               .!setSize @*global-renderer js/window.innerWidth js/window.innerHeight
-              .!setAnimationLoop @*global-renderer $ fn (& aa)
-                if-let
-                  session $ -> @*global-renderer .-xr (.!getSession)
-                  let
-                      p0 $ -> session .-inputSources .?-0
-                      p1 $ -> session .-inputSources .?-1
+              .!setAnimationLoop @*global-renderer $ fn (t & aa)
+                let
+                    prev-t @*global-time
+                  reset! *global-time t
+                  if-let
+                    session $ -> @*global-renderer .-xr (.!getSession)
                     let
-                        d $ ->
-                          []
-                            if (some? p0) (read-input p0)
-                            if (some? p1) (read-input p1)
-                          filter some?
-                      if
-                        not $ empty? d
-                        on-gamepad-event
-                          last $ first d
-                          , 1
+                        p0 $ -> session .-inputSources .?-0
+                        p1 $ -> session .-inputSources .?-1
+                      let
+                          d $ ->
+                            []
+                              if (some? p0) (read-input p0)
+                              if (some? p1) (read-input p1)
+                            filter some?
+                        if
+                          not $ empty? d
+                          on-gamepad-event
+                            last $ first d
+                            * 0.001 $ - t prev-t
                 .!updateProjectionMatrix @*global-camera
                 .!render @*global-renderer @*global-scene @*global-camera
               ; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight
@@ -1476,6 +1495,10 @@
                         :b $ -> buttons .-5 .-value
                         :dx $ -> axes .-2
                         :dy $ -> axes .-3
+                      controller $ -> @*global-renderer .-xr (.!getController 0)
+                      grip $ -> @*global-renderer .-xr (.!getControllerGrip 0)
+                      rot $ .-rotation controller
+                      rotation $ :: :v3 (.-x rot) (.-y rot) (.-z rot)
                     if (not= data data0)
                       []
                         turn-tag $ -> p0 .-handedness
@@ -1486,6 +1509,9 @@
                           :b $ > (-> buttons .-5 .-value) 0.5
                           :dx $ -> axes .-2
                           :dy $ -> axes .-3
+                          :rotation rotation
+                          :forward $ camera-direction-for 0 0 -1
+                          :upward $ camera-direction-for 0 1 0
                   , nil
         |refine-strength $ %{} :CodeEntry (:doc |)
           :code $ quote
@@ -1607,7 +1633,7 @@
             quatrefoil.dsl.patch :refer $ apply-changes
             quatrefoil.schema :refer $ Component
             "\"three" :as THREE
-            quatrefoil.globals :refer $ *global-tree *global-camera *global-renderer *global-composer *global-scene *proxied-dispatch *viewer-angle *viewer-y-shift
+            quatrefoil.globals :refer $ *global-tree *global-camera *global-renderer *global-time *global-composer *global-scene *proxied-dispatch *viewer-angle *viewer-y-shift
             "\"three/examples/jsm/lights/RectAreaLightUniformsLib" :refer $ RectAreaLightUniformsLib
             "\"three/examples/jsm/postprocessing/EffectComposer" :refer $ EffectComposer
             "\"three/examples/jsm/postprocessing/RenderPass" :refer $ RenderPass
@@ -2478,6 +2504,8 @@
         |*global-scene $ %{} :CodeEntry (:doc |)
           :code $ quote
             defatom *global-scene $ new THREE/Scene
+        |*global-time $ %{} :CodeEntry (:doc |)
+          :code $ quote (defatom *global-time 0)
         |*global-tree $ %{} :CodeEntry (:doc |)
           :code $ quote (defatom *global-tree nil)
         |*loaded-objects $ %{} :CodeEntry (:doc |)
