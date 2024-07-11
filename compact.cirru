@@ -1,6 +1,6 @@
 
 {} (:package |quatrefoil)
-  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.1.0-a3)
+  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.1.0-a4)
     :modules $ [] |touch-control/ |pointed-prompt/ |quaternion/
   :entries $ {}
   :files $ {}
@@ -1102,6 +1102,7 @@
                   speed $ or (:speed options) 1
                   color $ either (:color options) 0xffffff
                   text-color $ either (:text-color options) color
+                  text-size $ either (:text-size options) 1
                   bound $ or (:bound options) ([] 0 1)
                   label $ :label options
                 group
@@ -1126,7 +1127,7 @@
                             , d!
                       :gamepad $ fn (info elapsed d!)
                         on-change
-                          + value $ * elapsed (:dx info)
+                          + value $ * elapsed speed (:dx info)
                           , d!
                   if (:show-text? options)
                     text $ {}
@@ -1136,7 +1137,7 @@
                         str prefix $ .!toFixed value
                           either (:fract-length options) 2
                       :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
-                      :size 2
+                      :size text-size
                       :depth 0.5
         |comp-value-2d $ %{} :CodeEntry (:doc |)
           :code $ quote
@@ -1147,6 +1148,7 @@
                   speed $ either (:speed options) 1
                   color $ either (:color options) 0xaaaaff
                   text-color $ either (:text-color options) color
+                  text-size $ either (:text-size options) 1
                   fract-len $ either (:fract-length options) 2
                   label $ :label options
                 group
@@ -1167,8 +1169,8 @@
                         let
                             x0 $ nth v 0
                             y0 $ nth v 1
-                            dx $ * elapsed (:dx info)
-                            dy $ * elapsed (:dy info)
+                            dx $ * elapsed speed (:dx info)
+                            dy $ * elapsed speed (:dy info)
                           on-change
                             [] (+ x0 dx) (- y0 dy)
                             , d!
@@ -1181,7 +1183,7 @@
                           .!toFixed (nth v 0) fract-len
                           , "\", " $ .!toFixed (nth v 1) fract-len
                       :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
-                      :size 2
+                      :size text-size
                       :depth 1
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote

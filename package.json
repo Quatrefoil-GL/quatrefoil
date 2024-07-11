@@ -1,6 +1,6 @@
 {
   "name": "quatrefoil",
-  "version": "0.1.0-a3",
+  "version": "0.1.0-a4",
   "description": "Calcit-js wrapper on three.js",
   "main": "index.js",
   "scripts": {},
