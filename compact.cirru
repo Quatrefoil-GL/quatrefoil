@@ -1,6 +1,6 @@
 
 {} (:package |quatrefoil)
-  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.0.26)
+  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.1.0-a2)
     :modules $ [] |touch-control/ |pointed-prompt/ |quaternion/
   :entries $ {}
   :files $ {}
@@ -124,7 +124,7 @@
                   :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
                   :on $ {}
                     :click $ fn (e d!) (on-back d!)
-                text $ {} (:text |Back) (:size 4) (:height 2)
+                text $ {} (:text |Back) (:size 4) (:depth 2)
                   :position $ [] 0 0 10
                   :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
         |comp-container $ %{} :CodeEntry (:doc |)
@@ -137,32 +137,36 @@
                     {} $ :tab :portal
                   tab $ :tab state
                 scene ({})
-                  case-default tab
-                    comp-portal $ fn (next d!)
-                      d! cursor $ assoc state :tab next
-                    :portal $ comp-portal
-                      fn (next d!)
+                  group
+                    {}
+                      :scale $ [] 0.01 0.01 0.01
+                      :position $ [] 0 1.2 -0.4
+                    case-default tab
+                      comp-portal $ fn (next d!)
                         d! cursor $ assoc state :tab next
-                    :todolist $ comp-todolist (:tasks store)
-                    :demo $ comp-demo
-                    :lines $ comp-lines
-                    :shapes $ comp-shapes
-                    :triflorum $ comp-triflorum
-                    :mirror $ comp-mirror (>> states :mirror)
-                    :fly $ comp-fly-city (>> states :fly)
-                    :quat-tree $ comp-quat-tree
-                    :quilling $ comp-quilling
-                    :control $ comp-control-demo (>> states :control)
-                    :shader $ comp-shader
-                    :gltf $ comp-gltf
-                  if (not= tab :portal)
-                    comp-back $ fn (d!)
-                      d! cursor $ assoc state :tab :portal
-                  ambient-light $ {} (:color 0x666666) (:intensity 1)
-                  ; point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
-                    :position $ [] 20 40 50
-                  ; point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
-                    :position $ [] 0 60 0
+                      :portal $ comp-portal
+                        fn (next d!)
+                          d! cursor $ assoc state :tab next
+                      :todolist $ comp-todolist (:tasks store)
+                      :demo $ comp-demo
+                      :lines $ comp-lines
+                      :shapes $ comp-shapes
+                      :triflorum $ comp-triflorum
+                      :mirror $ comp-mirror (>> states :mirror)
+                      :fly $ comp-fly-city (>> states :fly)
+                      :quat-tree $ comp-quat-tree
+                      :quilling $ comp-quilling
+                      :control $ comp-control-demo (>> states :control)
+                      :shader $ comp-shader
+                      :gltf $ comp-gltf
+                    if (not= tab :portal)
+                      comp-back $ fn (d!)
+                        d! cursor $ assoc state :tab :portal
+                    ambient-light $ {} (:color 0x666666) (:intensity 1)
+                    ; point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
+                      :position $ [] 20 40 50
+                    ; point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
+                      :position $ [] 0 60 0
         |comp-demo $ %{} :CodeEntry (:doc |)
           :code $ quote
             defcomp comp-demo () $ group ({})
@@ -176,14 +180,16 @@
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.6) (:color 0x9050c0)
                 :event $ {}
                   :click $ fn (e d!) (d! :canvas nil)
+                  :gamepad $ fn (info elapsed d!) (js/console.log "\"first pad event" info)
               sphere $ {} (:radius 8)
                 :position $ [] 30 0 0
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.6)
                   :color $ hclx 160 80 70
                 :event $ {}
                   :click $ fn (e d!) (d! :canvas nil)
+                  :gamepad $ fn (info elapsed d!) (js/console.log "\"second pad event" info)
               group ({})
-                text $ {} (:text |Quatrefoil) (:size 4) (:height 2)
+                text $ {} (:text |Quatrefoil) (:size 4) (:depth 2)
                   :position $ [] -30 0 20
                   :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
               sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
@@ -330,7 +336,7 @@
         |comp-lines $ %{} :CodeEntry (:doc |)
           :code $ quote
             defcomp comp-lines () $ group ({})
-              text $ {} (:text |Lines) (:size 4) (:height 1)
+              text $ {} (:text |Lines) (:size 4) (:depth 1)
                 :position $ [] 0 0 4
                 :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.9) (:transparent true)
               line $ {}
@@ -438,7 +444,7 @@
                   ambient-light $ {} (:color 0x666666) (:intencity 1)
         |heart-path $ %{} :CodeEntry (:doc |)
           :code $ quote
-            def heart-path $ [][] (:move-to 25 25) (:bezier-curve-to 25 25 20 50 0 50) (:bezier-curve-to -30 50 -30 15 -30 15) (:bezier-curve-to -30 -5 -10 -27 25 -45) (:bezier-curve-to 60 -22 80 -5 80 15) (:bezier-curve-to 80 15 80 50 50 50) (:bezier-curve-to 35 50 25 25 25 25)
+            def heart-path $ [] (:: :move-to 25 25) (:: :bezier-curve-to 25 25 20 50 0 50) (:: :bezier-curve-to -30 50 -30 15 -30 15) (:: :bezier-curve-to -30 -5 -10 -27 25 -45) (:: :bezier-curve-to 60 -22 80 -5 80 15) (:: :bezier-curve-to 80 15 80 50 50 50) (:: :bezier-curve-to 35 50 25 25 25 25)
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote
           ns quatrefoil.app.comp.mirror $ :require
@@ -478,7 +484,7 @@
                     :transparent true
                   :on $ {}
                     :click $ fn (e d!) (on-change k d!)
-                text $ {} (:text title) (:size 4) (:height 1)
+                text $ {} (:text title) (:size 4) (:depth 1)
                   :position $ [] 0 0 4
                   :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true)
                     :color $ hsluvx 0 30 96
@@ -660,7 +666,7 @@
                 :position $ [] 0 0 0
                 :material $ {} (:kind :mesh-standard) (:opacity 0.9) (:transparent true) (:roughness 0.5) (:metalness 0.9) (:color 0x9050c0)
               shape $ {}
-                :path $ [][] (:move-to 0 0) (:line-to 7 2) (:line-to 16 10) (:line-to 20 20) (:line-to 8 17) (:line-to 4 12) (:line-to 0 0)
+                :path $ [] (:: :move-to 0 0) (:: :line-to 7 2) (:: :line-to 16 10) (:: :line-to 20 20) (:: :line-to 8 17) (:: :line-to 4 12) (:: :line-to 0 0)
                 :position $ [] 20 0 0
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0x249825)
               rect-area-light $ {} (:intensity 18) (:width 8) (:color 0xffca00) (:height 30)
@@ -750,7 +756,7 @@
                   text $ {}
                     :text $ :text task
                     :size 3
-                    :height 1
+                    :depth 1
                     :position $ [] -10 0 0
                     :material $ {} (:kind :mesh-lambert) (:color 0xffcccc) (:opacity 0.8) (:transparent true)
                 sphere $ {} (:radius 2)
@@ -920,8 +926,8 @@
         |main! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn main! () (load-console-formatter!) (inject-tree-methods) (start-loading-sakura!)
-              set-perspective-camera! $ {} (:fov 45) (:near 0.1) (:far 1000)
-                :position $ [] 0 0 100
+              set-perspective-camera! $ {} (:fov 40) (:near 0.1) (:far 100)
+                :position $ [] 0 0 8
                 :aspect $ / js/window.innerWidth js/window.innerHeight
               let
                   canvas-el $ js/document.querySelector |canvas
@@ -933,6 +939,7 @@
               set! js/window.onkeydown handle-key-event
               render-control!
               handle-control-events
+              init-controls!
               println "|App started!"
         |reload! $ %{} :CodeEntry (:doc |)
           :code $ quote
@@ -967,7 +974,7 @@
         :code $ quote
           ns quatrefoil.app.main $ :require
             "\"@quatrefoil/utils" :refer $ inject-tree-methods
-            quatrefoil.core :refer $ render-canvas! *global-tree clear-cache! init-renderer! handle-key-event handle-control-events
+            quatrefoil.core :refer $ render-canvas! *global-tree clear-cache! init-renderer! init-controls! handle-key-event handle-control-events
             quatrefoil.globals :refer $ *loaded-objects
             quatrefoil.app.comp.container :refer $ comp-container
             quatrefoil.dsl.object3d-dom :refer $ on-canvas-click
@@ -1059,7 +1066,7 @@
                       :text $ str label
                       :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                       :size 2
-                      :height 0.5
+                      :depth 0.5
         |comp-switch $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn comp-switch (options on-toggle)
@@ -1086,7 +1093,7 @@
                     :text $ or label "\"On"
                     :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                     :size 2
-                    :height 0.5
+                    :depth 0.5
         |comp-value $ %{} :CodeEntry (:doc |)
           :code $ quote
             defcomp comp-value (options on-change)
@@ -1117,6 +1124,10 @@
                               (< w2 low) low
                               true w2
                             , d!
+                      :gamepad $ fn (info elapsed d!)
+                        on-change
+                          + value $ * elapsed (:dx info)
+                          , d!
                   if (:show-text? options)
                     text $ {}
                       :position $ [] -1.6 2 0
@@ -1126,7 +1137,7 @@
                           either (:fract-length options) 2
                       :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                       :size 2
-                      :height 0.5
+                      :depth 0.5
         |comp-value-2d $ %{} :CodeEntry (:doc |)
           :code $ quote
             defcomp comp-value-2d (options on-change)
@@ -1152,6 +1163,15 @@
                           on-change
                             [] (+ x0 dx) (+ y0 dy)
                             , d!
+                      :gamepad $ fn (info elapsed d!)
+                        let
+                            x0 $ nth v 0
+                            y0 $ nth v 1
+                            dx $ * elapsed (:dx info)
+                            dy $ * elapsed (:dy info)
+                          on-change
+                            [] (+ x0 dx) (- y0 dy)
+                            , d!
                   if (:show-text? options)
                     text $ {}
                       :position $ [] -2 2 0
@@ -1162,7 +1182,7 @@
                           , "\", " $ .!toFixed (nth v 1) fract-len
                       :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                       :size 2
-                      :height 1
+                      :depth 1
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote
           ns quatrefoil.comp.control $ :require
@@ -1182,9 +1202,19 @@
                   parent-cursor $ either (:cursor states) ([])
                   branch $ either (get states k) ({})
                 assoc branch :cursor $ append parent-cursor k
+        |camera-direction-for $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defn camera-direction-for (x y z)
+              let
+                  v $ new THREE/Vector3 x y z
+                .!applyQuaternion v $ .-quaternion @*global-camera
+                :: :v3 (.-x v) (.-y v) (.-z v)
         |clear-cache! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn clear-cache! () $ ; "\"TODO memof..."
+        |data0 $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            def data0 $ {} (:v1 0) (:v2 0) (:a 0) (:b 0) (:dx 0) (:dy 0)
         |defcomp $ %{} :CodeEntry (:doc |)
           :code $ quote
             defmacro defcomp (comp-name params & body)
@@ -1309,21 +1339,56 @@
               let
                   c $ new THREE/Color
                 .!getHex $ .!setHSL c (/ h 360) (/ s 100) (/ l 100)
+        |init-controls! $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defn init-controls! () $ let
+                renderer @*global-renderer
+                scene @*global-scene
+                ctrl-0 $ -> renderer .-xr (.!getController 0)
+                ctrl-1 $ -> renderer .-xr (.!getController 1)
+                ctrl-grip-0 $ -> renderer .-xr (.!getControllerGrip 0)
+                ctrl-grip-1 $ -> renderer .-xr (.!getControllerGrip 1)
+                hand-0 $ -> renderer .-xr (.!getHand 0)
+                hand-1 $ -> renderer .-xr (.!getHand 1)
+                controllerModelFactory $ new XRControllerModelFactory
+                handModelFactory $ new XRHandModelFactory
+                line-geo $ -> (new THREE/BufferGeometry)
+                  .!setFromPoints $ js-array (new THREE/Vector3 0 0 0) (new THREE/Vector3 0 0 -1)
+                line $ new THREE/Line line-geo
+              js/document.body.appendChild $ .!createButton VRButton renderer
+                js-object $ :requiredFeatures (js-array "\"hand-tracking")
+              .!add ctrl-grip-0 $ .!createControllerModel controllerModelFactory ctrl-grip-0
+              .!add ctrl-grip-1 $ .!createControllerModel controllerModelFactory ctrl-grip-1
+              .!add hand-0 $ .!createHandModel handModelFactory hand-0
+              .!add hand-1 $ .!createHandModel handModelFactory hand-1
+              .!add scene ctrl-0
+              .!add scene ctrl-1
+              .!add scene ctrl-grip-0
+              .!add scene ctrl-grip-1
+              .!add scene hand-0
+              .!add scene hand-1
+              set! (.-name line) "\"line"
+              -> line .-scale .-z $ set! 5
+              .!add ctrl-0 $ .!clone line
+              .!add ctrl-1 $ .!clone line
+              listen-on-controller! ctrl-0
+              listen-on-controller! ctrl-1
         |init-renderer! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn init-renderer! (canvas-el options) (.!init RectAreaLightUniformsLib)
               reset! *global-renderer $ new THREE/WebGLRenderer
                 js-object (:canvas canvas-el) (:antialias true)
-              if (:shadow-map? options)
+              -> @*global-renderer .-xr .-enabled $ set! true
+              ; if (:shadow-map? options)
                 &let
                   m $ -> @*global-renderer .-shadowMap
                   -> m .-enabled $ set! true
                   -> m .-type $ set! THREE/VSMShadowMap
-              reset! *global-composer $ new EffectComposer @*global-renderer
-              let
+              ; reset! *global-composer $ new EffectComposer @*global-renderer
+              ; let
                   render-scene $ new RenderPass @*global-scene @*global-camera
                 .!addPass @*global-composer render-scene
-              &doseq
+              ; &doseq
                 pass $ either (:composer-passes options) ([])
                 .!addPass @*global-composer pass
               if
@@ -1333,14 +1398,59 @@
               ; set! (.-gammaFactor @*global-renderer) 22
               .!setPixelRatio @*global-renderer $ either js/window.devicePixelRatio 1
               .!setSize @*global-renderer js/window.innerWidth js/window.innerHeight
-              .!setSize @*global-composer js/window.innerWidth js/window.innerHeight
-              .!addEventListener canvas-el |click $ fn (event) (on-canvas-click event)
-              .!addEventListener js/window |resize $ fn (event)
-                set! (.-aspect @*global-camera) (/ js/window.innerWidth js/window.innerHeight)
+              .!setAnimationLoop @*global-renderer $ fn (t & aa)
+                let
+                    prev-t @*global-time
+                  reset! *global-time t
+                  if-let
+                    session $ -> @*global-renderer .-xr (.!getSession)
+                    let
+                        p0 $ -> session .-inputSources .?-0
+                        p1 $ -> session .-inputSources .?-1
+                      let
+                          d $ ->
+                            []
+                              if (some? p0) (read-input p0)
+                              if (some? p1) (read-input p1)
+                            filter some?
+                        if
+                          not $ empty? d
+                          on-gamepad-event
+                            last $ first d
+                            * 0.001 $ - t prev-t
                 .!updateProjectionMatrix @*global-camera
+                .!render @*global-renderer @*global-scene @*global-camera
+              ; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight
+              .!addEventListener canvas-el |click $ fn (event) (on-canvas-click event)
+              .!addEventListener js/window |resize $ fn (event) (js/console.log "\"resize" js/window.innerWidth js/window.innerHeight)
+                set! (.-aspect @*global-camera) (/ js/window.innerWidth js/window.innerHeight)
                 .!setSize @*global-renderer js/window.innerWidth js/window.innerHeight
-                .!setSize @*global-composer js/window.innerWidth js/window.innerHeight
-                .!render @*global-composer
+                .!updateProjectionMatrix @*global-camera
+                ; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight
+                ; .!render @*global-composer
+                .!render @*global-renderer @*global-scene @*global-camera
+        |listen-on-controller! $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defn listen-on-controller! (controller)
+              let
+                  temp-matrix $ new THREE/Matrix4
+                  raycaster $ new THREE/Raycaster
+                .!addEventListener controller "\"selectstart" $ fn (event)
+                  -> temp-matrix (.!identity)
+                    .!extractRotation $ .-matrixWorld controller
+                  -> raycaster .-ray .-origin $ .!setFromMatrixPosition (.-matrixWorld controller)
+                  -> raycaster .-ray .-direction (.!set 0 0 -1) (.!applyMatrix4 temp-matrix)
+                  let
+                      objects $ let
+                          children $ js-array
+                          collect! $ fn (x) (.!push children x)
+                        collect-children @*global-scene collect!
+                        , children
+                      intersects $ -> (.!intersectObjects raycaster objects)
+                        .!filter $ fn (target pos _xs) (-> target .-object .-event some?)
+                    if-let
+                      maybe-target $ .-0 intersects
+                      call-event-on-target! maybe-target event
         |move-viewer-by! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn move-viewer-by! (x0 y0 z0)
@@ -1356,7 +1466,7 @@
                 set! (.-y position) y
                 set! (.-z position) z
                 .!lookAt camera $ new-lookat-point
-                .!render @*global-composer
+                .!render @*global-renderer @*global-scene @*global-camera
         |new-lookat-point $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn new-lookat-point () $ let-sugar
@@ -1368,6 +1478,41 @@
                 z2 $ &+ (.-z position)
                   &* -4 $ sin @*viewer-angle
               new THREE/Vector3 x2 y2 z2
+        |read-input $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defn read-input (p0)
+              let
+                  gamepad $ -> p0 .-gamepad
+                  axes $ .-axes gamepad
+                  buttons $ .-buttons gamepad
+                if
+                  > (.-length buttons) 5
+                  let
+                      data $ {}
+                        :v1 $ -> buttons .-0 .-value
+                        :v2 $ -> buttons .-1 .-value
+                        :a $ -> buttons .-4 .-value
+                        :b $ -> buttons .-5 .-value
+                        :dx $ -> axes .-2
+                        :dy $ -> axes .-3
+                      controller $ -> @*global-renderer .-xr (.!getController 0)
+                      grip $ -> @*global-renderer .-xr (.!getControllerGrip 0)
+                      rot $ .-rotation controller
+                      rotation $ :: :v3 (.-x rot) (.-y rot) (.-z rot)
+                    if (not= data data0)
+                      []
+                        turn-tag $ -> p0 .-handedness
+                        {}
+                          :v1 $ -> buttons .-0 .-value
+                          :v2 $ -> buttons .-1 .-value
+                          :a $ > (-> buttons .-4 .-value)  0.5
+                          :b $ > (-> buttons .-5 .-value) 0.5
+                          :dx $ -> axes .-2
+                          :dy $ -> axes .-3
+                          :rotation rotation
+                          :forward $ camera-direction-for 0 0 -1
+                          :upward $ camera-direction-for 0 1 0
+                  , nil
         |refine-strength $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn refine-strength (x)
@@ -1384,7 +1529,7 @@
                   apply-changes @*tmp-changes
                 build-tree ([]) (purify-tree markup)
               reset! *global-tree markup
-              .!render @*global-composer
+              ; .!render @*global-renderer @*global-scene @*global-camera
         |rotate-viewer-by! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn rotate-viewer-by! (x)
@@ -1392,7 +1537,7 @@
                   camera @*global-camera
                 swap! *viewer-angle &+ x
                 .!lookAt camera $ new-lookat-point
-                .!render @*global-composer
+                .!render @*global-renderer @*global-scene @*global-camera
         |shift-viewer-by! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn shift-viewer-by! (x)
@@ -1401,7 +1546,7 @@
                 if (= x false) (reset! *viewer-y-shift 0)
                   swap! *viewer-y-shift &+ $ * 2 x
                 .!lookAt camera $ new-lookat-point
-                .!render @*global-composer
+                .!render @*global-renderer @*global-scene @*global-camera
         |to-viewer-axis $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn to-viewer-axis (x y z)
@@ -1459,13 +1604,13 @@
                       do
                         swap! *viewer-y-shift &+ $ / shift 10
                         .!lookAt camera $ new-lookat-point
-                        .!render @*global-composer
+                        .!render @*global-renderer @*global-scene @*global-camera
                   (:angle angle)
                     tween-call 20 5 $ fn (i)
                       swap! *viewer-angle &+ $ / angle 10
                       do
                         .!lookAt camera $ new-lookat-point
-                        .!render @*global-composer
+                        .!render @*global-renderer @*global-scene @*global-camera
                   (:move dx dy dz)
                     tween-call 20 5 $ fn (i)
                       let-sugar
@@ -1477,25 +1622,28 @@
                         set! (.-y position) y
                         set! (.-z position) z
                         .!lookAt camera $ new-lookat-point
-                        .!render @*global-composer
+                        .!render @*global-renderer @*global-scene @*global-camera
                   _ $ println "\"unknown camera control:" control
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote
           ns quatrefoil.core $ :require
             quatrefoil.dsl.diff :refer $ diff-tree
-            quatrefoil.dsl.object3d-dom :refer $ build-tree on-canvas-click on-control-event
-            quatrefoil.util.core :refer $ purify-tree
+            quatrefoil.dsl.object3d-dom :refer $ build-tree on-canvas-click on-control-event call-event-on-target! on-gamepad-event
+            quatrefoil.util.core :refer $ purify-tree collect-children
             quatrefoil.dsl.patch :refer $ apply-changes
             quatrefoil.schema :refer $ Component
             "\"three" :as THREE
-            quatrefoil.globals :refer $ *global-tree *global-camera *global-renderer *global-composer *global-scene *proxied-dispatch *viewer-angle *viewer-y-shift
+            quatrefoil.globals :refer $ *global-tree *global-camera *global-renderer *global-time *global-composer *global-scene *proxied-dispatch *viewer-angle *viewer-y-shift
             "\"three/examples/jsm/lights/RectAreaLightUniformsLib" :refer $ RectAreaLightUniformsLib
             "\"three/examples/jsm/postprocessing/EffectComposer" :refer $ EffectComposer
             "\"three/examples/jsm/postprocessing/RenderPass" :refer $ RenderPass
+            "\"three/addons/webxr/XRControllerModelFactory.js" :refer $ XRControllerModelFactory
+            "\"three/addons/webxr/XRHandModelFactory.js" :refer $ XRHandModelFactory
             touch-control.core :refer $ render-control! control-states start-control-loop! clear-control-loop!
             quaternion.core :refer $ &c* &c+ &v+
             "\"@quatrefoil/utils" :refer $ hcl-to-hex
             "\"hsluv" :refer $ Hsluv
+            "\"three/addons/webxr/VRButton.js" :refer $ VRButton
     |quatrefoil.cursor $ %{} :FileEntry
       :defs $ {}
         |update-states $ %{} :CodeEntry (:doc |)
@@ -1681,6 +1829,20 @@
                       .!addBy object3d (first entry) child
                   , object3d
                 new THREE/Object3D
+        |call-event-on-target! $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defn call-event-on-target! (maybe-target event)
+              let
+                  element-tree @*global-tree
+                  coord $ -> maybe-target .-object .-coord
+                  target-el $ find-element element-tree coord
+                  maybe-handler $ -> target-el :event :click
+                if (some? coord)
+                  do
+                    if (some? maybe-handler) (maybe-handler event @*proxied-dispatch) (println "|no handler" coord)
+                    reset! *focused-coord coord
+                    ; println "\"focus to" coord
+                  do (reset! *focused-coord nil) (eprintln "\"lose focus")
         |create-ambient-light $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn create-ambient-light (params position)
@@ -2120,7 +2282,6 @@
           :code $ quote
             defn on-canvas-click (event)
               let
-                  element-tree @*global-tree
                   mouse $ new THREE/Vector2
                   raycaster $ new THREE/Raycaster
                 set! (.-x mouse)
@@ -2141,16 +2302,7 @@
                   ; js/console.log intersects
                   if-let
                     maybe-target $ .-0 intersects
-                    let
-                        coord $ -> maybe-target .-object .-coord
-                        target-el $ find-element element-tree coord
-                        maybe-handler $ -> target-el :event :click
-                      if (some? coord)
-                        do
-                          if (some? maybe-handler) (maybe-handler event @*proxied-dispatch) (println "|no handler" coord)
-                          reset! *focused-coord coord
-                          ; println "\"focus to" coord
-                        do (reset! *focused-coord nil) (eprintln "\"lose focus")
+                    call-event-on-target! maybe-target event
                     do (reset! *focused-coord nil) (println "\"lose focus")
         |on-control-event $ %{} :CodeEntry (:doc |)
           :code $ quote
@@ -2162,6 +2314,17 @@
                     target-el $ find-element element-tree coord
                     maybe-handler $ -> target-el (get :event) (get :control)
                   if (some? maybe-handler) (maybe-handler move delta elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
+                println "\"no focused coord to control" @*focused-coord
+        |on-gamepad-event $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defn on-gamepad-event (info elapsed)
+              if (some? @*focused-coord)
+                let
+                    coord @*focused-coord
+                    element-tree @*global-tree
+                    target-el $ find-element element-tree coord
+                    maybe-handler $ -> target-el (get :event) (get :gamepad)
+                  if (some? maybe-handler) (maybe-handler info elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
                 println "\"no focused coord to control" @*focused-coord
         |set-geometry-attributes! $ %{} :CodeEntry (:doc |)
           :code $ quote
@@ -2341,6 +2504,8 @@
         |*global-scene $ %{} :CodeEntry (:doc |)
           :code $ quote
             defatom *global-scene $ new THREE/Scene
+        |*global-time $ %{} :CodeEntry (:doc |)
+          :code $ quote (defatom *global-time 0)
         |*global-tree $ %{} :CodeEntry (:doc |)
           :code $ quote (defatom *global-tree nil)
         |*loaded-objects $ %{} :CodeEntry (:doc |)
