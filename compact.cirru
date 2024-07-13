@@ -1,6 +1,6 @@
 
 {} (:package |quatrefoil)
-  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.1.0-a4)
+  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.1.0-a5)
     :modules $ [] |touch-control/ |pointed-prompt/ |quaternion/
   :entries $ {}
   :files $ {}
@@ -140,7 +140,7 @@
                   group
                     {}
                       :scale $ [] 0.01 0.01 0.01
-                      :position $ [] 0 1.2 -0.4
+                      :position $ [] 0 1.2 -0.8
                     case-default tab
                       comp-portal $ fn (next d!)
                         d! cursor $ assoc state :tab next
@@ -241,7 +241,7 @@
                       :on? false
                 group ({})
                   comp-pin-point
-                    {} (:speed 0.1) (:label "\"C") (:color 0xddaaff) (:radius 1) (:opacity 1)
+                    {} (:speed 8) (:label "\"C") (:color 0xddaaff) (:radius 1) (:opacity 1)
                       :position $ :p0 state
                     fn (next d!)
                       d! cursor $ assoc state :p0 next
@@ -1045,7 +1045,8 @@
                   text-color $ either (:text-color options) 0xaaaaff
                 group
                   {} $ :position position
-                  sphere $ {} (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0) (:position position)
+                  sphere $ {} (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0)
+                    :position $ [] 0 0 0
                     :radius $ or (:radius options) 1
                     :material $ {} (:kind :mesh-lambert) (:transparent true)
                       :color $ either (:color options) 0xaaaaff
@@ -1058,6 +1059,23 @@
                                 * speed $ nth delta 0
                                 * speed $ nth delta 1
                                 , 0
+                          on-change next-pos d!
+                      :gamepad $ fn (info elapsed d!) (js/console.log info)
+                        let
+                            speeding $ * speed
+                              if (:b info) 8 1
+                            forward $ * speeding elapsed (:v2 info)
+                              if (:a info) -1 1
+                            next-pos $ v+ position
+                              v-scale
+                                &tuple:params $ :rightward info
+                                * speeding elapsed $ :dx info
+                              v-scale
+                                &tuple:params $ :upward info
+                                * -1 speeding elapsed $ :dy info
+                              v-scale
+                                &tuple:params $ :forward info
+                                , forward
                           on-change next-pos d!
                   if-let
                     label $ :label options
@@ -1126,9 +1144,12 @@
                               true w2
                             , d!
                       :gamepad $ fn (info elapsed d!)
-                        on-change
-                          + value $ * elapsed speed (:dx info)
-                          , d!
+                        let
+                            speeding $ * speed
+                              if (:b info) 8 1
+                          on-change
+                            + value $ * elapsed speeding (:dx info)
+                            , d!
                   if (:show-text? options)
                     text $ {}
                       :position $ [] -1.6 2 0
@@ -1169,8 +1190,10 @@
                         let
                             x0 $ nth v 0
                             y0 $ nth v 1
-                            dx $ * elapsed speed (:dx info)
-                            dy $ * elapsed speed (:dy info)
+                            speeding $ * speed
+                              if (:b info) 8 1
+                            dx $ * elapsed speeding (:dx info)
+                            dy $ * elapsed speeding (:dy info)
                           on-change
                             [] (+ x0 dx) (- y0 dy)
                             , d!
@@ -1190,7 +1213,7 @@
           ns quatrefoil.comp.control $ :require
             quatrefoil.alias :refer $ group box sphere text line tube point-light
             quatrefoil.core :refer $ defcomp
-            quaternion.core :refer $ q* &q* v-scale q+ &v+
+            quaternion.core :refer $ q* &q* v-scale q+ &v+ v+
             quatrefoil.app.materials :refer $ cover-line
             quatrefoil.core :refer $ to-viewer-axis
     |quatrefoil.core $ %{} :FileEntry
@@ -1514,6 +1537,7 @@
                           :rotation rotation
                           :forward $ camera-direction-for 0 0 -1
                           :upward $ camera-direction-for 0 1 0
+                          :rightward $ camera-direction-for 1 0 0
                   , nil
         |refine-strength $ %{} :CodeEntry (:doc |)
           :code $ quote
