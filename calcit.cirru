@@ -1,6 +1,6 @@
 
 {} (:package |quatrefoil)
-  :configs $ {} (:compact-output? true) (:extension |.cljs) (:init-fn |quatrefoil.app.main/main!) (:output |src) (:port 6001) (:reload-fn |quatrefoil.app.main/reload!) (:storage-key |calcit.cirru) (:version |0.1.0-a5)
+  :configs $ {} (:compact-output? true) (:extension |.cljs) (:init-fn |quatrefoil.app.main/main!) (:output |src) (:port 6001) (:reload-fn |quatrefoil.app.main/reload!) (:storage-key |calcit.cirru) (:version |0.1.0-a6)
     :modules $ [] |touch-control/ |pointed-prompt/ |quaternion/
   :entries $ {}
   :files $ {}
@@ -2814,7 +2814,7 @@
                                   |y $ %{} :Expr (:at 1620412977512) (:by |-pxyJ-2j)
                                     :data $ {}
                                       |T $ %{} :Leaf (:at 1647171987252) (:by |-pxyJ-2j) (:text |:lineWidth)
-                                      |j $ %{} :Leaf (:at 1647171974809) (:by |-pxyJ-2j) (:text |0.5)
+                                      |j $ %{} :Leaf (:at 1720897112501) (:by |-pxyJ-2j) (:text |0.01)
                   |v $ %{} :Expr (:at 1647598456900) (:by |-pxyJ-2j)
                     :data $ {}
                       |T $ %{} :Leaf (:at 1647598456900) (:by |-pxyJ-2j) (:text |line-segments)
@@ -15632,30 +15632,16 @@
                                     :data $ {}
                                       |T $ %{} :Leaf (:at 1647170688517) (:by |-pxyJ-2j) (:text |.!push)
                                       |b $ %{} :Leaf (:at 1647170688517) (:by |-pxyJ-2j) (:text |ps)
-                                      |h $ %{} :Expr (:at 1647170688517) (:by |-pxyJ-2j)
+                                      |l $ %{} :Expr (:at 1720896751072) (:by |-pxyJ-2j)
                                         :data $ {}
-                                          |T $ %{} :Leaf (:at 1647170688517) (:by |-pxyJ-2j) (:text |new)
-                                          |b $ %{} :Leaf (:at 1647170688517) (:by |-pxyJ-2j) (:text |THREE/Vector3)
-                                          |h $ %{} :Leaf (:at 1647170688517) (:by |-pxyJ-2j) (:text |&)
-                                          |l $ %{} :Leaf (:at 1647170688517) (:by |-pxyJ-2j) (:text |p)
+                                          |D $ %{} :Leaf (:at 1720896752575) (:by |-pxyJ-2j) (:text |new)
+                                          |L $ %{} :Leaf (:at 1720896790774) (:by |-pxyJ-2j) (:text |THREE/Vector3)
+                                          |P $ %{} :Leaf (:at 1720896762082) (:by |-pxyJ-2j) (:text |&)
+                                          |T $ %{} :Leaf (:at 1647170688517) (:by |-pxyJ-2j) (:text |p)
                               |l $ %{} :Leaf (:at 1647170688517) (:by |-pxyJ-2j) (:text |ps)
-                      |b $ %{} :Expr (:at 1647170688517) (:by |-pxyJ-2j)
-                        :data $ {}
-                          |T $ %{} :Leaf (:at 1647170688517) (:by |-pxyJ-2j) (:text |geometry)
-                          |b $ %{} :Expr (:at 1647170688517) (:by |-pxyJ-2j)
-                            :data $ {}
-                              |T $ %{} :Leaf (:at 1647170688517) (:by |-pxyJ-2j) (:text |->)
-                              |b $ %{} :Expr (:at 1647170688517) (:by |-pxyJ-2j)
-                                :data $ {}
-                                  |T $ %{} :Leaf (:at 1647170688517) (:by |-pxyJ-2j) (:text |new)
-                                  |b $ %{} :Leaf (:at 1647170688517) (:by |-pxyJ-2j) (:text |THREE/BufferGeometry)
-                              |h $ %{} :Expr (:at 1647170688517) (:by |-pxyJ-2j)
-                                :data $ {}
-                                  |T $ %{} :Leaf (:at 1647170688517) (:by |-pxyJ-2j) (:text |.!setFromPoints)
-                                  |b $ %{} :Leaf (:at 1647170688517) (:by |-pxyJ-2j) (:text |points)
                       |e $ %{} :Expr (:at 1647170880685) (:by |-pxyJ-2j)
                         :data $ {}
-                          |T $ %{} :Leaf (:at 1647171015817) (:by |-pxyJ-2j) (:text |line)
+                          |T $ %{} :Leaf (:at 1720896468323) (:by |-pxyJ-2j) (:text |geometry)
                           |b $ %{} :Expr (:at 1647171052988) (:by |-pxyJ-2j)
                             :data $ {}
                               |D $ %{} :Leaf (:at 1647171055114) (:by |-pxyJ-2j) (:text |let)
@@ -15663,17 +15649,20 @@
                                 :data $ {}
                                   |T $ %{} :Expr (:at 1647171055864) (:by |-pxyJ-2j)
                                     :data $ {}
-                                      |T $ %{} :Leaf (:at 1647171058294) (:by |-pxyJ-2j) (:text |l)
+                                      |T $ %{} :Leaf (:at 1720896471492) (:by |-pxyJ-2j) (:text |g)
                                       |b $ %{} :Expr (:at 1647171061518) (:by |-pxyJ-2j)
                                         :data $ {}
                                           |T $ %{} :Leaf (:at 1647171061518) (:by |-pxyJ-2j) (:text |new)
-                                          |b $ %{} :Leaf (:at 1647171061518) (:by |-pxyJ-2j) (:text |MeshLine)
+                                          |b $ %{} :Leaf (:at 1720896298353) (:by |-pxyJ-2j) (:text |MeshLineGeometry)
                               |T $ %{} :Expr (:at 1647171067489) (:by |-pxyJ-2j)
                                 :data $ {}
-                                  |T $ %{} :Leaf (:at 1647171067489) (:by |-pxyJ-2j) (:text |.!setGeometry)
-                                  |b $ %{} :Leaf (:at 1647171071459) (:by |-pxyJ-2j) (:text |l)
-                                  |h $ %{} :Leaf (:at 1647171067489) (:by |-pxyJ-2j) (:text |geometry)
-                              |b $ %{} :Leaf (:at 1647171651431) (:by |-pxyJ-2j) (:text |l)
+                                  |T $ %{} :Leaf (:at 1720896452126) (:by |-pxyJ-2j) (:text |.!setPoints)
+                                  |b $ %{} :Leaf (:at 1720896472845) (:by |-pxyJ-2j) (:text |g)
+                                  |h $ %{} :Expr (:at 1720896880110) (:by |-pxyJ-2j)
+                                    :data $ {}
+                                      |D $ %{} :Leaf (:at 1720896881746) (:by |-pxyJ-2j) (:text |w-js-log)
+                                      |T $ %{} :Leaf (:at 1720896874833) (:by |-pxyJ-2j) (:text |points)
+                              |b $ %{} :Leaf (:at 1720896473301) (:by |-pxyJ-2j) (:text |g)
                       |h $ %{} :Expr (:at 1647170688517) (:by |-pxyJ-2j)
                         :data $ {}
                           |T $ %{} :Leaf (:at 1647170688517) (:by |-pxyJ-2j) (:text |object3d)
@@ -15681,7 +15670,7 @@
                             :data $ {}
                               |T $ %{} :Leaf (:at 1647170688517) (:by |-pxyJ-2j) (:text |new)
                               |b $ %{} :Leaf (:at 1647171028120) (:by |-pxyJ-2j) (:text |THREE/Mesh)
-                              |e $ %{} :Leaf (:at 1647171031028) (:by |-pxyJ-2j) (:text |line)
+                              |e $ %{} :Leaf (:at 1720896488899) (:by |-pxyJ-2j) (:text |geometry)
                               |l $ %{} :Expr (:at 1647170688517) (:by |-pxyJ-2j)
                                 :data $ {}
                                   |T $ %{} :Leaf (:at 1647170688517) (:by |-pxyJ-2j) (:text |create-material)
@@ -15708,7 +15697,7 @@
                         :data $ {}
                           |T $ %{} :Leaf (:at 1647171459873) (:by |-pxyJ-2j) (:text |.-raycast)
                           |b $ %{} :Leaf (:at 1647171466404) (:by |-pxyJ-2j) (:text |object3d)
-                      |h $ %{} :Leaf (:at 1647171469177) (:by |-pxyJ-2j) (:text |MeshLineRaycast)
+                      |h $ %{} :Leaf (:at 1720896307027) (:by |-pxyJ-2j) (:text |raycast)
                   |q $ %{} :Leaf (:at 1647170688517) (:by |-pxyJ-2j) (:text |object3d)
         |create-parametric-element $ %{} :CodeEntry (:doc |)
           :code $ %{} :Expr (:at 1622133146215) (:by |-pxyJ-2j)
@@ -18395,13 +18384,13 @@
                         |T $ %{} :Leaf (:at 1634456490737) (:by |-pxyJ-2j) (:text |ParametricGeometry)
                 |z $ %{} :Expr (:at 1647170841747) (:by |-pxyJ-2j)
                   :data $ {}
-                    |T $ %{} :Leaf (:at 1647880320043) (:by |-pxyJ-2j) (:text "|\"@quatrefoil/meshline")
+                    |T $ %{} :Leaf (:at 1720896283952) (:by |-pxyJ-2j) (:text "|\"meshline")
                     |b $ %{} :Leaf (:at 1647170843528) (:by |-pxyJ-2j) (:text |:refer)
                     |h $ %{} :Expr (:at 1647170843856) (:by |-pxyJ-2j)
                       :data $ {}
-                        |T $ %{} :Leaf (:at 1647170845893) (:by |-pxyJ-2j) (:text |MeshLine)
+                        |T $ %{} :Leaf (:at 1720896288729) (:by |-pxyJ-2j) (:text |MeshLineGeometry)
                         |b $ %{} :Leaf (:at 1647170853057) (:by |-pxyJ-2j) (:text |MeshLineMaterial)
-                        |h $ %{} :Leaf (:at 1647171471082) (:by |-pxyJ-2j) (:text |MeshLineRaycast)
+                        |h $ %{} :Leaf (:at 1720896292708) (:by |-pxyJ-2j) (:text |raycast)
     |quatrefoil.dsl.patch $ %{} :FileEntry
       :defs $ {}
         |add-children $ %{} :CodeEntry (:doc |)

@@ -151,11 +151,6 @@
   resolved "https://registry.yarnpkg.com/@quamolit/touch-control/-/touch-control-0.0.13.tgz#84a9ade22bf487ba3f9ed8f8f52c44c0e2022060"
   integrity sha512-Z1UX6ajBqMJrDZOsBDoB+QMiJFtJ7nUtaX/wZOJeaFVRpL+96xkYlcV+vosVjs8i/G85OUBy9RccGnDYT6FCvA==
 
-"@quatrefoil/meshline@^1.3.0-a1":
-  version "1.3.0-a1"
-  resolved "https://registry.yarnpkg.com/@quatrefoil/meshline/-/meshline-1.3.0-a1.tgz#900821ec05c7cf504afac337ef5fdf7c44e540b8"
-  integrity sha512-9YsktvIpAktkyLVXPNLWXn9b6K+RId4A5gHRWKlfQ+Pf0HOmzyNmpTUrT2M0SWSdY7/IIUAofX+Ndlzl2Ode7g==
-
 "@quatrefoil/utils@^0.0.3":
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/@quatrefoil/utils/-/utils-0.0.3.tgz#bd66a843e248b20c0a7f15587e858ce9e727e1fa"
@@ -348,6 +343,11 @@ is-object@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/is-object/-/is-object-1.0.2.tgz#a56552e1c665c9e950b4a025461da87e72f86fcf"
   integrity sha512-2rRIahhZr2UWb45fIOuvZGpFtz0TyOZLf32KxBbSoUCeZR495zCKlWUKKUByk3geS2eAs7ZAABt0Y/Rx0GiQGA==
+
+meshline@^3.3.1:
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/meshline/-/meshline-3.3.1.tgz#20decfd5cdd25c8469e862ddf0ab1ad167759734"
+  integrity sha512-/TQj+JdZkeSUOl5Mk2J7eLcYTLiQm2IDzmlSvYm7ov15anEcDJ92GHqqazxTSreeNgfnYu24kiEvvv0WlbCdFQ==
 
 min-document@^2.19.0:
   version "2.19.0"

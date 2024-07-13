@@ -1,6 +1,6 @@
 
 {} (:package |quatrefoil)
-  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.1.0-a5)
+  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.1.0-a6)
     :modules $ [] |touch-control/ |pointed-prompt/ |quaternion/
   :entries $ {}
   :files $ {}
@@ -346,7 +346,7 @@
               mesh-line $ {}
                 :points $ [] ([] 0 0 0) ([] 3 3 4) ([] 1 4 6) ([] -2 8 0) ([] 2 5 1)
                 :position $ [] 5 -10 0
-                :material $ {} (:kind :mesh-line) (:color 0xaaaaff) (:transparent true) (:opacity 0.4) (:depthTest true) (:lineWidth 0.5)
+                :material $ {} (:kind :mesh-line) (:color 0xaaaaff) (:transparent true) (:opacity 0.4) (:depthTest true) (:lineWidth 0.01)
               line-segments $ {}
                 :segments $ []
                   [] ([] 0 0 0) ([] 3 3 4)
@@ -2012,16 +2012,15 @@
                       p $ :points params
                       .!push ps $ new THREE/Vector3 & p
                     , ps
-                  geometry $ -> (new THREE/BufferGeometry) (.!setFromPoints points)
-                  line $ let
-                      l $ new MeshLine
-                    .!setGeometry l geometry
-                    , l
-                  object3d $ new THREE/Mesh line (create-material material)
+                  geometry $ let
+                      g $ new MeshLineGeometry
+                    .!setPoints g $ w-js-log points
+                    , g
+                  object3d $ new THREE/Mesh geometry (create-material material)
                 set-position! object3d position
                 set-rotation! object3d rotation
                 set-scale! object3d scale
-                set! (.-raycast object3d) MeshLineRaycast
+                set! (.-raycast object3d) raycast
                 , object3d
         |create-parametric-element $ %{} :CodeEntry (:doc |)
           :code $ quote
@@ -2417,7 +2416,7 @@
             "\"three/examples/jsm/objects/Reflector" :refer $ Reflector
             "\"three/examples/jsm/loaders/FontLoader" :refer $ Font
             "\"three/examples/jsm/geometries/ParametricGeometry" :refer $ ParametricGeometry
-            "\"@quatrefoil/meshline" :refer $ MeshLine MeshLineMaterial MeshLineRaycast
+            "\"meshline" :refer $ MeshLineGeometry MeshLineMaterial raycast
     |quatrefoil.dsl.patch $ %{} :FileEntry
       :defs $ {}
         |add-children $ %{} :CodeEntry (:doc |)
