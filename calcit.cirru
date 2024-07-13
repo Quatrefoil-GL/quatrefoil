@@ -15658,10 +15658,7 @@
                                 :data $ {}
                                   |T $ %{} :Leaf (:at 1720896452126) (:by |-pxyJ-2j) (:text |.!setPoints)
                                   |b $ %{} :Leaf (:at 1720896472845) (:by |-pxyJ-2j) (:text |g)
-                                  |h $ %{} :Expr (:at 1720896880110) (:by |-pxyJ-2j)
-                                    :data $ {}
-                                      |D $ %{} :Leaf (:at 1720896881746) (:by |-pxyJ-2j) (:text |w-js-log)
-                                      |T $ %{} :Leaf (:at 1720896874833) (:by |-pxyJ-2j) (:text |points)
+                                  |h $ %{} :Leaf (:at 1720896874833) (:by |-pxyJ-2j) (:text |points)
                               |b $ %{} :Leaf (:at 1720896473301) (:by |-pxyJ-2j) (:text |g)
                       |h $ %{} :Expr (:at 1647170688517) (:by |-pxyJ-2j)
                         :data $ {}

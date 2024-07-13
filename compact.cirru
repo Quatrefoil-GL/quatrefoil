@@ -2014,7 +2014,7 @@
                     , ps
                   geometry $ let
                       g $ new MeshLineGeometry
-                    .!setPoints g $ w-js-log points
+                    .!setPoints g points
                     , g
                   object3d $ new THREE/Mesh geometry (create-material material)
                 set-position! object3d position
