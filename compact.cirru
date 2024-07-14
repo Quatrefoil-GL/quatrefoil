@@ -926,8 +926,8 @@
         |main! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn main! () (load-console-formatter!) (inject-tree-methods) (start-loading-sakura!)
-              set-perspective-camera! $ {} (:fov 40) (:near 0.1) (:far 100)
-                :position $ [] 0 0 8
+              set-perspective-camera! $ {} (:fov 50) (:near 0.1) (:far 10)
+                :position $ [] 0 1.6 1
                 :aspect $ / js/window.innerWidth js/window.innerHeight
               let
                   canvas-el $ js/document.querySelector |canvas

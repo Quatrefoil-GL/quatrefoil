@@ -7926,7 +7926,7 @@
                       |b $ %{} :Expr (:at 1648231355028) (:by |-pxyJ-2j)
                         :data $ {}
                           |T $ %{} :Leaf (:at 1648231355028) (:by |-pxyJ-2j) (:text |:fov)
-                          |b $ %{} :Leaf (:at 1720546808099) (:by |-pxyJ-2j) (:text |40)
+                          |b $ %{} :Leaf (:at 1720978044981) (:by |-pxyJ-2j) (:text |50)
                       |h $ %{} :Expr (:at 1648231355028) (:by |-pxyJ-2j)
                         :data $ {}
                           |T $ %{} :Leaf (:at 1648231355028) (:by |-pxyJ-2j) (:text |:near)
@@ -7934,7 +7934,7 @@
                       |l $ %{} :Expr (:at 1648231355028) (:by |-pxyJ-2j)
                         :data $ {}
                           |T $ %{} :Leaf (:at 1648231355028) (:by |-pxyJ-2j) (:text |:far)
-                          |b $ %{} :Leaf (:at 1720546756771) (:by |-pxyJ-2j) (:text |100)
+                          |b $ %{} :Leaf (:at 1720978049080) (:by |-pxyJ-2j) (:text |10)
                       |o $ %{} :Expr (:at 1648231355028) (:by |-pxyJ-2j)
                         :data $ {}
                           |T $ %{} :Leaf (:at 1648231355028) (:by |-pxyJ-2j) (:text |:position)
@@ -7942,8 +7942,8 @@
                             :data $ {}
                               |T $ %{} :Leaf (:at 1648231355028) (:by |-pxyJ-2j) (:text |[])
                               |b $ %{} :Leaf (:at 1648231355028) (:by |-pxyJ-2j) (:text |0)
-                              |h $ %{} :Leaf (:at 1648231355028) (:by |-pxyJ-2j) (:text |0)
-                              |l $ %{} :Leaf (:at 1720546784349) (:by |-pxyJ-2j) (:text |8)
+                              |h $ %{} :Leaf (:at 1720978037086) (:by |-pxyJ-2j) (:text |1.6)
+                              |l $ %{} :Leaf (:at 1720978141072) (:by |-pxyJ-2j) (:text |1)
                       |q $ %{} :Expr (:at 1648231355028) (:by |-pxyJ-2j)
                         :data $ {}
                           |T $ %{} :Leaf (:at 1648231355028) (:by |-pxyJ-2j) (:text |:aspect)
