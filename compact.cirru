@@ -1,6 +1,6 @@
 
 {} (:package |quatrefoil)
-  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.1.0-a6)
+  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.1.0)
     :modules $ [] |touch-control/ |pointed-prompt/ |quaternion/
   :entries $ {}
   :files $ {}
@@ -451,7 +451,7 @@
             quatrefoil.alias :refer $ group box sphere shape text line spline tube plane-reflector point-light ambient-light
             quatrefoil.core :refer $ defcomp
             quatrefoil.math :refer $ rand-around
-            quaternion.core :refer $ v-scale
+            quaternion.vector :refer $ v-scale
             "\"@calcit/std" :refer $ rand
     |quatrefoil.app.comp.portal $ %{} :FileEntry
       :defs $ {}
@@ -498,9 +498,9 @@
         |comp-quat-tree $ %{} :CodeEntry (:doc |)
           :code $ quote
             defcomp comp-quat-tree () $ let
-                p0 $ [] 0 0 0 0
-                l0 $ [] 0 40 20 30
-                lines $ generate-lines p0 l0 6 :root
+                p0 $ %:: %quaternion :quaternion 0 0 0 0
+                l0 $ %:: %quaternion :quaternion 0 40 20 30
+                lines $ generate-lines p0 l0 3 :root
               group ({})
                 ambient-light $ {} (:color 0x444422)
                 point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
@@ -512,22 +512,22 @@
                         to $ :to line
                         v $ &q- to from
                         size $ q-length v
-                        w $ nth to 3
+                        w $ nth to 1
                         hang $ {} (:from to)
-                          :to $ [] (nth to 0)
-                            + (nth to 1)
+                          :to $ %:: %v3 :v3 (nth to 2)
+                            + (nth to 3)
                               nth (:line line) 3
-                            nth to 2
+                            nth to 4
                       []
                         tube $ {} (:points-fn straight-fn) (:factor line)
                           :radius $ * 0.04 size
                           :tubular-segments 4
                           :radial-segments 4
-                          :position $ [] -10 0 0
+                          :position $ %:: %v3 :v3 -10 0 0
                           :material $ assoc tube-material :color
                             pick-color $ :name line
                         tube $ {} (:points-fn straight-fn) (:factor hang) (:radius 0.1) (:tubular-segments 4) (:radial-segments 4)
-                          :position $ [] -10 0 0
+                          :position $ %:: %v3 :v3 -10 0 0
                           :material leaf-material
         |generate-lines $ %{} :CodeEntry (:doc |)
           :code $ quote
@@ -556,8 +556,9 @@
             defn straight-fn (t factor)
               let-sugar
                     [] x1 y1 z1
-                    &map:get factor :from
-                  ([] x2 y2 z2) (&map:get factor :to)
+                    &tuple:params $ &map:get factor :from
+                  ([] x2 y2 z2)
+                    &tuple:params $ &map:get factor :to
                 []
                   &+ (&* x1 t)
                     &* x2 $ &- 1 t
@@ -569,11 +570,11 @@
           :code $ quote
             def transformers $ []
               {} (:name :a)
-                :vector $ [] 0.3 0.1 0.1 0.7
+                :vector $ %:: %quaternion :quaternion 0.3 0.1 0.1 0.7
               {} (:name :b)
-                :vector $ [] 0.2 -0.3 -0.33 0.7
+                :vector $ %:: %quaternion :quaternion 0.2 -0.3 -0.33 0.7
               {} (:name :c)
-                :vector $ [] -0.44 0.12 0.33 0.6
+                :vector $ %:: %quaternion :quaternion -0.44 0.12 0.33 0.6
         |tube-material $ %{} :CodeEntry (:doc |)
           :code $ quote
             def tube-material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
@@ -582,7 +583,8 @@
           ns quatrefoil.app.comp.quat-tree $ :require
             quatrefoil.alias :refer $ group box sphere text line tube ambient-light point-light
             quatrefoil.core :refer $ defcomp
-            quaternion.core :refer $ q* &q* v-scale q+ &q+ &q- q-length
+            quaternion.core :refer $ q* &q* q+ &q+ &q- q-length %quaternion
+            quaternion.vector :refer $ v-scale %v3
             quatrefoil.app.materials :refer $ cover-line
     |quatrefoil.app.comp.shader $ %{} :FileEntry
       :defs $ {}
@@ -864,7 +866,7 @@
                         * (- 1 ratio) 8
                         * 1.0 $ sqrt (+ 6 i)
                     v-scale
-                      []
+                      %:: %v3 :v3
                         * radius $ cos theta
                         *
                           - 20 $ * i 0.1
@@ -875,7 +877,7 @@
                     let
                         radius $ * 0.8
                           sqrt $ + 6 i
-                      []
+                      %:: %v3 :v3
                         * radius $ cos theta0
                         *
                           - 20 $ * i 0.1
@@ -904,7 +906,7 @@
           ns quatrefoil.app.comp.triflorum $ :require
             quatrefoil.alias :refer $ group box sphere text line tube polyhedron point-light
             quatrefoil.core :refer $ defcomp
-            quaternion.core :refer $ v+ v-scale
+            quaternion.vector :refer $ v+ v-scale %v3
     |quatrefoil.app.main $ %{} :FileEntry
       :defs $ {}
         |*store $ %{} :CodeEntry (:doc |)
@@ -927,7 +929,7 @@
           :code $ quote
             defn main! () (load-console-formatter!) (inject-tree-methods) (start-loading-sakura!)
               set-perspective-camera! $ {} (:fov 50) (:near 0.1) (:far 10)
-                :position $ [] 0 1.6 1
+                :position $ %:: %v3 :v3 0 1.6 1
                 :aspect $ / js/window.innerWidth js/window.innerHeight
               let
                   canvas-el $ js/document.querySelector |canvas
@@ -979,6 +981,7 @@
             quatrefoil.app.comp.container :refer $ comp-container
             quatrefoil.dsl.object3d-dom :refer $ on-canvas-click
             quatrefoil.app.updater :refer $ [] updater
+            quaternion.vector :refer $ %v3
             "\"three" :as THREE
             touch-control.core :refer $ render-control! control-states start-control-loop! clear-control-loop!
             "\"bottom-tip" :default hud!
@@ -1213,7 +1216,8 @@
           ns quatrefoil.comp.control $ :require
             quatrefoil.alias :refer $ group box sphere text line tube point-light
             quatrefoil.core :refer $ defcomp
-            quaternion.core :refer $ q* &q* v-scale q+ &v+ v+
+            quaternion.core :refer $ q* &q* q+
+            quaternion.vector :refer $ v-scale &v+ v+
             quatrefoil.app.materials :refer $ cover-line
             quatrefoil.core :refer $ to-viewer-axis
     |quatrefoil.core $ %{} :FileEntry
@@ -1666,7 +1670,8 @@
             "\"three/addons/webxr/XRControllerModelFactory.js" :refer $ XRControllerModelFactory
             "\"three/addons/webxr/XRHandModelFactory.js" :refer $ XRHandModelFactory
             touch-control.core :refer $ render-control! control-states start-control-loop! clear-control-loop!
-            quaternion.core :refer $ &c* &c+ &v+
+            quaternion.complex :refer $ &c* &c+
+            quaternion.vector :refer $ &v+
             "\"@quatrefoil/utils" :refer $ hcl-to-hex
             "\"hsluv" :refer $ Hsluv
             "\"three/addons/webxr/VRButton.js" :refer $ VRButton
@@ -2381,8 +2386,16 @@
         |set-position! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn set-position! (object position)
-              if (some? position)
-                let[] (x y z) position $ .!set (.-position object) x y z
+              cond
+                  tuple? position
+                  tag-match position
+                      :v3 x y z
+                      .!set (.-position object) x y z
+                    _ $ raise "\"unknown position, expected vector"
+                (list? position)
+                  let[] (x y z) position $ .!set (.-position object) x y z
+                (nil? position) (;nil "\"do nothing")
+                true $ raise "\"unknown position"
         |set-rotation! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn set-rotation! (object3d rotation)
