@@ -500,8 +500,8 @@
           :code $ quote
             defcomp comp-quat-tree () $ let
                 p0 $ quaternion 0 0 0 0
-                l0 $ quaternion 0 40 20 30
-                lines $ generate-lines p0 l0 3 :root
+                l0 $ quaternion 0 0 30 0
+                lines $ generate-lines p0 l0 5 :root
               group ({})
                 ambient-light $ {} (:color 0x444422)
                 point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
@@ -515,7 +515,7 @@
                         size $ q-length v
                         w $ nth to 1
                         hang $ {} (:from to)
-                          :to $ v3 (nth to 2)
+                          :to $ quaternion w (nth to 2)
                             + (nth to 3)
                               nth (:line line) 3
                             nth to 4
@@ -527,7 +527,7 @@
                           :position $ v3 -10 0 0
                           :material $ assoc tube-material :color
                             pick-color $ :name line
-                        tube $ {} (:points-fn straight-fn) (:factor hang) (:radius 0.1) (:tubular-segments 4) (:radial-segments 4)
+                        ; tube $ {} (:points-fn straight-fn) (:factor hang) (:radius 0.1) (:tubular-segments 4) (:radial-segments 4)
                           :position $ v3 -10 0 0
                           :material leaf-material
         |generate-lines $ %{} :CodeEntry (:doc |)
@@ -556,9 +556,9 @@
           :code $ quote
             defn straight-fn (t factor)
               let-sugar
-                    [] x1 y1 z1
+                    [] w1 x1 y1 z1
                     &tuple:params $ &map:get factor :from
-                  ([] x2 y2 z2)
+                  ([] w2 x2 y2 z2)
                     &tuple:params $ &map:get factor :to
                 []
                   &+ (&* x1 t)
@@ -571,11 +571,11 @@
           :code $ quote
             def transformers $ []
               {} (:name :a)
-                :vector $ quaternion 0.3 0.1 0.1 0.7
+                :vector $ quaternion 0.7 0.3 0.3 0.1
               {} (:name :b)
-                :vector $ quaternion 0.2 -0.3 -0.33 0.7
+                :vector $ quaternion 0.7 0.2 -0.3 -0.43
               {} (:name :c)
-                :vector $ quaternion -0.44 0.12 0.33 0.6
+                :vector $ quaternion 0.4 -0.44 0.12 0.33
         |tube-material $ %{} :CodeEntry (:doc |)
           :code $ quote
             def tube-material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
