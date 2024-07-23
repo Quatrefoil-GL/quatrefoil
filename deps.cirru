@@ -1,5 +1,5 @@
 {}
   :dependencies $ {}
-    |calcit-lang/quaternion |0.0.8
+    |calcit-lang/quaternion |main
     |Quamolit/touch-control |main
     |mvc-works/pointed-prompt |main

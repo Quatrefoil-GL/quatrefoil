@@ -1,6 +1,6 @@
 {
   "name": "quatrefoil",
-  "version": "0.1.0-a3",
+  "version": "0.1.0",
   "description": "Calcit-js wrapper on three.js",
   "main": "index.js",
   "scripts": {},
@@ -18,9 +18,9 @@
     "@calcit/procs": "^0.9.0-a1",
     "@calcit/std": "^0.0.3",
     "@quamolit/touch-control": "^0.0.13",
-    "@quatrefoil/meshline": "^1.3.0-a1",
     "@quatrefoil/utils": "^0.0.3",
     "hsluv": "^1.0.1",
+    "meshline": "^3.3.1",
     "three": "^0.166.1"
   }
 }
