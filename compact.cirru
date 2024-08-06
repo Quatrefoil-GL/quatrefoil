@@ -1,6 +1,6 @@
 
 {} (:package |quatrefoil)
-  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.1.0)
+  :configs $ {} (:init-fn |quatrefoil.app.main/main!) (:reload-fn |quatrefoil.app.main/reload!) (:version |0.1.1)
     :modules $ [] |touch-control/ |pointed-prompt/ |quaternion/
   :entries $ {}
   :files $ {}
@@ -235,7 +235,7 @@
                   cursor $ :cursor states
                   state $ or (:data states)
                     {}
-                      :p0 $ [] 0 0 0
+                      :p0 $ v3 0 0 0
                       :v0 0
                       :v1 $ [] 1 1
                       :on? false
@@ -248,15 +248,15 @@
                   comp-value
                     {} (:speed 0.2) (:show-text? true) (:label "\"A")
                       :value $ :v0 state
-                      :position $ [] 10 0 0
+                      :position $ v3 10 0 0
                       :bound $ [] -2 20
                       :color $ hslx 10 90 80
-                    fn (v1 d!)
-                      d! cursor $ assoc state :v0 v1
+                    fn (v d!)
+                      d! cursor $ assoc state :v0 v
                   comp-value-2d
                     {} (:label "\"B")
                       :value $ :v1 state
-                      :position $ [] 0 10 0
+                      :position $ v3 0 10 0
                       :speed 0.2
                       :color 0xccaaff
                       :show-text? true
@@ -266,17 +266,18 @@
                   comp-switch
                     {} (:label "\"Status") (:color 0xaa88ff)
                       :value $ :on? state
-                      :position $ [] 20 0 0
+                      :position $ v3 20 0 0
                     fn (v d!)
                       d! cursor $ assoc state :on? v
                   point-light $ {} (:color 0xffffff) (:intensity 1) (:distance 200)
-                    :position $ [] 20 40 50
+                    :position $ v3 20 40 50
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote
           ns quatrefoil.app.comp.control $ :require
             quatrefoil.alias :refer $ group box sphere text line tube point-light
             quatrefoil.core :refer $ defcomp hslx
             quaternion.core :refer $ q* &q* v-scale q+
+            quaternion.vector :refer $ v3
             quatrefoil.comp.control :refer $ comp-pin-point comp-value comp-value-2d comp-switch
     |quatrefoil.app.comp.lines $ %{} :FileEntry
       :defs $ {}
@@ -499,8 +500,8 @@
           :code $ quote
             defcomp comp-quat-tree () $ let
                 p0 $ quaternion 0 0 0 0
-                l0 $ quaternion 0 40 20 30
-                lines $ generate-lines p0 l0 3 :root
+                l0 $ quaternion 0 0 30 0
+                lines $ generate-lines p0 l0 5 :root
               group ({})
                 ambient-light $ {} (:color 0x444422)
                 point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
@@ -514,7 +515,7 @@
                         size $ q-length v
                         w $ nth to 1
                         hang $ {} (:from to)
-                          :to $ v3 (nth to 2)
+                          :to $ quaternion w (nth to 2)
                             + (nth to 3)
                               nth (:line line) 3
                             nth to 4
@@ -526,7 +527,7 @@
                           :position $ v3 -10 0 0
                           :material $ assoc tube-material :color
                             pick-color $ :name line
-                        tube $ {} (:points-fn straight-fn) (:factor hang) (:radius 0.1) (:tubular-segments 4) (:radial-segments 4)
+                        ; tube $ {} (:points-fn straight-fn) (:factor hang) (:radius 0.1) (:tubular-segments 4) (:radial-segments 4)
                           :position $ v3 -10 0 0
                           :material leaf-material
         |generate-lines $ %{} :CodeEntry (:doc |)
@@ -555,9 +556,9 @@
           :code $ quote
             defn straight-fn (t factor)
               let-sugar
-                    [] x1 y1 z1
+                    [] w1 x1 y1 z1
                     &tuple:params $ &map:get factor :from
-                  ([] x2 y2 z2)
+                  ([] w2 x2 y2 z2)
                     &tuple:params $ &map:get factor :to
                 []
                   &+ (&* x1 t)
@@ -570,11 +571,11 @@
           :code $ quote
             def transformers $ []
               {} (:name :a)
-                :vector $ quaternion 0.3 0.1 0.1 0.7
+                :vector $ quaternion 0.7 0.3 0.3 0.1
               {} (:name :b)
-                :vector $ quaternion 0.2 -0.3 -0.33 0.7
+                :vector $ quaternion 0.7 0.2 -0.3 -0.43
               {} (:name :c)
-                :vector $ quaternion -0.44 0.12 0.33 0.6
+                :vector $ quaternion 0.4 -0.44 0.12 0.33
         |tube-material $ %{} :CodeEntry (:doc |)
           :code $ quote
             def tube-material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
@@ -1043,13 +1044,13 @@
           :code $ quote
             defcomp comp-pin-point (options on-change)
               let
-                  position $ or (:position options) ([] 0 0 0)
+                  position $ or (:position options) (v3 0 0 0)
                   speed $ or (:speed options) 1
                   text-color $ either (:text-color options) 0xaaaaff
                 group
                   {} $ :position position
                   sphere $ {} (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0)
-                    :position $ [] 0 0 0
+                    :position $ v3 0 0 0
                     :radius $ or (:radius options) 1
                     :material $ {} (:kind :mesh-lambert) (:transparent true)
                       :color $ either (:color options) 0xaaaaff
@@ -1070,20 +1071,16 @@
                             forward $ * speeding elapsed (:v2 info)
                               if (:a info) -1 1
                             next-pos $ v+ position
-                              v-scale
-                                &tuple:params $ :rightward info
+                              v-scale (:rightward info)
                                 * speeding elapsed $ :dx info
-                              v-scale
-                                &tuple:params $ :upward info
+                              v-scale (:upward info)
                                 * -1 speeding elapsed $ :dy info
-                              v-scale
-                                &tuple:params $ :forward info
-                                , forward
+                              v-scale (:forward info) forward
                           on-change next-pos d!
                   if-let
                     label $ :label options
                     text $ {}
-                      :position $ [] -0.6 2 0
+                      :position $ v3 -0.6 2 0
                       :text $ str label
                       :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                       :size 2
@@ -1217,7 +1214,7 @@
             quatrefoil.alias :refer $ group box sphere text line tube point-light
             quatrefoil.core :refer $ defcomp
             quaternion.core :refer $ q* &q* q+
-            quaternion.vector :refer $ v-scale &v+ v+
+            quaternion.vector :refer $ v-scale &v+ v+ v3
             quatrefoil.app.materials :refer $ cover-line
             quatrefoil.core :refer $ to-viewer-axis
     |quatrefoil.core $ %{} :FileEntry
@@ -1587,7 +1584,7 @@
                   project-distance 20
                   shift @*viewer-y-shift
                   v-angle $ js/Math.atan (/ shift project-distance)
-                  from-y $ []
+                  from-y $ v3
                     -> y
                       * $ js/Math.cos (+ v-angle half-pi)
                       * $ js/Math.cos angle
@@ -1598,13 +1595,13 @@
                       * $ js/Math.sin angle
                       negate
                   from-x $ wo-log
-                    []
+                    v3
                       -> x $ *
                         js/Math.cos $ - angle half-pi
                       , 0 $ -> x
                         * $ js/Math.sin (- angle half-pi)
                         negate
-                  from-z $ []
+                  from-z $ v3
                     -> z (negate)
                       * $ js/Math.cos v-angle
                       * $ js/Math.cos angle
@@ -1671,7 +1668,7 @@
             "\"three/addons/webxr/XRHandModelFactory.js" :refer $ XRHandModelFactory
             touch-control.core :refer $ render-control! control-states start-control-loop! clear-control-loop!
             quaternion.complex :refer $ &c* &c+
-            quaternion.vector :refer $ &v+
+            quaternion.vector :refer $ &v+ v3
             "\"@quatrefoil/utils" :refer $ hcl-to-hex
             "\"hsluv" :refer $ Hsluv
             "\"three/addons/webxr/VRButton.js" :refer $ VRButton
