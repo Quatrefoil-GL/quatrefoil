@@ -159,6 +159,7 @@
                       :control $ comp-control-demo (>> states :control)
                       :shader $ comp-shader
                       :gltf $ comp-gltf
+                      :sphere-grid $ comp-sphere-grid
                     if (not= tab :portal)
                       comp-back $ fn (d!)
                         d! cursor $ assoc state :tab :portal
@@ -211,6 +212,41 @@
               point-light $ {} (:color 0x555555) (:intensity 2.4) (:distance 800)
                 :position $ [] 10 100 100
               ambient-light $ {} (:color 0xaaaaaa) (:intensity 1)
+        |comp-sphere-grid $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defn comp-sphere-grid () $ group ({})
+              group ({}) & $ -> (range-3d 8)
+                map $ fn (pair)
+                  let
+                      x $ nth pair 0
+                      y $ nth pair 1
+                      z $ nth pair 2
+                      r 20
+                    sphere $ {} (:radius 3)
+                      :position $ [] (* r x) (* r y) (* r z)
+                      :material $ {} (:kind :mesh-lambert) (:opacity 0.6)
+                        :color $ hclx 160 80 70
+                      :event $ {}
+                        :click $ fn (e d!) (d! :canvas nil)
+                        :gamepad $ fn (info elapsed d!) (js/console.log "\"second pad event" info)
+              point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
+                :position $ [] 10 20 10
+        |range-2d $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defn range-2d (n)
+              -> (range-bothway n)
+                mapcat $ fn (i)
+                  -> (range-bothway n)
+                    map $ fn (j) ([] i j)
+        |range-3d $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defn range-3d (n)
+              -> (range-bothway n)
+                mapcat $ fn (i)
+                  -> (range-bothway n)
+                    mapcat $ fn (j)
+                      -> (range-bothway n)
+                        map $ fn (k) ([] i j k)
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote
           ns quatrefoil.app.comp.container $ :require
@@ -472,6 +508,7 @@
                 comp-tab :quilling "\"Quilling" ([] -0 -10 0) on-change
                 comp-tab :shader "\"Shader" ([] -40 -20 0) on-change
                 comp-tab :gltf "\"GLTF" ([] 0 -20 0) on-change
+                comp-tab :sphere-grid "\"Sphere Grid" ([] -40 -30 0) on-change
                 point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                   :position $ [] 20 40 50
         |comp-tab $ %{} :CodeEntry (:doc |)
