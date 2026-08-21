@@ -2168,14 +2168,14 @@
             defn create-shape (element coord)
               ; js/console.log |Element: element $ :coord element
               let
-                  params $ &record:get element :params
-                  position $ &record:get element :position
-                  scale $ &record:get element :scale
-                  rotation $ &record:get element :rotation
-                  material $ either (&record:get element :material)
+                  params $ &struct:get element :params
+                  position $ &struct:get element :position
+                  scale $ &struct:get element :scale
+                  rotation $ &struct:get element :rotation
+                  material $ either (&struct:get element :material)
                     {} (:kind :mesh-basic) (:color 0xa0a0a0)
-                  event $ &record:get element :event
-                case-default (&record:get element :name)
+                  event $ &struct:get element :event
+                case-default (&struct:get element :name)
                   do (js/console.warn "|Unknown element" element) (new THREE/Object3D)
                   :scene @*global-scene
                   :group $ create-group-element params position rotation scale
@@ -2198,7 +2198,7 @@
                   :plane-reflector $ create-plane-reflector params position rotation scale
                   :parametric $ create-parametric-element params position rotation scale material
                   :buffer-object $ create-buffer-object-element params position rotation scale material
-                  :shader-mesh $ create-shader-mesh (&record:get element :attributes) params position rotation scale material
+                  :shader-mesh $ create-shader-mesh (&struct:get element :attributes) params position rotation scale material
                   :some-object $ create-some-object params position rotation scale material
         |create-shape-element $ %{} :CodeEntry (:doc |)
           :code $ quote
@@ -2421,7 +2421,7 @@
           :code $ quote
             defn set-position! (object position)
               cond
-                  tuple? position
+                  enum? position
                   tag-match position
                       :v3 x y z
                       .!set (.-position object) x y z
@@ -2612,11 +2612,11 @@
         |comp? $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn comp? (x)
-              and (record? x) (&record:matches? Component x)
+              and (struct? x) (&struct:matches? Component x)
         |shape? $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn shape? (x)
-              and (record? x) (&record:matches? Shape x)
+              and (struct? x) (&struct:matches? Shape x)
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote (ns quatrefoil.schema)
     |quatrefoil.util.core $ %{} :FileEntry
