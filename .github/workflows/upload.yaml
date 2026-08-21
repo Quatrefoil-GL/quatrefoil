@@ -16,8 +16,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'yarn'
 
+      - run: corepack enable && corepack prepare yarn@4.12.0 --activate
       - uses: calcit-lang/setup-cr@0.0.7
         with:
           bundler: false
