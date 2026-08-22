@@ -15,7 +15,7 @@ yarn
 
 # also get calcit deps in `~/.config/calcit/modules/`
 
-cr --emit-js -1
+calcit calcit.cirru js
 yarn vite
 ```
 

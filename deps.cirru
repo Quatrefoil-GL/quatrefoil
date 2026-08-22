@@ -1,6 +1,5 @@
-{}
-  :calcit-version |0.9.5
-  :dependencies $ {}
+
+{} (:calcit-version |0.13.29)
+  :dependencies $ {} (|Quamolit/touch-control |main)
     |calcit-lang/quaternion |main
-    |Quamolit/touch-control |main
     |mvc-works/pointed-prompt |main
