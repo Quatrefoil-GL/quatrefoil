@@ -45,18 +45,24 @@
             defn create-element (el-name props children)
               %{} Shape (:name el-name)
                 :params $ -> props (dissoc :material) (dissoc :event) (dissoc :position) (dissoc :scale) (dissoc :rotation) (dissoc :attributes) (dissoc :on) (dissoc :event)
-                :position $ :position props
-                :scale $ :scale props
-                :material $ :material props
-                :rotation $ :rotation props
-                :attributes $ :attributes props
-                :event $ or (:on props) (:event props)
+                :position $ field props :position
+                :scale $ field props :scale
+                :material $ field props :material
+                :rotation $ field props :rotation
+                :attributes $ field props :attributes
+                :event $ or (field props :on) (field props :event)
                 :children $ arrange-children children
           :examples $ []
           :schema $ :: 'Dynamic
         |directional-light $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn directional-light (props & children) (create-element :directional-light props children)
+          :examples $ []
+          :schema $ :: 'Dynamic
+        |field $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn field (value key)
+              option:unwrap-or (get value key) nil
           :examples $ []
           :schema $ :: 'Dynamic
         |flat-values $ %{} 'CodeEntry (:doc |)
@@ -187,11 +193,11 @@
           :code $ quote
             defcomp comp-container (store)
               let
-                  states $ :states store
-                  cursor $ :cursor states
-                  state $ either (:data states)
+                  states $ field store :states
+                  cursor $ field states :cursor
+                  state $ either (field states :data)
                     {} $ :tab :portal
-                  tab $ :tab state
+                  tab $ field state :tab
                 scene ({})
                   group
                     {}
@@ -203,7 +209,7 @@
                       :portal $ comp-portal
                         fn (next d!)
                           d! cursor $ assoc state :tab next
-                      :todolist $ comp-todolist (:tasks store)
+                      :todolist $ comp-todolist (field store :tasks)
                       :demo $ comp-demo
                       :lines $ comp-lines
                       :shapes $ comp-shapes
@@ -266,7 +272,7 @@
           :code $ quote
             defn comp-gltf () $ group ({})
               some-object $ {} (:key :sakura)
-                :object-loaded? $ some? (get @*loaded-objects :sakura)
+                :object-loaded? $ option:some? (get @*loaded-objects :sakura)
                 :position $ [] 0 -100 -100
                 :scale $ [] 200 200 200
               point-light $ {} (:color 0x555555) (:intensity 2.4) (:distance 800)
@@ -293,6 +299,12 @@
                         :gamepad $ fn (info elapsed d!) (js/console.log "|second pad event" info)
               point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
                 :position $ [] 10 20 10
+          :examples $ []
+          :schema $ :: 'Dynamic
+        |field $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn field (value key)
+              option:unwrap-or (get value key) nil
           :examples $ []
           :schema $ :: 'Dynamic
         |range-2d $ %{} 'CodeEntry (:doc |)
@@ -336,8 +348,8 @@
           :code $ quote
             defcomp comp-control-demo (states)
               let
-                  cursor $ :cursor states
-                  state $ or (:data states)
+                  cursor $ field states :cursor
+                  state $ or (field states :data)
                     {}
                       :p0 $ v3 0 0 0
                       :v0 0
@@ -346,12 +358,12 @@
                 group ({})
                   comp-pin-point
                     {} (:speed 8) (:label |C) (:color 0xddaaff) (:radius 1) (:opacity 1)
-                      :position $ :p0 state
+                      :position $ field state :p0
                     fn (next d!)
                       d! cursor $ assoc state :p0 next
                   comp-value
                     {} (:speed 0.2) (:show-text? true) (:label |A)
-                      :value $ :v0 state
+                      :value $ field state :v0
                       :position $ v3 10 0 0
                       :bound $ [] -2 20
                       :color $ hslx 10 90 80
@@ -359,7 +371,7 @@
                       d! cursor $ assoc state :v0 v
                   comp-value-2d
                     {} (:label |B)
-                      :value $ :v1 state
+                      :value $ field state :v1
                       :position $ v3 0 10 0
                       :speed 0.2
                       :color 0xccaaff
@@ -369,12 +381,18 @@
                       d! cursor $ assoc state :v1 v
                   comp-switch
                     {} (:label |Status) (:color 0xaa88ff)
-                      :value $ :on? state
+                      :value $ field state :on?
                       :position $ v3 20 0 0
                     fn (v d!)
                       d! cursor $ assoc state :on? v
                   point-light $ {} (:color 0xffffff) (:intensity 1) (:distance 200)
                     :position $ v3 20 40 50
+          :examples $ []
+          :schema $ :: 'Dynamic
+        |field $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn field (value key)
+              option:unwrap-or (get value key) nil
           :examples $ []
           :schema $ :: 'Dynamic
       :ns $ %{} 'NsEntry (:doc |)
@@ -395,26 +413,27 @@
                   f1 $ nth factor 1
                   f2 $ nth factor 2
                   deg $ * ratio 20 &PI
-                  r $ * 160 (js/Math.sin deg)
+                  r $ * 160
+                    js-number $ js/Math.sin deg
                   deg2 $ / (* 5 f0 deg) 13
                   deg3 $ * 0.02 f1 deg
                 []
-                  * r $ js/Math.cos deg2
-                  * 0.6 f2 r $ js/Math.sin deg3
-                  * r $ js/Math.sin deg2
+                  * r $ js-number (js/Math.cos deg2)
+                  * 0.6 f2 r $ js-number (js/Math.sin deg3)
+                  * r $ js-number (js/Math.sin deg2)
           :examples $ []
           :schema $ :: 'Dynamic
         |comp-fly-city $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defcomp comp-fly-city (states)
               let
-                  cursor $ :cursor states
-                  state $ or (:data states)
+                  cursor $ field states :cursor
+                  state $ or (field states :data)
                     {}
                       :buildings $ make-building-data 80
                       :factor $ [] 1 1 1
                 group ({}) & horizontal-lines & forward-lines &
-                  -> (:buildings state)
+                  -> (field state :buildings)
                     map $ fn (vec)
                       let[] (x y w d h) vec $ box
                         {} (:width w) (:height h) (:depth d)
@@ -431,7 +450,7 @@
                   point-light $ {} (:color 0xffff55) (:intensity 2) (:distance 600)
                     :position $ [] 30 20 40
                   tube $ {} (:points-fn cloud-fn) (:radius 0.6) (:tubular-segments 1600) (:radial-segments 4)
-                    :factor $ :factor state
+                    :factor $ field state :factor
                     :position $ [] 0 200 0
                     :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
                   sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
@@ -479,6 +498,17 @@
                 :position $ [] 20 40 50
           :examples $ []
           :schema $ :: 'Dynamic
+        |ffi-object $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn ffi-object (value) (unsafe-coerce value JsObject)
+          :examples $ []
+          :schema $ :: 'Dynamic
+        |field $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn field (value key)
+              option:unwrap-or (get value key) nil
+          :examples $ []
+          :schema $ :: 'Dynamic
         |forward-lines $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def forward-lines $ -> (range 20)
@@ -501,6 +531,11 @@
                     :points $ [] ([] -200 0 pos) ([] 200 0 pos)
                     :position $ [] 0 0 0
                     :material $ {} (:kind :line-dashed) (:color 0xccccff) (:opacity 0.3) (:transparent true) (:linewidth 2) (:gapSize 0.5) (:dashSize 0.5)
+          :examples $ []
+          :schema $ :: 'Dynamic
+        |js-number $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn js-number (value) (unsafe-coerce value Number)
           :examples $ []
           :schema $ :: 'Dynamic
         |make-building-data $ %{} 'CodeEntry (:doc |)
@@ -537,8 +572,8 @@
           :code $ quote
             defcomp comp-mirror (states)
               let
-                  cursor $ :cursor states
-                  state $ either (:data states)
+                  cursor $ field states :cursor
+                  state $ either (field states :data)
                     {} $ :v 0
                 group ({})
                   group ({}) & $ -> (range 2)
@@ -563,6 +598,12 @@
                   point-light $ {} (:color 0xff8888) (:intensity 2) (:distance 200)
                     :position $ [] 10 0 0
                   ambient-light $ {} (:color 0x666666) (:intencity 1)
+          :examples $ []
+          :schema $ :: 'Dynamic
+        |field $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn field (value key)
+              option:unwrap-or (get value key) nil
           :examples $ []
           :schema $ :: 'Dynamic
         |heart-path $ %{} 'CodeEntry (:doc |)
@@ -638,27 +679,34 @@
                 group ({}) & $ -> lines
                   mapcat $ fn (line)
                     let
-                        from $ :from line
-                        to $ :to line
+                        from $ field line :from
+                        to $ field line :to
                         v $ &q- to from
                         size $ q-length v
                         w $ nth to 1
                         hang $ {} (:from to)
                           :to $ quaternion w (nth to 2)
                             + (nth to 3)
-                              nth (:line line) 3
+                              nth (field line :line) 3
                             nth to 4
                       []
-                        tube $ {} (:points-fn straight-fn) (:factor line)
+                        tube $ {} (:points-fn straight-fn)
+                          :factor $ field line :factor
                           :radius $ * 0.04 size
                           :tubular-segments 4
                           :radial-segments 4
                           :position $ v3 -10 0 0
                           :material $ assoc tube-material :color
-                            pick-color $ :name line
+                            pick-color $ field line :name
                         ; tube $ {} (:points-fn straight-fn) (:factor hang) (:radius 0.1) (:tubular-segments 4) (:radial-segments 4)
                           :position $ v3 -10 0 0
                           :material leaf-material
+          :examples $ []
+          :schema $ :: 'Dynamic
+        |field $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn field (value key)
+              option:unwrap-or (get value key) nil
           :examples $ []
           :schema $ :: 'Dynamic
         |generate-lines $ %{} 'CodeEntry (:doc |)
@@ -672,8 +720,8 @@
                     -> transformers $ mapcat
                       fn (info)
                         let
-                            trans $ :vector info
-                            name $ :name info
+                            trans $ field info :vector
+                            name $ field info :name
                           generate-lines line-to (&q* l0 trans) (dec level) name
                     []
           :examples $ []
@@ -694,9 +742,9 @@
             defn straight-fn (t factor)
               let-sugar
                     [] w1 x1 y1 z1
-                    &tuple:params $ &map:get factor :from
+                    &enum:params $ &map:get factor :from
                   ([] w2 x2 y2 z2)
-                    &tuple:params $ &map:get factor :to
+                    &enum:params $ &map:get factor :to
                 []
                   &+ (&* x1 t)
                     &* x2 $ &- 1 t
@@ -904,23 +952,29 @@
                 sphere $ {} (:radius 2)
                   :position $ [] -30 0 0
                   :material $ {} (:kind :mesh-lambert) (:opacity 0.8) (:transparent true)
-                    :color $ if (:done? task) 0x905055 0x9050ff
+                    :color $ if (field task :done?) 0x905055 0x9050ff
                   :event $ {}
                     :click $ fn (event dispatch!)
-                      dispatch! :toggle-task $ :id task
+                      dispatch! :toggle-task $ field task :id
                 box
                   {} (:width 40) (:height 4) (:depth 1)
                     :material $ {} (:kind :mesh-lambert) (:color 0xcccccc) (:opacity 0.6) (:transparent true)
                     :event $ {}
                       :click $ fn (event dispatch!)
-                        [] (:id task)
+                        [] (field task :id)
                           prompt-at!
-                            [] (.-pageX event) (.-pageY event)
-                            {} $ :initial (:text task)
+                            []
+                              unsafe-coerce
+                                .-pageX $ unsafe-coerce event JsObject
+                                , Number
+                              unsafe-coerce
+                                .-pageY $ unsafe-coerce event JsObject
+                                , Number
+                            {} $ :initial (field task :text)
                             fn (text)
-                              dispatch! :edit-task $ [] (:id task) text
+                              dispatch! :edit-task $ [] (field task :id) text
                   text $ {}
-                    :text $ :text task
+                    :text $ field task :text
                     :size 3
                     :depth 1
                     :position $ [] -10 0 0
@@ -930,7 +984,7 @@
                   :material $ {} (:kind :mesh-lambert) (:opacity 0.8) (:color 0xff5050) (:transparent true)
                   :event $ {}
                     :click $ fn (event dispatch!)
-                      dispatch! :delete-task $ :id task
+                      dispatch! :delete-task $ field task :id
           :examples $ []
           :schema $ :: 'Dynamic
         |comp-todolist $ %{} 'CodeEntry (:doc |)
@@ -951,10 +1005,16 @@
                   {} $ :position ([] 0 20 0)
                   -> (vals tasks)
                     map-indexed $ fn (idx task)
-                      [] (:id task) (comp-task task idx)
+                      [] (field task :id) (comp-task task idx)
                     pairs-map
                 point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                   :position $ [] 0 20 50
+          :examples $ []
+          :schema $ :: 'Dynamic
+        |field $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn field (value key)
+              option:unwrap-or (get value key) nil
           :examples $ []
           :schema $ :: 'Dynamic
       :ns $ %{} 'NsEntry (:doc |)
@@ -1105,17 +1165,33 @@
                   reset! *store store
           :examples $ []
           :schema $ :: 'Dynamic
+        |ffi-object $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn ffi-object (value) (unsafe-coerce value JsObject)
+          :examples $ []
+          :schema $ :: 'Dynamic
+        |js-number $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn js-number (value) (unsafe-coerce value Number)
+          :examples $ []
+          :schema $ :: 'Dynamic
         |main! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn main! () (load-console-formatter!) (inject-tree-methods) (start-loading-sakura!)
               set-perspective-camera! $ {} (:fov 50) (:near 0.1) (:far 10)
                 :position $ v3 0 1.6 1
-                :aspect $ / js/window.innerWidth js/window.innerHeight
+                :aspect $ /
+                  js-number $ .-innerWidth (ffi-object js/window)
+                  js-number $ .-innerHeight (ffi-object js/window)
               let
                   canvas-el $ js/document.querySelector |canvas
                 init-renderer! canvas-el $ {} (:background 0x110022) (:shadow-map? true)
                   ; :composer-passes $ []
-                    new UnrealBloomPass (new THREE/Vector2 js/window.innerWidth js/window.innerHeight) 1.5 0.4 0.85
+                    new UnrealBloomPass
+                      new THREE/Vector2
+                        js-number $ .-innerWidth (ffi-object js/window)
+                        js-number $ .-innerHeight (ffi-object js/window)
+                      , 1.5 0.4 0.85
               render-app!
               add-watch *store :changes $ fn (store prev) (render-app!)
               set! js/window.onkeydown handle-key-event
@@ -1150,9 +1226,6 @@
               .!setDRACOLoader loader dracoLoader
               .!load loader |https://cdn.tiye.me/gltf/fantasy_sakura/scene.gltf
                 fn (gltf)
-                  set!
-                    .-cachedHash $ .-scene gltf
-                    , |sakura
                   swap! *loaded-objects assoc :sakura $ .-scene gltf
                   js/console.info "|gltf loaded"
                   render-app!
@@ -1208,7 +1281,7 @@
                   fn (tasks)
                     assoc-in tasks
                       [] (first op-data) :text
-                      last op-data
+                      option:unwrap-or (last op-data) nil
           :examples $ []
           :schema $ :: 'Dynamic
       :ns $ %{} 'NsEntry (:doc |)
@@ -1237,17 +1310,17 @@
           :code $ quote
             defcomp comp-pin-point (options on-change)
               let
-                  position $ or (:position options) (v3 0 0 0)
-                  speed $ or (:speed options) 1
-                  text-color $ either (:text-color options) 0xaaaaff
+                  position $ or (field options :position) (v3 0 0 0)
+                  speed $ or (field options :speed) 1
+                  text-color $ either (field options :text-color) 0xaaaaff
                 group
                   {} $ :position position
                   sphere $ {} (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0)
                     :position $ v3 0 0 0
-                    :radius $ or (:radius options) 1
+                    :radius $ or (field options :radius) 1
                     :material $ {} (:kind :mesh-lambert) (:transparent true)
-                      :color $ either (:color options) 0xaaaaff
-                      :opacity $ either (:opacity options) 0.7
+                      :color $ either (field options :color) 0xaaaaff
+                      :opacity $ either (field options :opacity) 0.7
                     :event $ {}
                       :control $ fn (states delta elapse d!) (; println |delta delta)
                         let
@@ -1260,18 +1333,18 @@
                       :gamepad $ fn (info elapsed d!) (js/console.log info)
                         let
                             speeding $ * speed
-                              if (:b info) 8 1
-                            forward $ * speeding elapsed (:v2 info)
-                              if (:a info) -1 1
+                              if (field info :b) 8 1
+                            forward $ * speeding elapsed (field info :v2)
+                              if (field info :a) -1 1
                             next-pos $ v+ position
-                              v-scale (:rightward info)
-                                * speeding elapsed $ :dx info
-                              v-scale (:upward info)
-                                * -1 speeding elapsed $ :dy info
-                              v-scale (:forward info) forward
+                              v-scale (field info :rightward)
+                                * speeding elapsed $ field info :dx
+                              v-scale (field info :upward)
+                                * -1 speeding elapsed $ field info :dy
+                              v-scale (field info :forward) forward
                           on-change next-pos d!
                   if-let
-                    label $ :label options
+                    label $ field options :label
                     text $ {}
                       :position $ v3 -0.6 2 0
                       :text $ str label
@@ -1284,19 +1357,19 @@
           :code $ quote
             defn comp-switch (options on-toggle)
               let
-                  value $ :value options
-                  color $ either (:color options) 0xffffff
-                  text-color $ either (:text-color options) color
-                  label $ :label options
+                  value $ field options :value
+                  color $ either (field options :color) 0xffffff
+                  text-color $ either (field options :text-color) color
+                  label $ field options :label
                 group
-                  {} $ :position (:position options)
+                  {} $ :position (field options :position)
                   sphere $ {} (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0)
                     :radius $ &*
-                      or (:radius options) 1
+                      or (field options :radius) 1
                       if value 1 0.8
                     :material $ {} (:kind :mesh-lambert) (:color color) (:transparent true)
                       :opacity $ if value
-                        either (:opacity options) 0.8
+                        either (field options :opacity) 0.8
                         , 0.3
                     :event $ {}
                       :click $ fn (e d!)
@@ -1313,19 +1386,19 @@
           :code $ quote
             defcomp comp-value (options on-change)
               let
-                  value $ :value options
-                  speed $ or (:speed options) 1
-                  color $ either (:color options) 0xffffff
-                  text-color $ either (:text-color options) color
-                  text-size $ either (:text-size options) 1
-                  bound $ or (:bound options) ([] 0 1)
-                  label $ :label options
+                  value $ field options :value
+                  speed $ or (field options :speed) 1
+                  color $ either (field options :color) 0xffffff
+                  text-color $ either (field options :text-color) color
+                  text-size $ either (field options :text-size) 1
+                  bound $ or (field options :bound) ([] 0 1)
+                  label $ field options :label
                 group
-                  {} $ :position (:position options)
+                  {} $ :position (field options :position)
                   sphere $ {} (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0)
-                    :radius $ or (:radius options) 1
+                    :radius $ or (field options :radius) 1
                     :material $ {} (:kind :mesh-lambert) (:color color) (:transparent true)
-                      :opacity $ either (:opacity options) 0.6
+                      :opacity $ either (field options :opacity) 0.6
                     :event $ {}
                       :control $ fn (move delta elapse d!) (; println |delta delta)
                         let
@@ -1343,17 +1416,17 @@
                       :gamepad $ fn (info elapsed d!)
                         let
                             speeding $ * speed
-                              if (:b info) 8 1
+                              if (field info :b) 8 1
                           on-change
-                            + value $ * elapsed speeding (:dx info)
+                            + value $ * elapsed speeding (field info :dx)
                             , d!
-                  if (:show-text? options)
+                  if (field options :show-text?)
                     text $ {}
                       :position $ [] -1.6 2 0
                       :text $ let
                           prefix $ if (blank? label) | (str label "| ")
                         str prefix $ .!toFixed value
-                          either (:fract-length options) 2
+                          either (field options :fract-length) 2
                       :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                       :size text-size
                       :depth 0.5
@@ -1363,16 +1436,16 @@
           :code $ quote
             defcomp comp-value-2d (options on-change)
               let
-                  v $ :value options
-                  position $ :position options
-                  speed $ either (:speed options) 1
-                  color $ either (:color options) 0xaaaaff
-                  text-color $ either (:text-color options) color
-                  text-size $ either (:text-size options) 1
-                  fract-len $ either (:fract-length options) 2
-                  label $ :label options
+                  v $ field options :value
+                  position $ field options :position
+                  speed $ either (field options :speed) 1
+                  color $ either (field options :color) 0xaaaaff
+                  text-color $ either (field options :text-color) color
+                  text-size $ either (field options :text-size) 1
+                  fract-len $ either (field options :fract-length) 2
+                  label $ field options :label
                 group
-                  {} $ :position (:position options)
+                  {} $ :position (field options :position)
                   sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0)
                     :material $ {} (:kind :mesh-lambert) (:color color) (:opacity 0.7) (:transparent true)
                     :event $ {}
@@ -1390,13 +1463,13 @@
                             x0 $ nth v 0
                             y0 $ nth v 1
                             speeding $ * speed
-                              if (:b info) 8 1
-                            dx $ * elapsed speeding (:dx info)
-                            dy $ * elapsed speeding (:dy info)
+                              if (field info :b) 8 1
+                            dx $ * elapsed speeding (field info :dx)
+                            dy $ * elapsed speeding (field info :dy)
                           on-change
                             [] (+ x0 dx) (- y0 dy)
                             , d!
-                  if (:show-text? options)
+                  if (field options :show-text?)
                     text $ {}
                       :position $ [] -2 2 0
                       :text $ let
@@ -1407,6 +1480,12 @@
                       :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                       :size text-size
                       :depth 1
+          :examples $ []
+          :schema $ :: 'Dynamic
+        |field $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn field (value key)
+              option:unwrap-or (get value key) nil
           :examples $ []
           :schema $ :: 'Dynamic
       :ns $ %{} 'NsEntry (:doc |)
@@ -1428,7 +1507,7 @@
           :code $ quote
             defn >> (states k)
               let
-                  parent-cursor $ either (:cursor states) ([])
+                  parent-cursor $ either (field states :cursor) ([])
                   branch $ either (get states k) ({})
                 assoc branch :cursor $ append parent-cursor k
           :examples $ []
@@ -1438,8 +1517,11 @@
             defn camera-direction-for (x y z)
               let
                   v $ new THREE/Vector3 x y z
-                .!applyQuaternion v $ .-quaternion @*global-camera
-                :: :v3 (.-x v) (.-y v) (.-z v)
+                .!applyQuaternion v $ .-quaternion (ffi-object @*global-camera)
+                :: :v3
+                  js-number $ .-x (ffi-object v)
+                  js-number $ .-y (ffi-object v)
+                  js-number $ .-z (ffi-object v)
           :examples $ []
           :schema $ :: 'Dynamic
         |clear-cache! $ %{} 'CodeEntry (:doc |)
@@ -1465,6 +1547,17 @@
                     :tree $ &let () ~@body
           :examples $ []
           :schema $ :: 'Dynamic
+        |ffi-object $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn ffi-object (value) (unsafe-coerce value JsObject)
+          :examples $ []
+          :schema $ :: 'Dynamic
+        |field $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn field (value key)
+              option:unwrap-or (get value key) nil
+          :examples $ []
+          :schema $ :: 'Dynamic
         |half-pi $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def half-pi $ * 0.5 &PI
@@ -1475,14 +1568,14 @@
             defn handle-control-events () $ start-control-loop! 10
               fn (elapsed states delta)
                 let
-                    l-move $ map (:left-move states) refine-strength
-                    r-move $ map (:right-move states) refine-strength
-                    r-delta $ :right-move delta
-                    l-delta $ :left-move delta
+                    l-move $ map (field states :left-move) refine-strength
+                    r-move $ map (field states :right-move) refine-strength
+                    r-delta $ field delta :right-move
+                    l-delta $ field delta :left-move
                     camera @*global-camera
-                    left-a? $ :left-a? states
-                    right-b? $ :right-b? states
-                    left-b? $ :left-b? states
+                    left-a? $ field states :left-a?
+                    right-b? $ field states :right-b?
+                    left-b? $ field states :left-b?
                   ; println |L l-move |R r-move
                   when
                     not= 0 $ nth l-move 1
@@ -1512,7 +1605,7 @@
                           shift-viewer-by! $ * 2 elapsed
                         (> shift 0.06)
                           shift-viewer-by! $ * -2 elapsed
-                        (< (js/Math.abs shift) 0.06)
+                        (< (js-number (js/Math.abs shift)) 0.06)
                           shift-viewer-by! false
                         true nil
                   when
@@ -1527,8 +1620,12 @@
             defn handle-key-event (event)
               let
                   angle @*viewer-angle
-                  key $ .-key event
-                  shift? $ .-shiftKey event
+                  key $ unsafe-coerce
+                    .-key $ ffi-object event
+                    , String
+                  shift? $ unsafe-coerce
+                    .-shiftKey $ ffi-object event
+                    , Bool
                 case-default key nil
                   |ArrowDown $ if shift?
                     tween-move-camera! $ [] :shift -1
@@ -1579,7 +1676,11 @@
                 set! (.-hsluv_s conv) c
                 set! (.-hsluv_l conv) l
                 .!hsluvToRgb conv
-                .!getHex $ .!setRGB color (.-rgb_r conv) (.-rgb_g conv) (.-rgb_r conv)
+                .!getHex $ ffi-object
+                  .!setRGB (ffi-object color)
+                    .-rgb_r $ ffi-object conv
+                    .-rgb_g $ ffi-object conv
+                    .-rgb_r $ ffi-object conv
           :examples $ []
           :schema $ :: 'Dynamic
         |hslx $ %{} 'CodeEntry (:doc |)
@@ -1587,27 +1688,31 @@
             defn hslx (h s l)
               let
                   c $ new THREE/Color
-                .!getHex $ .!setHSL c (/ h 360) (/ s 100) (/ l 100)
+                .!getHex $ ffi-object
+                  .!setHSL (ffi-object c) (/ h 360) (/ s 100) (/ l 100)
           :examples $ []
           :schema $ :: 'Dynamic
         |init-controls! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn init-controls! () $ let
-                renderer @*global-renderer
-                scene @*global-scene
-                ctrl-0 $ -> renderer .-xr (.!getController 0)
-                ctrl-1 $ -> renderer .-xr (.!getController 1)
-                ctrl-grip-0 $ -> renderer .-xr (.!getControllerGrip 0)
-                ctrl-grip-1 $ -> renderer .-xr (.!getControllerGrip 1)
-                hand-0 $ -> renderer .-xr (.!getHand 0)
-                hand-1 $ -> renderer .-xr (.!getHand 1)
-                controllerModelFactory $ new XRControllerModelFactory
-                handModelFactory $ new XRHandModelFactory
-                line-geo $ -> (new THREE/BufferGeometry)
-                  .!setFromPoints $ js-array (new THREE/Vector3 0 0 0) (new THREE/Vector3 0 0 -1)
-                line $ new THREE/Line line-geo
-              js/document.body.appendChild $ .!createButton VRButton renderer
-                js-object $ :requiredFeatures (js-array |hand-tracking)
+                renderer $ ffi-object @*global-renderer
+                scene $ ffi-object @*global-scene
+                xr $ ffi-object (.-xr renderer)
+                ctrl-0 $ ffi-object (.!getController xr 0)
+                ctrl-1 $ ffi-object (.!getController xr 1)
+                ctrl-grip-0 $ ffi-object (.!getControllerGrip xr 0)
+                ctrl-grip-1 $ ffi-object (.!getControllerGrip xr 1)
+                hand-0 $ ffi-object (.!getHand xr 0)
+                hand-1 $ ffi-object (.!getHand xr 1)
+                controllerModelFactory $ ffi-object (new XRControllerModelFactory)
+                handModelFactory $ ffi-object (new XRHandModelFactory)
+                line-geo $ ffi-object
+                  -> (new THREE/BufferGeometry)
+                    .!setFromPoints $ js-array (new THREE/Vector3 0 0 0) (new THREE/Vector3 0 0 -1)
+                line $ ffi-object (new THREE/Line line-geo)
+              .!appendChild (ffi-object js/document.body)
+                .!createButton VRButton renderer $ js-object
+                  :requiredFeatures $ js-array |hand-tracking
               .!add ctrl-grip-0 $ .!createControllerModel controllerModelFactory ctrl-grip-0
               .!add ctrl-grip-1 $ .!createControllerModel controllerModelFactory ctrl-grip-1
               .!add hand-0 $ .!createHandModel handModelFactory hand-0
@@ -1619,7 +1724,9 @@
               .!add scene hand-0
               .!add scene hand-1
               set! (.-name line) |line
-              -> line .-scale .-z $ set! 5
+              ->
+                ffi-object $ .-scale (ffi-object line)
+                , .-z $ set! 5
               .!add ctrl-0 $ .!clone line
               .!add ctrl-1 $ .!clone line
               listen-on-controller! ctrl-0
@@ -1631,7 +1738,10 @@
             defn init-renderer! (canvas-el options) (.!init RectAreaLightUniformsLib)
               reset! *global-renderer $ new THREE/WebGLRenderer
                 js-object (:canvas canvas-el) (:antialias true)
-              -> @*global-renderer .-xr .-enabled $ set! true
+              set!
+                .-enabled $ ffi-object
+                  .-xr $ ffi-object @*global-renderer
+                , true
               ; if (:shadow-map? options)
                 &let
                   m $ -> @*global-renderer .-shadowMap
@@ -1645,67 +1755,104 @@
                 pass $ either (:composer-passes options) ([])
                 .!addPass @*global-composer pass
               if
-                some? $ :background options
-                .!setClearColor @*global-renderer (:background options) 1
+                some? $ field options :background
+                .!setClearColor @*global-renderer (field options :background) 1
               ; set! (.-physicallyCorrectLights @*global-renderer) true
               ; set! (.-gammaFactor @*global-renderer) 22
-              .!setPixelRatio @*global-renderer $ either js/window.devicePixelRatio 1
-              .!setSize @*global-renderer js/window.innerWidth js/window.innerHeight
+              .!setPixelRatio @*global-renderer $ either
+                js-number $ .-devicePixelRatio (ffi-object js/window)
+                , 1
+              .!setSize @*global-renderer
+                js-number $ .-innerWidth (ffi-object js/window)
+                js-number $ .-innerHeight (ffi-object js/window)
               .!setAnimationLoop @*global-renderer $ fn (t & aa)
                 let
                     prev-t @*global-time
                   reset! *global-time t
-                  if-let
-                    session $ -> @*global-renderer .-xr (.!getSession)
+                  if
+                    js-present? $ .!getSession
+                      ffi-object $ .-xr (ffi-object @*global-renderer)
                     let
+                        session $ ffi-object
+                          .!getSession $ ffi-object
+                            .-xr $ ffi-object @*global-renderer
                         p0 $ -> session .-inputSources .?-0
                         p1 $ -> session .-inputSources .?-1
                       let
                           d $ ->
                             []
-                              if (some? p0) (read-input p0)
-                              if (some? p1) (read-input p1)
+                              if (js-present? p0) (read-input p0)
+                              if (js-present? p1) (read-input p1)
                             filter some?
                         if
                           not $ empty? d
                           on-gamepad-event
-                            last $ first d
+                            last $ option:unwrap-or (first d) ([])
                             * 0.001 $ - t prev-t
                 .!updateProjectionMatrix @*global-camera
                 .!render @*global-renderer @*global-scene @*global-camera
-              ; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight
-              .!addEventListener canvas-el |click $ fn (event) (on-canvas-click event)
-              .!addEventListener js/window |resize $ fn (event) (js/console.log |resize js/window.innerWidth js/window.innerHeight)
-                set! (.-aspect @*global-camera) (/ js/window.innerWidth js/window.innerHeight)
-                .!setSize @*global-renderer js/window.innerWidth js/window.innerHeight
+              ; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight $ .!addEventListener (ffi-object canvas-el) |click
+                fn (event) (on-canvas-click event)
+              .!addEventListener (ffi-object js/window) |resize $ fn (event)
+                js/console.log |resize
+                  .-innerWidth $ ffi-object js/window
+                  .-innerHeight $ ffi-object js/window
+                set!
+                  .-aspect $ ffi-object @*global-camera
+                  /
+                    js-number $ .-innerWidth (ffi-object js/window)
+                    js-number $ .-innerHeight (ffi-object js/window)
+                .!setSize @*global-renderer
+                  js-number $ .-innerWidth (ffi-object js/window)
+                  js-number $ .-innerHeight (ffi-object js/window)
                 .!updateProjectionMatrix @*global-camera
                 ; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight
                 ; .!render @*global-composer
                 .!render @*global-renderer @*global-scene @*global-camera
           :examples $ []
           :schema $ :: 'Dynamic
+        |js-number $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn js-number (value) (unsafe-coerce value Number)
+          :examples $ []
+          :schema $ :: 'Dynamic
         |listen-on-controller! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn listen-on-controller! (controller)
               let
-                  temp-matrix $ new THREE/Matrix4
-                  raycaster $ new THREE/Raycaster
-                .!addEventListener controller |selectstart $ fn (event)
-                  -> temp-matrix (.!identity)
-                    .!extractRotation $ .-matrixWorld controller
-                  -> raycaster .-ray .-origin $ .!setFromMatrixPosition (.-matrixWorld controller)
-                  -> raycaster .-ray .-direction (.!set 0 0 -1) (.!applyMatrix4 temp-matrix)
+                  temp-matrix $ ffi-object (new THREE/Matrix4)
+                  raycaster $ ffi-object (new THREE/Raycaster)
+                .!addEventListener (ffi-object controller) |selectstart $ fn (event) (.!identity temp-matrix)
+                  .!extractRotation temp-matrix $ .-matrixWorld (ffi-object controller)
+                  .!setFromMatrixPosition
+                    ffi-object $ .-origin
+                      ffi-object $ .-ray raycaster
+                    .-matrixWorld $ ffi-object controller
+                  .!set
+                    ffi-object $ .-direction
+                      ffi-object $ .-ray raycaster
+                    , 0 0 -1
+                  .!applyMatrix4
+                    ffi-object $ .-direction
+                      ffi-object $ .-ray raycaster
+                    , temp-matrix
                   let
                       objects $ let
                           children $ js-array
                           collect! $ fn (x) (.!push children x)
                         collect-children @*global-scene collect!
                         , children
-                      intersects $ -> (.!intersectObjects raycaster objects)
-                        .!filter $ fn (target pos _xs) (-> target .-object .-event some?)
-                    if-let
-                      maybe-target $ .-0 intersects
-                      call-event-on-target! maybe-target event
+                      intersects $ ffi-object
+                        ->
+                          ffi-object $ .!intersectObjects raycaster objects
+                          .!filter $ fn (target pos _xs)
+                            js-present? $ .-event
+                              ffi-object $ .-object (ffi-object target)
+                    if
+                      js-present? $ .-0 (ffi-object intersects)
+                      call-event-on-target!
+                        ffi-object $ .-0 (ffi-object intersects)
+                        , event
           :examples $ []
           :schema $ :: 'Dynamic
         |move-viewer-by! $ %{} 'CodeEntry (:doc |)
@@ -1714,10 +1861,17 @@
               let-sugar
                   camera @*global-camera
                   ([] dx dy dz) (to-viewer-axis x0 y0 z0)
-                  position $ .-position camera
-                  x $ &+ (.-x position) dx
-                  y $ &+ (.-y position) dy
-                  z $ &+ (.-z position) dz
+                  position $ ffi-object
+                    .-position $ ffi-object camera
+                  x $ &+
+                    js-number $ .-x position
+                    , dx
+                  y $ &+
+                    js-number $ .-y position
+                    , dy
+                  z $ &+
+                    js-number $ .-z position
+                    , dz
                 ; println ([] x0 y0 z0) |=> $ [] dx dy dz
                 set! (.-x position) x
                 set! (.-y position) y
@@ -1730,11 +1884,16 @@
           :code $ quote
             defn new-lookat-point () $ let-sugar
                 camera @*global-camera
-                position $ .-position camera
-                x2 $ &+ (.-x position)
+                position $ ffi-object
+                  .-position $ ffi-object camera
+                x2 $ &+
+                  js-number $ .-x position
                   &* 4 $ cos @*viewer-angle
-                y2 $ &+ (.-y position) (&* 0.2 @*viewer-y-shift)
-                z2 $ &+ (.-z position)
+                y2 $ &+
+                  js-number $ .-y position
+                  &* 0.2 @*viewer-y-shift
+                z2 $ &+
+                  js-number $ .-z position
                   &* -4 $ sin @*viewer-angle
               new THREE/Vector3 x2 y2 z2
           :examples $ []
@@ -1743,33 +1902,59 @@
           :code $ quote
             defn read-input (p0)
               let
-                  gamepad $ -> p0 .-gamepad
-                  axes $ .-axes gamepad
-                  buttons $ .-buttons gamepad
+                  gamepad $ ffi-object
+                    .-gamepad $ ffi-object p0
+                  axes $ ffi-object (.-axes gamepad)
+                  buttons $ ffi-object (.-buttons gamepad)
                 if
-                  > (.-length buttons) 5
+                      >
+                        js-number $ .-length (ffi-object buttons)
+                        , 5
                   let
                       data $ {}
-                        :v1 $ -> buttons .-0 .-value
-                        :v2 $ -> buttons .-1 .-value
-                        :a $ -> buttons .-4 .-value
-                        :b $ -> buttons .-5 .-value
-                        :dx $ -> axes .-2
-                        :dy $ -> axes .-3
-                      controller $ -> @*global-renderer .-xr (.!getController 0)
-                      grip $ -> @*global-renderer .-xr (.!getControllerGrip 0)
-                      rot $ .-rotation controller
-                      rotation $ :: :v3 (.-x rot) (.-y rot) (.-z rot)
+                        :v1 $ js-number
+                          .-value $ ffi-object (.-0 buttons)
+                        :v2 $ js-number
+                          .-value $ ffi-object (.-1 buttons)
+                        :a $ js-number
+                          .-value $ ffi-object (.-4 buttons)
+                        :b $ js-number
+                          .-value $ ffi-object (.-5 buttons)
+                        :dx $ js-number (.-2 axes)
+                        :dy $ js-number (.-3 axes)
+                      controller $ ffi-object
+                        .!getController
+                          ffi-object $ .-xr (ffi-object @*global-renderer)
+                          , 0
+                      grip $ ffi-object
+                        .!getControllerGrip
+                          ffi-object $ .-xr (ffi-object @*global-renderer)
+                          , 0
+                      rot $ ffi-object (.-rotation controller)
+                      rotation $ :: :v3
+                        js-number $ .-x rot
+                        js-number $ .-y rot
+                        js-number $ .-z rot
                     if (not= data data0)
                       []
-                        turn-tag $ -> p0 .-handedness
+                        turn-tag $ unsafe-coerce
+                          .-handedness $ ffi-object p0
+                          , String
                         {}
-                          :v1 $ -> buttons .-0 .-value
-                          :v2 $ -> buttons .-1 .-value
-                          :a $ > (-> buttons .-4 .-value) 0.5
-                          :b $ > (-> buttons .-5 .-value) 0.5
-                          :dx $ -> axes .-2
-                          :dy $ -> axes .-3
+                          :v1 $ js-number
+                            .-value $ ffi-object (.-0 buttons)
+                          :v2 $ js-number
+                            .-value $ ffi-object (.-1 buttons)
+                          :a $ >
+                            js-number $ .-value
+                              ffi-object $ .-4 buttons
+                            , 0.5
+                          :b $ >
+                            js-number $ .-value
+                              ffi-object $ .-5 buttons
+                            , 0.5
+                          :dx $ js-number (.-2 axes)
+                          :dy $ js-number (.-3 axes)
                           :rotation rotation
                           :forward $ camera-direction-for 0 0 -1
                           :upward $ camera-direction-for 0 1 0
@@ -1781,7 +1966,7 @@
           :code $ quote
             defn refine-strength (x)
               &* x $ sqrt
-                js/Math.abs $ &* x 0.02
+                js-number $ js/Math.abs (&* x 0.02)
           :examples $ []
           :schema $ :: 'Dynamic
         |render-canvas! $ %{} 'CodeEntry (:doc |)
@@ -1828,33 +2013,37 @@
                   angle @*viewer-angle
                   project-distance 20
                   shift @*viewer-y-shift
-                  v-angle $ js/Math.atan (/ shift project-distance)
+                  v-angle $ js-number
+                    js/Math.atan $ / shift project-distance
                   from-y $ v3
                     -> y
-                      * $ js/Math.cos (+ v-angle half-pi)
-                      * $ js/Math.cos angle
+                      * $ js-number
+                        js/Math.cos $ + v-angle half-pi
+                      * $ js-number (js/Math.cos angle)
                     -> y $ *
-                      js/Math.sin $ + v-angle half-pi
+                      js-number $ js/Math.sin (+ v-angle half-pi)
                     -> y
-                      * $ js/Math.cos (+ v-angle half-pi)
-                      * $ js/Math.sin angle
+                      * $ js-number
+                        js/Math.cos $ + v-angle half-pi
+                      * $ js-number (js/Math.sin angle)
                       negate
                   from-x $ wo-log
                     v3
                       -> x $ *
-                        js/Math.cos $ - angle half-pi
+                        js-number $ js/Math.cos (- angle half-pi)
                       , 0 $ -> x
-                        * $ js/Math.sin (- angle half-pi)
+                        * $ js-number
+                          js/Math.sin $ - angle half-pi
                         negate
                   from-z $ v3
                     -> z (negate)
-                      * $ js/Math.cos v-angle
-                      * $ js/Math.cos angle
+                      * $ js-number (js/Math.cos v-angle)
+                      * $ js-number (js/Math.cos angle)
                     -> z (negate)
-                      * $ js/Math.sin v-angle
+                      * $ js-number (js/Math.sin v-angle)
                     -> z (negate)
-                      * $ js/Math.cos v-angle
-                      * $ js/Math.sin angle
+                      * $ js-number (js/Math.cos v-angle)
+                      * $ js-number (js/Math.sin angle)
                       negate
                 -> from-x (&v+ from-y) (&v+ from-z)
           :examples $ []
@@ -1890,10 +2079,17 @@
                   (:move dx dy dz)
                     tween-call 20 5 $ fn (i)
                       let-sugar
-                          position $ .-position camera
-                          x $ &+ (.-x position) (/ dx 10)
-                          y $ &+ (.-y position) (/ dy 10)
-                          z $ &+ (.-z position) (/ dz 10)
+                          position $ ffi-object
+                            .-position $ ffi-object camera
+                          x $ &+
+                            js-number $ .-x position
+                            / dx 10
+                          y $ &+
+                            js-number $ .-y position
+                            / dy 10
+                          z $ &+
+                            js-number $ .-z position
+                            / dz 10
                         set! (.-x position) x
                         set! (.-y position) y
                         set! (.-z position) z
@@ -2049,39 +2245,45 @@
               cond
                   = nil prev-tree tree
                   &let () nil
-                (and (comp? prev-tree) (comp? tree) (not= (:name prev-tree) (:name tree)))
+                (and (comp? prev-tree) (comp? tree) (not= (field prev-tree :name) (field tree :name)))
                   collect! $ [] coord :replace-element (purify-tree tree)
                 (comp? prev-tree)
-                  recur (:tree prev-tree) tree coord collect!
+                  recur (field prev-tree :tree) tree coord collect!
                 (comp? tree)
-                  recur prev-tree (:tree tree) coord collect!
+                  recur prev-tree (field tree :tree) coord collect!
                 (and (some? tree) (nil? prev-tree))
                   collect! $ [] coord :add-element tree
                 (and (some? prev-tree) (nil? tree))
                   collect! $ [] coord :remove-element
-                (not= (:name prev-tree) (:name tree))
+                (not= (field prev-tree :name) (field tree :name))
                   collect! $ [] coord :replace-element (purify-tree tree)
-                (and (= :text (:name tree) (:name prev-tree)) (not= (:params tree) (:params prev-tree)))
+                (and (= :text (field tree :name) (field prev-tree :name)) (not= (field tree :params) (field prev-tree :params)))
                   collect! $ [] coord :replace-element (purify-tree tree)
-                (and (= (:name tree) (:name prev-tree)) (not= (:params tree) (:params prev-tree)))
+                (and (= (field tree :name) (field prev-tree :name)) (not= (field tree :params) (field prev-tree :params)))
                   collect! $ [] coord :replace-element (purify-tree tree)
                 true $ do
                   ; diff-params (:params prev-tree) (:params tree) coord collect!
                   if
-                    not= (:position prev-tree) (:position tree)
-                    collect! $ [] coord :change-position (:position tree)
+                    not= (field prev-tree :position) (field tree :position)
+                    collect! $ [] coord :change-position (field tree :position)
                   if
-                    not= (:rotation prev-tree) (:rotation tree)
-                    collect! $ [] coord :change-rotation (:rotation tree)
+                    not= (field prev-tree :rotation) (field tree :rotation)
+                    collect! $ [] coord :change-rotation (field tree :rotation)
                   if
-                    not= (:scale prev-tree) (:scale tree)
-                    collect! $ [] coord :change-scale (:scale tree)
+                    not= (field prev-tree :scale) (field tree :scale)
+                    collect! $ [] coord :change-scale (field tree :scale)
                   if
-                    not= (:attributes prev-tree) (:attributes tree)
-                    collect! $ [] coord :change-attributes (:attributes tree)
-                  diff-material (:material prev-tree) (:material tree) coord collect!
-                  diff-events (:event prev-tree) (:event tree) coord collect!
-                  diff-children (:children prev-tree) (:children tree) coord collect!
+                    not= (field prev-tree :attributes) (field tree :attributes)
+                    collect! $ [] coord :change-attributes (field tree :attributes)
+                  diff-material (field prev-tree :material) (field tree :material) coord collect!
+                  diff-events (field prev-tree :event) (field tree :event) coord collect!
+                  diff-children (field prev-tree :children) (field tree :children) coord collect!
+          :examples $ []
+          :schema $ :: 'Dynamic
+        |field $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn field (value key)
+              option:unwrap-or (get value key) nil
           :examples $ []
           :schema $ :: 'Dynamic
         |select-keys $ %{} 'CodeEntry (:doc |)
@@ -2089,7 +2291,7 @@
             defn select-keys (m xs)
               foldl ({})
                 fn (acc x)
-                  assoc acc x $ &get m x
+                  assoc acc x $ option:unwrap-or (get m x) nil
           :examples $ []
           :schema $ :: 'Dynamic
       :ns $ %{} 'NsEntry (:doc |)
@@ -2109,7 +2311,7 @@
               if (some? tree)
                 let
                     object3d $ create-shape (assoc tree :children nil) coord
-                    children $ -> (:children tree) (.to-list)
+                    children $ -> (field tree :children) (.to-list)
                       map $ fn (entry)
                         update entry 1 $ fn (child)
                           build-tree
@@ -2131,10 +2333,11 @@
             defn call-event-on-target! (maybe-target event)
               let
                   element-tree @*global-tree
-                  coord $ -> maybe-target .-object .-coord
+                  coord $ .-coord
+                    ffi-object $ .-object (ffi-object maybe-target)
                   target-el $ find-element element-tree coord
-                  maybe-handler $ -> target-el :event :click
-                if (some? coord)
+                  maybe-handler $ field (field target-el :event) :click
+                if (js-present? coord)
                   do
                     if (some? maybe-handler) (maybe-handler event @*proxied-dispatch) (println "|no handler" coord)
                     reset! *focused-coord coord
@@ -2146,8 +2349,8 @@
           :code $ quote
             defn create-ambient-light (params position)
               let
-                  color $ :color params
-                  intensity $ either (:intensity params) 1
+                  color $ field params :color
+                  intensity $ either (field params :intensity) 1
                   object3d $ new THREE/AmbientLight color intensity
                 set-position! object3d position
                 ; js/console.log |Light: object3d
@@ -2158,15 +2361,23 @@
           :code $ quote
             defn create-box-element (params position rotation scale material event coord)
               let
-                  geometry $ new THREE/BoxGeometry (:width params) (:height params) (:depth params)
+                  geometry $ new THREE/BoxGeometry (field params :width) (field params :height) (field params :depth)
                   object3d $ new THREE/Mesh geometry (create-material material)
                 set-position! object3d position
                 set-rotation! object3d rotation
                 set-scale! object3d scale
-                set! (.-castShadow object3d) true
-                set! (.-receiveShadow object3d) true
-                set! (.-coord object3d) coord
-                set! (.-event object3d) event
+                set!
+                  .-castShadow $ ffi-object object3d
+                  , true
+                set!
+                  .-receiveShadow $ ffi-object object3d
+                  , true
+                set!
+                  .-coord $ ffi-object object3d
+                  , coord
+                set!
+                  .-event $ ffi-object object3d
+                  , event
                 , object3d
           :examples $ []
           :schema $ :: 'Dynamic
@@ -2175,19 +2386,25 @@
             defn create-buffer-object-element (params position rotation scale material)
               let
                   vertices $ new js/Float32Array
-                    js-array & $ either (:vertices params) ([])
+                    js-array & $ either (field params :vertices) ([])
                   indices $ js-array &
-                    either (:indices params) ([])
+                    either (field params :indices) ([])
                   geometry $ new THREE/BufferGeometry
                   object3d $ do
                     .!setAttribute geometry |position $ new THREE/BufferAttribute vertices 3
                     if
-                      > (.-length indices) 0
+                      >
+                        js-number $ .-length (ffi-object indices)
+                        , 0
                       .!setIndex geometry indices
                     .!computeVertexNormals geometry
                     new THREE/Mesh geometry $ create-material material
-                set! (.-castShadow object3d) true
-                set! (.-receiveShadow object3d) true
+                set!
+                  .-castShadow $ ffi-object object3d
+                  , true
+                set!
+                  .-receiveShadow $ ffi-object object3d
+                  , true
                 set-position! object3d position
                 set-rotation! object3d rotation
                 set-scale! object3d scale
@@ -2198,11 +2415,15 @@
           :code $ quote
             defn create-directional-light (params position)
               let
-                  color $ :color params
-                  intensity $ :intensity params
+                  color $ field params :color
+                  intensity $ field params :intensity
                   object3d $ new THREE/DirectionalLight color intensity
-                set! (.-castShadow object3d) true
-                -> object3d .-shadow .-bias $ set! -0.0005
+                set!
+                  .-castShadow $ ffi-object object3d
+                  , true
+                ->
+                  ffi-object $ .-shadow (ffi-object object3d)
+                  , .-bias $ set! -0.0005
                 set-position! object3d position
                 js/console.log "|directional light:" object3d
                 , object3d
@@ -2226,7 +2447,7 @@
                   points $ &let
                     ps $ js-array
                     &doseq
-                      p $ :points params
+                      p $ field params :points
                       .!push ps $ new THREE/Vector3 & p
                     , ps
                   geometry $ -> (new THREE/BufferGeometry) (.!setFromPoints points)
@@ -2244,15 +2465,15 @@
                   points $ &let
                     ps $ js-array
                     if
-                      some? $ :segments params
+                      some? $ field params :segments
                       &doseq
-                        segment $ :segments params
+                        segment $ field params :segments
                         let
                             p0 $ nth segment 0
                             p1 $ nth segment 1
                           .!push ps (new THREE/Vector3 & p0) (new THREE/Vector3 & p1)
                       &doseq
-                        p $ :points params
+                        p $ field params :points
                         .!push ps $ new THREE/Vector3 & p
                     , ps
                   geometry $ -> (new THREE/BufferGeometry) (.!setFromPoints points)
@@ -2267,7 +2488,7 @@
           :code $ quote
             defn create-material (material)
               &let
-                m $ case-default (:kind material)
+                m $ case-default (field material :kind)
                   do (js/console.warn "|Unknown material:" material)
                     new THREE/LineBasicMaterial $ to-js-data (dissoc material :kind)
                   :line-basic $ new THREE/LineBasicMaterial
@@ -2285,9 +2506,10 @@
                   :raw-shader $ new THREE/RawShaderMaterial
                     let
                         options $ to-js-data (dissoc material :kind)
-                      set! (.-side options) THREE/DoubleSide
                       , options
-                set! (.-side m) THREE/DoubleSide
+                set!
+                  .-side $ ffi-object m
+                  , THREE/DoubleSide
                 , m
           :examples $ []
           :schema $ :: 'Dynamic
@@ -2298,7 +2520,7 @@
                   points $ &let
                     ps $ js-array
                     &doseq
-                      p $ :points params
+                      p $ field params :points
                       .!push ps $ new THREE/Vector3 & p
                     , ps
                   geometry $ let
@@ -2309,7 +2531,9 @@
                 set-position! object3d position
                 set-rotation! object3d rotation
                 set-scale! object3d scale
-                set! (.-raycast object3d) raycast
+                set!
+                  .-raycast $ ffi-object object3d
+                  , raycast
                 , object3d
           :examples $ []
           :schema $ :: 'Dynamic
@@ -2317,18 +2541,22 @@
           :code $ quote
             defn create-parametric-element (params position rotation scale material)
               let
-                  func $ either (:func params)
+                  func $ either (field params :func)
                     fn (a b data) ([] a b 0)
-                  data $ :data params
-                  slices $ either (:slices params) 10
-                  stacks $ either (:stacks params) 10
+                  data $ field params :data
+                  slices $ either (field params :slices) 10
+                  stacks $ either (field params :stacks) 10
                   geometry $ new ParametricGeometry
                     fn (u v target)
                       let[] (x y z) (func u v data) (.!set target x y z)
                     , slices stacks
                   object3d $ new THREE/Mesh geometry (create-material material)
-                set! (.-castShadow object3d) true
-                set! (.-receiveShadow object3d) true
+                set!
+                  .-castShadow $ ffi-object object3d
+                  , true
+                set!
+                  .-receiveShadow $ ffi-object object3d
+                  , true
                 set-position! object3d position
                 set-rotation! object3d rotation
                 set-scale! object3d scale
@@ -2340,14 +2568,18 @@
             defn create-plane-reflector (params position rotation scale)
               let
                   geometry $ new THREE/PlaneGeometry
-                    either (:width params) 80
-                    either (:height params) 80
+                    either (field params :width) 80
+                    either (field params :height) 80
                   object3d $ new Reflector geometry
                     js-object
-                      |clipBias $ either (:clip-bias params) 0.003
-                      |textureWidth $ * js/window.innerWidth js/window.devicePixelRatio
-                      |textureHeight $ * js/window.innerHeight js/window.devicePixelRatio
-                      |color $ either (:color params) |0x7777ff
+                      |clipBias $ either (field params :clip-bias) 0.003
+                      |textureWidth $ *
+                        js-number $ .-innerWidth (ffi-object js/window)
+                        js-number $ .-devicePixelRatio (ffi-object js/window)
+                      |textureHeight $ *
+                        js-number $ .-innerHeight (ffi-object js/window)
+                        js-number $ .-devicePixelRatio (ffi-object js/window)
+                      |color $ either (field params :color) |0x7777ff
                 set-position! object3d position
                 set-rotation! object3d rotation
                 set-scale! object3d scale
@@ -2358,13 +2590,17 @@
           :code $ quote
             defn create-point-light (params position)
               let
-                  color $ :color params
-                  intensity $ :intensity params
-                  distance $ :distance params
+                  color $ field params :color
+                  intensity $ field params :intensity
+                  distance $ field params :distance
                   object3d $ new THREE/PointLight color intensity distance
-                set! (.-castShadow object3d) true
+                set!
+                  .-castShadow $ ffi-object object3d
+                  , true
                 set-position! object3d position
-                -> object3d .-shadow .-bias $ set! -0.005
+                ->
+                  ffi-object $ .-shadow (ffi-object object3d)
+                  , .-bias $ set! -0.005
                 ; js/console.log |Light: object3d
                 , object3d
           :examples $ []
@@ -2374,15 +2610,19 @@
             defn create-polyhedron-element (params position rotation scale material)
               let
                   vertices $ js-array &
-                    concat & $ :vertices params
+                    concat & $ field params :vertices
                   indices $ js-array &
-                    concat & $ :indices params
-                  radius $ :radius params
-                  detail $ :detail params
+                    concat & $ field params :indices
+                  radius $ field params :radius
+                  detail $ field params :detail
                   geometry $ new THREE/PolyhedronGeometry vertices indices radius detail
                   object3d $ new THREE/Mesh geometry (create-material material)
-                set! (.-castShadow object3d) true
-                set! (.-receiveShadow object3d) true
+                set!
+                  .-castShadow $ ffi-object object3d
+                  , true
+                set!
+                  .-receiveShadow $ ffi-object object3d
+                  , true
                 set-position! object3d position
                 set-rotation! object3d rotation
                 set-scale! object3d scale
@@ -2393,14 +2633,16 @@
           :code $ quote
             defn create-rect-area-light (params position rotation)
               let
-                  color $ :color params
-                  intensity $ :intensity params
-                  width $ :width params
-                  height $ :height params
-                  look-at $ :look-at params
+                  color $ field params :color
+                  intensity $ field params :intensity
+                  width $ field params :width
+                  height $ field params :height
+                  look-at $ field params :look-at
                   object3d $ new THREE/RectAreaLight color intensity width height
                 .!lookAt object3d & look-at
-                set! (.-castShadow object3d) true
+                set!
+                  .-castShadow $ ffi-object object3d
+                  , true
                 set-position! object3d position
                 set-rotation! object3d rotation
                 ; js/console.log "|Area Light:" object3d
@@ -2413,14 +2655,18 @@
             defn create-shader-mesh (attributes params position rotation scale material)
               let
                   vertices $ new js/Float32Array
-                    js-array & $ either (:vertices params) ([])
+                    js-array & $ either (field params :vertices) ([])
                   geometry $ let
                       g $ new THREE/BufferGeometry
                     set-geometry-attributes! g attributes
                     , g
                   object3d $ new THREE/Mesh geometry (create-material material)
-                set! (.-castShadow object3d) true
-                set! (.-receiveShadow object3d) true
+                set!
+                  .-castShadow $ ffi-object object3d
+                  , true
+                set!
+                  .-receiveShadow $ ffi-object object3d
+                  , true
                 set-position! object3d position
                 set-rotation! object3d rotation
                 set-scale! object3d scale
@@ -2432,14 +2678,14 @@
             defn create-shape (element coord)
               ; js/console.log |Element: element $ :coord element
               let
-                  params $ &struct:get element :params
-                  position $ &struct:get element :position
-                  scale $ &struct:get element :scale
-                  rotation $ &struct:get element :rotation
-                  material $ either (&struct:get element :material)
+                  params $ field element :params
+                  position $ field element :position
+                  scale $ field element :scale
+                  rotation $ field element :rotation
+                  material $ either (field element :material)
                     {} (:kind :mesh-basic) (:color 0xa0a0a0)
-                  event $ &struct:get element :event
-                case-default (&struct:get element :name)
+                  event $ field element :event
+                case-default (field element :name)
                   do (js/console.warn "|Unknown element" element) (new THREE/Object3D)
                   :scene @*global-scene
                   :group $ create-group-element params position rotation scale
@@ -2462,7 +2708,7 @@
                   :plane-reflector $ create-plane-reflector params position rotation scale
                   :parametric $ create-parametric-element params position rotation scale material
                   :buffer-object $ create-buffer-object-element params position rotation scale material
-                  :shader-mesh $ create-shader-mesh (&struct:get element :attributes) params position rotation scale material
+                  :shader-mesh $ create-shader-mesh (field element :attributes) params position rotation scale material
                   :some-object $ create-some-object params position rotation scale material
           :examples $ []
           :schema $ :: 'Dynamic
@@ -2473,13 +2719,17 @@
                   shape-2d $ &let
                     s $ new THREE/Shape
                     &doseq
-                      op $ :path params
+                      op $ field params :path
                       write-shape-path! s op
                     , s
                   geometry $ new THREE/ShapeGeometry shape-2d
                   object3d $ new THREE/Mesh geometry (create-material material)
-                set! (.-castShadow object3d) true
-                set! (.-receiveShadow object3d) true
+                set!
+                  .-castShadow $ ffi-object object3d
+                  , true
+                set!
+                  .-receiveShadow $ ffi-object object3d
+                  , true
                 set-position! object3d position
                 set-rotation! object3d rotation
                 set-scale! object3d scale
@@ -2491,16 +2741,20 @@
             defn create-some-object (params position rotation scale material)
               let
                   object3d $ new THREE/Object3D
-                  obj $ get @*loaded-objects (:key params)
+                  obj $ get @*loaded-objects (field params :key)
                 set-position! object3d position
                 set-rotation! object3d rotation
                 set-scale! object3d scale
-                set! (.-castShadow object3d) true
-                set! (.-receiveShadow object3d) true
+                set!
+                  .-castShadow $ ffi-object object3d
+                  , true
+                set!
+                  .-receiveShadow $ ffi-object object3d
+                  , true
                 ; set! (.-coord object3d) coord
                 ; set! (.-event object3d) event
                 if (some? obj) (.!add object3d obj)
-                  js/console.warn "|object not loaded for" $ :key params
+                  js/console.warn "|object not loaded for" $ field params :key
                 , object3d
           :examples $ []
           :schema $ :: 'Dynamic
@@ -2509,17 +2763,25 @@
             defn create-sphere-element (params position rotation scale material event coord)
               let
                   geometry $ new THREE/SphereGeometry
-                    or (:radius params) 8
-                    or (:width-segments params) 12
-                    or (:height-segments params) 12
+                    or (field params :radius) 8
+                    or (field params :width-segments) 12
+                    or (field params :height-segments) 12
                   object3d $ new THREE/Mesh geometry (create-material material)
                 set-position! object3d position
                 set-rotation! object3d rotation
                 set-scale! object3d scale
-                set! (.-coord object3d) coord
-                set! (.-castShadow object3d) true
-                set! (.-receiveShadow object3d) true
-                set! (.-event object3d) event
+                set!
+                  .-coord $ ffi-object object3d
+                  , coord
+                set!
+                  .-castShadow $ ffi-object object3d
+                  , true
+                set!
+                  .-receiveShadow $ ffi-object object3d
+                  , true
+                set!
+                  .-event $ ffi-object object3d
+                  , event
                 ; js/console.log |Sphere: object3d
                 , object3d
           :examples $ []
@@ -2528,7 +2790,7 @@
           :code $ quote
             defn create-spline-element (params position rotation scale material)
               let
-                  points0 $ :points params
+                  points0 $ field params :points
                   curve $ new THREE/CatmullRomCurve3
                     js-array & $ -> points0
                       map $ fn (p) (new THREE/Vector3 & p)
@@ -2536,8 +2798,12 @@
                     * 16 $ count points0
                   geometry $ -> (new THREE/BufferGeometry) (.!setFromPoints points)
                   object3d $ new THREE/Line geometry (create-material material)
-                set! (.-castShadow object3d) true
-                set! (.-receiveShadow object3d) true
+                set!
+                  .-castShadow $ ffi-object object3d
+                  , true
+                set!
+                  .-receiveShadow $ ffi-object object3d
+                  , true
                 set-position! object3d position
                 set-rotation! object3d rotation
                 set-scale! object3d scale
@@ -2548,15 +2814,19 @@
           :code $ quote
             defn create-spot-light (params position)
               let
-                  color $ :color params
-                  intensity $ :intensity params
-                  distance $ :distance params
-                  angle $ or (:angle params) (* 0.5 &PI)
-                  penumbra $ or (:penumbra params) 0.5
-                  decay $ or (:decay params) 1.5
+                  color $ field params :color
+                  intensity $ field params :intensity
+                  distance $ field params :distance
+                  angle $ or (field params :angle) (* 0.5 &PI)
+                  penumbra $ or (field params :penumbra) 0.5
+                  decay $ or (field params :decay) 1.5
                   object3d $ new THREE/SpotLight color intensity distance angle penumbra decay
-                set! (.-castShadow object3d) true
-                -> object3d .-shadow .-bias $ set! -0.0005
+                set!
+                  .-castShadow $ ffi-object object3d
+                  , true
+                ->
+                  ffi-object $ .-shadow (ffi-object object3d)
+                  , .-bias $ set! -0.0005
                 set-position! object3d position
                 js/console.log |Light: object3d
                 , object3d
@@ -2567,14 +2837,18 @@
             defn create-text-element (params position rotation scale material)
               let
                   geometry $ new TextGeometry
-                    or (:text params) |Quatrefoil
+                    or (field params :text) |Quatrefoil
                     to-js-data $ assoc params :font font-resource
                   object3d $ new THREE/Mesh geometry (create-material material)
                 set-position! object3d position
                 set-rotation! object3d rotation
                 set-scale! object3d scale
-                set! (.-castShadow object3d) true
-                set! (.-receiveShadow object3d) true
+                set!
+                  .-castShadow $ ffi-object object3d
+                  , true
+                set!
+                  .-receiveShadow $ ffi-object object3d
+                  , true
                 , object3d
           :examples $ []
           :schema $ :: 'Dynamic
@@ -2583,10 +2857,14 @@
             defn create-torus-element (params position rotation scale material)
               let
                   geometry $ ->
-                    new THREE/TorusGeometry (:r1 params) (:r2 params) (:s1 params) (:s2 params) (:arc params)
+                    new THREE/TorusGeometry (field params :r1) (field params :r2) (field params :s1) (field params :s2) (field params :arc)
                   object3d $ new THREE/Mesh geometry (create-material material)
-                set! (.-castShadow object3d) true
-                set! (.-receiveShadow object3d) true
+                set!
+                  .-castShadow $ ffi-object object3d
+                  , true
+                set!
+                  .-receiveShadow $ ffi-object object3d
+                  , true
                 set-position! object3d position
                 set-scale! object3d scale
                 , object3d
@@ -2596,31 +2874,51 @@
           :code $ quote
             defn create-tube-element (params position rotation scale material)
               let
-                  points-fn $ :points-fn params
-                  factor $ :factor params
+                  points-fn $ field params :points-fn
+                  factor $ field params :factor
                   geometry $ ->
                     new THREE/TubeGeometry (make-tube-curve points-fn factor)
-                      -> (:tubular-segments params)
-                        either $ :tubular params
+                      -> (field params :tubular-segments)
+                        either $ field params :tubular
                         either 40
-                      either (:radius params) 2
-                      -> (:radial-segments params)
-                        either $ :radial params
+                      either (field params :radius) 2
+                      -> (field params :radial-segments)
+                        either $ field params :radial
                         either 8
-                      either (:closed? params) false
+                      either (field params :closed?) false
                   object3d $ new THREE/Mesh geometry (create-material material)
-                set! (.-castShadow object3d) true
-                set! (.-receiveShadow object3d) true
+                set!
+                  .-castShadow $ ffi-object object3d
+                  , true
+                set!
+                  .-receiveShadow $ ffi-object object3d
+                  , true
                 set-position! object3d position
                 set-rotation! object3d rotation
                 set-scale! object3d scale
                 , object3d
           :examples $ []
           :schema $ :: 'Dynamic
+        |ffi-object $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn ffi-object (value) (unsafe-coerce value JsObject)
+          :examples $ []
+          :schema $ :: 'Dynamic
+        |field $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn field (value key)
+              option:unwrap-or (get value key) nil
+          :examples $ []
+          :schema $ :: 'Dynamic
         |font-resource $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def font-resource $ new Font
               js/JSON.parse $ load-file |assets/hind.json
+          :examples $ []
+          :schema $ :: 'Dynamic
+        |js-number $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn js-number (value) (unsafe-coerce value Number)
           :examples $ []
           :schema $ :: 'Dynamic
         |load-file $ %{} 'CodeEntry (:doc |)
@@ -2634,12 +2932,18 @@
               let
                   mouse $ new THREE/Vector2
                   raycaster $ new THREE/Raycaster
-                set! (.-x mouse)
+                set!
+                  .-x $ ffi-object mouse
                   dec $ * 2
-                    / (.-clientX event) js/window.innerWidth
-                set! (.-y mouse)
+                    /
+                      js-number $ .-clientX (ffi-object event)
+                      js-number $ .-innerWidth (ffi-object js/window)
+                set!
+                  .-y $ ffi-object mouse
                   - 1 $ * 2
-                    / (.-clientY event) js/window.innerHeight
+                    /
+                      js-number $ .-clientY (ffi-object event)
+                      js-number $ .-innerHeight (ffi-object js/window)
                 .!setFromCamera raycaster mouse @*global-camera
                 let
                     intersects $ ->
@@ -2648,11 +2952,15 @@
                           collect! $ fn (x) (.!push children x)
                         collect-children @*global-scene collect!
                         , children
-                      .!filter $ fn (target pos _xs) (-> target .-object .-event some?)
+                      .!filter $ fn (target pos _xs)
+                        js-present? $ .-event
+                          ffi-object $ .-object (ffi-object target)
                   ; js/console.log intersects
-                  if-let
-                    maybe-target $ .-0 intersects
-                    call-event-on-target! maybe-target event
+                  if
+                    js-present? $ .-0 (ffi-object intersects)
+                    call-event-on-target!
+                      ffi-object $ .-0 (ffi-object intersects)
+                      , event
                     do (reset! *focused-coord nil) (println "|lose focus")
           :examples $ []
           :schema $ :: 'Dynamic
@@ -2664,7 +2972,7 @@
                     coord @*focused-coord
                     element-tree @*global-tree
                     target-el $ find-element element-tree coord
-                    maybe-handler $ -> target-el (get :event) (get :control)
+                    maybe-handler $ field (field target-el :event) :control
                   if (some? maybe-handler) (maybe-handler move delta elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
                 println "|no focused coord to control" @*focused-coord
           :examples $ []
@@ -2677,7 +2985,7 @@
                     coord @*focused-coord
                     element-tree @*global-tree
                     target-el $ find-element element-tree coord
-                    maybe-handler $ -> target-el (get :event) (get :gamepad)
+                    maybe-handler $ field (field target-el :event) :gamepad
                   if (some? maybe-handler) (maybe-handler info elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
                 println "|no focused coord to control" @*focused-coord
           :examples $ []
@@ -2687,10 +2995,10 @@
             defn set-geometry-attributes! (g attributes)
               &doseq (info attributes)
                 let
-                    name $ turn-string (:id info)
-                    buffer $ :buffer info
-                    size $ :size info
-                    type $ :type info
+                    name $ turn-string (field info :id)
+                    buffer $ field info :buffer
+                    size $ field info :size
+                    type $ field info :type
                     attr $ case-default type
                       do (js/console.warn "|use f32 as default attribute type")
                         new THREE/Float32BufferAttribute (js-array & buffer) size
@@ -2703,12 +3011,12 @@
           :code $ quote
             defn set-perspective-camera! (params)
               let
-                  fov $ :fov params
-                  aspect $ :aspect params
-                  near $ :near params
-                  far $ :far params
+                  fov $ field params :fov
+                  aspect $ field params :aspect
+                  near $ field params :near
+                  far $ field params :far
                   object3d $ new THREE/PerspectiveCamera fov aspect near far
-                set-position! object3d $ :position params
+                set-position! object3d $ field params :position
                 reset! *global-camera object3d
                 , object3d
           :examples $ []
@@ -2720,10 +3028,14 @@
                   enum? position
                   tag-match position
                     (:v3 x y z)
-                      .!set (.-position object) x y z
+                      .!set
+                        ffi-object $ .-position (ffi-object object)
+                        , x y z
                     _ $ raise "|unknown position, expected vector"
                 (list? position)
-                  let[] (x y z) position $ .!set (.-position object) x y z
+                  let[] (x y z) position $ .!set
+                    ffi-object $ .-position (ffi-object object)
+                    , x y z
                 (nil? position) (;nil "|do nothing")
                 true $ raise "|unknown position"
           :examples $ []
@@ -2732,14 +3044,20 @@
           :code $ quote
             defn set-rotation! (object3d rotation)
               if (some? rotation)
-                let[] (x y z) rotation $ .!set (.-rotation object3d) x y z
+                let[] (x y z) rotation $ .!set
+                  ffi-object $ .-rotation (ffi-object object3d)
+                  , x y z
           :examples $ []
           :schema $ :: 'Dynamic
         |set-scale! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn set-scale! (object scale)
               if (some? scale)
-                let[] (x y z) scale $ .!set (.-scale object) (scale-zero x) (scale-zero y) (scale-zero z)
+                let[] (x y z) scale $ .!set
+                  ffi-object $ .-scale (ffi-object object)
+                  scale-zero x
+                  scale-zero y
+                  scale-zero z
           :examples $ []
           :schema $ :: 'Dynamic
         |write-shape-path! $ %{} 'CodeEntry (:doc |)
@@ -2814,7 +3132,14 @@
                       either op-data $ [] 0 0 0
                     :change-scale $ set-scale! target
                       either op-data $ [] 1 1 1
-                    :change-attributes $ set-geometry-attributes! (.-geometry target) op-data
+                    :change-attributes $ set-geometry-attributes!
+                      .-geometry $ ffi-object target
+                      , op-data
+          :examples $ []
+          :schema $ :: 'Dynamic
+        |ffi-object $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn ffi-object (value) (unsafe-coerce value JsObject)
           :examples $ []
           :schema $ :: 'Dynamic
         |remove-children $ %{} 'CodeEntry (:doc |)
@@ -2836,11 +3161,16 @@
           :code $ quote
             defn remove-material (target coord op-data)
               let
-                  material $ .-material target
+                  material $ ffi-object
+                    .-material $ ffi-object target
                 &doseq (entry op-data)
                   case-default entry (println "|Unknown material prop:" op-data)
-                    :opacity $ set! (.-opacity material) 0.9
-                    :transparent $ set! (.-transparent material) 1
+                    :opacity $ set!
+                      .-opacity $ ffi-object material
+                      , 0.9
+                    :transparent $ set!
+                      .-transparent $ ffi-object material
+                      , 1
           :examples $ []
           :schema $ :: 'Dynamic
         |replace-element $ %{} 'CodeEntry (:doc |)
@@ -2855,27 +3185,48 @@
         |replace-material $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn replace-material (target coord op-data)
-              set! (.-material target) (create-material op-data)
+              set!
+                .-material $ ffi-object target
+                create-material op-data
           :examples $ []
           :schema $ :: 'Dynamic
         |update-material $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn update-material (target coord op-data) (; println "|Update material" coord op-data)
               let
-                  material $ .-material target
+                  material $ ffi-object
+                    .-material $ ffi-object target
                 ; js/console.log target
                 &doseq
                   entry $ .to-list op-data
                   let[] (param new-value) entry $ case-default param (js/console.log "|Unknown param:" param)
-                    :color $ .!set (.-color material) (new THREE/Color new-value)
-                    :opacity $ set! (.-opacity material) new-value
-                    :transparent $ set! (.-transparent material) new-value
-                    :lineWidth $ set! (.-lineWidth material) new-value
-                    :uniforms $ set! (.-uniforms material) (to-js-data new-value)
-                    :fragmentShader $ set! (.-fragmentShader material) new-value
-                    :vertexShader $ set! (.-vertexShader material) new-value
-                    :wireframe $ set! (.-wireframe material) new-value
-                set! (.-needsUpdate material) true
+                    :color $ .!set
+                      ffi-object $ .-color (ffi-object material)
+                      new THREE/Color new-value
+                    :opacity $ set!
+                      .-opacity $ ffi-object material
+                      , new-value
+                    :transparent $ set!
+                      .-transparent $ ffi-object material
+                      , new-value
+                    :lineWidth $ set!
+                      .-lineWidth $ ffi-object material
+                      , new-value
+                    :uniforms $ set!
+                      .-uniforms $ ffi-object material
+                      to-js-data new-value
+                    :fragmentShader $ set!
+                      .-fragmentShader $ ffi-object material
+                      , new-value
+                    :vertexShader $ set!
+                      .-vertexShader $ ffi-object material
+                      , new-value
+                    :wireframe $ set!
+                      .-wireframe $ ffi-object material
+                      , new-value
+                set!
+                  .-needsUpdate $ ffi-object material
+                  , true
           :examples $ []
           :schema $ :: 'Dynamic
       :ns $ %{} 'NsEntry (:doc |)
@@ -2949,23 +3300,25 @@
     |quatrefoil.schema $ %{} 'FileEntry
       :defs $ {}
         |Component $ %{} 'CodeEntry (:doc |)
-          :code $ quote (defrecord Component :name :tree)
+          :code $ quote
+            defstruct Component (:name 'Dynamic) (:tree 'Dynamic)
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'StructDef
         |Shape $ %{} 'CodeEntry (:doc |)
-          :code $ quote (defrecord Shape :name :params :position :scale :rotation :material :event :attributes :children)
+          :code $ quote
+            defstruct Shape (:name 'Dynamic) (:params 'Dynamic) (:position 'Dynamic) (:scale 'Dynamic) (:rotation 'Dynamic) (:material 'Dynamic) (:event 'Dynamic) (:attributes 'Dynamic) (:children 'Dynamic)
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'StructDef
         |comp? $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn comp? (x)
-              and (struct? x) (&struct:matches? Component x)
+              and (struct? x) (&struct:matches? x Component)
           :examples $ []
           :schema $ :: 'Dynamic
         |shape? $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn shape? (x)
-              and (struct? x) (&struct:matches? Shape x)
+              and (struct? x) (&struct:matches? x Shape)
           :examples $ []
           :schema $ :: 'Dynamic
       :ns $ %{} 'NsEntry (:doc |)
@@ -2976,11 +3329,11 @@
           :code $ quote
             defn =component? (prev-tree markup)
               let
-                  prev-args $ :args prev-tree
-                  prev-states $ :states prev-tree
+                  prev-args $ field prev-tree :args
+                  prev-states $ field prev-tree :states
                 ; println
-                  =seq? (:args markup) prev-args
-                  identical? (:states markup) prev-states
+                  =seq? (field markup :args) prev-args
+                  identical? (field markup :states) prev-states
                 and
                   =seq? (:args markup) prev-args
                   identical? (:states markup) prev-states
@@ -3002,22 +3355,34 @@
         |collect-children $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn collect-children (element collect!)
-              .!forEach (.-children element)
+              .!forEach
+                ffi-object $ .-children (ffi-object element)
                 fn (child idx _) (; js/console.log |Child: child) (collect! child)
                   if
-                    some? $ .-children child
+                    js-present? $ .-children (ffi-object child)
                     collect-children child collect!
+          :examples $ []
+          :schema $ :: 'Dynamic
+        |ffi-object $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn ffi-object (value) (unsafe-coerce value JsObject)
+          :examples $ []
+          :schema $ :: 'Dynamic
+        |field $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn field (value key)
+              option:unwrap-or (get value key) nil
           :examples $ []
           :schema $ :: 'Dynamic
         |find-element $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn find-element (tree coord) (; js/console.log |Find... tree coord)
               if (comp? tree)
-                recur (:tree tree) coord
+                recur (field tree :tree) coord
                 if (empty? coord) tree $ let
                     cursor $ first coord
                   if
-                    contains? (:children tree) cursor
+                    contains? (field tree :children) cursor
                     recur
                       get-in tree $ [] :children cursor
                       rest coord
@@ -3031,7 +3396,7 @@
                   nil? tree
                   , nil
                 (comp? tree)
-                  recur $ :tree tree
+                  recur $ field tree :tree
                 true $ update tree :children
                   fn (children)
                     -> children (.to-list)
