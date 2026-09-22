@@ -23,6 +23,10 @@ jobs:
       - name: Verify dependencies and strict types
         run: |
           caps --ci
+          yarn install --immutable
+          caps verify --toolchain
+          calcit calcit.cirru edit format
+          git diff --exit-code -- calcit.cirru
           calcit --check-only
           calcit analyze dynamic-methods --max 0
 
@@ -30,7 +34,6 @@ jobs:
         run: |
           calcit js
           cp assets/* js-out/
-          yarn install --immutable
           yarn vite build --base=./
 
       - name: Deploy to server
