@@ -1,9 +1,9 @@
 {
+  "packageManager": "yarn@4.18.0",
   "name": "@quatrefoil/utils",
   "version": "0.0.3",
   "description": "js helpers for quatrefoil",
   "main": "./index.js",
-  "scripts": {},
   "repository": "git@github.com:Quatrefoil-GL/quatrefoil.git",
   "author": "jiyinyiyong",
   "license": "MIT",
