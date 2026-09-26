@@ -28,7 +28,7 @@ jobs:
           calcit calcit.cirru edit format
           git diff --exit-code -- calcit.cirru
           calcit --check-only
-          calcit analyze dynamic-methods --max 0
+          calcit analyze dynamic-methods
 
       - name: Verify tree-utils lockfile
         working-directory: tree-utils

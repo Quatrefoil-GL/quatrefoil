@@ -833,7 +833,9 @@
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 20 40 50
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+            :args $ []
+            :features $ #{} :js-ffi
         'inline-shader $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defmacro inline-shader (name)
             read-file $ str |shaders/ name
@@ -3241,7 +3243,9 @@
           :code $ quote $ def font-resource
             new Font $ js/JSON.parse $ load-file |assets/hind.json
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+            :args $ []
+            :features $ #{} :js-ffi
         'geometry-compute-normals! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn geometry-compute-normals! (g)
             do

@@ -9,3 +9,5 @@ dist/
 .yarn/
 
 .DS_Store
+.pnp.cjs
+.pnp.loader.mjs
