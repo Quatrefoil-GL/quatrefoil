@@ -3,7 +3,7 @@
   :about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `calcit query` to inspect and `calcit edit`/`calcit tree` to modify. Run `calcit docs agents --contract` before mutations; use `--full` for first orientation or changed contract digest. Manual edits must follow format and schema conventions, then run `calcit edit format`."
   :package |quatrefoil
   :entries $ {} $ :default
-    {} (:description |) (:init-fn 'quatrefoil.app.main/main!) (:mode :native) (:reload-fn 'quatrefoil.app.main/reload!)
+    {} (:description |) (:init-fn 'quatrefoil.app.main/main!) (:mode :native) (:reload-fn 'quatrefoil.app.main/reload!) (:target :browser)
       :feature-policy $ {}
       :modules $ [] |touch-control/ |pointed-prompt/ |quaternion/
       :type-slots $ {}
@@ -833,7 +833,8 @@
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 20 40 50
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+            :args $ []
         'inline-shader $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defmacro inline-shader (name)
             read-file $ str |shaders/ name
@@ -1677,7 +1678,9 @@
           :code $ quote $ defn >> (states k)
             let
                 parent-cursor $ either (field states :cursor) ([])
-                branch $ either (get states k) ({})
+                branch $ assert-type
+                  either (get states k) ({})
+                  :: 'Map 'Tag 'Dynamic
               assoc branch :cursor $ append parent-cursor k
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
@@ -2458,6 +2461,7 @@
                 if
                   not $ empty? updated-material
                   collect! $ [] coord :update-material updated-material
+                , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'Dynamic (:: 'List 'Number)
@@ -3238,8 +3242,7 @@
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
         'font-resource $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ def font-resource
-            new Font $ js/JSON.parse $ load-file |assets/hind.json
+          :code $ quote $ def font-resource (load-font-resource)
           :examples $ []
           :schema $ :: 'Dynamic
         'geometry-compute-normals! $ %{} 'CodeEntry (:doc |)
@@ -3290,6 +3293,13 @@
             :capabilities $ #{} :fs-read
             :expansion $ :: 'Expr 'String
             :required $ [] $ :: 'Expr 'String
+        'load-font-resource $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn load-font-resource ()
+            new Font $ js/JSON.parse $ load-file |assets/hind.json
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+            :args $ []
+            :features $ #{} :js-ffi
         'mesh-line-set-points! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn mesh-line-set-points! (g points)
             do
@@ -3658,7 +3668,7 @@
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
         '*global-scene $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *global-scene (new THREE/Scene)
+          :code $ quote $ defatom *global-scene (make-global-scene)
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
         '*global-time $ %{} 'CodeEntry (:doc |)
@@ -3685,6 +3695,12 @@
           :code $ quote $ defatom *viewer-y-shift 0
           :examples $ []
           :schema $ :: 'Ref 'Number
+        'make-global-scene $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn make-global-scene () (new THREE/Scene)
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+            :args $ []
+            :features $ #{} :js-ffi
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.globals
           :require $ |three :as THREE
