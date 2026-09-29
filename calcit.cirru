@@ -43,15 +43,11 @@
             :args $ [] 'Dynamic
         'create-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-element (el-name props children)
-            %{} Shape (:name el-name)
-              :params $ -> props (dissoc :material) (dissoc :event) (dissoc :position) (dissoc :scale) (dissoc :rotation) (dissoc :attributes) (dissoc :on) (dissoc :event)
-              :position $ field props :position
-              :scale $ field props :scale
-              :material $ field props :material
-              :rotation $ field props :rotation
-              :attributes $ field props :attributes
-              :event $ or (field props :on) (field props :event)
-              :children $ arrange-children children
+            Shape :name el-name :params
+              -> props (dissoc :material) (dissoc :event) (dissoc :position) (dissoc :scale) (dissoc :rotation) (dissoc :attributes) (dissoc :on) (dissoc :event)
+              , :position (field props :position) :scale (field props :scale) :material (field props :material) :rotation (field props :rotation) :attributes (field props :attributes) :event
+                or (field props :on) (field props :event)
+                , :children $ arrange-children children
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Tag 'Dynamic $ :: 'List 'Dynamic
@@ -1270,9 +1266,8 @@
             :features $ #{} :js-ffi
         'load-gltf! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn load-gltf! (loader url on-load on-progress on-error)
-            do
-              .!load (unsafe-coerce loader GltfLoaderHost) url on-load on-progress on-error
-              , &unit
+            .!load (unsafe-coerce loader GltfLoaderHost) url on-load on-progress on-error
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'String
@@ -1329,18 +1324,16 @@
             :args $ []
         'set-decoder-path! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn set-decoder-path! (loader path)
-            do
-              .!setDecoderPath (unsafe-coerce loader DracoLoaderHost) path
-              , &unit
+            .!setDecoderPath (unsafe-coerce loader DracoLoaderHost) path
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'String
             :features $ #{} :js-ffi
         'set-draco-loader! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn set-draco-loader! (loader draco-loader)
-            do
-              .!setDRACOLoader (unsafe-coerce loader GltfLoaderHost) draco-loader
-              , &unit
+            .!setDRACOLoader (unsafe-coerce loader GltfLoaderHost) draco-loader
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'Dynamic
@@ -1449,9 +1442,9 @@
                 fn (states delta elapse d!) (; println |delta delta)
                   let-sugar
                         [] x0 y0
-                        get state field
-                      dx $ * speed elapse $ nth delta 0
-                      dy $ * speed elapse $ nth delta 1
+                        option:unwrap-or (get state field) ([] 0 0)
+                      dx $ * speed elapse $ option:unwrap-or (nth delta 0) 0
+                      dy $ * speed elapse $ option:unwrap-or (nth delta 1) 0
                     d! cursor $ assoc state field $ [] (+ x0 dx) (+ y0 dy)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
@@ -1679,7 +1672,7 @@
             let
                 parent-cursor $ either (field states :cursor) ([])
                 branch $ assert-type
-                  either (get states k) ({})
+                  option:unwrap-or (get states k) ({})
                   :: 'Map 'Tag 'Dynamic
               assoc branch :cursor $ append parent-cursor k
           :examples $ []
@@ -2293,16 +2286,14 @@
               match control
                 (:shift shift)
                   tween-call 20 5 $ fn (i)
-                    do
-                      swap! *viewer-y-shift &+ $ / shift 10
-                      .!lookAt camera $ new-lookat-point
-                      .!render @*global-renderer @*global-scene @*global-camera
+                    swap! *viewer-y-shift &+ $ / shift 10
+                    .!lookAt camera $ new-lookat-point
+                    .!render @*global-renderer @*global-scene @*global-camera
                 (:angle angle)
                   tween-call 20 5 $ fn (i)
                     swap! *viewer-angle &+ $ / angle 10
-                    do
-                      .!lookAt camera $ new-lookat-point
-                      .!render @*global-renderer @*global-scene @*global-camera
+                    .!lookAt camera $ new-lookat-point
+                    .!render @*global-renderer @*global-scene @*global-camera
                 (:move dx dy dz)
                   tween-call 20 5 $ fn (i)
                     let-sugar
@@ -2553,9 +2544,8 @@
             :args $ [] 'Dynamic 'Dynamic
         'select-keys $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn select-keys (m xs)
-            foldl ({})
-              fn (acc x)
-                assoc acc x $ option:unwrap-or (get m x) nil
+            foldl ({}) xs $ fn (acc x)
+              assoc acc x $ option:unwrap-or (get m x) nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
@@ -2594,6 +2584,8 @@
           :code $ quote $ deftrait JsArrayHost
             .push $ :: 'Fn $ {} (:return 'Number)
               :args $ [] 'JsArrayHost 'Dynamic
+            .filter $ :: 'Fn $ {} (:return 'JsArrayHost)
+              :args $ [] 'JsArrayHost 'Dynamic
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
@@ -2601,6 +2593,15 @@
           :code $ quote $ deftrait MeshLineGeometryHost
             .setPoints $ :: 'Fn $ {} (:return 'Unit)
               :args $ [] 'MeshLineGeometryHost 'Dynamic
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
+        'RaycasterHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait RaycasterHost
+            .setFromCamera $ :: 'Fn $ {} (:return 'Unit)
+              :args $ [] 'RaycasterHost 'Dynamic 'Dynamic
+            .intersectObjects $ :: 'Fn $ {} (:return 'JsArrayHost)
+              :args $ [] 'RaycasterHost 'Dynamic
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
@@ -3069,11 +3070,9 @@
               set!
                 .-receiveShadow $ ffi-object object3d
                 , true
-              ; set! (.-coord object3d) coord
-              ; set! (.-event object3d) event
-              if (some? obj)
-                .!add (three-object object3d) obj
-                js/console.warn "|object not loaded for" $ field params :key
+              if-let (loaded obj)
+                .!add (three-object object3d) loaded
+                js/console.warn |object-not-loaded-for $ field params :key
               , object3d
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
@@ -3247,18 +3246,16 @@
           :schema $ :: 'Dynamic
         'geometry-compute-normals! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn geometry-compute-normals! (g)
-            do
-              .!computeVertexNormals $ unsafe-coerce g BufferGeometryHost
-              , &unit
+            .!computeVertexNormals $ unsafe-coerce g BufferGeometryHost
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic
             :features $ #{} :js-ffi
         'geometry-set-attribute! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn geometry-set-attribute! (g name attr)
-            do
-              .!setAttribute (unsafe-coerce g BufferGeometryHost) name attr
-              , &unit
+            .!setAttribute (unsafe-coerce g BufferGeometryHost) name attr
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'String 'Dynamic
@@ -3272,9 +3269,8 @@
             :features $ #{} :js-ffi
         'geometry-set-index! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn geometry-set-index! (g indices)
-            do
-              .!setIndex (unsafe-coerce g BufferGeometryHost) indices
-              , &unit
+            .!setIndex (unsafe-coerce g BufferGeometryHost) indices
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'Dynamic
@@ -3302,9 +3298,8 @@
             :features $ #{} :js-ffi
         'mesh-line-set-points! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn mesh-line-set-points! (g points)
-            do
-              .!setPoints (unsafe-coerce g MeshLineGeometryHost) points
-              , &unit
+            .!setPoints (unsafe-coerce g MeshLineGeometryHost) points
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'Dynamic
@@ -3313,7 +3308,7 @@
           :code $ quote $ defn on-canvas-click (event)
             let
                 mouse $ new THREE/Vector2
-                raycaster $ new THREE/Raycaster
+                raycaster $ unsafe-coerce (new THREE/Raycaster) RaycasterHost
               set!
                 .-x $ ffi-object mouse
                 dec $ * 2 $ /
@@ -3326,13 +3321,15 @@
                   js-number $ .-innerHeight $ ffi-object js/window
               .!setFromCamera raycaster mouse @*global-camera
               let
-                  intersects $ ->
-                    .!intersectObjects raycaster $ let
-                        children $ js-array
-                        collect! $ fn (x) (push-array! children x)
-                      collect-children @*global-scene collect!
-                      , children
-                    .!filter $ fn (target pos _xs)
+                  intersects $ .!filter
+                    unsafe-coerce
+                      .!intersectObjects raycaster $ let
+                          children $ js-array
+                          collect! $ fn (x) (push-array! children x)
+                        collect-children @*global-scene collect!
+                        , children
+                      , JsArrayHost
+                    fn (target pos _xs)
                       js-present? $ .-event $ ffi-object
                         .-object $ ffi-object target
                 ; js/console.log intersects
@@ -3425,13 +3422,14 @@
                     .!set
                       ffi-object $ .-position $ ffi-object object
                       , x y z
-                  _ $ raise "|unknown position, expected vector"
+                  _ $ raise |unknown-position-expected-vector
               (list? position)
                 let[] (x y z) position $ .!set
                   ffi-object $ .-position $ ffi-object object
                   , x y z
-              (nil? position) (;nil "|do nothing")
-              true $ raise "|unknown position"
+              (nil? position) nil
+              true $ raise |unknown-position
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'Dynamic
@@ -3747,12 +3745,9 @@
             let
                 prev-args $ field prev-tree :args
                 prev-states $ field prev-tree :states
-              ; println
+              and
                 =seq? (field markup :args) prev-args
                 identical? (field markup :states) prev-states
-              and
-                =seq? (:args markup) prev-args
-                identical? (:states markup) prev-states
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Bool)
             :args $ [] 'Dynamic 'Dynamic
@@ -3805,17 +3800,16 @@
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
         'find-element $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn find-element (tree coord) (; js/console.log |Find... tree coord)
+          :code $ quote $ defn find-element (tree coord)
             if (comp? tree)
               recur (field tree :tree) coord
               if (empty? coord) tree $ let
-                  cursor $ first coord
-                if
-                  contains? (field tree :children) cursor
-                  recur
-                    get-in tree $ [] :children cursor
-                    rest coord
-                  , nil
+                  cursor $ option:unwrap $ first coord
+                let
+                    child $ get-in tree $ [] :children cursor
+                  if (option:some? child)
+                    recur (option:unwrap child) (rest coord)
+                    , nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
