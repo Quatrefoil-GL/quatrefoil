@@ -18,7 +18,7 @@
         'arrange-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn arrange-children (children)
             let
-                cursor $ first children
+                cursor $ .unwrap-or (first children) nil
                 result $ if
                   and
                     = 1 $ count children
@@ -2026,8 +2026,8 @@
                           * 0.001 $ - t0 prev-t
               .!updateProjectionMatrix @*global-camera
               .!render @*global-renderer @*global-scene @*global-camera
-            , &unit
-              ; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight $ .!addEventListener (ffi-object canvas-el) |click $ fn (event) (on-canvas-click event)
+            , &unit (; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight)
+              .!addEventListener (ffi-object canvas-el) |click $ fn (event) (on-canvas-click event)
               .!addEventListener (ffi-object js/window) |resize $ fn (event)
                 js/console.log |resize
                   .-innerWidth $ ffi-object js/window
@@ -2444,28 +2444,30 @@
         'diff-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-material (prev-material material coord collect!)
             if
-              not= (get prev-material :kind) (get material :kind)
+              not= (quatrefoil.util.core/field prev-material :kind) (quatrefoil.util.core/field material :kind)
               collect! $ [] coord :replace-material material
               let
-                  prev-material0 $ assert-type
+                  prev-material0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                     either prev-material $ {}
                     :: 'Map 'Tag 'Dynamic
-                  material0 $ assert-type
+                  material0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                     either material $ {}
                     :: 'Map 'Tag 'Dynamic
                   prev-keys $ keys prev-material0
                   curr-keys $ keys material0
                   added-material $ -> (difference curr-keys prev-keys) (&set:to-list)
                     map $ fn (k)
-                      [] k $ get material0 k
+                      [] k $ .unwrap $ get material0 k
                     pairs-map
                   removed-keys $ difference prev-keys curr-keys
                   updated-material $ -> (intersection prev-keys curr-keys)
                     filter $ fn (k)
-                      not= (get prev-material0 k) (get material0 k)
+                      not=
+                        .unwrap $ get prev-material0 k
+                        .unwrap $ get material0 k
                     &set:to-list
                     map $ fn (k)
-                      [] k $ get material0 k
+                      [] k $ .unwrap $ get material0 k
                     pairs-map
                 if
                   not $ empty? added-material
@@ -2656,9 +2658,11 @@
                 ; js/console.log "|handle children" children $ :children tree
                 &doseq (entry children)
                   let
-                      child $ last entry
+                      child $ .unwrap $ last entry
                     ; js/console.log |Child: child entry
-                    .!addBy object3d (first entry) child
+                    .!addBy object3d
+                      .unwrap $ first entry
+                      , child
                 , object3d
               new THREE/Object3D
           :examples $ []
@@ -3548,7 +3552,9 @@
             if (empty? coord) (js/console.warn "|Cannot remove by empty coord!")
               let
                   parent $ reach-object3d @*global-scene $ butlast coord
-                .!addBy parent (last coord) (build-tree coord op-data)
+                .!addBy parent
+                  .unwrap $ last coord
+                  build-tree coord op-data
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -3600,7 +3606,7 @@
             if (empty? coord) (js/console.warn "|Cannot remove by empty coord!")
               let
                   parent $ reach-object3d @*global-scene $ butlast coord
-                .!removeBy parent $ last coord
+                .!removeBy parent $ .unwrap $ last coord
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -3628,7 +3634,9 @@
             if (empty? coord) (js/console.warn "|Cannot replace with empty coord!")
               let
                   parent $ reach-object3d @*global-scene $ butlast coord
-                .!replaceBy parent (last coord) (build-tree coord op-data)
+                .!replaceBy parent
+                  .unwrap $ last coord
+                  build-tree coord op-data
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -3835,7 +3843,7 @@
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn field (value key)
-            option:unwrap-or (get value key) nil
+            if (nil? value) nil $ option:unwrap-or (get value key) nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
@@ -3846,7 +3854,7 @@
               if (empty? coord) tree $ let
                   cursor $ option:unwrap $ first coord
                 let
-                    child $ get-in tree $ [] :children cursor
+                    child $ get (field tree :children) cursor
                   if (option:some? child)
                     recur (option:unwrap child) (rest coord)
                     , nil
@@ -3873,7 +3881,7 @@
         'reach-object3d $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reach-object3d (object3d coord)
             if (empty? coord) object3d $ let
-                cursor $ first coord
+                cursor $ .unwrap $ first coord
               recur (.!reachBy object3d cursor) (rest coord)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
