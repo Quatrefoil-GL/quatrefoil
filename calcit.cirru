@@ -618,7 +618,9 @@
                   map $ fn (x)
                     shape $ {} (:path heart-path)
                       :scale $ v-scale (v3 1 1 1)
-                        pow (rand 0.26) 1.4
+                        pow
+                          quatrefoil.util.core/require-decoded $ try-decode-map-as (rand 0.26) 'Number
+                          , 1.4
                       :rotation $ [] (rand-around 0 1) (rand-around 0 1) (rand-around 0 1)
                       :position $ [] (rand-around 0 50) (rand-around 0 50) (rand-around 20 80)
                       :material $ {} (:kind :mesh-lambert) (:opacity 0.5) (:transparent true) (:color 0xff2225)
