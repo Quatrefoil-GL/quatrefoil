@@ -2348,11 +2348,13 @@
                     swap! *viewer-y-shift &+ $ / shift 10
                     .!lookAt camera $ new-lookat-point
                     .!render @*global-renderer @*global-scene @*global-camera
+                    , &unit
                 (:angle angle)
                   tween-call 20 5 $ fn (i)
                     swap! *viewer-angle &+ $ / angle 10
                     .!lookAt camera $ new-lookat-point
                     .!render @*global-renderer @*global-scene @*global-camera
+                    , &unit
                 (:move dx dy dz)
                   tween-call 20 5 $ fn (i)
                     let
@@ -2373,7 +2375,9 @@
                       set! (.-z position) z
                       .!lookAt camera $ new-lookat-point
                       .!render @*global-renderer @*global-scene @*global-camera
+                    , &unit
                 _ $ println "|unknown camera control:" control
+              , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'quatrefoil.core/CameraControl
