@@ -2664,6 +2664,12 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
+        'ShadowFlagsHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ShadowFlagsHost (:castShadow 'Bool) (:receiveShadow 'Bool)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :castShadow :receiveShadow
+          :schema $ :: 'Trait
         'ThreeObjectHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ThreeObjectHost
             .lookAt $ :: 'Fn $ {} (:return 'Unit)
@@ -2746,10 +2752,10 @@
               set-rotation! object3d rotation
               set-scale! object3d scale
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
                 .-coord $ ffi-object object3d
@@ -2786,10 +2792,10 @@
                   geometry-compute-normals! geometry
                   new THREE/Mesh geometry $ create-material material
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
               set-rotation! object3d rotation
@@ -2806,7 +2812,7 @@
                 intensity $ field params :intensity
                 object3d $ new THREE/DirectionalLight color intensity
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               ->
                 ffi-object $ .-shadow $ ffi-object object3d
@@ -2939,14 +2945,16 @@
                 stacks $ either (field params :stacks) 10
                 geometry $ new ParametricGeometry
                   fn (u v target)
-                    let[] (x y z) (func u v data) (.!set target x y z)
+                    let[] (x y z)
+                      quatrefoil.util.core/require-decoded $ try-decode-map-as (func u v data) (:: 'List 'Number)
+                      .set (js-cast target 'quatrefoil.dsl.object3d-dom/AxisSetterHost) x y z
                   , slices stacks
                 object3d $ new THREE/Mesh geometry $ create-material material
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
               set-rotation! object3d rotation
@@ -2987,7 +2995,7 @@
                 distance $ field params :distance
                 object3d $ new THREE/PointLight color intensity distance
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
               ->
@@ -3015,10 +3023,10 @@
                 geometry $ new THREE/PolyhedronGeometry vertices indices radius detail
                 object3d $ new THREE/Mesh geometry $ create-material material
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
               set-rotation! object3d rotation
@@ -3044,7 +3052,7 @@
                   .unwrap $ nth coordinates 1
                   .unwrap $ nth coordinates 2
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
               set-rotation! object3d rotation
@@ -3069,10 +3077,10 @@
                   , g
                 object3d $ new THREE/Mesh geometry $ create-material material
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
               set-rotation! object3d rotation
@@ -3133,10 +3141,10 @@
                 geometry $ new THREE/ShapeGeometry shape-2d
                 object3d $ new THREE/Mesh geometry $ create-material material
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
               set-rotation! object3d rotation
@@ -3155,10 +3163,10 @@
               set-rotation! object3d rotation
               set-scale! object3d scale
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               if-let (loaded obj)
                 .!add (three-object object3d) loaded
@@ -3183,10 +3191,10 @@
                 .-coord $ ffi-object object3d
                 , coord
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
                 .-event $ ffi-object object3d
@@ -3209,10 +3217,10 @@
                 geometry $ geometry-set-from-points (new THREE/BufferGeometry) points
                 object3d $ new THREE/Line geometry $ create-material material
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
               set-rotation! object3d rotation
@@ -3233,7 +3241,7 @@
                 decay $ or (field params :decay) 1.5
                 object3d $ new THREE/SpotLight color intensity distance angle penumbra decay
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               ->
                 ffi-object $ .-shadow $ ffi-object object3d
@@ -3256,10 +3264,10 @@
               set-rotation! object3d rotation
               set-scale! object3d scale
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               , object3d
           :examples $ []
@@ -3272,10 +3280,10 @@
                 geometry $ -> $ new THREE/TorusGeometry (field params :r1) (field params :r2) (field params :s1) (field params :s2) (field params :arc)
                 object3d $ new THREE/Mesh geometry $ create-material material
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
               set-scale! object3d scale
@@ -3300,10 +3308,10 @@
                   either (field params :closed?) false
                 object3d $ new THREE/Mesh geometry $ create-material material
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
               set-rotation! object3d rotation
