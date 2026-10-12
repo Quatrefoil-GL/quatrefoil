@@ -3852,6 +3852,11 @@
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :writable $ #{} :needsUpdate :opacity :transparent
           :schema $ :: 'Trait
+        'MeshGeometryHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait MeshGeometryHost (:geometry 'JsObject)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
         'MeshLineMaterialHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait MeshLineMaterialHost (:lineWidth 'Number)
           :examples $ []
@@ -3925,7 +3930,7 @@
                     :change-rotation $ set-rotation! target $ either op-data ([] 0 0 0)
                     :change-scale $ set-scale! target $ either op-data ([] 1 1 1)
                     :change-attributes $ set-geometry-attributes!
-                      .-geometry $ ffi-object target
+                      .-geometry $ js-cast target 'quatrefoil.dsl.patch/MeshGeometryHost
                       , op-data
                     _ $ js/console.warn "|Unknown op:" op
           :examples $ []
