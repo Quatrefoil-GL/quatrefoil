@@ -1745,7 +1745,8 @@
           :code $ quote $ deftrait ControllerRaycasterHost
             .setFromXRController $ :: 'Fn $ {} (:return 'quatrefoil.core/ControllerRaycasterHost)
               :args $ [] 'quatrefoil.core/ControllerRaycasterHost 'quatrefoil.core/ControllerRayHost
-            .intersectObjects $ :: 'Fn $ {} (:return 'JsObject)
+            .intersectObjects $ :: 'Fn $ {}
+              :return $ quote quatrefoil.dsl.object3d-dom/JsArrayHost
               :args $ [] 'quatrefoil.core/ControllerRaycasterHost 'JsObject
           :examples $ []
           :ffi $ {} (:kind :external-object) (:platform :browser)
@@ -2198,7 +2199,7 @@
             let
                 controller-host $ js-cast controller $ quote quatrefoil.core/ControllerRayHost
                 raycaster $ js-cast (new THREE/Raycaster) (quote quatrefoil.core/ControllerRaycasterHost)
-              .!addEventListener controller-host |selectstart $ fn (event) (.!setFromXRController raycaster controller-host)
+              .!addEventListener controller-host |selectstart $ fn (event) (.setFromXRController raycaster controller-host)
                 let
                     objects $ let
                         children $ js-array
@@ -2206,16 +2207,11 @@
                           .!push (unsafe-coerce children CoreJsArrayHost) x
                       collect-children @*global-scene collect!
                       , children
-                    intersects $ ffi-object $ ->
-                      ffi-object $ .!intersectObjects raycaster objects
-                      .!filter $ fn (target pos _xs)
-                        js-present? $ .-event $ ffi-object
-                          .-object $ ffi-object target
-                  if
-                    js-present? $ .-0 $ ffi-object intersects
-                    call-event-on-target!
-                      ffi-object $ .-0 $ ffi-object intersects
-                      , event
+                    intersects $ .filter
+                      js-cast (.intersectObjects raycaster objects) (quote quatrefoil.dsl.object3d-dom/JsArrayHost)
+                      , quatrefoil.dsl.object3d-dom/interactive-hit?
+                    target $ aget intersects 0
+                  if (js-present? target) (call-event-on-target! target event)
                 , &unit
               , &unit
           :examples $ []
@@ -2759,12 +2755,20 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
+        'IntersectionHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait IntersectionHost (:object 'JsObject)
+          :examples $ []
+          :ffi $ {} (:kind :external-object) (:platform :browser)
+          :schema $ :: 'Trait
         'JsArrayHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait JsArrayHost
             .push $ :: 'Fn $ {} (:return 'Number)
               :args $ [] 'JsArrayHost 'Dynamic
             .filter $ :: 'Fn $ {} (:return 'JsArrayHost)
-              :args $ [] 'JsArrayHost 'Dynamic
+              :args $ [] 'JsArrayHost $ :: (quote Fn)
+                {}
+                  :return $ quote Bool
+                  :args $ [] (quote JsObject) (quote Number) (quote quatrefoil.dsl.object3d-dom/JsArrayHost)
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
@@ -2781,10 +2785,18 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
+        'ObjectMetadataHost $ %{} 'CodeEntry
+          :doc "|Optional application-owned fields on arbitrary Three.js objects. Values may be absent on imported or ordinary meshes; use the lexical read adapter rather than js-cast presence checks. Coordinate contents must still be decoded before application use."
+          :code $ quote $ deftrait ObjectMetadataHost
+            :coord $ :: 'JsNullish $ :: 'List 'Number
+            :event $ :: 'JsNullish 'Dynamic
+          :examples $ []
+          :ffi $ {} (:kind :external-object) (:platform :browser)
+          :schema $ :: 'Trait
         'RaycasterHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait RaycasterHost
             .setFromCamera $ :: 'Fn $ {} (:return 'Unit)
-              :args $ [] 'RaycasterHost 'Dynamic 'Dynamic
+              :args $ [] 'RaycasterHost (quote JsObject) 'Dynamic
             .intersectObjects $ :: 'Fn $ {} (:return 'JsArrayHost)
               :args $ [] 'RaycasterHost 'Dynamic
           :examples $ []
@@ -2841,21 +2853,23 @@
         'call-event-on-target! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn call-event-on-target! (maybe-target event)
             let
-                element-tree @*global-tree
-                coord $ .-coord $ ffi-object
-                  .-object $ ffi-object maybe-target
-                target-el $ find-element element-tree coord
-                maybe-handler $ field (field target-el :event) :click
-              if (js-present? coord)
-                do
+                maybe-coord $ hit-coordinate maybe-target
+              if (.some? maybe-coord)
+                let
+                    coord $ .unwrap maybe-coord
+                    element-tree @*global-tree
+                    target-el $ find-element element-tree coord
+                    maybe-handler $ field (field target-el :event) :click
                   if (non-nil? maybe-handler) (maybe-handler event @*proxied-dispatch) (println "|no handler" coord)
                   reset! *focused-coord coord
                   ; println "|focus to" coord
                 do (reset! *focused-coord nil) (eprintln "|lose focus")
+              , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'Dynamic 'Dynamic
+            :args $ [] 'JsObject 'E
             :features $ #{} :js-ffi
+            :generics $ [] 'E
         'create-ambient-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-ambient-light (params position)
             let
@@ -3501,6 +3515,30 @@
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
+        'hit-coordinate $ %{} 'CodeEntry
+          :doc "|Normalize optional application coordinate metadata on a Three.js intersection into Option<List<Number>>; absence is not a malformed required host field."
+          :code $ quote $ defn hit-coordinate (target)
+            let
+                hit $ js-cast target 'quatrefoil.dsl.object3d-dom/IntersectionHost
+                coord $ .-coord $ unsafe-coerce (.-object hit) 'quatrefoil.dsl.object3d-dom/ObjectMetadataHost
+              if (js-present? coord)
+                Option :some $ quatrefoil.util.core/require-decoded $ try-decode-map-as coord (:: 'List 'Number)
+                Option :none
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'JsObject
+            :features $ #{} :js-ffi
+            :return $ :: 'Option $ :: 'List 'Number
+        'interactive-hit? $ %{} 'CodeEntry
+          :doc "|Read optional application event metadata on arbitrary Three.js objects; ordinary meshes and imported GLTF nodes may lack this property. Keep raw optional lookup semantics at this single adapter."
+          :code $ quote $ defn interactive-hit? (target pos hits)
+            let
+                hit $ js-cast target 'quatrefoil.dsl.object3d-dom/IntersectionHost
+              js-present? $ .-event $ unsafe-coerce (.-object hit) 'quatrefoil.dsl.object3d-dom/ObjectMetadataHost
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'Bool)
+            :args $ [] 'JsObject 'Number 'quatrefoil.dsl.object3d-dom/JsArrayHost
+            :features $ #{} :js-ffi
         'js-number $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn js-number (value)
             quatrefoil.util.core/require-decoded $ try-decode-map-as value 'Number
@@ -3534,38 +3572,30 @@
         'on-canvas-click $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-canvas-click (event)
             let
+                event-host $ js-ffi.browser/mouse-event-host event
                 mouse $ new THREE/Vector2
-                raycaster $ unsafe-coerce (new THREE/Raycaster) RaycasterHost
-              set!
-                .-x $ ffi-object mouse
-                dec $ * 2 $ /
-                  js-number $ .-clientX $ ffi-object event
-                  js-number $ .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
-              set!
-                .-y $ ffi-object mouse
-                - 1 $ * 2 $ /
-                  js-number $ .-clientY $ ffi-object event
-                  js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
-              .!setFromCamera raycaster mouse @*global-camera
+                  dec $ * 2 $ /
+                    js-number $ .-client-x event-host
+                    js-number $ .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+                  - 1 $ * 2 $ /
+                    js-number $ .-client-y event-host
+                    js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+                raycaster $ js-cast (new THREE/Raycaster) (quote quatrefoil.dsl.object3d-dom/RaycasterHost)
+              .setFromCamera raycaster mouse @*global-camera
               let
-                  intersects $ .!filter
-                    unsafe-coerce
-                      .!intersectObjects raycaster $ let
+                  intersects $ .filter
+                    js-cast
+                      .intersectObjects raycaster $ let
                           children $ js-array
                           collect! $ fn (x) (push-array! children x)
                         collect-children @*global-scene collect!
                         , children
-                      , JsArrayHost
-                    fn (target pos _xs)
-                      js-present? $ .-event $ ffi-object
-                        .-object $ ffi-object target
-                ; js/console.log intersects
-                if
-                  js-present? $ .-0 $ ffi-object intersects
-                  call-event-on-target!
-                    ffi-object $ .-0 $ ffi-object intersects
-                    , event
+                      quote quatrefoil.dsl.object3d-dom/JsArrayHost
+                    , interactive-hit?
+                  target $ aget intersects 0
+                if (js-present? target) (call-event-on-target! target event-host)
                   do (reset! *focused-coord nil) (println "|lose focus")
+              , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic
