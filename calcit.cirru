@@ -730,9 +730,8 @@
                         l1 $ assert-type (field line :line) 'quaternion.core/Quaternion
                         v $ &q- to from
                         size $ q-length v
-                        w $ nth to 1
                       tube $ {} (:points-fn straight-fn)
-                        :factor $ field line :factor
+                        :factor $ {} (:from from) (:to to)
                         :radius $ * 0.04 size
                         :tubular-segments 4
                         :radial-segments 4
@@ -786,17 +785,23 @@
             :args $ [] 'Tag
         'straight-fn $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn straight-fn (t factor)
-            let[] (w1 x1 y1 z1)
-              &enum:params $ &map:get factor :from
-              let[] (w2 x2 y2 z2)
-                &enum:params $ &map:get factor :to
-                []
-                  &+ (&* x1 t)
-                    &* x2 $ &- 1 t
-                  &+ (&* y1 t)
-                    &* y2 $ &- 1 t
-                  &+ (&* z1 t)
-                    &* z2 $ &- 1 t
+            let
+                factor0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as factor (:: 'Map 'Tag 'quaternion.core/Quaternion)
+              let[] (w1 x1 y1 z1)
+                quatrefoil.util.core/require-decoded $ try-decode-map-as
+                  &enum:params $ .unwrap $ get factor0 :from
+                  :: 'List 'Number
+                let[] (w2 x2 y2 z2)
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as
+                    &enum:params $ .unwrap $ get factor0 :to
+                    :: 'List 'Number
+                  []
+                    &+ (&* x1 t)
+                      &* x2 $ &- 1 t
+                    &+ (&* y1 t)
+                      &* y2 $ &- 1 t
+                    &+ (&* z1 t)
+                      &* z2 $ &- 1 t
           :examples $ []
           :schema $ :: 'Fn $ {}
             :args $ [] 'Number 'Dynamic
@@ -2965,8 +2970,12 @@
         'create-polyhedron-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-polyhedron-element (params position rotation scale material)
             let
-                vertices $ js-array & $ concat & (field params :vertices)
-                indices $ js-array & $ concat & (field params :indices)
+                vertices $ js-array & $ concat &
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :vertices)
+                    :: 'List $ :: 'List 'Number
+                indices $ js-array & $ concat &
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :indices)
+                    :: 'List $ :: 'List 'Number
                 radius $ field params :radius
                 detail $ field params :detail
                 geometry $ new THREE/PolyhedronGeometry vertices indices radius detail
@@ -3520,7 +3529,7 @@
             :args $ [] 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
         'three-object $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn three-object (value) (unsafe-coerce value 'ThreeObjectHost)
+          :code $ quote $ defn three-object (value) (js-cast value 'quatrefoil.dsl.object3d-dom/ThreeObjectHost)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'ThreeObjectHost)
             :args $ [] 'Dynamic
@@ -3557,7 +3566,9 @@
         'add-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn add-children (target coord op-data)
             &doseq (entry op-data)
-              let[] (k tree) entry $ .!addBy target k $ build-tree (conj coord k) tree
+              let[] (k tree)
+                quatrefoil.util.core/require-decoded $ try-decode-map-as entry $ :: 'List 'Dynamic
+                .!addBy target k $ build-tree (conj coord k) tree
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic (:: 'List 'Number) 'Dynamic
@@ -3579,26 +3590,28 @@
           :code $ quote $ defn apply-changes (changes)
             ; js/console.log |changes (count changes) changes
             &doseq (change changes)
-              let[] (coord op op-data) change $ let
-                  target $ reach-object3d @*global-scene coord
-                ; js/console.log |Change: op coord op-data
-                match op
-                  :add-material $ update-material target coord op-data
-                  :update-material $ update-material target coord op-data
-                  :remove-material $ remove-material target coord op-data
-                  :replace-material $ replace-material target coord op-data
-                  :remove-children $ remove-children target coord op-data
-                  :add-children $ add-children target coord op-data
-                  :add-element $ add-element target coord op-data
-                  :remove-element $ remove-element target coord
-                  :replace-element $ replace-element target coord op-data
-                  :change-position $ set-position! target $ either op-data ([] 0 0 0)
-                  :change-rotation $ set-rotation! target $ either op-data ([] 0 0 0)
-                  :change-scale $ set-scale! target $ either op-data ([] 1 1 1)
-                  :change-attributes $ set-geometry-attributes!
-                    .-geometry $ ffi-object target
-                    , op-data
-                  _ $ js/console.warn "|Unknown op:" op
+              let[] (coord op op-data)
+                quatrefoil.util.core/require-decoded $ try-decode-map-as change $ :: 'List 'Dynamic
+                let
+                    target $ reach-object3d @*global-scene coord
+                  ; js/console.log |Change: op coord op-data
+                  match op
+                    :add-material $ update-material target coord op-data
+                    :update-material $ update-material target coord op-data
+                    :remove-material $ remove-material target coord op-data
+                    :replace-material $ replace-material target coord op-data
+                    :remove-children $ remove-children target coord op-data
+                    :add-children $ add-children target coord op-data
+                    :add-element $ add-element target coord op-data
+                    :remove-element $ remove-element target coord
+                    :replace-element $ replace-element target coord op-data
+                    :change-position $ set-position! target $ either op-data ([] 0 0 0)
+                    :change-rotation $ set-rotation! target $ either op-data ([] 0 0 0)
+                    :change-scale $ set-scale! target $ either op-data ([] 1 1 1)
+                    :change-attributes $ set-geometry-attributes!
+                      .-geometry $ ffi-object target
+                      , op-data
+                    _ $ js/console.warn "|Unknown op:" op
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] $ :: 'List 'Dynamic
@@ -3769,7 +3782,9 @@
       :defs $ {} $ 'rand-around
         %{} 'CodeEntry (:doc |)
           :code $ quote $ defn rand-around (base x)
-            + base (rand x) (* -0.5 x)
+            + base
+              quatrefoil.util.core/require-decoded $ try-decode-map-as (rand x) 'Number
+              * -0.5 x
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Number)
             :args $ [] 'Number 'Number
