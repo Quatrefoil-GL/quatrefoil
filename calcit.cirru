@@ -13,7 +13,7 @@
         'ambient-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn ambient-light (props & children) (create-element :ambient-light props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'arrange-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn arrange-children (children)
@@ -34,12 +34,12 @@
         'box $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn box (props & children) (create-element :box props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'buffer-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn buffer-object (props & children) (create-element :buffer-object props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'create-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-element (el-name props children)
@@ -49,12 +49,12 @@
                 or (field props :on) (field props :event)
                 , :children $ arrange-children children
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Tag 'Dynamic $ :: 'List 'Dynamic
         'directional-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn directional-light (props & children) (create-element :directional-light props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'field $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn field (value key)
@@ -75,98 +75,98 @@
         'group $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn group (props & children) (create-element :group props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'line $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn line (props & children) (create-element :line props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'line-segments $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn line-segments (props & children) (create-element :line-segments props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'mesh-line $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn mesh-line (props & children) (create-element :mesh-line props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'parametric $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn parametric (props & children) (create-element :parametric props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'plane-reflector $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn plane-reflector (props & children) (create-element :plane-reflector props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'point-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn point-light (props & children) (create-element :point-light props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'polyhedron $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn polyhedron (props & children) (create-element :polyhedron props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'rect-area-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn rect-area-light (props & children) (create-element :rect-area-light props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'scene $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn scene (props & children) (create-element :scene props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'shader-mesh $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn shader-mesh (props & children) (create-element :shader-mesh props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'shape $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn shape (props & children) (create-element :shape props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'some-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn some-object (props)
             create-element :some-object props $ []
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'sphere $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn sphere (props & children) (create-element :sphere props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'spline $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn spline (props & children) (create-element :spline props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'spot-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn spot-light (props & children) (create-element :spot-light props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'text $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn text (props & children) (create-element :text props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'torus $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn torus (props & children) (create-element :torus props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'tube $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn tube (props & children) (create-element :tube props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.alias
@@ -550,7 +550,7 @@
                     :position $ [] 0 0 0
                     :material $ {} (:kind :line-dashed) (:color 0xccccff) (:opacity 0.3) (:transparent true) (:linewidth 2) (:gapSize 0.5) (:dashSize 0.5)
           :examples $ []
-          :schema $ :: 'List 'Dynamic
+          :schema $ :: 'List 'quatrefoil.schema/Shape
         'horizontal-lines $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def horizontal-lines
             -> (range 20)
@@ -562,7 +562,7 @@
                     :position $ [] 0 0 0
                     :material $ {} (:kind :line-dashed) (:color 0xccccff) (:opacity 0.3) (:transparent true) (:linewidth 2) (:gapSize 0.5) (:dashSize 0.5)
           :examples $ []
-          :schema $ :: 'List 'Dynamic
+          :schema $ :: 'List 'quatrefoil.schema/Shape
         'js-number $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn js-number (value)
             quatrefoil.util.core/require-decoded $ try-decode-map-as value 'Number
