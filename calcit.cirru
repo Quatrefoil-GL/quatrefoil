@@ -2652,7 +2652,7 @@
         'ThreeObjectHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ThreeObjectHost
             .lookAt $ :: 'Fn $ {} (:return 'Unit)
-              :args $ [] 'ThreeObjectHost 'Dynamic
+              :args $ [] 'ThreeObjectHost 'Number 'Number 'Number
             .add $ :: 'Fn $ {} (:return 'Unit)
               :args $ [] 'ThreeObjectHost 'Dynamic
           :examples $ []
@@ -2816,8 +2816,9 @@
                 points $ &let
                   ps $ js-array
                   &doseq
-                    p $ field params :points
-                    push-array! ps $ new THREE/Vector3 & p
+                    p $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :points)
+                      :: 'List $ :: 'List 'Number
+                    push-array! ps $ vector3-from-list p
                   , ps
                 geometry $ geometry-set-from-points (new THREE/BufferGeometry) points
                 object3d $ new THREE/Line geometry $ create-material material
@@ -2842,12 +2843,12 @@
                       let
                           p0 $ .unwrap $ nth segment 0
                           p1 $ .unwrap $ nth segment 1
-                        push-array! ps $ new THREE/Vector3 & p0
-                        push-array! ps $ new THREE/Vector3 & p1
+                        push-array! ps $ vector3-from-list p0
+                        push-array! ps $ vector3-from-list p1
                     &doseq
                       p $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :points)
                         :: 'List $ :: 'List 'Number
-                      push-array! ps $ new THREE/Vector3 & p
+                      push-array! ps $ vector3-from-list p
                   , ps
                 geometry $ geometry-set-from-points (new THREE/BufferGeometry) points
                 object3d $ new THREE/LineSegments geometry $ create-material material
@@ -2888,8 +2889,9 @@
                 points $ &let
                   ps $ js-array
                   &doseq
-                    p $ field params :points
-                    push-array! ps $ new THREE/Vector3 & p
+                    p $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :points)
+                      :: 'List $ :: 'List 'Number
+                    push-array! ps $ vector3-from-list p
                   , ps
                 geometry $ let
                     g $ new MeshLineGeometry
@@ -3015,7 +3017,12 @@
                 height $ field params :height
                 look-at $ field params :look-at
                 object3d $ new THREE/RectAreaLight color intensity width height
-              .!lookAt (three-object object3d) & look-at
+              let
+                  coordinates $ quatrefoil.util.core/require-decoded $ try-decode-map-as look-at (:: 'List 'Number)
+                .lookAt (three-object object3d)
+                  .unwrap $ nth coordinates 0
+                  .unwrap $ nth coordinates 1
+                  .unwrap $ nth coordinates 2
               set!
                 .-castShadow $ ffi-object object3d
                 , true
@@ -3175,8 +3182,9 @@
             let
                 points0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :points)
                   :: 'List $ :: 'List 'Number
-                curve $ new THREE/CatmullRomCurve3 $ js-array &
-                  -> points0 $ map $ fn (p) (new THREE/Vector3 & p)
+                curve $ new THREE/CatmullRomCurve3 $ to-js-data
+                  -> points0 $ map $ fn (p) (vector3-from-list p)
+                  {} $ :js-array true
                 points $ curve-get-points curve $ * 16 (count points0)
                 geometry $ geometry-set-from-points (new THREE/BufferGeometry) points
                 object3d $ new THREE/Line geometry $ create-material material
@@ -3466,14 +3474,20 @@
                         .to-string $ quatrefoil.util.core/require-decoded $ try-decode-map-as id 'Bool
                       (nil? id) (.to-string nil)
                       true $ raise |geometry-attribute-id-must-be-a-scalar
-                  buffer $ field info :buffer
+                  buffer $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :buffer) (:: 'List 'Number)
                   size $ field info :size
                   type $ field info :type
                   attr $ match type
-                    :f32 $ new THREE/Float32BufferAttribute (js-array & buffer) size
-                    :u8 $ new THREE/Float32BufferAttribute (js-array & buffer) size
+                    :f32 $ new THREE/Float32BufferAttribute
+                      to-js-data buffer $ {} $ :js-array true
+                      , size
+                    :u8 $ new THREE/Float32BufferAttribute
+                      to-js-data buffer $ {} $ :js-array true
+                      , size
                     _ $ do (js/console.warn "|use f32 as default attribute type")
-                      new THREE/Float32BufferAttribute (js-array & buffer) size
+                      new THREE/Float32BufferAttribute
+                        to-js-data buffer $ {} $ :js-array true
+                        , size
                 geometry-set-attribute! g name attr
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -3548,6 +3562,16 @@
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'ThreeObjectHost)
             :args $ [] 'Dynamic
+            :features $ #{} :js-ffi
+        'vector3-from-list $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn vector3-from-list (coordinates)
+            new THREE/Vector3
+              .unwrap-or (nth coordinates 0) 0
+              .unwrap-or (nth coordinates 1) 0
+              .unwrap-or (nth coordinates 2) 0
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+            :args $ [] $ :: 'List 'Number
             :features $ #{} :js-ffi
         'write-shape-path! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn write-shape-path! (s op)
