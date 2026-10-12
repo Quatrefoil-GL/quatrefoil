@@ -1615,7 +1615,9 @@
                   text $ {}
                     :position $ [] -1.6 2 0
                     :text $ let
-                        prefix $ if (blank? label) | $ str label "| "
+                        prefix $ if
+                          blank? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (either label |) 'String
+                          , | $ str label "| "
                       str prefix $ .!toFixed value $ either (field options :fract-length) 2
                     :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                     :size text-size
@@ -1673,7 +1675,9 @@
                   text $ {}
                     :position $ [] -2 2 0
                     :text $ let
-                        prefix $ if (blank? label) | $ str label "| "
+                        prefix $ if
+                          blank? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (either label |) 'String
+                          , | $ str label "| "
                       str prefix
                         .!toFixed
                           option:unwrap-or (nth v 0) 0
