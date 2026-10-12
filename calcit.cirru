@@ -1311,15 +1311,15 @@
             set-perspective-camera! $ {} (:fov 50) (:near 0.1) (:far 10)
               :position $ v3 0 1.6 1
               :aspect $ /
-                js-number $ .-innerWidth $ ffi-object js/window
-                js-number $ .-innerHeight $ ffi-object js/window
+                js-number $ .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+                js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
             let
                 canvas-el $ js/document.querySelector |canvas
               init-renderer! canvas-el $ {} (:background 0x110022) (:shadow-map? true)
                 ; :composer-passes $ [] $ new UnrealBloomPass
                   new THREE/Vector2
-                    js-number $ .-innerWidth $ ffi-object js/window
-                    js-number $ .-innerHeight $ ffi-object js/window
+                    js-number $ .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+                    js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
                   , 1.5 0.4 0.85
             render-app!
             add-watch! *store :changes $ fn (store prev) (render-app!)
@@ -2011,11 +2011,11 @@
             ; set! (.-physicallyCorrectLights @*global-renderer) true
             ; set! (.-gammaFactor @*global-renderer) 22
             .!setPixelRatio @*global-renderer $ either
-              js-number $ .-devicePixelRatio $ ffi-object js/window
+              js-number $ .-devicePixelRatio $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
               , 1
             .!setSize @*global-renderer
-              js-number $ .-innerWidth $ ffi-object js/window
-              js-number $ .-innerHeight $ ffi-object js/window
+              js-number $ .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+              js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
             .!setAnimationLoop @*global-renderer $ fn (t & aa)
               let
                   t0 $ assert-type t 'Number
@@ -2049,16 +2049,16 @@
               .!addEventListener (ffi-object canvas-el) |click $ fn (event) (on-canvas-click event)
               .!addEventListener (ffi-object js/window) |resize $ fn (event)
                 js/console.log |resize
-                  .-innerWidth $ ffi-object js/window
-                  .-innerHeight $ ffi-object js/window
+                  .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+                  .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
                 set!
                   .-aspect $ ffi-object @*global-camera
                   /
-                    js-number $ .-innerWidth $ ffi-object js/window
-                    js-number $ .-innerHeight $ ffi-object js/window
+                    js-number $ .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+                    js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
                 .!setSize @*global-renderer
-                  js-number $ .-innerWidth $ ffi-object js/window
-                  js-number $ .-innerHeight $ ffi-object js/window
+                  js-number $ .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+                  js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
                 .!updateProjectionMatrix @*global-camera
                 ; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight
                 ; .!render @*global-composer
@@ -2606,6 +2606,11 @@
           :code $ quote $ defref *focused-coord nil
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
+        'ArrayLengthHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ArrayLengthHost (:length 'Number)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
         'AxisSetterHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait AxisSetterHost
             .set $ :: 'Fn $ {} (:return 'AxisSetterHost)
@@ -2786,7 +2791,7 @@
                   geometry-set-attribute! geometry |position $ new THREE/BufferAttribute vertices 3
                   if
                     >
-                      js-number $ .-length $ ffi-object indices
+                      js-number $ .-length $ js-cast indices 'quatrefoil.dsl.object3d-dom/ArrayLengthHost
                       , 0
                     geometry-set-index! geometry indices
                   geometry-compute-normals! geometry
@@ -2973,11 +2978,11 @@
                 object3d $ new Reflector geometry $ js-object
                   |clipBias $ either (field params :clip-bias) 0.003
                   |textureWidth $ *
-                    js-number $ .-innerWidth $ ffi-object js/window
-                    js-number $ .-devicePixelRatio $ ffi-object js/window
+                    js-number $ .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+                    js-number $ .-devicePixelRatio $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
                   |textureHeight $ *
-                    js-number $ .-innerHeight $ ffi-object js/window
-                    js-number $ .-devicePixelRatio $ ffi-object js/window
+                    js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+                    js-number $ .-devicePixelRatio $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
                   |color $ either (field params :color) |0x7777ff
               set-position! object3d position
               set-rotation! object3d rotation
@@ -3414,12 +3419,12 @@
                 .-x $ ffi-object mouse
                 dec $ * 2 $ /
                   js-number $ .-clientX $ ffi-object event
-                  js-number $ .-innerWidth $ ffi-object js/window
+                  js-number $ .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
               set!
                 .-y $ ffi-object mouse
                 - 1 $ * 2 $ /
                   js-number $ .-clientY $ ffi-object event
-                  js-number $ .-innerHeight $ ffi-object js/window
+                  js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
               .!setFromCamera raycaster mouse @*global-camera
               let
                   intersects $ .!filter
@@ -3583,7 +3588,12 @@
           :code $ quote $ defn set-scale! (object scale)
             if (non-nil? scale)
               let[] (x y z)
-                quatrefoil.util.core/require-decoded $ try-decode-map-as scale $ :: 'List 'Number
+                if (enum? scale)
+                  match
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as scale 'quaternion.vector/V3
+                    (:v3 x y z) ([] x y z)
+                    _ $ raise |unknown-scale-expected-vector
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as scale $ :: 'List 'Number
                 .set
                   js-cast
                     .-scale $ js-cast object 'quatrefoil.dsl.object3d-dom/TransformHost
@@ -3928,6 +3938,11 @@
           :schema $ :: 'Trait
         'ObjectChildrenHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ObjectChildrenHost (:children 'Dynamic)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
+        'WindowMetricsHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait WindowMetricsHost (:innerWidth 'Number) (:innerHeight 'Number) (:devicePixelRatio 'Number)
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
