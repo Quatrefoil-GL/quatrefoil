@@ -1719,6 +1719,11 @@
           :code $ quote $ defenum CameraControl (:shift 'Number) (:angle 'Number) (:move 'Number 'Number 'Number)
           :examples $ []
           :schema $ :: 'EnumDef
+        'CameraPositionHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait CameraPositionHost (:position 'VectorCoordinatesHost)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
         'CoreBufferGeometryHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait CoreBufferGeometryHost
             .setFromPoints $ :: 'Fn $ {} (:return 'Dynamic)
@@ -1767,6 +1772,12 @@
               :args $ [] 'ThreeVector3Host 'Dynamic
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
+        'VectorCoordinatesHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait VectorCoordinatesHost (:x 'Number) (:y 'Number) (:z 'Number)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :x :y :z
           :schema $ :: 'Trait
         'camera-direction-for $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn camera-direction-for (x y z)
@@ -2119,7 +2130,9 @@
           :code $ quote $ defn move-viewer-by! (x0 y0 z0)
             let
                 camera @*global-camera
-                position $ ffi-object $ .-position (ffi-object camera)
+                position $ js-cast
+                  .-position $ js-cast camera 'quatrefoil.core/CameraPositionHost
+                  , 'quatrefoil.core/VectorCoordinatesHost
               match (to-viewer-axis x0 y0 z0)
                 (:v3 dx dy dz)
                   let
@@ -2147,7 +2160,9 @@
           :code $ quote $ defn new-lookat-point ()
             let
                 camera @*global-camera
-                position $ ffi-object $ .-position (ffi-object camera)
+                position $ js-cast
+                  .-position $ js-cast camera 'quatrefoil.core/CameraPositionHost
+                  , 'quatrefoil.core/VectorCoordinatesHost
                 x2 $ &+
                   js-number $ .-x position
                   &* 4 $ cos @*viewer-angle
@@ -2341,7 +2356,9 @@
                 (:move dx dy dz)
                   tween-call 20 5 $ fn (i)
                     let
-                        position $ ffi-object $ .-position (ffi-object camera)
+                        position $ js-cast
+                          .-position $ js-cast camera 'quatrefoil.core/CameraPositionHost
+                          , 'quatrefoil.core/VectorCoordinatesHost
                         x $ &+
                           js-number $ .-x position
                           / dx 10
