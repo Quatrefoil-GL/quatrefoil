@@ -3074,7 +3074,7 @@
                 quatrefoil.util.core/require-decoded $ try-decode-map-as THREE/DoubleSide 'Number
               , m
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'JsObject)
             :args $ [] 'Dynamic
             :features $ #{} :js-ffi
         'create-mesh-line-element $ %{} 'CodeEntry (:doc |)
@@ -3833,6 +3833,49 @@
             |meshline :refer $ MeshLineGeometry MeshLineMaterial raycast
     'quatrefoil.dsl.patch $ %{} 'FileEntry
       :defs $ {}
+        'ColorHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ColorHost
+            .set $ :: 'Fn $ {}
+              :args $ [] 'quatrefoil.dsl.patch/ColorHost 'JsObject
+              :return 'quatrefoil.dsl.patch/ColorHost
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
+        'ColoredMaterialHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ColoredMaterialHost (:color 'quatrefoil.dsl.patch/ColorHost)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
+        'MaterialHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait MaterialHost (:opacity 'Number) (:transparent 'Bool) (:needsUpdate 'Bool)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :needsUpdate :opacity :transparent
+          :schema $ :: 'Trait
+        'MeshLineMaterialHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait MeshLineMaterialHost (:lineWidth 'Number)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :lineWidth
+          :schema $ :: 'Trait
+        'MeshMaterialHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait MeshMaterialHost (:material 'JsObject)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :material
+          :schema $ :: 'Trait
+        'ShaderMaterialHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ShaderMaterialHost (:uniforms 'JsObject) (:fragmentShader 'String) (:vertexShader 'String)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :fragmentShader :uniforms :vertexShader
+          :schema $ :: 'Trait
+        'WireframeMaterialHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait WireframeMaterialHost (:wireframe 'Bool)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :wireframe
+          :schema $ :: 'Trait
         'add-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn add-children (target coord op-data)
             &doseq (entry op-data)
@@ -3913,15 +3956,13 @@
         'remove-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn remove-material (target coord op-data)
             let
-                material $ ffi-object $ .-material (ffi-object target)
+                material $ js-cast
+                  .-material $ js-cast target 'quatrefoil.dsl.patch/MeshMaterialHost
+                  , 'quatrefoil.dsl.patch/MaterialHost
               &doseq (entry op-data)
                 match entry
-                  :opacity $ set!
-                    .-opacity $ ffi-object material
-                    , 0.9
-                  :transparent $ set!
-                    .-transparent $ ffi-object material
-                    , 1
+                  :opacity $ set! (.-opacity material) 0.9
+                  :transparent $ set! (.-transparent material) true
                   _ $ println "|Unknown material prop:" op-data
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -3943,8 +3984,9 @@
         'replace-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn replace-material (target coord op-data)
             set!
-              .-material $ ffi-object target
+              .-material $ js-cast target 'quatrefoil.dsl.patch/MeshMaterialHost
               create-material op-data
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic (:: 'List 'Number) 'Dynamic
@@ -3952,39 +3994,43 @@
         'update-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn update-material (target coord op-data) (; println "|Update material" coord op-data)
             let
-                material $ ffi-object $ .-material (ffi-object target)
+                material $ js-cast
+                  .-material $ js-cast target 'quatrefoil.dsl.patch/MeshMaterialHost
+                  , 'quatrefoil.dsl.patch/MaterialHost
               ; js/console.log target
               &doseq
-                entry $ &map:to-list op-data
+                entry $ &map:to-list $ quatrefoil.util.core/require-decoded
+                  try-decode-map-as op-data $ :: 'Map 'Tag 'Dynamic
                 let[] (param new-value) entry $ match param
-                  :color $ .!set
-                    ffi-object $ .-color $ ffi-object material
-                    new THREE/Color new-value
-                  :opacity $ set!
-                    .-opacity $ ffi-object material
-                    , new-value
-                  :transparent $ set!
-                    .-transparent $ ffi-object material
-                    , new-value
+                  :color $
+                    js-cast
+                      .-color $ js-cast material 'quatrefoil.dsl.patch/ColoredMaterialHost
+                      , 'quatrefoil.dsl.patch/ColorHost
+                    , .set $ new THREE/Color new-value
+                  :opacity $ set! (.-opacity material)
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as new-value 'Number
+                  :transparent $ set! (.-transparent material)
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as new-value 'Bool
                   :lineWidth $ set!
-                    .-lineWidth $ ffi-object material
-                    , new-value
+                    .-lineWidth $ js-cast material 'quatrefoil.dsl.patch/MeshLineMaterialHost
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as new-value 'Number
                   :uniforms $ set!
-                    .-uniforms $ ffi-object material
-                    to-js-data new-value
+                    .-uniforms $ js-cast material 'quatrefoil.dsl.patch/ShaderMaterialHost
+                    unsafe-coerce
+                      to-js-data $ quatrefoil.util.core/require-decoded $ try-decode-map-as new-value (:: 'Map 'Dynamic 'Dynamic)
+                      , 'JsObject
                   :fragmentShader $ set!
-                    .-fragmentShader $ ffi-object material
-                    , new-value
+                    .-fragmentShader $ js-cast material 'quatrefoil.dsl.patch/ShaderMaterialHost
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as new-value 'String
                   :vertexShader $ set!
-                    .-vertexShader $ ffi-object material
-                    , new-value
+                    .-vertexShader $ js-cast material 'quatrefoil.dsl.patch/ShaderMaterialHost
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as new-value 'String
                   :wireframe $ set!
-                    .-wireframe $ ffi-object material
-                    , new-value
+                    .-wireframe $ js-cast material 'quatrefoil.dsl.patch/WireframeMaterialHost
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as new-value 'Bool
                   _ $ js/console.log "|Unknown param:" param
-              set!
-                .-needsUpdate $ ffi-object material
-                , true
+              set! (.-needsUpdate material) true
+              , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic (:: 'List 'Number) 'Dynamic
