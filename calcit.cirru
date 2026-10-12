@@ -726,9 +726,9 @@
                 group ({}) & $ -> lines $ map
                   fn (line)
                     let
-                        from $ assert-type (field line :from) 'quaternion.core/Quaternion
-                        to $ assert-type (field line :to) 'quaternion.core/Quaternion
-                        l1 $ assert-type (field line :line) 'quaternion.core/Quaternion
+                        from $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field line :from) 'quaternion.core/Quaternion
+                        to $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field line :to) 'quaternion.core/Quaternion
+                        l1 $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field line :line) 'quaternion.core/Quaternion
                         v $ &q- to from
                         size $ q-length v
                       tube $ {} (:points-fn straight-fn)
@@ -762,10 +762,10 @@
                       assert-type ([]) (:: 'List 'Dynamic)
                       fn (acc info)
                         let
-                            trans $ assert-type (field info :vector) 'quaternion.core/Quaternion
-                            name $ assert-type (field info :name) 'Tag
+                            trans $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :vector) 'quaternion.core/Quaternion
+                            name $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :name) 'Tag
                           concat
-                            assert-type acc $ :: 'List 'Dynamic
+                            quatrefoil.util.core/require-decoded $ try-decode-map-as acc $ :: 'List 'Dynamic
                             generate-lines line-to (&q* l0 trans) (dec level) name
                     assert-type ([]) (:: 'List 'Dynamic)
                   :: 'List 'Dynamic
@@ -1064,10 +1064,10 @@
               group
                 {} $ :position $ [] 0 20 0
                 ->
-                  &map:to-list $ assert-type tasks $ :: 'Map 'Number 'Dynamic
+                  &map:to-list $ quatrefoil.util.core/require-decoded $ try-decode-map-as tasks (:: 'Map 'Number 'Dynamic)
                   map-indexed $ fn (idx entry)
                     let
-                        task-id $ assert-type
+                        task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                           option:unwrap-or (nth entry 0) 0
                           , 'Number
                         task $ option:unwrap-or (nth entry 1) nil
@@ -1574,14 +1574,14 @@
         'comp-value $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-value (options on-change)
             let
-                value $ assert-type (field options :value) 'Number
-                speed $ assert-type
+                value $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field options :value) 'Number
+                speed $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   or (field options :speed) 1
                   , 'Number
                 color $ either (field options :color) 0xffffff
                 text-color $ either (field options :text-color) color
                 text-size $ either (field options :text-size) 1
-                bound $ assert-type
+                bound $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   or (field options :bound) ([] 0 1)
                   :: 'List 'Number
                 label $ field options :label
@@ -1627,9 +1627,9 @@
         'comp-value-2d $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-value-2d (options on-change)
             let
-                v $ assert-type (field options :value) (:: 'List 'Number)
+                v $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field options :value) (:: 'List 'Number)
                 position $ field options :position
-                speed $ assert-type
+                speed $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   either (field options :speed) 1
                   , 'Number
                 color $ either (field options :color) 0xaaaaff
@@ -1644,7 +1644,7 @@
                   :event $ {}
                     :control $ fn (states delta elapse d!) (; println |delta delta)
                       let[] (x0 y0)
-                        assert-type v $ :: 'List 'Number
+                        quatrefoil.util.core/require-decoded $ try-decode-map-as v $ :: 'List 'Number
                         let
                             dx $ * speed elapse $ option:unwrap-or (nth delta 0) 0
                             dy $ * speed elapse $ option:unwrap-or (nth delta 1) 0
@@ -1653,7 +1653,7 @@
                             , d!
                     :gamepad $ fn (info elapsed d!)
                       let
-                          v0 $ assert-type v $ :: 'List 'Number
+                          v0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as v (:: 'List 'Number)
                           x0 $ option:unwrap-or (nth v0 0) 0
                           y0 $ option:unwrap-or (nth v0 1) 0
                           speeding $ * speed $ if (field info :b) 8 1
@@ -1706,7 +1706,7 @@
           :code $ quote $ defn >> (states k)
             let
                 parent-cursor $ either (field states :cursor) ([])
-                branch $ assert-type
+                branch $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   option:unwrap-or (get states k) ({})
                   :: 'Map 'Tag 'Dynamic
               assoc branch :cursor $ append parent-cursor k
@@ -1821,16 +1821,16 @@
                   r-move $ map
                     quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :right-move) (:: 'List 'Number)
                     , refine-strength
-                  r-delta $ assert-type (field delta :right-move) (:: 'List 'Number)
+                  r-delta $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field delta :right-move) (:: 'List 'Number)
                   l0 $ option:unwrap-or (nth l-move 0) 0
                   l1 $ option:unwrap-or (nth l-move 1) 0
                   r0 $ option:unwrap-or (nth r-move 0) 0
                   r1 $ option:unwrap-or (nth r-move 1) 0
                   rd0 $ option:unwrap-or (nth r-delta 0) 0
                   rd1 $ option:unwrap-or (nth r-delta 1) 0
-                  left-a? $ assert-type (field states :left-a?) 'Bool
-                  right-b? $ assert-type (field states :right-b?) 'Bool
-                  left-b? $ assert-type (field states :left-b?) 'Bool
+                  left-a? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :left-a?) 'Bool
+                  right-b? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :right-b?) 'Bool
+                  left-b? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :left-b?) 'Bool
                 ; println |L l-move |R r-move
                 when (not= 0 l1)
                   move-viewer-by! 0 0 $ negate $ * 0.6 elapsed l1
@@ -2436,10 +2436,10 @@
         'diff-events $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-events (prev-events events coord collect!)
             let
-                prev-events0 $ assert-type
+                prev-events0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   either prev-events $ {}
                   :: 'Map 'Tag 'Dynamic
-                events0 $ assert-type
+                events0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   either events $ {}
                   :: 'Map 'Tag 'Dynamic
                 prev-event-names $ keys prev-events0
@@ -2505,10 +2505,10 @@
           :code $ quote $ defn diff-params (prev-params params coord collect!)
             ; "|unused code, when params changed, geometry would be recreated, so not diffed"
               let
-                prev-params0 $ assert-type
+                prev-params0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   either prev-params $ {}
                   :: 'Map 'Tag 'Dynamic
-                params0 $ assert-type
+                params0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   either params $ {}
                   :: 'Map 'Tag 'Dynamic
                 prev-keys $ keys prev-params0
@@ -3448,9 +3448,7 @@
             :features $ #{} :js-ffi
         'push-array! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn push-array! (xs x)
-            unsafe-coerce
-              .!push (unsafe-coerce xs JsArrayHost) x
-              , Number
+            .push (js-cast xs 'quatrefoil.dsl.object3d-dom/JsArrayHost) x
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Number)
             :args $ [] 'Dynamic 'Dynamic
