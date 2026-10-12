@@ -1740,6 +1740,11 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
+        'KeyboardEventHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait KeyboardEventHost (:key 'String) (:shiftKey 'Bool)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
         'ThreeCameraHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ThreeCameraHost (:quaternion 'Dynamic)
           :examples $ []
@@ -1872,13 +1877,9 @@
         'handle-key-event $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn handle-key-event (event)
             let
-                angle @*viewer-angle
-                key $ unsafe-coerce
-                  .-key $ ffi-object event
-                  , String
-                shift? $ unsafe-coerce
-                  .-shiftKey $ ffi-object event
-                  , Bool
+                event-host $ js-cast event 'quatrefoil.core/KeyboardEventHost
+                key $ quatrefoil.util.core/require-decoded $ try-decode-map-as (.-key event-host) 'String
+                shift? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (.-shiftKey event-host) 'Bool
               match key
                 |ArrowDown $ if shift?
                   tween-move-camera! $ CameraControl :shift -1
