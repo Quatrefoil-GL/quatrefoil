@@ -635,9 +635,7 @@
           :code $ quote $ def heart-path
             [] (:: :move-to 25 25) (:: :bezier-curve-to 25 25 20 50 0 50) (:: :bezier-curve-to -30 50 -30 15 -30 15) (:: :bezier-curve-to -30 -5 -10 -27 25 -45) (:: :bezier-curve-to 60 -22 80 -5 80 15) (:: :bezier-curve-to 80 15 80 50 50 50) (:: :bezier-curve-to 35 50 25 25 25 25)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
-            :args $ [] 'Dynamic 'Tag 'Dynamic
-            :features $ #{} :js-ffi
+          :schema $ :: 'List 'Enum
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.comp.mirror
           :require
@@ -1455,7 +1453,7 @@
             let
                 position $ let
                     p $ field options :position
-                  if (some? p) (assert-type p 'quaternion.vector/V3) (v3 0 0 0)
+                  if (non-nil? p) (assert-type p 'quaternion.vector/V3) (v3 0 0 0)
                 speed $ assert-type
                   or (field options :speed) 1
                   , 'Number
@@ -1495,7 +1493,7 @@
                             v-scale forward-v3 forward
                         on-change next-pos d!
                 if
-                  some? $ field options :label
+                  non-nil? $ field options :label
                   text $ {}
                     :position $ v3 -0.6 2 0
                     :text $ str $ field options :label
@@ -2497,16 +2495,16 @@
           :code $ quote $ defn diff-tree (prev-tree tree coord collect!) (; js/console.log |Diffing: coord prev-tree tree)
             cond
                 = nil prev-tree tree
-                &let () nil
+                &let () &unit
               (and (comp? prev-tree) (comp? tree) (not= (field prev-tree :name) (field tree :name)))
                 collect! $ [] coord :replace-element $ purify-tree tree
               (comp? prev-tree)
                 recur (field prev-tree :tree) tree coord collect!
               (comp? tree)
                 recur prev-tree (field tree :tree) coord collect!
-              (and (some? tree) (nil? prev-tree))
+              (and (non-nil? tree) (nil? prev-tree))
                 collect! $ [] coord :add-element tree
-              (and (some? prev-tree) (nil? tree))
+              (and (non-nil? prev-tree) (nil? tree))
                 collect! $ [] coord :remove-element
               (not= (field prev-tree :name) (field tree :name))
                 collect! $ [] coord :replace-element $ purify-tree tree
@@ -3436,7 +3434,7 @@
             :features $ #{} :js-ffi
         'set-rotation! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn set-rotation! (object3d rotation)
-            if (some? rotation)
+            if (non-nil? rotation)
               let[] (x y z) rotation $ .!set
                 ffi-object $ .-rotation $ ffi-object object3d
                 , x y z
@@ -3447,7 +3445,7 @@
             :features $ #{} :js-ffi
         'set-scale! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn set-scale! (object scale)
-            if (some? scale)
+            if (non-nil? scale)
               let[] (x y z) scale $ .!set
                 ffi-object $ .-scale $ ffi-object object
                 scale-zero x
