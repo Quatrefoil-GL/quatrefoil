@@ -573,7 +573,8 @@
           :examples $ []
           :schema $ :: 'List 'Dynamic
         'js-number $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn js-number (value) (unsafe-coerce value Number)
+          :code $ quote $ defn js-number (value)
+            quatrefoil.util.core/require-decoded $ try-decode-map-as value 'Number
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Number)
             :args $ [] 'Dynamic
@@ -1257,6 +1258,7 @@
                     , op-data
                 ; js/console.log |Dispatch: op op-data store
                 reset! *store store
+                , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'Dynamic
@@ -1276,7 +1278,8 @@
             :args $ [] 'Dynamic
             :features $ #{} :js-ffi
         'js-number $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn js-number (value) (unsafe-coerce value Number)
+          :code $ quote $ defn js-number (value)
+            quatrefoil.util.core/require-decoded $ try-decode-map-as value 'Number
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Number)
             :args $ [] 'Dynamic
@@ -1405,42 +1408,42 @@
         %{} 'CodeEntry (:doc |)
           :code $ quote $ defn updater (store op op-data)
             let
-                store0 $ assert-type store $ :: 'Map 'Tag 'Dynamic
+                store0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as store (:: 'Map 'Tag 'Dynamic)
               match op
                 :states $ update-states store0 op-data
                 :add-task $ let
-                    tasks $ assert-type
+                    tasks $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                       option:unwrap-or (get store0 :tasks) ({})
                       :: 'Map 'Number 'Dynamic
-                    text $ assert-type op-data 'String
+                    text $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data 'String
                     id $ shared/now-ms
                   assoc store0 :tasks $ assoc tasks id $ {} (:id id) (:text text) (:done? false)
                 :delete-task $ let
-                    tasks $ assert-type
+                    tasks $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                       option:unwrap-or (get store0 :tasks) ({})
                       :: 'Map 'Number 'Dynamic
-                    task-id $ assert-type op-data 'Number
+                    task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data 'Number
                   assoc store0 :tasks $ dissoc tasks task-id
                 :toggle-task $ let
-                    tasks $ assert-type
+                    tasks $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                       option:unwrap-or (get store0 :tasks) ({})
                       :: 'Map 'Number 'Dynamic
-                    task-id $ assert-type op-data 'Number
-                    done? $ assert-type
+                    task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data 'Number
+                    done? $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                       option:unwrap-or
                         get-in tasks $ [] task-id :done?
                         , false
                       , 'Bool
                   assoc store0 :tasks $ assoc-in tasks ([] task-id :done?) (not done?)
                 :edit-task $ let
-                    tasks $ assert-type
+                    tasks $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                       option:unwrap-or (get store0 :tasks) ({})
                       :: 'Map 'Number 'Dynamic
-                    data $ assert-type op-data $ :: 'List 'Dynamic
+                    data $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data (:: 'List 'Dynamic)
                     task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                       .unwrap $ first data
                       , 'Number
-                    text $ assert-type
+                    text $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                       option:unwrap-or (last data) |
                       , 'String
                   assoc store0 :tasks $ assoc-in tasks ([] task-id :text) text
@@ -1477,8 +1480,10 @@
             let
                 position $ let
                     p $ field options :position
-                  if (non-nil? p) (assert-type p 'quaternion.vector/V3) (v3 0 0 0)
-                speed $ assert-type
+                  if (non-nil? p)
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as p 'quaternion.vector/V3
+                    v3 0 0 0
+                speed $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   or (field options :speed) 1
                   , 'Number
                 text-color $ either (field options :text-color) 0xaaaaff
@@ -1493,8 +1498,8 @@
                   :event $ {}
                     :control $ fn (states delta elapse d!) (; println |delta delta)
                       let
-                          delta0 $ assert-type delta $ :: 'List 'Number
-                          elapse0 $ assert-type elapse 'Number
+                          delta0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as delta (:: 'List 'Number)
+                          elapse0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as elapse 'Number
                           next-pos $ &v+ position $ to-viewer-axis
                             * speed $ option:unwrap-or (nth delta0 0) 0
                             * speed $ option:unwrap-or (nth delta0 1) 0
@@ -1502,13 +1507,13 @@
                         on-change next-pos d!
                     :gamepad $ fn (info elapsed d!) (js/console.log info)
                       let
-                          elapsed0 $ assert-type elapsed 'Number
-                          rightward $ assert-type (field info :rightward) 'quaternion.vector/V3
-                          upward $ assert-type (field info :upward) 'quaternion.vector/V3
-                          forward-v3 $ assert-type (field info :forward) 'quaternion.vector/V3
-                          dx $ assert-type (field info :dx) 'Number
-                          dy $ assert-type (field info :dy) 'Number
-                          v2 $ assert-type (field info :v2) 'Number
+                          elapsed0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as elapsed 'Number
+                          rightward $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :rightward) 'quaternion.vector/V3
+                          upward $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :upward) 'quaternion.vector/V3
+                          forward-v3 $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :forward) 'quaternion.vector/V3
+                          dx $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :dx) 'Number
+                          dy $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :dy) 'Number
+                          v2 $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :v2) 'Number
                           speeding $ * speed $ if (field info :b) 8 1
                           forward $ * speeding elapsed0 v2 $ if (field info :a) -1 1
                           next-pos $ v+ position
@@ -1700,6 +1705,10 @@
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
+        'CameraControl $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defenum CameraControl (:shift 'Number) (:angle 'Number) (:move 'Number 'Number 'Number)
+          :examples $ []
+          :schema $ :: 'EnumDef
         'CoreBufferGeometryHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait CoreBufferGeometryHost
             .setFromPoints $ :: 'Fn $ {} (:return 'Dynamic)
@@ -1750,7 +1759,7 @@
                 v $ unsafe-coerce (new THREE/Vector3 x y z) ThreeVector3Host
                 camera $ unsafe-coerce @*global-camera ThreeCameraHost
               .!applyQuaternion v $ .-quaternion camera
-              :: :v3 (.-x v) (.-y v) (.-z v)
+              v3 (.-x v) (.-y v) (.-z v)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'quaternion.vector/V3)
             :args $ [] 'Number 'Number 'Number
@@ -1862,30 +1871,30 @@
                   , Bool
               match key
                 |ArrowDown $ if shift?
-                  tween-move-camera! $ [] :shift -1
-                  tween-move-camera! $ [] :move 0 -2 0
+                  tween-move-camera! $ CameraControl :shift -1
+                  tween-move-camera! $ CameraControl :move 0 -2 0
                 |ArrowUp $ if shift?
-                  tween-move-camera! $ [] :shift 1
-                  tween-move-camera! $ [] :move 0 2 0
-                |a $ tween-move-camera! $ [] :angle 0.04
-                |d $ tween-move-camera! $ [] :angle -0.04
-                |b $ tween-move-camera! $ [] :angle 1.653959 (; "|manual value for turn back")
+                  tween-move-camera! $ CameraControl :shift 1
+                  tween-move-camera! $ CameraControl :move 0 2 0
+                |a $ tween-move-camera! $ CameraControl :angle 0.04
+                |d $ tween-move-camera! $ CameraControl :angle -0.04
+                |b $ tween-move-camera! $ CameraControl :angle 1.653959 (; "|manual value for turn back")
                 |w $ &let (a @*viewer-angle)
-                  tween-move-camera! $ [] :move
+                  tween-move-camera! $ CameraControl :move
                     &* 4 $ cos a
                     , 0 $ &* -4 (sin a)
                 |s $ &let (a @*viewer-angle)
-                  tween-move-camera! $ [] :move
+                  tween-move-camera! $ CameraControl :move
                     &* -2 $ cos a
                     , 0 $ &* 2 (sin a)
                 |ArrowLeft $ &let
                   a $ &+ @*viewer-angle $ &/ &PI 2
-                  tween-move-camera! $ [] :move
+                  tween-move-camera! $ CameraControl :move
                     &* 1 $ cos a
                     , 0 $ &* -1 (sin a)
                 |ArrowRight $ &let
                   a $ &- @*viewer-angle $ &/ &PI 2
-                  tween-move-camera! $ [] :move
+                  tween-move-camera! $ CameraControl :move
                     &* 1 $ cos a
                     , 0 $ &* -1 (sin a)
                 _ &unit
@@ -2339,7 +2348,7 @@
                 _ $ println "|unknown camera control:" control
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'Dynamic
+            :args $ [] 'quatrefoil.core/CameraControl
             :features $ #{} :js-ffi
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.core
@@ -3385,6 +3394,7 @@
                   maybe-handler $ field (field target-el :event) :control
                 if (non-nil? maybe-handler) (maybe-handler move delta elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
               println "|no focused coord to control" @*focused-coord
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'Dynamic 'Number
@@ -3399,6 +3409,7 @@
                   maybe-handler $ field (field target-el :event) :gamepad
                 if (non-nil? maybe-handler) (maybe-handler info elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
               println "|no focused coord to control" @*focused-coord
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'Number
@@ -3483,9 +3494,11 @@
         'set-rotation! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn set-rotation! (object3d rotation)
             if (non-nil? rotation)
-              let[] (x y z) rotation $ .!set
-                ffi-object $ .-rotation $ ffi-object object3d
-                , x y z
+              let[] (x y z)
+                quatrefoil.util.core/require-decoded $ try-decode-map-as rotation $ :: 'List 'Number
+                .!set
+                  ffi-object $ .-rotation $ ffi-object object3d
+                  , x y z
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -3494,11 +3507,13 @@
         'set-scale! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn set-scale! (object scale)
             if (non-nil? scale)
-              let[] (x y z) scale $ .!set
-                ffi-object $ .-scale $ ffi-object object
-                scale-zero x
-                scale-zero y
-                scale-zero z
+              let[] (x y z)
+                quatrefoil.util.core/require-decoded $ try-decode-map-as scale $ :: 'List 'Number
+                .!set
+                  ffi-object $ .-scale $ ffi-object object
+                  scale-zero x
+                  scale-zero y
+                  scale-zero z
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
