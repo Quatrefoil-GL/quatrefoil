@@ -1699,9 +1699,9 @@
     'quatrefoil.core $ %{} 'FileEntry
       :defs $ {}
         '*tmp-changes $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defref *tmp-changes nil
+          :code $ quote $ defref *tmp-changes ([])
           :examples $ []
-          :schema $ :: 'Ref 'Dynamic
+          :schema $ :: 'Ref $ :: 'List 'Dynamic
         '>> $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn >> (states k)
             let
@@ -2343,9 +2343,7 @@
             if (non-nil? @*global-tree)
               let
                   collect! $ fn (x)
-                    reset! *tmp-changes $ conj
-                      assert-type @*tmp-changes $ :: 'List 'Dynamic
-                      , x
+                    reset! *tmp-changes $ conj @*tmp-changes x
                 reset! *tmp-changes $ []
                 diff-tree @*global-tree markup ([]) collect!
                 apply-changes @*tmp-changes
