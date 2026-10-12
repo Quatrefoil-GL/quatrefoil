@@ -1809,6 +1809,12 @@
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :writable $ #{} :name
           :schema $ :: 'Trait
+        'PerspectiveCameraHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait PerspectiveCameraHost (:aspect 'Number)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :aspect
+          :schema $ :: 'Trait
         'RendererXrHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait RendererXrHost (:xr 'quatrefoil.core/WebXRManagerHost)
           :examples $ []
@@ -2164,13 +2170,13 @@
               .!updateProjectionMatrix @*global-camera
               .!render @*global-renderer @*global-scene @*global-camera
             , &unit (; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight)
-              .!addEventListener (ffi-object canvas-el) |click $ fn (event) (on-canvas-click event)
-              .!addEventListener (ffi-object js/window) |resize $ fn (event)
+              js-ffi.browser/element-add-event-listener! (js-ffi.browser/element-host canvas-el) |click $ fn (event) (on-canvas-click event)
+              js-ffi.browser/add-event-listener! |resize $ fn (event)
                 js/console.log |resize
                   .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
                   .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
                 set!
-                  .-aspect $ ffi-object @*global-camera
+                  .-aspect $ js-cast @*global-camera 'quatrefoil.core/PerspectiveCameraHost
                   /
                     js-number $ .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
                     js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
