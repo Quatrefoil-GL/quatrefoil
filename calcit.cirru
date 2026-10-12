@@ -1705,7 +1705,9 @@
         '>> $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn >> (states k)
             let
-                parent-cursor $ either (field states :cursor) ([])
+                parent-cursor $ quatrefoil.util.core/require-decoded $ try-decode-map-as
+                  either (field states :cursor) ([])
+                  :: 'List 'Tag
                 branch $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   option:unwrap-or (get states k) ({})
                   :: 'Map 'Tag 'Dynamic
@@ -2604,6 +2606,13 @@
           :code $ quote $ defref *focused-coord nil
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
+        'AxisSetterHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait AxisSetterHost
+            .set $ :: 'Fn $ {} (:return 'AxisSetterHost)
+              :args $ [] 'AxisSetterHost 'Number 'Number 'Number
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
         'BufferGeometryHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait BufferGeometryHost
             .setFromPoints $ :: 'Fn $ {} (:return 'Dynamic)
@@ -2633,6 +2642,12 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
+        'MaterialSideHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait MaterialSideHost (:side 'Number)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :side
+          :schema $ :: 'Trait
         'MeshLineGeometryHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait MeshLineGeometryHost
             .setPoints $ :: 'Fn $ {} (:return 'Unit)
@@ -2655,6 +2670,11 @@
               :args $ [] 'ThreeObjectHost 'Number 'Number 'Number
             .add $ :: 'Fn $ {} (:return 'Unit)
               :args $ [] 'ThreeObjectHost 'Dynamic
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
+        'TransformHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait TransformHost (:position 'AxisSetterHost) (:rotation 'AxisSetterHost) (:scale 'AxisSetterHost)
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
@@ -2876,8 +2896,8 @@
                 _ $ do (js/console.warn "|Unknown material:" material)
                   new THREE/LineBasicMaterial $ to-js-data $ dissoc material :kind
               set!
-                .-side $ ffi-object m
-                , THREE/DoubleSide
+                .-side $ js-cast m 'quatrefoil.dsl.object3d-dom/MaterialSideHost
+                quatrefoil.util.core/require-decoded $ try-decode-map-as THREE/DoubleSide 'Number
               , m
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
@@ -3448,7 +3468,9 @@
             :features $ #{} :js-ffi
         'push-array! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn push-array! (xs x)
-            .push (js-cast xs 'quatrefoil.dsl.object3d-dom/JsArrayHost) x
+            quatrefoil.util.core/require-decoded $ try-decode-map-as
+              .push (js-cast xs 'quatrefoil.dsl.object3d-dom/JsArrayHost) x
+              , 'Number
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Number)
             :args $ [] 'Dynamic 'Dynamic
@@ -3510,16 +3532,23 @@
           :code $ quote $ defn set-position! (object position)
             cond
                 enum? position
-                match position
+                match
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as position 'quaternion.vector/V3
                   (:v3 x y z)
-                    .!set
-                      ffi-object $ .-position $ ffi-object object
+                    .set
+                      js-cast
+                        .-position $ js-cast object 'quatrefoil.dsl.object3d-dom/TransformHost
+                        , 'quatrefoil.dsl.object3d-dom/AxisSetterHost
                       , x y z
                   _ $ raise |unknown-position-expected-vector
               (list? position)
-                let[] (x y z) position $ .!set
-                  ffi-object $ .-position $ ffi-object object
-                  , x y z
+                let[] (x y z)
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as position $ :: 'List 'Number
+                  .set
+                    js-cast
+                      .-position $ js-cast object 'quatrefoil.dsl.object3d-dom/TransformHost
+                      , 'quatrefoil.dsl.object3d-dom/AxisSetterHost
+                    , x y z
               (nil? position) nil
               true $ raise |unknown-position
             , &unit
@@ -3532,8 +3561,10 @@
             if (non-nil? rotation)
               let[] (x y z)
                 quatrefoil.util.core/require-decoded $ try-decode-map-as rotation $ :: 'List 'Number
-                .!set
-                  ffi-object $ .-rotation $ ffi-object object3d
+                .set
+                  js-cast
+                    .-rotation $ js-cast object3d 'quatrefoil.dsl.object3d-dom/TransformHost
+                    , 'quatrefoil.dsl.object3d-dom/AxisSetterHost
                   , x y z
             , &unit
           :examples $ []
@@ -3545,8 +3576,10 @@
             if (non-nil? scale)
               let[] (x y z)
                 quatrefoil.util.core/require-decoded $ try-decode-map-as scale $ :: 'List 'Number
-                .!set
-                  ffi-object $ .-scale $ ffi-object object
+                .set
+                  js-cast
+                    .-scale $ js-cast object 'quatrefoil.dsl.object3d-dom/TransformHost
+                    , 'quatrefoil.dsl.object3d-dom/AxisSetterHost
                   scale-zero x
                   scale-zero y
                   scale-zero z
