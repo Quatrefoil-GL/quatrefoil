@@ -1750,6 +1750,11 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
+        'RendererXrHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait RendererXrHost (:xr 'quatrefoil.core/WebXRManagerHost)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
         'ThreeCameraHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ThreeCameraHost (:quaternion 'Dynamic)
           :examples $ []
@@ -1778,6 +1783,20 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :writable $ #{} :x :y :z
+          :schema $ :: 'Trait
+        'WebXRManagerHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait WebXRManagerHost (:enabled 'Bool)
+            .getController $ :: 'Fn $ {} (:return 'JsObject)
+              :args $ [] 'quatrefoil.core/WebXRManagerHost 'Number
+            .getControllerGrip $ :: 'Fn $ {} (:return 'JsObject)
+              :args $ [] 'quatrefoil.core/WebXRManagerHost 'Number
+            .getHand $ :: 'Fn $ {} (:return 'JsObject)
+              :args $ [] 'quatrefoil.core/WebXRManagerHost 'Number
+            .getSession $ :: 'Fn $ {} (:return 'Dynamic)
+              :args $ [] 'quatrefoil.core/WebXRManagerHost
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :enabled
           :schema $ :: 'Trait
         'camera-direction-for $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn camera-direction-for (x y z)
@@ -1960,9 +1979,9 @@
         'init-controls! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn init-controls! ()
             let
-                renderer $ ffi-object @*global-renderer
+                renderer $ js-cast @*global-renderer 'quatrefoil.core/RendererXrHost
                 scene $ ffi-object @*global-scene
-                xr $ ffi-object $ .-xr renderer
+                xr $ .-xr renderer
                 ctrl-0 $ ffi-object $ .!getController xr 0
                 ctrl-1 $ ffi-object $ .!getController xr 1
                 ctrl-grip-0 $ ffi-object $ .!getControllerGrip xr 0
@@ -2003,7 +2022,7 @@
           :code $ quote $ defn init-renderer! (canvas-el options) (.!init RectAreaLightUniformsLib)
             reset! *global-renderer $ new THREE/WebGLRenderer $ js-object (:canvas canvas-el) (:antialias true)
             set!
-              .-enabled $ ffi-object $ .-xr (ffi-object @*global-renderer)
+              .-enabled $ .-xr $ js-cast @*global-renderer 'quatrefoil.core/RendererXrHost
               , true
             ; if (:shadow-map? options)
               &let
@@ -2030,15 +2049,14 @@
               js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
             .!setAnimationLoop @*global-renderer $ fn (t & aa)
               let
-                  t0 $ assert-type t 'Number
+                  t0 $ js-number t
                   prev-t @*global-time
                 reset! *global-time t0
                 if
-                  js-present? $ .!getSession $ ffi-object
-                    .-xr $ ffi-object @*global-renderer
+                  js-present? $ .!getSession $ .-xr (js-cast @*global-renderer 'quatrefoil.core/RendererXrHost)
                   let
                       session $ ffi-object $ .!getSession
-                        ffi-object $ .-xr $ ffi-object @*global-renderer
+                        .-xr $ js-cast @*global-renderer 'quatrefoil.core/RendererXrHost
                       p0 $ -> session .-inputSources .?-0
                       p1 $ -> session .-inputSources .?-1
                     let
@@ -2200,10 +2218,10 @@
                       :dx $ js-number $ .-2 axes
                       :dy $ js-number $ .-3 axes
                     controller $ ffi-object $ .!getController
-                      ffi-object $ .-xr $ ffi-object @*global-renderer
+                      .-xr $ js-cast @*global-renderer 'quatrefoil.core/RendererXrHost
                       , 0
                     grip $ ffi-object $ .!getControllerGrip
-                      ffi-object $ .-xr $ ffi-object @*global-renderer
+                      .-xr $ js-cast @*global-renderer 'quatrefoil.core/RendererXrHost
                       , 0
                     rot $ ffi-object $ .-rotation controller
                     rotation $ :: :v3
