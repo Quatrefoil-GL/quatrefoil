@@ -1731,6 +1731,24 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
+        'ControllerRayHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ControllerRayHost (:matrixWorld 'JsObject)
+            .addEventListener $ :: 'Fn $ {} (:return 'Unit)
+              :args $ [] 'quatrefoil.core/ControllerRayHost 'String $ :: 'Fn
+                {} (:return 'Unit)
+                  :args $ [] 'JsObject
+          :examples $ []
+          :ffi $ {} (:kind :external-object) (:platform :browser)
+          :schema $ :: 'Trait
+        'ControllerRaycasterHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ControllerRaycasterHost
+            .setFromXRController $ :: 'Fn $ {} (:return 'quatrefoil.core/ControllerRaycasterHost)
+              :args $ [] 'quatrefoil.core/ControllerRaycasterHost 'quatrefoil.core/ControllerRayHost
+            .intersectObjects $ :: 'Fn $ {} (:return 'JsObject)
+              :args $ [] 'quatrefoil.core/ControllerRaycasterHost 'JsObject
+          :examples $ []
+          :ffi $ {} (:kind :external-object) (:platform :browser)
+          :schema $ :: 'Trait
         'CoreBufferGeometryHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait CoreBufferGeometryHost
             .setFromPoints $ :: 'Fn $ {} (:return 'Dynamic)
@@ -2142,19 +2160,9 @@
         'listen-on-controller! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn listen-on-controller! (controller)
             let
-                temp-matrix $ ffi-object $ new THREE/Matrix4
-                raycaster $ ffi-object $ new THREE/Raycaster
-              .!addEventListener (ffi-object controller) |selectstart $ fn (event) (.!identity temp-matrix)
-                .!extractRotation temp-matrix $ .-matrixWorld $ ffi-object controller
-                .!setFromMatrixPosition
-                  ffi-object $ .-origin $ ffi-object (.-ray raycaster)
-                  .-matrixWorld $ ffi-object controller
-                .!set
-                  ffi-object $ .-direction $ ffi-object (.-ray raycaster)
-                  , 0 0 -1
-                .!applyMatrix4
-                  ffi-object $ .-direction $ ffi-object (.-ray raycaster)
-                  , temp-matrix
+                controller-host $ js-cast controller $ quote quatrefoil.core/ControllerRayHost
+                raycaster $ js-cast (new THREE/Raycaster) (quote quatrefoil.core/ControllerRaycasterHost)
+              .!addEventListener controller-host |selectstart $ fn (event) (.!setFromXRController raycaster controller-host)
                 let
                     objects $ let
                         children $ js-array
@@ -2172,6 +2180,7 @@
                     call-event-on-target!
                       ffi-object $ .-0 $ ffi-object intersects
                       , event
+                , &unit
               , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
