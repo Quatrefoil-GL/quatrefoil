@@ -1737,6 +1737,7 @@
               :args $ [] 'quatrefoil.core/ControllerRayHost 'String $ :: 'Fn
                 {} (:return 'Unit)
                   :args $ [] 'JsObject
+            :rotation $ quote quatrefoil.core/VectorCoordinatesHost
           :examples $ []
           :ffi $ {} (:kind :external-object) (:platform :browser)
           :schema $ :: 'Trait
@@ -1762,6 +1763,21 @@
               :args $ [] 'CoreJsArrayHost 'Dynamic
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
+        'GamepadButtonHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait GamepadButtonHost (:value 'Number)
+          :examples $ []
+          :ffi $ {} (:kind :external-object) (:platform :browser)
+          :schema $ :: 'Trait
+        'GamepadCollectionHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait GamepadCollectionHost (:length 'Number)
+          :examples $ []
+          :ffi $ {} (:kind :external-object) (:platform :browser)
+          :schema $ :: 'Trait
+        'GamepadHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait GamepadHost (:axes 'quatrefoil.core/GamepadCollectionHost) (:buttons 'quatrefoil.core/GamepadCollectionHost)
+          :examples $ []
+          :ffi $ {} (:kind :external-object) (:platform :browser)
           :schema $ :: 'Trait
         'HandModelFactoryHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait HandModelFactoryHost
@@ -1841,6 +1857,12 @@
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :writable $ #{} :enabled
           :schema $ :: 'Trait
+        'XRInputSourceHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait XRInputSourceHost (:handedness 'String)
+            :gamepad $ :: 'JsNullish 'quatrefoil.core/GamepadHost
+          :examples $ []
+          :ffi $ {} (:kind :external-object) (:platform :browser)
+          :schema $ :: 'Trait
         'XRSessionHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait XRSessionHost (:inputSources 'JsObject)
           :examples $ []
@@ -1892,6 +1914,20 @@
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
+        'gamepad-axis-value $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn gamepad-axis-value (axes index)
+            js-number $ aget axes index
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'Number)
+            :args $ [] 'quatrefoil.core/GamepadCollectionHost 'Number
+            :features $ #{} :js-ffi
+        'gamepad-button-value $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn gamepad-button-value (buttons index)
+            js-number $ .-value $ js-cast (aget buttons index) 'quatrefoil.core/GamepadButtonHost
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'Number)
+            :args $ [] 'quatrefoil.core/GamepadCollectionHost 'Number
+            :features $ #{} :js-ffi
         'half-pi $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def half-pi (* 0.5 &PI)
           :examples $ []
@@ -2240,62 +2276,57 @@
         'read-input $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn read-input (p0)
             let
-                gamepad $ ffi-object $ .-gamepad (ffi-object p0)
-                axes $ ffi-object $ .-axes gamepad
-                buttons $ ffi-object $ .-buttons gamepad
-              if
-                >
-                  js-number $ .-length $ ffi-object buttons
-                  , 5
+                input-source $ js-cast p0 $ quote quatrefoil.core/XRInputSourceHost
+                maybe-gamepad $ .-gamepad input-source
+              if (js-present? maybe-gamepad)
                 let
-                    data $ {}
-                      :v1 $ js-number $ .-value
-                        ffi-object $ .-0 buttons
-                      :v2 $ js-number $ .-value
-                        ffi-object $ .-1 buttons
-                      :a $ js-number $ .-value
-                        ffi-object $ .-4 buttons
-                      :b $ js-number $ .-value
-                        ffi-object $ .-5 buttons
-                      :dx $ js-number $ .-2 axes
-                      :dy $ js-number $ .-3 axes
-                    controller $ ffi-object $ .!getController
-                      .-xr $ js-cast @*global-renderer 'quatrefoil.core/RendererXrHost
-                      , 0
-                    grip $ ffi-object $ .!getControllerGrip
-                      .-xr $ js-cast @*global-renderer 'quatrefoil.core/RendererXrHost
-                      , 0
-                    rot $ ffi-object $ .-rotation controller
-                    rotation $ :: :v3
-                      js-number $ .-x rot
-                      js-number $ .-y rot
-                      js-number $ .-z rot
-                  if (not= data data0)
-                    []
-                      turn-tag $ unsafe-coerce
-                        .-handedness $ ffi-object p0
-                        , String
-                      {}
-                        :v1 $ js-number $ .-value
-                          ffi-object $ .-0 buttons
-                        :v2 $ js-number $ .-value
-                          ffi-object $ .-1 buttons
-                        :a $ >
-                          js-number $ .-value $ ffi-object (.-4 buttons)
-                          , 0.5
-                        :b $ >
-                          js-number $ .-value $ ffi-object (.-5 buttons)
-                          , 0.5
-                        :dx $ js-number $ .-2 axes
-                        :dy $ js-number $ .-3 axes
-                        :rotation rotation
-                        :forward $ camera-direction-for 0 0 -1
-                        :upward $ camera-direction-for 0 1 0
-                        :rightward $ camera-direction-for 1 0 0
+                    gamepad $ js-cast maybe-gamepad $ quote quatrefoil.core/GamepadHost
+                    axes $ js-cast (.-axes gamepad) (quote quatrefoil.core/GamepadCollectionHost)
+                    buttons $ js-cast (.-buttons gamepad) (quote quatrefoil.core/GamepadCollectionHost)
+                  if
+                    >
+                      js-number $ .-length buttons
+                      , 5
+                    let
+                        data $ {}
+                          :v1 $ gamepad-button-value buttons 0
+                          :v2 $ gamepad-button-value buttons 1
+                          :a $ gamepad-button-value buttons 4
+                          :b $ gamepad-button-value buttons 5
+                          :dx $ gamepad-axis-value axes 2
+                          :dy $ gamepad-axis-value axes 3
+                        controller $ js-cast
+                          .!getController
+                            .-xr $ js-cast @*global-renderer 'quatrefoil.core/RendererXrHost
+                            , 0
+                          , 'quatrefoil.core/ControllerRayHost
+                        grip $ ffi-object $ .!getControllerGrip
+                          .-xr $ js-cast @*global-renderer 'quatrefoil.core/RendererXrHost
+                          , 0
+                        rot $ js-cast (.-rotation controller) 'quatrefoil.core/VectorCoordinatesHost
+                        rotation $ :: :v3
+                          js-number $ .-x rot
+                          js-number $ .-y rot
+                          js-number $ .-z rot
+                      if (not= data data0)
+                        []
+                          turn-tag $ quatrefoil.util.core/require-decoded $ try-decode-map-as (.-handedness input-source) (quote String)
+                          {}
+                            :v1 $ gamepad-button-value buttons 0
+                            :v2 $ gamepad-button-value buttons 1
+                            :a $ > (gamepad-button-value buttons 4) 0.5
+                            :b $ > (gamepad-button-value buttons 5) 0.5
+                            :dx $ gamepad-axis-value axes 2
+                            :dy $ gamepad-axis-value axes 3
+                            :rotation rotation
+                            :forward $ camera-direction-for 0 0 -1
+                            :upward $ camera-direction-for 0 1 0
+                            :rightward $ camera-direction-for 1 0 0
+                    , nil
                 , nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
-            :args $ [] 'Dynamic
+            :args $ [] 'JsObject
             :features $ #{} :js-ffi
         'refine-strength $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn refine-strength (x)
