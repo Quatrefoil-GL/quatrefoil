@@ -705,6 +705,14 @@
             quatrefoil.core :refer $ defcomp hslx hsluvx
     'quatrefoil.app.comp.quat-tree $ %{} 'FileEntry
       :defs $ {}
+        'TreeLine $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defstruct TreeLine (:from 'quaternion.core/Quaternion) (:to 'quaternion.core/Quaternion) (:name 'Tag) (:line 'quaternion.core/Quaternion)
+          :examples $ []
+          :schema $ :: 'StructDef
+        'TreeTransform $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defstruct TreeTransform (:name 'Tag) (:vector 'quaternion.core/Quaternion)
+          :examples $ []
+          :schema $ :: 'StructDef
         'comp-quat-tree $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-quat-tree ()
             let
@@ -718,9 +726,8 @@
                 group ({}) & $ -> lines $ map
                   fn (line)
                     let
-                        from $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field line :from) 'quaternion.core/Quaternion
-                        to $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field line :to) 'quaternion.core/Quaternion
-                        l1 $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field line :line) 'quaternion.core/Quaternion
+                        from $ :from line
+                        to $ :to line
                         v $ &q- to from
                         size $ q-length v
                       tube $ {} (:points-fn straight-fn)
@@ -729,7 +736,7 @@
                         :tubular-segments 4
                         :radial-segments 4
                         :position $ v3 -10 0 0
-                        :material $ assoc tube-material :color $ pick-color (field line :name)
+                        :material $ assoc tube-material :color $ pick-color (:name line)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ []
@@ -744,27 +751,19 @@
           :code $ quote $ defn generate-lines (base l0 level name)
             let
                 line-to $ &q+ base l0
-              concat
-                assert-type
-                  [] $ {} (:from base) (:to line-to) (:name name) (:line l0)
-                  :: 'List 'Dynamic
-                assert-type
-                  if (> level 0)
-                    foldl transformers
-                      assert-type ([]) (:: 'List 'Dynamic)
-                      fn (acc info)
-                        let
-                            trans $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :vector) 'quaternion.core/Quaternion
-                            name $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :name) 'Tag
-                          concat
-                            quatrefoil.util.core/require-decoded $ try-decode-map-as acc $ :: 'List 'Dynamic
-                            generate-lines line-to (&q* l0 trans) (dec level) name
-                    assert-type ([]) (:: 'List 'Dynamic)
-                  :: 'List 'Dynamic
+                line $ %{} TreeLine (:from base) (:to line-to) (:name name) (:line l0)
+              if (> level 0)
+                concat ([] line)
+                  mapcat transformers $ fn (info)
+                    generate-lines line-to
+                      &q* l0 $ :vector info
+                      dec level
+                      :name info
+                [] line
           :examples $ []
           :schema $ :: 'Fn $ {}
             :args $ [] 'quaternion.core/Quaternion 'quaternion.core/Quaternion 'Number 'Tag
-            :return $ :: 'List 'Dynamic
+            :return $ :: 'List 'quatrefoil.app.comp.quat-tree/TreeLine
         'leaf-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def leaf-material
             {} (:kind :mesh-standard) (:color 0x66cc55) (:opacity 0.5) (:transparent true)
@@ -802,14 +801,14 @@
         'transformers $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def transformers
             []
-              {} (:name :a)
+              %{} TreeTransform (:name :a)
                 :vector $ quaternion 0.7 0.3 0.3 0.1
-              {} (:name :b)
+              %{} TreeTransform (:name :b)
                 :vector $ quaternion 0.7 0.2 -0.3 -0.43
-              {} (:name :c)
+              %{} TreeTransform (:name :c)
                 :vector $ quaternion 0.4 -0.44 0.12 0.33
           :examples $ []
-          :schema $ :: 'List 'Dynamic
+          :schema $ :: 'List 'quatrefoil.app.comp.quat-tree/TreeTransform
         'tube-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def tube-material
             {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
