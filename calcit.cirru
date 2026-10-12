@@ -3879,9 +3879,11 @@
         'add-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn add-children (target coord op-data)
             &doseq (entry op-data)
-              let[] (k tree)
+              let[] (raw-key tree)
                 quatrefoil.util.core/require-decoded $ try-decode-map-as entry $ :: 'List 'Dynamic
-                .!addBy target k $ build-tree (conj coord k) tree
+                let
+                    k $ quatrefoil.util.core/require-decoded $ try-decode-map-as raw-key 'Number
+                  .!addBy target k $ build-tree (conj coord k) tree
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic (:: 'List 'Number) 'Dynamic
