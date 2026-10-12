@@ -328,38 +328,28 @@
           :examples $ []
           :schema $ :: 'Fn $ {}
             :args $ [] 'Number
-            :return $ :: 'List 'Dynamic
+            :return $ :: 'List $ :: 'List 'Number
         'range-3d $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn range-3d (n)
-            foldl
+            ->
               range
                 inc $ negate n
                 , n
-              assert-type ([]) (:: 'List 'Dynamic)
-              fn (acc i)
-                concat
-                  assert-type acc $ :: 'List 'Dynamic
-                  assert-type
-                    foldl
+              mapcat $ fn (i)
+                ->
+                  range
+                    inc $ negate n
+                    , n
+                  mapcat $ fn (j)
+                    ->
                       range
                         inc $ negate n
                         , n
-                      assert-type ([]) (:: 'List 'Dynamic)
-                      fn (acc2 j)
-                        concat
-                          assert-type acc2 $ :: 'List 'Dynamic
-                          assert-type
-                            ->
-                              range
-                                inc $ negate n
-                                , n
-                              map $ fn (k) ([] i j k)
-                            :: 'List 'Dynamic
-                    :: 'List 'Dynamic
+                      map $ fn (k) ([] i j k)
           :examples $ []
           :schema $ :: 'Fn $ {}
             :args $ [] 'Number
-            :return $ :: 'List 'Dynamic
+            :return $ :: 'List $ :: 'List 'Number
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.comp.container
           :require
@@ -2343,13 +2333,18 @@
             if (non-nil? @*global-tree)
               let
                   collect! $ fn (x)
+                    hint-fn $ {}
+                      :args $ [] 'Dynamic
+                      :return 'Unit
                     reset! *tmp-changes $ conj @*tmp-changes x
+                    , &unit
                 reset! *tmp-changes $ []
                 diff-tree @*global-tree markup ([]) collect!
                 apply-changes @*tmp-changes
               build-tree ([]) (purify-tree markup)
             reset! *global-tree markup
             ; .!render @*global-renderer @*global-scene @*global-camera
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'Dynamic
