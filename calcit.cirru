@@ -1542,7 +1542,9 @@
                 {} $ :position $ field options :position
                 sphere $ {} (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0)
                   :radius $ &*
-                    or (field options :radius) 1
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as
+                      or (field options :radius) 1
+                      , 'Number
                     if value 1 0.8
                   :material $ {} (:kind :mesh-lambert) (:color color) (:transparent true)
                     :opacity $ if value
