@@ -2772,6 +2772,12 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
+        'LightShadowHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait LightShadowHost (:bias 'Number)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :bias
+          :schema $ :: 'Trait
         'MaterialSideHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait MaterialSideHost (:side 'Number)
           :examples $ []
@@ -2791,7 +2797,8 @@
             :coord $ :: 'JsNullish $ :: 'List 'Number
             :event $ :: 'JsNullish 'Dynamic
           :examples $ []
-          :ffi $ {} (:kind :external-object) (:platform :browser)
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :coord :event
           :schema $ :: 'Trait
         'RaycasterHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait RaycasterHost
@@ -2807,6 +2814,11 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :writable $ #{} :castShadow :receiveShadow
+          :schema $ :: 'Trait
+        'ShadowLightHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ShadowLightHost (:shadow 'quatrefoil.dsl.object3d-dom/LightShadowHost)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
         'ThreeObjectHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ThreeObjectHost
@@ -2888,6 +2900,7 @@
             let
                 geometry $ new THREE/BoxGeometry (field params :width) (field params :height) (field params :depth)
                 object3d $ new THREE/Mesh geometry $ create-material material
+                metadata-object $ unsafe-coerce object3d 'quatrefoil.dsl.object3d-dom/ObjectMetadataHost
               set-position! object3d position
               set-rotation! object3d rotation
               set-scale! object3d scale
@@ -2897,12 +2910,8 @@
               set!
                 .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
-              set!
-                .-coord $ ffi-object object3d
-                , coord
-              set!
-                .-event $ ffi-object object3d
-                , event
+              set! (.-coord metadata-object) coord
+              set! (.-event metadata-object) event
               , object3d
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
@@ -2954,9 +2963,11 @@
               set!
                 .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
-              ->
-                ffi-object $ .-shadow $ ffi-object object3d
-                , .-bias $ set! -0.0005
+              set!
+                .-bias $ js-cast
+                  .-shadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowLightHost
+                  , 'quatrefoil.dsl.object3d-dom/LightShadowHost
+                , -0.0005
               set-position! object3d position
               js/console.log "|directional light:" object3d
               , object3d
@@ -3138,9 +3149,11 @@
                 .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
-              ->
-                ffi-object $ .-shadow $ ffi-object object3d
-                , .-bias $ set! -0.005
+              set!
+                .-bias $ js-cast
+                  .-shadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowLightHost
+                  , 'quatrefoil.dsl.object3d-dom/LightShadowHost
+                , -0.005
               ; js/console.log |Light: object3d
               , object3d
           :examples $ []
@@ -3324,21 +3337,18 @@
                   or (field params :width-segments) 12
                   or (field params :height-segments) 12
                 object3d $ new THREE/Mesh geometry $ create-material material
+                metadata-object $ unsafe-coerce object3d 'quatrefoil.dsl.object3d-dom/ObjectMetadataHost
               set-position! object3d position
               set-rotation! object3d rotation
               set-scale! object3d scale
-              set!
-                .-coord $ ffi-object object3d
-                , coord
+              set! (.-coord metadata-object) coord
               set!
                 .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
                 .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
-              set!
-                .-event $ ffi-object object3d
-                , event
+              set! (.-event metadata-object) event
               ; js/console.log |Sphere: object3d
               , object3d
           :examples $ []
@@ -3383,9 +3393,11 @@
               set!
                 .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
-              ->
-                ffi-object $ .-shadow $ ffi-object object3d
-                , .-bias $ set! -0.0005
+              set!
+                .-bias $ js-cast
+                  .-shadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowLightHost
+                  , 'quatrefoil.dsl.object3d-dom/LightShadowHost
+                , -0.0005
               set-position! object3d position
               js/console.log |Light: object3d
               , object3d
