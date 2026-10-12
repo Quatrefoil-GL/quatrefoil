@@ -201,9 +201,7 @@
                   {}
                     :scale $ [] 0.01 0.01 0.01
                     :position $ [] 0 1.2 -0.8
-                  case-default tab
-                    comp-portal $ fn (next d!)
-                      d! cursor $ assoc state :tab next
+                  match tab
                     :portal $ comp-portal $ fn (next d!)
                       d! cursor $ assoc state :tab next
                     :todolist $ comp-todolist $ quatrefoil.util.core/require-decoded
@@ -220,6 +218,8 @@
                     :shader $ comp-shader
                     :gltf $ comp-gltf
                     :sphere-grid $ comp-sphere-grid
+                    _ $ comp-portal $ fn (next d!)
+                      d! cursor $ assoc state :tab next
                   if (not= tab :portal)
                     comp-back $ fn (d!)
                       d! cursor $ assoc state :tab :portal
@@ -315,9 +315,15 @@
             :args $ [] 'Dynamic 'Dynamic
         'range-2d $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn range-2d (n)
-            -> (range-bothway n)
+            ->
+              range
+                inc $ negate n
+                , n
               mapcat $ fn (i)
-                -> (range-bothway n)
+                ->
+                  range
+                    inc $ negate n
+                    , n
                   map $ fn (j) ([] i j)
           :examples $ []
           :schema $ :: 'Fn $ {}
@@ -325,19 +331,28 @@
             :return $ :: 'List 'Dynamic
         'range-3d $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn range-3d (n)
-            foldl (range-bothway n)
+            foldl
+              range
+                inc $ negate n
+                , n
               assert-type ([]) (:: 'List 'Dynamic)
               fn (acc i)
                 concat
                   assert-type acc $ :: 'List 'Dynamic
                   assert-type
-                    foldl (range-bothway n)
+                    foldl
+                      range
+                        inc $ negate n
+                        , n
                       assert-type ([]) (:: 'List 'Dynamic)
                       fn (acc2 j)
                         concat
                           assert-type acc2 $ :: 'List 'Dynamic
                           assert-type
-                            -> (range-bothway n)
+                            ->
+                              range
+                                inc $ negate n
+                                , n
                               map $ fn (k) ([] i j k)
                             :: 'List 'Dynamic
                     :: 'List 'Dynamic
@@ -764,7 +779,7 @@
           :schema $ :: 'Dynamic
         'pick-color $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn pick-color (name)
-            case-default name 0xffffff (:a 0xbbaaff) (:b 0x88bbff) (:c 0x77ccaa)
+            match name (:a 0xbbaaff) (:b 0x88bbff) (:c 0x77ccaa) (_ 0xffffff)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Number)
             :args $ [] 'Tag
@@ -1309,7 +1324,7 @@
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
             if (non-nil? build-errors) (hud! |error build-errors)
-              do (hud! |ok~ nil) (clear-cache!) (clear-control-loop!) (handle-control-events) (remove-watch *store :changes)
+              do (hud! |ok~ nil) (clear-cache!) (clear-control-loop!) (handle-control-events) (remove-watch! *store :changes)
                 add-watch! *store :changes $ fn (store prev) (render-app!)
                 render-app!
                 set! js/window.onkeydown handle-key-event
@@ -1391,7 +1406,7 @@
           :code $ quote $ defn updater (store op op-data)
             let
                 store0 $ assert-type store $ :: 'Map 'Tag 'Dynamic
-              case-default op store0
+              match op
                 :states $ update-states store0 op-data
                 :add-task $ let
                     tasks $ assert-type
@@ -1429,6 +1444,7 @@
                       option:unwrap-or (last data) |
                       , 'String
                   assoc store0 :tasks $ assoc-in tasks ([] task-id :text) text
+                _ store0
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Tag 'Dynamic
@@ -1446,12 +1462,12 @@
               :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
               :event $ {} $ :control
                 fn (states delta elapse d!) (; println |delta delta)
-                  let-sugar
-                        [] x0 y0
-                        option:unwrap-or (get state field) ([] 0 0)
-                      dx $ * speed elapse $ option:unwrap-or (nth delta 0) 0
-                      dy $ * speed elapse $ option:unwrap-or (nth delta 1) 0
-                    d! cursor $ assoc state field $ [] (+ x0 dx) (+ y0 dy)
+                  let[] (x0 y0)
+                    option:unwrap-or (get state field) ([] 0 0)
+                    let
+                        dx $ * speed elapse $ option:unwrap-or (nth delta 0) 0
+                        dy $ * speed elapse $ option:unwrap-or (nth delta 1) 0
+                      d! cursor $ assoc state field $ [] (+ x0 dx) (+ y0 dy)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic 'Dynamic 'Dynamic 'Number 'Number
@@ -1614,14 +1630,14 @@
                   :material $ {} (:kind :mesh-lambert) (:color color) (:opacity 0.7) (:transparent true)
                   :event $ {}
                     :control $ fn (states delta elapse d!) (; println |delta delta)
-                      let-sugar
-                            [] x0 y0
-                            assert-type v $ :: 'List 'Number
-                          dx $ * speed elapse $ option:unwrap-or (nth delta 0) 0
-                          dy $ * speed elapse $ option:unwrap-or (nth delta 1) 0
-                        on-change
-                          [] (+ x0 dx) (+ y0 dy)
-                          , d!
+                      let[] (x0 y0)
+                        assert-type v $ :: 'List 'Number
+                        let
+                            dx $ * speed elapse $ option:unwrap-or (nth delta 0) 0
+                            dy $ * speed elapse $ option:unwrap-or (nth delta 1) 0
+                          on-change
+                            [] (+ x0 dx) (+ y0 dy)
+                            , d!
                     :gamepad $ fn (info elapsed d!)
                       let
                           v0 $ assert-type v $ :: 'List 'Number
@@ -1756,9 +1772,7 @@
             if (&list:empty? body)
               quasiquote $ echo "|[Warn] invalid component body for" (quote ~comp-name) (quote ~params)
               quasiquote $ defn ~comp-name (~ params)
-                %{} Component
-                  :name $ quote ~comp-name
-                  :tree $ &let () ~@body
+                quatrefoil.schema/Component :name (quote ~comp-name) :tree $ &let () ~@body
           :examples $ []
           :schema $ :: 'Macro $ {} (:rest 'Syntax)
             :capabilities $ #{}
@@ -1846,7 +1860,7 @@
                 shift? $ unsafe-coerce
                   .-shiftKey $ ffi-object event
                   , Bool
-              case-default key &unit
+              match key
                 |ArrowDown $ if shift?
                   tween-move-camera! $ [] :shift -1
                   tween-move-camera! $ [] :move 0 -2 0
@@ -1874,6 +1888,7 @@
                   tween-move-camera! $ [] :move
                     &* 1 $ cos a
                     , 0 $ &* -1 (sin a)
+                _ &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic
@@ -2036,7 +2051,8 @@
             :args $ [] 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
         'js-number $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn js-number (value) (unsafe-coerce value Number)
+          :code $ quote $ defn js-number (value)
+            quatrefoil.util.core/require-decoded $ try-decode-map-as value 'Number
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Number)
             :args $ [] 'Dynamic
@@ -2255,13 +2271,12 @@
                     * $ js-number $ js/Math.cos (+ v-angle half-pi)
                     * $ js-number $ js/Math.sin angle
                     negate
-                from-x $ wo-log $ v3
+                from-x $ v3
                   -> x $ * $ js-number
                     js/Math.cos $ - angle half-pi
-                  , 0
-                    -> x
-                      * $ js-number $ js/Math.sin (- angle half-pi)
-                      negate
+                  , 0 $ -> x
+                    * $ js-number $ js/Math.sin (- angle half-pi)
+                    negate
                 from-z $ v3
                   -> z (negate)
                     * $ js-number $ js/Math.cos v-angle
@@ -2352,8 +2367,8 @@
         %{} 'CodeEntry (:doc |)
           :code $ quote $ defn update-states (store pair)
             let
-                data $ assert-type pair $ :: 'List 'Dynamic
-                cursor $ assert-type
+                data $ quatrefoil.util.core/require-decoded $ try-decode-map-as pair (:: 'List 'Dynamic)
+                cursor $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   option:unwrap-or (nth data 0) ([])
                   :: 'List 'Tag
                 new-state $ option:unwrap-or (nth data 1) nil
@@ -2370,8 +2385,8 @@
         'diff-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-children (prev-children children coord collect!)
             let
-                prev-children0 $ assert-type prev-children $ :: 'Map 'Number 'Dynamic
-                children0 $ assert-type children $ :: 'Map 'Number 'Dynamic
+                prev-children0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as prev-children (:: 'Map 'Number 'Dynamic)
+                children0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as children (:: 'Map 'Number 'Dynamic)
                 prev-keys $ keys prev-children0
                 curr-keys $ keys children0
                 removed-keys $ difference prev-keys curr-keys
@@ -2379,7 +2394,7 @@
                   map $ fn (k)
                     let
                         k0 $ assert-type k Number
-                      [] k0 $ purify-tree $ get children0 k0
+                      [] k0 $ purify-tree $ .unwrap (get children0 k0)
                 common-keys $ intersection prev-keys curr-keys
               if
                 not $ empty? removed-keys
@@ -2391,8 +2406,8 @@
               &doseq (k common-keys) (; js/console.log "|Diffing children:" coord common-keys)
                 let
                     k0 $ assert-type k Number
-                    prev-child $ get prev-children0 k0
-                    child $ get children0 k0
+                    prev-child $ .unwrap $ get prev-children0 k0
+                    child $ .unwrap $ get children0 k0
                   if
                     not $ identical? prev-child child
                     diff-tree prev-child child (conj coord k0) collect!
@@ -2819,9 +2834,7 @@
         'create-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-material (material)
             &let
-              m $ case-default (field material :kind)
-                do (js/console.warn "|Unknown material:" material)
-                  new THREE/LineBasicMaterial $ to-js-data $ dissoc material :kind
+              m $ match (field material :kind)
                 :line-basic $ new THREE/LineBasicMaterial $ to-js-data (dissoc material :kind)
                 :line-dashed $ new THREE/LineDashedMaterial $ to-js-data (dissoc material :kind)
                 :mesh-basic $ new THREE/MeshBasicMaterial $ to-js-data (dissoc material :kind)
@@ -2831,6 +2844,8 @@
                 :raw-shader $ new THREE/RawShaderMaterial $ let
                     options $ to-js-data $ dissoc material :kind
                   , options
+                _ $ do (js/console.warn "|Unknown material:" material)
+                  new THREE/LineBasicMaterial $ to-js-data $ dissoc material :kind
               set!
                 .-side $ ffi-object m
                 , THREE/DoubleSide
@@ -3014,9 +3029,7 @@
                 material $ either (field element :material)
                   {} (:kind :mesh-basic) (:color 0xa0a0a0)
                 event $ field element :event
-              case-default (field element :name)
-                do (js/console.warn "|Unknown element" element) (new THREE/Object3D)
-                :scene @*global-scene
+              match (field element :name) (:scene @*global-scene)
                 :group $ create-group-element params position rotation scale
                 :box $ create-box-element params position rotation scale material event coord
                 :sphere $ create-sphere-element params position rotation scale material event coord
@@ -3039,6 +3052,7 @@
                 :buffer-object $ create-buffer-object-element params position rotation scale material
                 :shader-mesh $ create-shader-mesh (field element :attributes) params position rotation scale material
                 :some-object $ create-some-object params position rotation scale material
+                _ $ do (js/console.warn "|Unknown element" element) (new THREE/Object3D)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic $ :: 'List 'Number
@@ -3289,7 +3303,8 @@
             :args $ [] 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
         'js-number $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn js-number (value) (unsafe-coerce value Number)
+          :code $ quote $ defn js-number (value)
+            quatrefoil.util.core/require-decoded $ try-decode-map-as value 'Number
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Number)
             :args $ [] 'Dynamic
@@ -3415,11 +3430,11 @@
                   buffer $ field info :buffer
                   size $ field info :size
                   type $ field info :type
-                  attr $ case-default type
-                    do (js/console.warn "|use f32 as default attribute type")
-                      new THREE/Float32BufferAttribute (js-array & buffer) size
+                  attr $ match type
                     :f32 $ new THREE/Float32BufferAttribute (js-array & buffer) size
                     :u8 $ new THREE/Float32BufferAttribute (js-array & buffer) size
+                    _ $ do (js/console.warn "|use f32 as default attribute type")
+                      new THREE/Float32BufferAttribute (js-array & buffer) size
                 geometry-set-attribute! g name attr
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -3546,7 +3561,7 @@
               let[] (coord op op-data) change $ let
                   target $ reach-object3d @*global-scene coord
                 ; js/console.log |Change: op coord op-data
-                case-default op (js/console.warn "|Unknown op:" op)
+                match op
                   :add-material $ update-material target coord op-data
                   :update-material $ update-material target coord op-data
                   :remove-material $ remove-material target coord op-data
@@ -3562,6 +3577,7 @@
                   :change-attributes $ set-geometry-attributes!
                     .-geometry $ ffi-object target
                     , op-data
+                  _ $ js/console.warn "|Unknown op:" op
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] $ :: 'List 'Dynamic
@@ -3595,13 +3611,14 @@
             let
                 material $ ffi-object $ .-material (ffi-object target)
               &doseq (entry op-data)
-                case-default entry (println "|Unknown material prop:" op-data)
+                match entry
                   :opacity $ set!
                     .-opacity $ ffi-object material
                     , 0.9
                   :transparent $ set!
                     .-transparent $ ffi-object material
                     , 1
+                  _ $ println "|Unknown material prop:" op-data
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic (:: 'List 'Number) 'Dynamic
@@ -3633,7 +3650,7 @@
               ; js/console.log target
               &doseq
                 entry $ &map:to-list op-data
-                let[] (param new-value) entry $ case-default param (js/console.log "|Unknown param:" param)
+                let[] (param new-value) entry $ match param
                   :color $ .!set
                     ffi-object $ .-color $ ffi-object material
                     new THREE/Color new-value
@@ -3658,6 +3675,7 @@
                   :wireframe $ set!
                     .-wireframe $ ffi-object material
                     , new-value
+                  _ $ js/console.log "|Unknown param:" param
               set!
                 .-needsUpdate $ ffi-object material
                 , true
