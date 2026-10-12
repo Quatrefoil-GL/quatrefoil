@@ -466,7 +466,7 @@
                   {}
                     :buildings $ make-building-data 80
                     :factor $ [] 1 1 1
-              group ({}) & horizontal-lines & forward-lines &
+              group ({}) & $ concat horizontal-lines forward-lines
                 ->
                   quatrefoil.util.core/require-decoded $ try-decode-map-as (field state :buildings)
                     :: 'List $ :: 'List 'Number
@@ -476,25 +476,26 @@
                       :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
                       :event $ {} $ :click
                         fn (e d!) (d! :demo nil)
-                sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
-                  :position $ [] 30 30 40
-                  :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.8) (:transparent true)
-                  :event $ {} $ :click
-                    fn (e d!)
-                      d! cursor $ assoc state :buildings $ make-building-data 80
-                point-light $ {} (:color 0xffff55) (:intensity 2) (:distance 600)
-                  :position $ [] 30 20 40
-                tube $ {} (:points-fn cloud-fn) (:radius 0.6) (:tubular-segments 1600) (:radial-segments 4)
-                  :factor $ field state :factor
-                  :position $ [] 0 200 0
-                  :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
-                sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
-                  :position $ [] 0 240 0
-                  :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.2) (:transparent true)
-                  :event $ {} $ :click
-                    fn (e d!)
-                      d! cursor $ assoc state :factor $ [] (rand-shift 1 0.92) (rand-shift 1 0.92) (rand-shift 1 0.92)
-                ambient-light $ {} $ :color 0x444422
+                []
+                  sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
+                    :position $ [] 30 30 40
+                    :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.8) (:transparent true)
+                    :event $ {} $ :click
+                      fn (e d!)
+                        d! cursor $ assoc state :buildings $ make-building-data 80
+                  point-light $ {} (:color 0xffff55) (:intensity 2) (:distance 600)
+                    :position $ [] 30 20 40
+                  tube $ {} (:points-fn cloud-fn) (:radius 0.6) (:tubular-segments 1600) (:radial-segments 4)
+                    :factor $ field state :factor
+                    :position $ [] 0 200 0
+                    :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
+                  sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
+                    :position $ [] 0 240 0
+                    :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.2) (:transparent true)
+                    :event $ {} $ :click
+                      fn (e d!)
+                        d! cursor $ assoc state :factor $ [] (rand-shift 1 0.92) (rand-shift 1 0.92) (rand-shift 1 0.92)
+                  ambient-light $ {} $ :color 0x444422
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic
@@ -1094,58 +1095,57 @@
       :defs $ {}
         'comp-triflorum $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-triflorum ()
-            group ({}) &
+            group ({}) & $ concat
               -> (range 100)
                 map $ fn (i)
                   tube $ {} (:points-fn petal-fn) (:factor i) (:radius 0.06) (:tubularSegments 20) (:radialSegments 8)
                     :position $ [] 0 0 0
                     :material $ {} (:kind :mesh-standard) (:color 0x882222) (:opacity 1) (:transparent true)
-              , &
-                -> (range 100)
-                  map $ fn (i)
-                    tube $ {} (:points-fn yarn-fn) (:factor i) (:radius 0.3) (:tubularSegments 20) (:radialSegments 8)
-                      :position $ [] 0 0 0
-                      :material $ {} (:kind :mesh-standard) (:color 0xffaaaa) (:opacity 0.27) (:transparent true)
-                , &
-                  -> (range 12)
-                    map $ fn (i)
-                      let
-                          theta $ * i &PI (sqrt 2) 0.15
-                        polyhedron $ {}
-                          :vertices $ let
-                              r1 1
-                              r2 1
-                              r3 3
-                              th1 $ + theta 1.5
-                              th2 $ - theta 1.5
-                              th3 $ - theta &PI
-                            []
-                              []
-                                * r1 $ cos th1
-                                , 0 $ * r1 $ sin th1
-                              []
-                                * r1 $ cos th2
-                                , 0 $ * r1 $ sin th2
-                              []
-                                * r3 $ cos theta
-                                , 0.5 $ * r3 $ sin theta
-                              []
-                                * r2 $ cos th3
-                                , -2 $ * r2 $ sin th3
-                          :indices $ [] ([] 0 1 2) ([] 0 1 3) ([] 0 2 3) ([] 1 2 3)
-                          :radius 6
-                          :detail 0
-                          :position $ let
-                              r 8
-                            []
-                              * r $ cos theta
-                              , -0.3 $ * r $ sin theta
-                          :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0x45cc33)
-                  tube $ {} (:points-fn main-branch-fn) (:radius 0.7) (:tubularSegments 20) (:radialSegments 8)
+              -> (range 100)
+                map $ fn (i)
+                  tube $ {} (:points-fn yarn-fn) (:factor i) (:radius 0.3) (:tubularSegments 20) (:radialSegments 8)
                     :position $ [] 0 0 0
-                    :material $ {} (:kind :mesh-standard) (:color 0x336622) (:opacity 1) (:transparent true)
-                  point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
-                    :position $ [] 0 20 50
+                    :material $ {} (:kind :mesh-standard) (:color 0xffaaaa) (:opacity 0.27) (:transparent true)
+              -> (range 12)
+                map $ fn (i)
+                  let
+                      theta $ * i &PI (sqrt 2) 0.15
+                    polyhedron $ {}
+                      :vertices $ let
+                          r1 1
+                          r2 1
+                          r3 3
+                          th1 $ + theta 1.5
+                          th2 $ - theta 1.5
+                          th3 $ - theta &PI
+                        []
+                          []
+                            * r1 $ cos th1
+                            , 0 $ * r1 $ sin th1
+                          []
+                            * r1 $ cos th2
+                            , 0 $ * r1 $ sin th2
+                          []
+                            * r3 $ cos theta
+                            , 0.5 $ * r3 $ sin theta
+                          []
+                            * r2 $ cos th3
+                            , -2 $ * r2 $ sin th3
+                      :indices $ [] ([] 0 1 2) ([] 0 1 3) ([] 0 2 3) ([] 1 2 3)
+                      :radius 6
+                      :detail 0
+                      :position $ let
+                          r 8
+                        []
+                          * r $ cos theta
+                          , -0.3 $ * r $ sin theta
+                      :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0x45cc33)
+              []
+                tube $ {} (:points-fn main-branch-fn) (:radius 0.7) (:tubularSegments 20) (:radialSegments 8)
+                  :position $ [] 0 0 0
+                  :material $ {} (:kind :mesh-standard) (:color 0x336622) (:opacity 1) (:transparent true)
+                point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
+                  :position $ [] 0 20 50
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ []
@@ -1164,32 +1164,35 @@
                 theta $ *
                   + i $ * ratio 0.4
                   * &PI $ sqrt 2
-              v+
-                let
-                    radius $ +
-                      * (- 1 ratio) 8
-                      * 1.0 $ sqrt $ + 6 i
-                  v-scale
-                    v3
-                      * radius $ cos theta
-                      *
-                        - 20 $ * i 0.1
-                        , ratio
-                      * radius $ sin theta
-                    , ratio
-                v-scale
+              match
+                v+
                   let
-                      radius $ * 0.8 $ sqrt (+ 6 i)
-                    v3
-                      * radius $ cos theta0
-                      *
-                        - 20 $ * i 0.1
-                        , ratio
-                      * radius $ sin theta0
-                  - 1 ratio
+                      radius $ +
+                        * (- 1 ratio) 8
+                        * 1.0 $ sqrt $ + 6 i
+                    v-scale
+                      v3
+                        * radius $ cos theta
+                        *
+                          - 20 $ * i 0.1
+                          , ratio
+                        * radius $ sin theta
+                      , ratio
+                  v-scale
+                    let
+                        radius $ * 0.8 $ sqrt (+ 6 i)
+                      v3
+                        * radius $ cos theta0
+                        *
+                          - 20 $ * i 0.1
+                          , ratio
+                        * radius $ sin theta0
+                    - 1 ratio
+                (:v3 x y z) ([] x y z)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'quaternion.vector/V3)
+          :schema $ :: 'Fn $ {}
             :args $ [] 'Number 'Number
+            :return $ :: 'List 'Number
         'yarn-fn $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn yarn-fn (ratio i)
             let
@@ -2742,9 +2745,16 @@
         'create-buffer-object-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-buffer-object-element (params position rotation scale material)
             let
-                vertices $ new js/Float32Array $ js-array &
-                  either (field params :vertices) ([])
-                indices $ js-array & $ either (field params :indices) ([])
+                vertices $ new js/Float32Array $ to-js-data
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as
+                    either (field params :vertices) ([])
+                    :: 'List 'Number
+                  {} $ :js-array true
+                indices $ to-js-data
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as
+                    either (field params :indices) ([])
+                    :: 'List 'Number
+                  {} $ :js-array true
                 geometry $ new THREE/BufferGeometry
                 object3d $ do
                   geometry-set-attribute! geometry |position $ new THREE/BufferAttribute vertices 3
@@ -2970,12 +2980,14 @@
         'create-polyhedron-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-polyhedron-element (params position rotation scale material)
             let
-                vertices $ js-array & $ concat &
-                  quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :vertices)
+                vertices $ to-js-data
+                  concat & $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :vertices)
                     :: 'List $ :: 'List 'Number
-                indices $ js-array & $ concat &
-                  quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :indices)
+                  {} $ :js-array true
+                indices $ to-js-data
+                  concat & $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :indices)
                     :: 'List $ :: 'List 'Number
+                  {} $ :js-array true
                 radius $ field params :radius
                 detail $ field params :detail
                 geometry $ new THREE/PolyhedronGeometry vertices indices radius detail
@@ -3019,8 +3031,11 @@
         'create-shader-mesh $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-shader-mesh (attributes params position rotation scale material)
             let
-                vertices $ new js/Float32Array $ js-array &
-                  either (field params :vertices) ([])
+                vertices $ new js/Float32Array $ to-js-data
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as
+                    either (field params :vertices) ([])
+                    :: 'List 'Number
+                  {} $ :js-array true
                 geometry $ let
                     g $ new THREE/BufferGeometry
                   set-geometry-attributes! g attributes
