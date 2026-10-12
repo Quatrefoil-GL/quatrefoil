@@ -4226,12 +4226,12 @@
               (comp? tree)
                 recur $ field tree :tree
               true $ update tree :children $ fn (children)
-                assert-type
-                  -> children (&map:to-list)
-                    map $ fn (entry)
-                      update entry 1 $ fn (child) (purify-tree child)
-                    pairs-map
-                  , 'Dynamic
+                ->
+                  require-decoded $ try-decode-map-as children $ :: 'Map 'Dynamic 'Dynamic
+                  &map:to-list
+                  map $ fn (entry)
+                    update entry 1 $ fn (child) (purify-tree child)
+                  pairs-map
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic
