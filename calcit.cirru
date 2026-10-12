@@ -1792,11 +1792,17 @@
               :args $ [] 'quatrefoil.core/WebXRManagerHost 'Number
             .getHand $ :: 'Fn $ {} (:return 'JsObject)
               :args $ [] 'quatrefoil.core/WebXRManagerHost 'Number
-            .getSession $ :: 'Fn $ {} (:return 'Dynamic)
+            .getSession $ :: 'Fn $ {}
+              :return $ :: 'JsNullish 'quatrefoil.core/XRSessionHost
               :args $ [] 'quatrefoil.core/WebXRManagerHost
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :writable $ #{} :enabled
+          :schema $ :: 'Trait
+        'XRSessionHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait XRSessionHost (:inputSources 'JsObject)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
         'camera-direction-for $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn camera-direction-for (x y z)
@@ -1994,8 +2000,10 @@
                   unsafe-coerce (new THREE/BufferGeometry) CoreBufferGeometryHost
                   js-array (new THREE/Vector3 0 0 0) (new THREE/Vector3 0 0 -1)
                 line $ ffi-object $ new THREE/Line line-geo
-              .!appendChild (ffi-object js/document.body)
-                .!createButton VRButton renderer $ js-object $ :requiredFeatures (js-array |hand-tracking)
+              js-ffi.browser/append-child!
+                .unwrap $ js-ffi.browser/document-body
+                js-ffi.browser/element-host $ .!createButton VRButton renderer $ js-object
+                  :requiredFeatures $ js-array |hand-tracking
               .!add ctrl-grip-0 $ .!createControllerModel controllerModelFactory ctrl-grip-0
               .!add ctrl-grip-1 $ .!createControllerModel controllerModelFactory ctrl-grip-1
               .!add hand-0 $ .!createHandModel handModelFactory hand-0
@@ -2055,10 +2063,11 @@
                 if
                   js-present? $ .!getSession $ .-xr (js-cast @*global-renderer 'quatrefoil.core/RendererXrHost)
                   let
-                      session $ ffi-object $ .!getSession
-                        .-xr $ js-cast @*global-renderer 'quatrefoil.core/RendererXrHost
-                      p0 $ -> session .-inputSources .?-0
-                      p1 $ -> session .-inputSources .?-1
+                      session $ js-cast
+                        .!getSession $ .-xr $ js-cast @*global-renderer 'quatrefoil.core/RendererXrHost
+                        , 'quatrefoil.core/XRSessionHost
+                      p0 $ xr-input-source-at session 0
+                      p1 $ xr-input-source-at session 1
                     let
                         d $ ->
                           []
@@ -2400,6 +2409,14 @@
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'quatrefoil.core/CameraControl
             :features $ #{} :js-ffi
+        'xr-input-source-at $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn xr-input-source-at (session index)
+            aget (.-inputSources session) index
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'quatrefoil.core/XRSessionHost 'Number
+            :features $ #{} :js-ffi
+            :return $ :: 'JsNullish 'JsObject
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.core
           :require
