@@ -3903,9 +3903,10 @@
           :code $ quote $ defn apply-changes (changes)
             ; js/console.log |changes (count changes) changes
             &doseq (change changes)
-              let[] (coord op op-data)
+              let[] (raw-coord op op-data)
                 quatrefoil.util.core/require-decoded $ try-decode-map-as change $ :: 'List 'Dynamic
                 let
+                    coord $ quatrefoil.util.core/require-decoded $ try-decode-map-as raw-coord (:: 'List 'Number)
                     target $ reach-object3d @*global-scene coord
                   ; js/console.log |Change: op coord op-data
                   match op
