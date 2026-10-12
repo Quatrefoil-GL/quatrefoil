@@ -1602,10 +1602,14 @@
                             true w2
                           , d!
                     :gamepad $ fn (info elapsed d!)
+                      hint-fn $ {}
+                        :args $ [] 'Dynamic 'Number 'Dynamic
+                        :return 'Dynamic
                       let
                           speeding $ * speed $ if (field info :b) 8 1
                         on-change
-                          + value $ * elapsed speeding $ field info :dx
+                          + value $ * elapsed speeding $ quatrefoil.util.core/require-decoded
+                            try-decode-map-as (field info :dx) 'Number
                           , d!
                 if (field options :show-text?)
                   text $ {}
@@ -1643,22 +1647,25 @@
                         :args $ [] (:: 'List 'Number) (:: 'List 'Number) 'Number 'Dynamic
                         :return 'Dynamic
                       ; println |delta delta
-                      let[] (x0 y0)
-                        quatrefoil.util.core/require-decoded $ try-decode-map-as v $ :: 'List 'Number
-                        let
-                            dx $ * speed elapse $ option:unwrap-or (nth delta 0) 0
-                            dy $ * speed elapse $ option:unwrap-or (nth delta 1) 0
-                          on-change
-                            [] (+ x0 dx) (+ y0 dy)
-                            , d!
+                      let[] (x0 y0) v $ let
+                          dx $ * speed elapse $ option:unwrap-or (nth delta 0) 0
+                          dy $ * speed elapse $ option:unwrap-or (nth delta 1) 0
+                        on-change
+                          [] (+ x0 dx) (+ y0 dy)
+                          , d!
                     :gamepad $ fn (info elapsed d!)
+                      hint-fn $ {}
+                        :args $ [] 'Dynamic 'Number 'Dynamic
+                        :return 'Dynamic
                       let
-                          v0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as v (:: 'List 'Number)
+                          v0 v
                           x0 $ option:unwrap-or (nth v0 0) 0
                           y0 $ option:unwrap-or (nth v0 1) 0
                           speeding $ * speed $ if (field info :b) 8 1
-                          dx $ * elapsed speeding $ field info :dx
-                          dy $ * elapsed speeding $ field info :dy
+                          dx $ * elapsed speeding $ quatrefoil.util.core/require-decoded
+                            try-decode-map-as (field info :dx) 'Number
+                          dy $ * elapsed speeding $ quatrefoil.util.core/require-decoded
+                            try-decode-map-as (field info :dy) 'Number
                         on-change
                           [] (+ x0 dx) (- y0 dy)
                           , d!
