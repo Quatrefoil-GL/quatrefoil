@@ -3,7 +3,7 @@
   :about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `calcit query` to inspect and `calcit edit`/`calcit tree` to modify. Run `calcit docs agents --contract` before mutations; use `--full` for first orientation or changed contract digest. Manual edits must follow format and schema conventions, then run `calcit edit format`."
   :package |quatrefoil
   :entries $ {} $ :default
-    {} (:description |) (:init-fn 'quatrefoil.app.main/main!) (:mode :native) (:reload-fn 'quatrefoil.app.main/reload!) (:target :browser)
+    {} (:description |) (:init-fn 'quatrefoil.app.main/main!) (:mode :js) (:reload-fn 'quatrefoil.app.main/reload!) (:target :browser)
       :feature-policy $ {}
       :modules $ [] |touch-control/ |pointed-prompt/ |quaternion/
       :type-slots $ {}
@@ -206,7 +206,8 @@
                       d! cursor $ assoc state :tab next
                     :portal $ comp-portal $ fn (next d!)
                       d! cursor $ assoc state :tab next
-                    :todolist $ comp-todolist $ field store :tasks
+                    :todolist $ comp-todolist $ quatrefoil.util.core/require-decoded
+                      try-decode-map-as (field store :tasks) (:: 'Map 'Number 'Dynamic)
                     :demo $ comp-demo
                     :lines $ comp-lines
                     :shapes $ comp-shapes
@@ -451,7 +452,9 @@
                     :buildings $ make-building-data 80
                     :factor $ [] 1 1 1
               group ({}) & horizontal-lines & forward-lines &
-                -> (field state :buildings)
+                ->
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as (field state :buildings)
+                    :: 'List $ :: 'List 'Number
                   map $ fn (vec)
                     let[] (x y w d h) vec $ box $ {} (:width w) (:height h) (:depth d)
                       :position $ [] x (* h 0.5) (+ y)
@@ -767,18 +770,17 @@
             :args $ [] 'Tag
         'straight-fn $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn straight-fn (t factor)
-            let-sugar
-                  [] w1 x1 y1 z1
-                  &enum:params $ &map:get factor :from
-                ([] w2 x2 y2 z2)
-                  &enum:params $ &map:get factor :to
-              []
-                &+ (&* x1 t)
-                  &* x2 $ &- 1 t
-                &+ (&* y1 t)
-                  &* y2 $ &- 1 t
-                &+ (&* z1 t)
-                  &* z2 $ &- 1 t
+            let[] (w1 x1 y1 z1)
+              &enum:params $ &map:get factor :from
+              let[] (w2 x2 y2 z2)
+                &enum:params $ &map:get factor :to
+                []
+                  &+ (&* x1 t)
+                    &* x2 $ &- 1 t
+                  &+ (&* y1 t)
+                    &* y2 $ &- 1 t
+                  &+ (&* z1 t)
+                    &* z2 $ &- 1 t
           :examples $ []
           :schema $ :: 'Fn $ {}
             :args $ [] 'Number 'Dynamic
@@ -1196,7 +1198,7 @@
     'quatrefoil.app.main $ %{} 'FileEntry
       :defs $ {}
         '*store $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *store
+          :code $ quote $ defref *store
             {}
               :tasks $ {} $ 100
                 {} (:id 100) (:text "|Initial task") (:done? false)
@@ -1235,7 +1237,9 @@
             if (list? op)
               recur :states $ [] op op-data
               let
-                  store $ updater @*store op op-data
+                  store $ updater @*store
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as op 'Tag
+                    , op-data
                 ; js/console.log |Dispatch: op op-data store
                 reset! *store store
           :examples $ []
@@ -1292,7 +1296,7 @@
                     js-number $ .-innerHeight $ ffi-object js/window
                   , 1.5 0.4 0.85
             render-app!
-            add-watch *store :changes $ fn (store prev) (render-app!)
+            add-watch! *store :changes $ fn (store prev) (render-app!)
             set! js/window.onkeydown handle-key-event
             render-control!
             handle-control-events
@@ -1304,9 +1308,9 @@
             :features $ #{} :js-ffi
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
-            if (some? build-errors) (hud! |error build-errors)
+            if (non-nil? build-errors) (hud! |error build-errors)
               do (hud! |ok~ nil) (clear-cache!) (clear-control-loop!) (handle-control-events) (remove-watch *store :changes)
-                add-watch *store :changes $ fn (store prev) (render-app!)
+                add-watch! *store :changes $ fn (store prev) (render-app!)
                 render-app!
                 set! js/window.onkeydown handle-key-event
                 println "|Code updated."
@@ -1394,7 +1398,7 @@
                       option:unwrap-or (get store0 :tasks) ({})
                       :: 'Map 'Number 'Dynamic
                     text $ assert-type op-data 'String
-                    id $ assert-type js/Date.now 'Number
+                    id $ shared/now-ms
                   assoc store0 :tasks $ assoc tasks id $ {} (:id id) (:text text) (:done? false)
                 :delete-task $ let
                     tasks $ assert-type
@@ -1418,7 +1422,9 @@
                       option:unwrap-or (get store0 :tasks) ({})
                       :: 'Map 'Number 'Dynamic
                     data $ assert-type op-data $ :: 'List 'Dynamic
-                    task-id $ assert-type (first data) 'Number
+                    task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as
+                      .unwrap $ first data
+                      , 'Number
                     text $ assert-type
                       option:unwrap-or (last data) |
                       , 'String
@@ -1429,7 +1435,9 @@
             :features $ #{} :js-ffi
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.updater
-          :require $ quatrefoil.cursor :refer $ update-states
+          :require
+            quatrefoil.cursor :refer $ update-states
+            js-ffi.shared :as shared
     'quatrefoil.comp.control $ %{} 'FileEntry
       :defs $ {}
         'comp-2d-control $ %{} 'CodeEntry (:doc |)
@@ -1662,7 +1670,7 @@
     'quatrefoil.core $ %{} 'FileEntry
       :defs $ {}
         '*tmp-changes $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *tmp-changes nil
+          :code $ quote $ defref *tmp-changes nil
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
         '>> $ %{} 'CodeEntry (:doc |)
@@ -1776,12 +1784,12 @@
           :code $ quote $ defn handle-control-events ()
             start-control-loop! 10 $ fn (elapsed states delta)
               let
-                  l-move $ assert-type
-                    map (field states :left-move) refine-strength
-                    :: 'List 'Number
-                  r-move $ assert-type
-                    map (field states :right-move) refine-strength
-                    :: 'List 'Number
+                  l-move $ map
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :left-move) (:: 'List 'Number)
+                    , refine-strength
+                  r-move $ map
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :right-move) (:: 'List 'Number)
+                    , refine-strength
                   r-delta $ assert-type (field delta :right-move) (:: 'List 'Number)
                   l0 $ option:unwrap-or (nth l-move 0) 0
                   l1 $ option:unwrap-or (nth l-move 1) 0
@@ -1838,7 +1846,7 @@
                 shift? $ unsafe-coerce
                   .-shiftKey $ ffi-object event
                   , Bool
-              case-default key nil
+              case-default key &unit
                 |ArrowDown $ if shift?
                   tween-move-camera! $ [] :shift -1
                   tween-move-camera! $ [] :move 0 -2 0
@@ -1964,7 +1972,7 @@
               pass $ either (:composer-passes options) ([])
               .!addPass @*global-composer pass
             if
-              some? $ field options :background
+              non-nil? $ field options :background
               .!setClearColor @*global-renderer (field options :background) 1
             ; set! (.-physicallyCorrectLights @*global-renderer) true
             ; set! (.-gammaFactor @*global-renderer) 22
@@ -1992,11 +2000,14 @@
                           []
                             if (js-present? p0) (read-input p0)
                             if (js-present? p1) (read-input p1)
-                          filter some?
+                          filter non-nil?
                       if
                         not $ empty? d
                         on-gamepad-event
-                          last $ option:unwrap-or (first d) ([])
+                          .unwrap $ last $ quatrefoil.util.core/require-decoded
+                            try-decode-map-as
+                              .unwrap $ first d
+                              :: 'List 'Dynamic
                           * 0.001 $ - t0 prev-t
               .!updateProjectionMatrix @*global-camera
               .!render @*global-renderer @*global-scene @*global-camera
@@ -2098,7 +2109,7 @@
             :features $ #{} :js-ffi
         'new-lookat-point $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn new-lookat-point ()
-            let-sugar
+            let
                 camera @*global-camera
                 position $ ffi-object $ .-position (ffi-object camera)
                 x2 $ &+
@@ -2185,7 +2196,7 @@
             :features $ #{} :js-ffi
         'render-canvas! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-canvas! (markup dispatch!) (; js/console.log |render markup) (reset! *proxied-dispatch dispatch!)
-            if (some? @*global-tree)
+            if (non-nil? @*global-tree)
               let
                   collect! $ fn (x)
                     reset! *tmp-changes $ conj
@@ -2218,7 +2229,7 @@
             let
                 camera @*global-camera
               if (= x false) (reset! *viewer-y-shift 0)
-                swap! *viewer-y-shift &+ $ * 2 x
+                swap! *viewer-y-shift &+ $ * 2 $ quatrefoil.util.core/require-decoded (try-decode-map-as x 'Number)
               .!lookAt camera $ new-lookat-point
               .!render @*global-renderer @*global-scene @*global-camera
               , &unit
@@ -2294,7 +2305,7 @@
                     .!render @*global-renderer @*global-scene @*global-camera
                 (:move dx dy dz)
                   tween-call 20 5 $ fn (i)
-                    let-sugar
+                    let
                         position $ ffi-object $ .-position (ffi-object camera)
                         x $ &+
                           js-number $ .-x position
@@ -2486,6 +2497,7 @@
               if
                 not $ empty? changed-params
                 collect! $ [] coord :update-params changed-params
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'Dynamic (:: 'List 'Number)
@@ -2555,7 +2567,7 @@
     'quatrefoil.dsl.object3d-dom $ %{} 'FileEntry
       :defs $ {}
         '*focused-coord $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *focused-coord nil
+          :code $ quote $ defref *focused-coord nil
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
         'BufferGeometryHost $ %{} 'CodeEntry (:doc |)
@@ -2614,7 +2626,7 @@
           :schema $ :: 'Trait
         'build-tree $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn build-tree (coord tree) (; js/console.log "|build tree:" coord tree)
-            if (some? tree)
+            if (non-nil? tree)
               let
                   object3d $ create-shape (assoc tree :children nil) coord
                   children $ -> (field tree :children) (&map:to-list)
@@ -2648,7 +2660,7 @@
                 maybe-handler $ field (field target-el :event) :click
               if (js-present? coord)
                 do
-                  if (some? maybe-handler) (maybe-handler event @*proxied-dispatch) (println "|no handler" coord)
+                  if (non-nil? maybe-handler) (maybe-handler event @*proxied-dispatch) (println "|no handler" coord)
                   reset! *focused-coord coord
                   ; println "|focus to" coord
                 do (reset! *focused-coord nil) (eprintln "|lose focus")
@@ -2780,16 +2792,18 @@
                 points $ &let
                   ps $ js-array
                   if
-                    some? $ field params :segments
+                    non-nil? $ field params :segments
                     &doseq
-                      segment $ field params :segments
+                      segment $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :segments)
+                        :: 'List $ :: 'List $ :: 'List 'Number
                       let
-                          p0 $ nth segment 0
-                          p1 $ nth segment 1
+                          p0 $ .unwrap $ nth segment 0
+                          p1 $ .unwrap $ nth segment 1
                         push-array! ps $ new THREE/Vector3 & p0
                         push-array! ps $ new THREE/Vector3 & p1
                     &doseq
-                      p $ field params :points
+                      p $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :points)
+                        :: 'List $ :: 'List 'Number
                       push-array! ps $ new THREE/Vector3 & p
                   , ps
                 geometry $ geometry-set-from-points (new THREE/BufferGeometry) points
@@ -3108,7 +3122,8 @@
         'create-spline-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-spline-element (params position rotation scale material)
             let
-                points0 $ field params :points
+                points0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :points)
+                  :: 'List $ :: 'List 'Number
                 curve $ new THREE/CatmullRomCurve3 $ js-array &
                   -> points0 $ map $ fn (p) (new THREE/Vector3 & p)
                 points $ curve-get-points curve $ * 16 (count points0)
@@ -3343,13 +3358,13 @@
             :features $ #{} :js-ffi
         'on-control-event $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-control-event (move delta elapsed)
-            if (some? @*focused-coord)
+            if (non-nil? @*focused-coord)
               let
                   coord @*focused-coord
                   element-tree @*global-tree
                   target-el $ find-element element-tree coord
                   maybe-handler $ field (field target-el :event) :control
-                if (some? maybe-handler) (maybe-handler move delta elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
+                if (non-nil? maybe-handler) (maybe-handler move delta elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
               println "|no focused coord to control" @*focused-coord
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -3357,13 +3372,13 @@
             :features $ #{} :js-ffi
         'on-gamepad-event $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-gamepad-event (info elapsed)
-            if (some? @*focused-coord)
+            if (non-nil? @*focused-coord)
               let
                   coord @*focused-coord
                   element-tree @*global-tree
                   target-el $ find-element element-tree coord
                   maybe-handler $ field (field target-el :event) :gamepad
-                if (some? maybe-handler) (maybe-handler info elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
+                if (non-nil? maybe-handler) (maybe-handler info elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
               println "|no focused coord to control" @*focused-coord
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -3382,7 +3397,21 @@
           :code $ quote $ defn set-geometry-attributes! (g attributes)
             &doseq (info attributes)
               let
-                  name $ turn-string $ field info :id
+                  name $ let
+                      id $ field info :id
+                    cond
+                        string? id
+                        quatrefoil.util.core/require-decoded $ try-decode-map-as id 'String
+                      (tag? id)
+                        .to-string $ quatrefoil.util.core/require-decoded $ try-decode-map-as id 'Tag
+                      (symbol? id)
+                        .to-string $ quatrefoil.util.core/require-decoded $ try-decode-map-as id 'Symbol
+                      (number? id)
+                        .to-string $ quatrefoil.util.core/require-decoded $ try-decode-map-as id 'Number
+                      (bool? id)
+                        .to-string $ quatrefoil.util.core/require-decoded $ try-decode-map-as id 'Bool
+                      (nil? id) (.to-string nil)
+                      true $ raise |geometry-attribute-id-must-be-a-scalar
                   buffer $ field info :buffer
                   size $ field info :size
                   type $ field info :type
@@ -3494,10 +3523,7 @@
         'add-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn add-children (target coord op-data)
             &doseq (entry op-data)
-              let-sugar
-                    [] k tree
-                    , entry
-                .!addBy target k $ build-tree (conj coord k) tree
+              let[] (k tree) entry $ .!addBy target k $ build-tree (conj coord k) tree
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic (:: 'List 'Number) 'Dynamic
@@ -3517,9 +3543,7 @@
           :code $ quote $ defn apply-changes (changes)
             ; js/console.log |changes (count changes) changes
             &doseq (change changes)
-              let-sugar
-                    [] coord op op-data
-                    , change
+              let[] (coord op op-data) change $ let
                   target $ reach-object3d @*global-scene coord
                 ; js/console.log |Change: op coord op-data
                 case-default op (js/console.warn "|Unknown op:" op)
@@ -3652,43 +3676,43 @@
     'quatrefoil.globals $ %{} 'FileEntry
       :defs $ {}
         '*global-camera $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *global-camera nil
+          :code $ quote $ defref *global-camera nil
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
         '*global-composer $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *global-composer nil
+          :code $ quote $ defref *global-composer nil
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
         '*global-renderer $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *global-renderer nil
+          :code $ quote $ defref *global-renderer nil
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
         '*global-scene $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *global-scene (make-global-scene)
+          :code $ quote $ defref *global-scene (make-global-scene)
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
         '*global-time $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *global-time 0
+          :code $ quote $ defref *global-time 0
           :examples $ []
           :schema $ :: 'Ref 'Number
         '*global-tree $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *global-tree nil
+          :code $ quote $ defref *global-tree nil
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
         '*loaded-objects $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *loaded-objects ({})
+          :code $ quote $ defref *loaded-objects ({})
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
         '*proxied-dispatch $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *proxied-dispatch nil
+          :code $ quote $ defref *proxied-dispatch nil
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
         '*viewer-angle $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *viewer-angle (&/ &PI 2)
+          :code $ quote $ defref *viewer-angle (&/ &PI 2)
           :examples $ []
           :schema $ :: 'Ref 'Number
         '*viewer-y-shift $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *viewer-y-shift 0
+          :code $ quote $ defref *viewer-y-shift 0
           :examples $ []
           :schema $ :: 'Ref 'Number
         'make-global-scene $ %{} 'CodeEntry (:doc |)
@@ -3837,6 +3861,15 @@
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
+        'require-decoded $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn require-decoded (result)
+            match result
+              (:ok value) value
+              (:err message) (raise message)
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'T)
+            :args $ [] $ :: 'Result 'T 'String
+            :generics $ [] 'T
         'scale-zero $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn scale-zero (x)
             if (&= 0 x) 0.01 x
