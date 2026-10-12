@@ -2791,6 +2791,15 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
+        'MeshRaycastHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait MeshRaycastHost
+            :raycast $ :: 'Fn $ {}
+              :args $ [] 'JsObject 'quatrefoil.dsl.object3d-dom/JsArrayHost
+              :return 'Unit
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :raycast
+          :schema $ :: 'Trait
         'ObjectMetadataHost $ %{} 'CodeEntry
           :doc "|Optional application-owned fields on arbitrary Three.js objects. Values may be absent on imported or ordinary meshes; use the lexical read adapter rather than js-cast presence checks. Coordinate contents must still be decoded before application use."
           :code $ quote $ deftrait ObjectMetadataHost
@@ -3079,8 +3088,10 @@
               set-rotation! object3d rotation
               set-scale! object3d scale
               set!
-                .-raycast $ ffi-object object3d
-                , raycast
+                .-raycast $ js-cast object3d 'quatrefoil.dsl.object3d-dom/MeshRaycastHost
+                unsafe-coerce raycast $ :: 'Fn $ {}
+                  :args $ [] 'JsObject 'quatrefoil.dsl.object3d-dom/JsArrayHost
+                  :return 'Unit
               , object3d
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
