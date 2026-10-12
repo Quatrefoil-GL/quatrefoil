@@ -2854,11 +2854,13 @@
             if (non-nil? tree)
               let
                   object3d $ create-shape (assoc tree :children nil) coord
-                  children $ -> (field tree :children) (&map:to-list)
+                  children $ ->
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as (field tree :children) (:: 'Map 'Number 'Dynamic)
+                    &map:to-list
                     map $ fn (entry)
                       update entry 1 $ fn (child)
                         build-tree
-                          conj coord $ assert-type
+                          conj coord $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                             option:unwrap-or (first entry) 0
                             , 'Number
                           , child
