@@ -1584,7 +1584,11 @@
                   :material $ {} (:kind :mesh-lambert) (:color color) (:transparent true)
                     :opacity $ either (field options :opacity) 0.6
                   :event $ {}
-                    :control $ fn (move delta elapse d!) (; println |delta delta)
+                    :control $ fn (move delta elapse d!)
+                      hint-fn $ {}
+                        :args $ [] (:: 'List 'Number) (:: 'List 'Number) 'Number 'Dynamic
+                        :return 'Dynamic
+                      ; println |delta delta
                       let
                           dx $ * speed elapse $ option:unwrap-or (nth delta 1) 0
                           w2 $ + dx value
@@ -1634,7 +1638,11 @@
                 sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0)
                   :material $ {} (:kind :mesh-lambert) (:color color) (:opacity 0.7) (:transparent true)
                   :event $ {}
-                    :control $ fn (states delta elapse d!) (; println |delta delta)
+                    :control $ fn (states delta elapse d!)
+                      hint-fn $ {}
+                        :args $ [] (:: 'List 'Number) (:: 'List 'Number) 'Number 'Dynamic
+                        :return 'Dynamic
+                      ; println |delta delta
                       let[] (x0 y0)
                         quatrefoil.util.core/require-decoded $ try-decode-map-as v $ :: 'List 'Number
                         let
@@ -3639,7 +3647,7 @@
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'Dynamic 'Dynamic 'Number
+            :args $ [] (:: 'List 'Number) (:: 'List 'Number) 'Number
             :features $ #{} :js-ffi
         'on-gamepad-event $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-gamepad-event (info elapsed)
