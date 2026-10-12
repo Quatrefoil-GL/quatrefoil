@@ -1724,6 +1724,13 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
+        'ControllerModelFactoryHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ControllerModelFactoryHost
+            .createControllerModel $ :: 'Fn $ {} (:return 'quatrefoil.core/Object3DGroupHost)
+              :args $ [] 'quatrefoil.core/ControllerModelFactoryHost 'quatrefoil.core/Object3DGroupHost
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
         'CoreBufferGeometryHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait CoreBufferGeometryHost
             .setFromPoints $ :: 'Fn $ {} (:return 'Dynamic)
@@ -1738,6 +1745,13 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
+        'HandModelFactoryHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait HandModelFactoryHost
+            .createHandModel $ :: 'Fn $ {} (:return 'quatrefoil.core/Object3DGroupHost)
+              :args $ [] 'quatrefoil.core/HandModelFactoryHost 'quatrefoil.core/Object3DGroupHost
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
         'HsluvHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait HsluvHost (:hsluv_h 'Number) (:hsluv_s 'Number) (:hsluv_l 'Number) (:rgb_r 'Number) (:rgb_g 'Number) (:rgb_b 'Number)
             .hsluvToRgb $ :: 'Fn $ {} (:return 'Unit)
@@ -1749,6 +1763,16 @@
           :code $ quote $ deftrait KeyboardEventHost (:key 'String) (:shiftKey 'Bool)
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
+        'Object3DGroupHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait Object3DGroupHost (:name 'String) (:scale 'quatrefoil.core/VectorCoordinatesHost)
+            .add $ :: 'Fn $ {} (:return 'quatrefoil.core/Object3DGroupHost)
+              :args $ [] 'quatrefoil.core/Object3DGroupHost 'quatrefoil.core/Object3DGroupHost
+            .clone $ :: 'Fn $ {} (:return 'quatrefoil.core/Object3DGroupHost)
+              :args $ [] 'quatrefoil.core/Object3DGroupHost
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :name
           :schema $ :: 'Trait
         'RendererXrHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait RendererXrHost (:xr 'quatrefoil.core/WebXRManagerHost)
@@ -1986,20 +2010,20 @@
           :code $ quote $ defn init-controls! ()
             let
                 renderer $ js-cast @*global-renderer 'quatrefoil.core/RendererXrHost
-                scene $ ffi-object @*global-scene
+                scene $ js-cast @*global-scene 'quatrefoil.core/Object3DGroupHost
                 xr $ .-xr renderer
-                ctrl-0 $ ffi-object $ .!getController xr 0
-                ctrl-1 $ ffi-object $ .!getController xr 1
-                ctrl-grip-0 $ ffi-object $ .!getControllerGrip xr 0
-                ctrl-grip-1 $ ffi-object $ .!getControllerGrip xr 1
-                hand-0 $ ffi-object $ .!getHand xr 0
-                hand-1 $ ffi-object $ .!getHand xr 1
-                controllerModelFactory $ ffi-object $ new XRControllerModelFactory
-                handModelFactory $ ffi-object $ new XRHandModelFactory
+                ctrl-0 $ js-cast (.!getController xr 0) 'quatrefoil.core/Object3DGroupHost
+                ctrl-1 $ js-cast (.!getController xr 1) 'quatrefoil.core/Object3DGroupHost
+                ctrl-grip-0 $ js-cast (.!getControllerGrip xr 0) 'quatrefoil.core/Object3DGroupHost
+                ctrl-grip-1 $ js-cast (.!getControllerGrip xr 1) 'quatrefoil.core/Object3DGroupHost
+                hand-0 $ js-cast (.!getHand xr 0) 'quatrefoil.core/Object3DGroupHost
+                hand-1 $ js-cast (.!getHand xr 1) 'quatrefoil.core/Object3DGroupHost
+                controllerModelFactory $ js-cast (new XRControllerModelFactory) 'quatrefoil.core/ControllerModelFactoryHost
+                handModelFactory $ js-cast (new XRHandModelFactory) 'quatrefoil.core/HandModelFactoryHost
                 line-geo $ ffi-object $ .!setFromPoints
                   unsafe-coerce (new THREE/BufferGeometry) CoreBufferGeometryHost
                   js-array (new THREE/Vector3 0 0 0) (new THREE/Vector3 0 0 -1)
-                line $ ffi-object $ new THREE/Line line-geo
+                line $ js-cast (new THREE/Line line-geo) 'quatrefoil.core/Object3DGroupHost
               js-ffi.browser/append-child!
                 .unwrap $ js-ffi.browser/document-body
                 js-ffi.browser/element-host $ .!createButton VRButton renderer $ js-object
@@ -2015,9 +2039,9 @@
               .!add scene hand-0
               .!add scene hand-1
               set! (.-name line) |line
-              ->
-                ffi-object $ .-scale $ ffi-object line
-                , .-z $ set! 5
+              set!
+                .-z $ .-scale line
+                , 5
               .!add ctrl-0 $ .!clone line
               .!add ctrl-1 $ .!clone line
               listen-on-controller! ctrl-0
