@@ -751,7 +751,7 @@
           :code $ quote $ defn generate-lines (base l0 level name)
             let
                 line-to $ &q+ base l0
-                line $ %{} TreeLine (:from base) (:to line-to) (:name name) (:line l0)
+                line $ TreeLine :from base :to line-to :name name :line l0
               if (> level 0)
                 concat ([] line)
                   mapcat transformers $ fn (info)
@@ -801,12 +801,9 @@
         'transformers $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def transformers
             []
-              %{} TreeTransform (:name :a)
-                :vector $ quaternion 0.7 0.3 0.3 0.1
-              %{} TreeTransform (:name :b)
-                :vector $ quaternion 0.7 0.2 -0.3 -0.43
-              %{} TreeTransform (:name :c)
-                :vector $ quaternion 0.4 -0.44 0.12 0.33
+              TreeTransform :name :a :vector $ quaternion 0.7 0.3 0.3 0.1
+              TreeTransform :name :b :vector $ quaternion 0.7 0.2 -0.3 -0.43
+              TreeTransform :name :c :vector $ quaternion 0.4 -0.44 0.12 0.33
           :examples $ []
           :schema $ :: 'List 'quatrefoil.app.comp.quat-tree/TreeTransform
         'tube-material $ %{} 'CodeEntry (:doc |)
