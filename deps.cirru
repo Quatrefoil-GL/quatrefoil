@@ -2,5 +2,5 @@
 {} (:calcit-version |0.29.1)
   :version |0.1.5
   :dependencies $ {} (|Triadica/touch-control |0.0.27)
-    |calcit-lang/quaternion |0.2.11
+    |calcit-lang/quaternion |0.2.12
     |mvc-works/pointed-prompt |0.0.16
