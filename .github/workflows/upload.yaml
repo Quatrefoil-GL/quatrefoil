@@ -55,8 +55,8 @@ jobs:
           test "$(calcit --version)" = "0.29.3"
           calcit calcit.cirru edit format
           git diff --exit-code -- calcit.cirru
-          calcit calcit.cirru fix --workflow strict --verify --format edn
-          calcit calcit.cirru --check-only --all-defs
+          calcit calcit.cirru fix --workflow strict --verify --format json | jq '{validation:.data.validation,suggestions:[.data.suggestions[]? | {definition,path,message}],diagnostics:.diagnostics}'
+          calcit calcit.cirru --check-only --all-defs --format json | jq '{summary:.data.summary,failures:[.data.definitions[]? | select(.status != "passed")],diagnostics:.diagnostics}'
           calcit calcit.cirru --check-only \
             --ns quatrefoil.alias \
             --ns quatrefoil.app.comp.container \
@@ -82,13 +82,13 @@ jobs:
             --ns quatrefoil.math \
             --ns quatrefoil.schema \
             --ns quatrefoil.util.core \
-            --summary-only --format json
-          calcit calcit.cirru analyze weak-types --only coverage --summary-only --format json
+            --summary-only --format json | jq '{summary:.data.summary,diagnostics:.diagnostics}'
+          calcit calcit.cirru analyze weak-types --only coverage --summary-only --format json | jq '.data.summary'
           calcit calcit.cirru analyze weak-types \
             --only schema-dynamic,code-dynamic \
             --intent unresolved \
-            --summary-only --format json
-          calcit calcit.cirru analyze weak-types --only deprecated-call --summary-only --format json
+            --summary-only --format json | jq '.data.summary'
+          calcit calcit.cirru analyze weak-types --only deprecated-call --summary-only --format json | jq '.data.summary'
           calcit calcit.cirru analyze weak-types --only dynamic-method
 
       - name: Verify tree-utils lockfile
