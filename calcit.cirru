@@ -1463,9 +1463,14 @@
             sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
               :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
               :event $ {} $ :control
-                fn (states delta elapse d!) (; println |delta delta)
+                fn (states delta elapse d!)
+                  hint-fn $ {}
+                    :args $ [] (:: 'List 'Number) (:: 'List 'Number) 'Number 'Dynamic
+                    :return 'Dynamic
                   let[] (x0 y0)
-                    option:unwrap-or (get state field) ([] 0 0)
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as
+                      option:unwrap-or (get state field) ([] 0 0)
+                      :: 'List 'Number
                     let
                         dx $ * speed elapse $ option:unwrap-or (nth delta 0) 0
                         dy $ * speed elapse $ option:unwrap-or (nth delta 1) 0
