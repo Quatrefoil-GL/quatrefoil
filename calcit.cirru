@@ -3,7 +3,7 @@
   :about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `calcit query` to inspect and `calcit edit`/`calcit tree` to modify. Run `calcit docs agents --contract` before mutations; use `--full` for first orientation or changed contract digest. Manual edits must follow format and schema conventions, then run `calcit edit format`."
   :package |quatrefoil
   :entries $ {} $ :default
-    {} (:description |) (:init-fn 'quatrefoil.app.main/main!) (:mode :native) (:reload-fn 'quatrefoil.app.main/reload!) (:target :browser)
+    {} (:description |) (:init-fn 'quatrefoil.app.main/main!) (:mode :js) (:reload-fn 'quatrefoil.app.main/reload!) (:target :browser)
       :feature-policy $ {}
       :modules $ [] |touch-control/ |pointed-prompt/ |quaternion/
       :type-slots $ {}
@@ -13,12 +13,12 @@
         'ambient-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn ambient-light (props & children) (create-element :ambient-light props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'arrange-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn arrange-children (children)
             let
-                cursor $ first children
+                cursor $ .unwrap-or (first children) nil
                 result $ if
                   and
                     = 1 $ count children
@@ -34,12 +34,12 @@
         'box $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn box (props & children) (create-element :box props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'buffer-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn buffer-object (props & children) (create-element :buffer-object props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'create-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-element (el-name props children)
@@ -49,12 +49,12 @@
                 or (field props :on) (field props :event)
                 , :children $ arrange-children children
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Tag 'Dynamic $ :: 'List 'Dynamic
         'directional-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn directional-light (props & children) (create-element :directional-light props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'field $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn field (value key)
@@ -75,98 +75,98 @@
         'group $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn group (props & children) (create-element :group props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'line $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn line (props & children) (create-element :line props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'line-segments $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn line-segments (props & children) (create-element :line-segments props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'mesh-line $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn mesh-line (props & children) (create-element :mesh-line props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'parametric $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn parametric (props & children) (create-element :parametric props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'plane-reflector $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn plane-reflector (props & children) (create-element :plane-reflector props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'point-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn point-light (props & children) (create-element :point-light props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'polyhedron $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn polyhedron (props & children) (create-element :polyhedron props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'rect-area-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn rect-area-light (props & children) (create-element :rect-area-light props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'scene $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn scene (props & children) (create-element :scene props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'shader-mesh $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn shader-mesh (props & children) (create-element :shader-mesh props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'shape $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn shape (props & children) (create-element :shape props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'some-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn some-object (props)
             create-element :some-object props $ []
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'sphere $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn sphere (props & children) (create-element :sphere props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'spline $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn spline (props & children) (create-element :spline props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'spot-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn spot-light (props & children) (create-element :spot-light props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'text $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn text (props & children) (create-element :text props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'torus $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn torus (props & children) (create-element :torus props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
         'tube $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn tube (props & children) (create-element :tube props children)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'quatrefoil.schema/Shape)
             :args $ [] 'Dynamic
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.alias
@@ -185,7 +185,7 @@
                 :position $ [] 0 0 10
                 :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic
             :features $ #{} :js-ffi
         'comp-container $ %{} 'CodeEntry (:doc |)
@@ -201,12 +201,11 @@
                   {}
                     :scale $ [] 0.01 0.01 0.01
                     :position $ [] 0 1.2 -0.8
-                  case-default tab
-                    comp-portal $ fn (next d!)
-                      d! cursor $ assoc state :tab next
+                  match tab
                     :portal $ comp-portal $ fn (next d!)
                       d! cursor $ assoc state :tab next
-                    :todolist $ comp-todolist $ field store :tasks
+                    :todolist $ comp-todolist $ quatrefoil.util.core/require-decoded
+                      try-decode-map-as (field store :tasks) (:: 'Map 'Number 'Dynamic)
                     :demo $ comp-demo
                     :lines $ comp-lines
                     :shapes $ comp-shapes
@@ -219,6 +218,8 @@
                     :shader $ comp-shader
                     :gltf $ comp-gltf
                     :sphere-grid $ comp-sphere-grid
+                    _ $ comp-portal $ fn (next d!)
+                      d! cursor $ assoc state :tab next
                   if (not= tab :portal)
                     comp-back $ fn (d!)
                       d! cursor $ assoc state :tab :portal
@@ -228,7 +229,7 @@
                   ; point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
                     :position $ [] 0 60 0
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic
             :features $ #{} :js-ffi
         'comp-demo $ %{} 'CodeEntry (:doc |)
@@ -266,7 +267,7 @@
               point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
                 :position $ [] 10 20 10
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ []
             :features $ #{} :js-ffi
         'comp-gltf $ %{} 'CodeEntry (:doc |)
@@ -314,36 +315,41 @@
             :args $ [] 'Dynamic 'Dynamic
         'range-2d $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn range-2d (n)
-            -> (range-bothway n)
+            ->
+              range
+                inc $ negate n
+                , n
               mapcat $ fn (i)
-                -> (range-bothway n)
+                ->
+                  range
+                    inc $ negate n
+                    , n
                   map $ fn (j) ([] i j)
           :examples $ []
           :schema $ :: 'Fn $ {}
             :args $ [] 'Number
-            :return $ :: 'List 'Dynamic
+            :return $ :: 'List $ :: 'List 'Number
         'range-3d $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn range-3d (n)
-            foldl (range-bothway n)
-              assert-type ([]) (:: 'List 'Dynamic)
-              fn (acc i)
-                concat
-                  assert-type acc $ :: 'List 'Dynamic
-                  assert-type
-                    foldl (range-bothway n)
-                      assert-type ([]) (:: 'List 'Dynamic)
-                      fn (acc2 j)
-                        concat
-                          assert-type acc2 $ :: 'List 'Dynamic
-                          assert-type
-                            -> (range-bothway n)
-                              map $ fn (k) ([] i j k)
-                            :: 'List 'Dynamic
-                    :: 'List 'Dynamic
+            ->
+              range
+                inc $ negate n
+                , n
+              mapcat $ fn (i)
+                ->
+                  range
+                    inc $ negate n
+                    , n
+                  mapcat $ fn (j)
+                    ->
+                      range
+                        inc $ negate n
+                        , n
+                      map $ fn (k) ([] i j k)
           :examples $ []
           :schema $ :: 'Fn $ {}
             :args $ [] 'Number
-            :return $ :: 'List 'Dynamic
+            :return $ :: 'List $ :: 'List 'Number
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.comp.container
           :require
@@ -404,7 +410,7 @@
                 point-light $ {} (:color 0xffffff) (:intensity 1) (:distance 200)
                   :position $ v3 20 40 50
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
@@ -450,35 +456,38 @@
                   {}
                     :buildings $ make-building-data 80
                     :factor $ [] 1 1 1
-              group ({}) & horizontal-lines & forward-lines &
-                -> (field state :buildings)
+              group ({}) & $ concat horizontal-lines forward-lines
+                ->
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as (field state :buildings)
+                    :: 'List $ :: 'List 'Number
                   map $ fn (vec)
                     let[] (x y w d h) vec $ box $ {} (:width w) (:height h) (:depth d)
                       :position $ [] x (* h 0.5) (+ y)
                       :material $ {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
                       :event $ {} $ :click
                         fn (e d!) (d! :demo nil)
-                sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
-                  :position $ [] 30 30 40
-                  :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.8) (:transparent true)
-                  :event $ {} $ :click
-                    fn (e d!)
-                      d! cursor $ assoc state :buildings $ make-building-data 80
-                point-light $ {} (:color 0xffff55) (:intensity 2) (:distance 600)
-                  :position $ [] 30 20 40
-                tube $ {} (:points-fn cloud-fn) (:radius 0.6) (:tubular-segments 1600) (:radial-segments 4)
-                  :factor $ field state :factor
-                  :position $ [] 0 200 0
-                  :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
-                sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
-                  :position $ [] 0 240 0
-                  :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.2) (:transparent true)
-                  :event $ {} $ :click
-                    fn (e d!)
-                      d! cursor $ assoc state :factor $ [] (rand-shift 1 0.92) (rand-shift 1 0.92) (rand-shift 1 0.92)
-                ambient-light $ {} $ :color 0x444422
+                []
+                  sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
+                    :position $ [] 30 30 40
+                    :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.8) (:transparent true)
+                    :event $ {} $ :click
+                      fn (e d!)
+                        d! cursor $ assoc state :buildings $ make-building-data 80
+                  point-light $ {} (:color 0xffff55) (:intensity 2) (:distance 600)
+                    :position $ [] 30 20 40
+                  tube $ {} (:points-fn cloud-fn) (:radius 0.6) (:tubular-segments 1600) (:radial-segments 4)
+                    :factor $ field state :factor
+                    :position $ [] 0 200 0
+                    :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
+                  sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
+                    :position $ [] 0 240 0
+                    :material $ {} (:kind :mesh-basic) (:color 0xffff55) (:opacity 0.2) (:transparent true)
+                    :event $ {} $ :click
+                      fn (e d!)
+                        d! cursor $ assoc state :factor $ [] (rand-shift 1 0.92) (rand-shift 1 0.92) (rand-shift 1 0.92)
+                  ambient-light $ {} $ :color 0x444422
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic
             :features $ #{} :js-ffi
         'comp-lines $ %{} 'CodeEntry (:doc |)
@@ -515,7 +524,7 @@
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 20 40 50
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ []
             :features $ #{} :js-ffi
         'ffi-object $ %{} 'CodeEntry (:doc |)
@@ -541,7 +550,7 @@
                     :position $ [] 0 0 0
                     :material $ {} (:kind :line-dashed) (:color 0xccccff) (:opacity 0.3) (:transparent true) (:linewidth 2) (:gapSize 0.5) (:dashSize 0.5)
           :examples $ []
-          :schema $ :: 'List 'Dynamic
+          :schema $ :: 'List 'quatrefoil.schema/Shape
         'horizontal-lines $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def horizontal-lines
             -> (range 20)
@@ -553,9 +562,10 @@
                     :position $ [] 0 0 0
                     :material $ {} (:kind :line-dashed) (:color 0xccccff) (:opacity 0.3) (:transparent true) (:linewidth 2) (:gapSize 0.5) (:dashSize 0.5)
           :examples $ []
-          :schema $ :: 'List 'Dynamic
+          :schema $ :: 'List 'quatrefoil.schema/Shape
         'js-number $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn js-number (value) (unsafe-coerce value Number)
+          :code $ quote $ defn js-number (value)
+            quatrefoil.util.core/require-decoded $ try-decode-map-as value 'Number
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Number)
             :args $ [] 'Dynamic
@@ -608,7 +618,9 @@
                   map $ fn (x)
                     shape $ {} (:path heart-path)
                       :scale $ v-scale (v3 1 1 1)
-                        pow (rand 0.26) 1.4
+                        pow
+                          quatrefoil.util.core/require-decoded $ try-decode-map-as (rand 0.26) 'Number
+                          , 1.4
                       :rotation $ [] (rand-around 0 1) (rand-around 0 1) (rand-around 0 1)
                       :position $ [] (rand-around 0 50) (rand-around 0 50) (rand-around 20 80)
                       :material $ {} (:kind :mesh-lambert) (:opacity 0.5) (:transparent true) (:color 0xff2225)
@@ -622,7 +634,7 @@
                   :position $ [] 10 0 0
                 ambient-light $ {} (:color 0x666666) (:intencity 1)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
@@ -635,9 +647,7 @@
           :code $ quote $ def heart-path
             [] (:: :move-to 25 25) (:: :bezier-curve-to 25 25 20 50 0 50) (:: :bezier-curve-to -30 50 -30 15 -30 15) (:: :bezier-curve-to -30 -5 -10 -27 25 -45) (:: :bezier-curve-to 60 -22 80 -5 80 15) (:: :bezier-curve-to 80 15 80 50 50 50) (:: :bezier-curve-to 35 50 25 25 25 25)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
-            :args $ [] 'Dynamic 'Tag 'Dynamic
-            :features $ #{} :js-ffi
+          :schema $ :: 'List 'Enum
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.comp.mirror
           :require
@@ -667,7 +677,7 @@
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 20 40 50
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic
             :features $ #{} :js-ffi
         'comp-tab $ %{} 'CodeEntry (:doc |)
@@ -685,7 +695,7 @@
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true)
                   :color $ hsluvx 0 30 96
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Tag 'String 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
       :ns $ %{} 'NsEntry (:doc |)
@@ -695,6 +705,14 @@
             quatrefoil.core :refer $ defcomp hslx hsluvx
     'quatrefoil.app.comp.quat-tree $ %{} 'FileEntry
       :defs $ {}
+        'TreeLine $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defstruct TreeLine (:from 'quaternion.core/Quaternion) (:to 'quaternion.core/Quaternion) (:name 'Tag) (:line 'quaternion.core/Quaternion)
+          :examples $ []
+          :schema $ :: 'StructDef
+        'TreeTransform $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defstruct TreeTransform (:name 'Tag) (:vector 'quaternion.core/Quaternion)
+          :examples $ []
+          :schema $ :: 'StructDef
         'comp-quat-tree $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-quat-tree ()
             let
@@ -708,21 +726,19 @@
                 group ({}) & $ -> lines $ map
                   fn (line)
                     let
-                        from $ assert-type (field line :from) 'quaternion.core/Quaternion
-                        to $ assert-type (field line :to) 'quaternion.core/Quaternion
-                        l1 $ assert-type (field line :line) 'quaternion.core/Quaternion
+                        from $ :from line
+                        to $ :to line
                         v $ &q- to from
                         size $ q-length v
-                        w $ nth to 1
                       tube $ {} (:points-fn straight-fn)
-                        :factor $ field line :factor
+                        :factor $ {} (:from from) (:to to)
                         :radius $ * 0.04 size
                         :tubular-segments 4
                         :radial-segments 4
                         :position $ v3 -10 0 0
-                        :material $ assoc tube-material :color $ pick-color (field line :name)
+                        :material $ assoc tube-material :color $ pick-color (:name line)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ []
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
@@ -735,27 +751,19 @@
           :code $ quote $ defn generate-lines (base l0 level name)
             let
                 line-to $ &q+ base l0
-              concat
-                assert-type
-                  [] $ {} (:from base) (:to line-to) (:name name) (:line l0)
-                  :: 'List 'Dynamic
-                assert-type
-                  if (> level 0)
-                    foldl transformers
-                      assert-type ([]) (:: 'List 'Dynamic)
-                      fn (acc info)
-                        let
-                            trans $ assert-type (field info :vector) 'quaternion.core/Quaternion
-                            name $ assert-type (field info :name) 'Tag
-                          concat
-                            assert-type acc $ :: 'List 'Dynamic
-                            generate-lines line-to (&q* l0 trans) (dec level) name
-                    assert-type ([]) (:: 'List 'Dynamic)
-                  :: 'List 'Dynamic
+                line $ TreeLine :from base :to line-to :name name :line l0
+              if (> level 0)
+                concat ([] line)
+                  mapcat transformers $ fn (info)
+                    generate-lines line-to
+                      &q* l0 $ :vector info
+                      dec level
+                      :name info
+                [] line
           :examples $ []
           :schema $ :: 'Fn $ {}
             :args $ [] 'quaternion.core/Quaternion 'quaternion.core/Quaternion 'Number 'Tag
-            :return $ :: 'List 'Dynamic
+            :return $ :: 'List 'quatrefoil.app.comp.quat-tree/TreeLine
         'leaf-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def leaf-material
             {} (:kind :mesh-standard) (:color 0x66cc55) (:opacity 0.5) (:transparent true)
@@ -763,24 +771,29 @@
           :schema $ :: 'Dynamic
         'pick-color $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn pick-color (name)
-            case-default name 0xffffff (:a 0xbbaaff) (:b 0x88bbff) (:c 0x77ccaa)
+            match name (:a 0xbbaaff) (:b 0x88bbff) (:c 0x77ccaa) (_ 0xffffff)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Number)
             :args $ [] 'Tag
         'straight-fn $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn straight-fn (t factor)
-            let-sugar
-                  [] w1 x1 y1 z1
-                  &enum:params $ &map:get factor :from
-                ([] w2 x2 y2 z2)
-                  &enum:params $ &map:get factor :to
-              []
-                &+ (&* x1 t)
-                  &* x2 $ &- 1 t
-                &+ (&* y1 t)
-                  &* y2 $ &- 1 t
-                &+ (&* z1 t)
-                  &* z2 $ &- 1 t
+            let
+                factor0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as factor (:: 'Map 'Tag 'quaternion.core/Quaternion)
+              let[] (w1 x1 y1 z1)
+                quatrefoil.util.core/require-decoded $ try-decode-map-as
+                  &enum:params $ .unwrap $ get factor0 :from
+                  :: 'List 'Number
+                let[] (w2 x2 y2 z2)
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as
+                    &enum:params $ .unwrap $ get factor0 :to
+                    :: 'List 'Number
+                  []
+                    &+ (&* x1 t)
+                      &* x2 $ &- 1 t
+                    &+ (&* y1 t)
+                      &* y2 $ &- 1 t
+                    &+ (&* z1 t)
+                      &* z2 $ &- 1 t
           :examples $ []
           :schema $ :: 'Fn $ {}
             :args $ [] 'Number 'Dynamic
@@ -788,14 +801,11 @@
         'transformers $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def transformers
             []
-              {} (:name :a)
-                :vector $ quaternion 0.7 0.3 0.3 0.1
-              {} (:name :b)
-                :vector $ quaternion 0.7 0.2 -0.3 -0.43
-              {} (:name :c)
-                :vector $ quaternion 0.4 -0.44 0.12 0.33
+              TreeTransform :name :a :vector $ quaternion 0.7 0.3 0.3 0.1
+              TreeTransform :name :b :vector $ quaternion 0.7 0.2 -0.3 -0.43
+              TreeTransform :name :c :vector $ quaternion 0.4 -0.44 0.12 0.33
           :examples $ []
-          :schema $ :: 'List 'Dynamic
+          :schema $ :: 'List 'quatrefoil.app.comp.quat-tree/TreeTransform
         'tube-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def tube-material
             {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
@@ -829,7 +839,7 @@
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 20 40 50
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ []
         'inline-shader $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defmacro inline-shader (name)
@@ -892,7 +902,7 @@
                     :position $ [] 0 -40 0
                     :material paper-material
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ []
             :features $ #{} :js-ffi
         'comp-shapes $ %{} 'CodeEntry (:doc |)
@@ -930,7 +940,7 @@
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 20 40 50
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ []
             :features $ #{} :js-ffi
         'paper-fn $ %{} 'CodeEntry (:doc |)
@@ -1008,6 +1018,7 @@
                           {} $ :initial $ field task :text
                           fn (text)
                             dispatch! :edit-task $ [] (field task :id) text
+                            , &unit
                 text $ {}
                   :text $ field task :text
                   :size 3
@@ -1021,7 +1032,7 @@
                   fn (event dispatch!)
                     dispatch! :delete-task $ field task :id
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic 'Number
             :features $ #{} :js-ffi
         'comp-todolist $ %{} 'CodeEntry (:doc |)
@@ -1038,14 +1049,14 @@
                             e0 $ unsafe-coerce e DomMouseEvent
                           [] (.-pageX e0) (.-pageY e0)
                         {} $ :initial |
-                        fn (text) (d! :add-task text)
+                        fn (text) (d! :add-task text) &unit
               group
                 {} $ :position $ [] 0 20 0
                 ->
-                  &map:to-list $ assert-type tasks $ :: 'Map 'Number 'Dynamic
+                  &map:to-list $ quatrefoil.util.core/require-decoded $ try-decode-map-as tasks (:: 'Map 'Number 'Dynamic)
                   map-indexed $ fn (idx entry)
                     let
-                        task-id $ assert-type
+                        task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                           option:unwrap-or (nth entry 0) 0
                           , 'Number
                         task $ option:unwrap-or (nth entry 1) nil
@@ -1054,7 +1065,7 @@
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 0 20 50
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] $ :: 'Map 'Number 'Dynamic
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
@@ -1073,60 +1084,59 @@
       :defs $ {}
         'comp-triflorum $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-triflorum ()
-            group ({}) &
+            group ({}) & $ concat
               -> (range 100)
                 map $ fn (i)
                   tube $ {} (:points-fn petal-fn) (:factor i) (:radius 0.06) (:tubularSegments 20) (:radialSegments 8)
                     :position $ [] 0 0 0
                     :material $ {} (:kind :mesh-standard) (:color 0x882222) (:opacity 1) (:transparent true)
-              , &
-                -> (range 100)
-                  map $ fn (i)
-                    tube $ {} (:points-fn yarn-fn) (:factor i) (:radius 0.3) (:tubularSegments 20) (:radialSegments 8)
-                      :position $ [] 0 0 0
-                      :material $ {} (:kind :mesh-standard) (:color 0xffaaaa) (:opacity 0.27) (:transparent true)
-                , &
-                  -> (range 12)
-                    map $ fn (i)
-                      let
-                          theta $ * i &PI (sqrt 2) 0.15
-                        polyhedron $ {}
-                          :vertices $ let
-                              r1 1
-                              r2 1
-                              r3 3
-                              th1 $ + theta 1.5
-                              th2 $ - theta 1.5
-                              th3 $ - theta &PI
-                            []
-                              []
-                                * r1 $ cos th1
-                                , 0 $ * r1 $ sin th1
-                              []
-                                * r1 $ cos th2
-                                , 0 $ * r1 $ sin th2
-                              []
-                                * r3 $ cos theta
-                                , 0.5 $ * r3 $ sin theta
-                              []
-                                * r2 $ cos th3
-                                , -2 $ * r2 $ sin th3
-                          :indices $ [] ([] 0 1 2) ([] 0 1 3) ([] 0 2 3) ([] 1 2 3)
-                          :radius 6
-                          :detail 0
-                          :position $ let
-                              r 8
-                            []
-                              * r $ cos theta
-                              , -0.3 $ * r $ sin theta
-                          :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0x45cc33)
-                  tube $ {} (:points-fn main-branch-fn) (:radius 0.7) (:tubularSegments 20) (:radialSegments 8)
+              -> (range 100)
+                map $ fn (i)
+                  tube $ {} (:points-fn yarn-fn) (:factor i) (:radius 0.3) (:tubularSegments 20) (:radialSegments 8)
                     :position $ [] 0 0 0
-                    :material $ {} (:kind :mesh-standard) (:color 0x336622) (:opacity 1) (:transparent true)
-                  point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
-                    :position $ [] 0 20 50
+                    :material $ {} (:kind :mesh-standard) (:color 0xffaaaa) (:opacity 0.27) (:transparent true)
+              -> (range 12)
+                map $ fn (i)
+                  let
+                      theta $ * i &PI (sqrt 2) 0.15
+                    polyhedron $ {}
+                      :vertices $ let
+                          r1 1
+                          r2 1
+                          r3 3
+                          th1 $ + theta 1.5
+                          th2 $ - theta 1.5
+                          th3 $ - theta &PI
+                        []
+                          []
+                            * r1 $ cos th1
+                            , 0 $ * r1 $ sin th1
+                          []
+                            * r1 $ cos th2
+                            , 0 $ * r1 $ sin th2
+                          []
+                            * r3 $ cos theta
+                            , 0.5 $ * r3 $ sin theta
+                          []
+                            * r2 $ cos th3
+                            , -2 $ * r2 $ sin th3
+                      :indices $ [] ([] 0 1 2) ([] 0 1 3) ([] 0 2 3) ([] 1 2 3)
+                      :radius 6
+                      :detail 0
+                      :position $ let
+                          r 8
+                        []
+                          * r $ cos theta
+                          , -0.3 $ * r $ sin theta
+                      :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0x45cc33)
+              []
+                tube $ {} (:points-fn main-branch-fn) (:radius 0.7) (:tubularSegments 20) (:radialSegments 8)
+                  :position $ [] 0 0 0
+                  :material $ {} (:kind :mesh-standard) (:color 0x336622) (:opacity 1) (:transparent true)
+                point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
+                  :position $ [] 0 20 50
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ []
             :features $ #{} :js-ffi
         'main-branch-fn $ %{} 'CodeEntry (:doc |)
@@ -1143,32 +1153,35 @@
                 theta $ *
                   + i $ * ratio 0.4
                   * &PI $ sqrt 2
-              v+
-                let
-                    radius $ +
-                      * (- 1 ratio) 8
-                      * 1.0 $ sqrt $ + 6 i
-                  v-scale
-                    v3
-                      * radius $ cos theta
-                      *
-                        - 20 $ * i 0.1
-                        , ratio
-                      * radius $ sin theta
-                    , ratio
-                v-scale
+              match
+                v+
                   let
-                      radius $ * 0.8 $ sqrt (+ 6 i)
-                    v3
-                      * radius $ cos theta0
-                      *
-                        - 20 $ * i 0.1
-                        , ratio
-                      * radius $ sin theta0
-                  - 1 ratio
+                      radius $ +
+                        * (- 1 ratio) 8
+                        * 1.0 $ sqrt $ + 6 i
+                    v-scale
+                      v3
+                        * radius $ cos theta
+                        *
+                          - 20 $ * i 0.1
+                          , ratio
+                        * radius $ sin theta
+                      , ratio
+                  v-scale
+                    let
+                        radius $ * 0.8 $ sqrt (+ 6 i)
+                      v3
+                        * radius $ cos theta0
+                        *
+                          - 20 $ * i 0.1
+                          , ratio
+                        * radius $ sin theta0
+                    - 1 ratio
+                (:v3 x y z) ([] x y z)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'quaternion.vector/V3)
+          :schema $ :: 'Fn $ {}
             :args $ [] 'Number 'Number
+            :return $ :: 'List 'Number
         'yarn-fn $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn yarn-fn (ratio i)
             let
@@ -1198,13 +1211,13 @@
     'quatrefoil.app.main $ %{} 'FileEntry
       :defs $ {}
         '*store $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *store
+          :code $ quote $ defref *store
             {}
               :tasks $ {} $ 100
                 {} (:id 100) (:text "|Initial task") (:done? false)
               :states $ {} $ :cursor ([])
           :examples $ []
-          :schema $ :: 'Ref 'Dynamic
+          :schema $ :: 'Ref $ :: 'Map 'Tag 'Dynamic
         'DracoLoaderHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait DracoLoaderHost
             .setDecoderPath $ :: 'Fn $ {} (:return 'Unit)
@@ -1237,9 +1250,12 @@
             if (list? op)
               recur :states $ [] op op-data
               let
-                  store $ updater @*store op op-data
+                  store $ updater @*store
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as op 'Tag
+                    , op-data
                 ; js/console.log |Dispatch: op op-data store
                 reset! *store store
+                , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'Dynamic
@@ -1259,7 +1275,8 @@
             :args $ [] 'Dynamic
             :features $ #{} :js-ffi
         'js-number $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn js-number (value) (unsafe-coerce value Number)
+          :code $ quote $ defn js-number (value)
+            quatrefoil.util.core/require-decoded $ try-decode-map-as value 'Number
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Number)
             :args $ [] 'Dynamic
@@ -1283,35 +1300,37 @@
             set-perspective-camera! $ {} (:fov 50) (:near 0.1) (:far 10)
               :position $ v3 0 1.6 1
               :aspect $ /
-                js-number $ .-innerWidth $ ffi-object js/window
-                js-number $ .-innerHeight $ ffi-object js/window
+                js-number $ .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+                js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
             let
                 canvas-el $ js/document.querySelector |canvas
               init-renderer! canvas-el $ {} (:background 0x110022) (:shadow-map? true)
                 ; :composer-passes $ [] $ new UnrealBloomPass
                   new THREE/Vector2
-                    js-number $ .-innerWidth $ ffi-object js/window
-                    js-number $ .-innerHeight $ ffi-object js/window
+                    js-number $ .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+                    js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
                   , 1.5 0.4 0.85
             render-app!
-            add-watch *store :changes $ fn (store prev) (render-app!)
+            add-watch! *store :changes $ fn (store prev) (render-app!) &unit
             set! js/window.onkeydown handle-key-event
             render-control!
             handle-control-events
             init-controls!
             println "|App started!"
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
             :features $ #{} :js-ffi
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
-            if (some? build-errors) (hud! |error build-errors)
-              do (hud! |ok~ nil) (clear-cache!) (clear-control-loop!) (handle-control-events) (remove-watch *store :changes)
-                add-watch *store :changes $ fn (store prev) (render-app!)
+            if (non-nil? build-errors) (hud! |error build-errors)
+              do (hud! |ok~ nil) (clear-cache!) (clear-control-loop!) (handle-control-events) (remove-watch! *store :changes)
+                add-watch! *store :changes $ fn (store prev) (render-app!) &unit
                 render-app!
                 set! js/window.onkeydown handle-key-event
                 println "|Code updated."
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
@@ -1388,50 +1407,56 @@
         %{} 'CodeEntry (:doc |)
           :code $ quote $ defn updater (store op op-data)
             let
-                store0 $ assert-type store $ :: 'Map 'Tag 'Dynamic
-              case-default op store0
+                store0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as store (:: 'Map 'Tag 'Dynamic)
+              match op
                 :states $ update-states store0 op-data
                 :add-task $ let
-                    tasks $ assert-type
+                    tasks $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                       option:unwrap-or (get store0 :tasks) ({})
                       :: 'Map 'Number 'Dynamic
-                    text $ assert-type op-data 'String
-                    id $ assert-type js/Date.now 'Number
+                    text $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data 'String
+                    id $ shared/now-ms
                   assoc store0 :tasks $ assoc tasks id $ {} (:id id) (:text text) (:done? false)
                 :delete-task $ let
-                    tasks $ assert-type
+                    tasks $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                       option:unwrap-or (get store0 :tasks) ({})
                       :: 'Map 'Number 'Dynamic
-                    task-id $ assert-type op-data 'Number
+                    task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data 'Number
                   assoc store0 :tasks $ dissoc tasks task-id
                 :toggle-task $ let
-                    tasks $ assert-type
+                    tasks $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                       option:unwrap-or (get store0 :tasks) ({})
                       :: 'Map 'Number 'Dynamic
-                    task-id $ assert-type op-data 'Number
-                    done? $ assert-type
+                    task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data 'Number
+                    done? $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                       option:unwrap-or
                         get-in tasks $ [] task-id :done?
                         , false
                       , 'Bool
                   assoc store0 :tasks $ assoc-in tasks ([] task-id :done?) (not done?)
                 :edit-task $ let
-                    tasks $ assert-type
+                    tasks $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                       option:unwrap-or (get store0 :tasks) ({})
                       :: 'Map 'Number 'Dynamic
-                    data $ assert-type op-data $ :: 'List 'Dynamic
-                    task-id $ assert-type (first data) 'Number
-                    text $ assert-type
+                    data $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data (:: 'List 'Dynamic)
+                    task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as
+                      .unwrap $ first data
+                      , 'Number
+                    text $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                       option:unwrap-or (last data) |
                       , 'String
                   assoc store0 :tasks $ assoc-in tasks ([] task-id :text) text
+                _ store0
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {}
             :args $ [] 'Dynamic 'Tag 'Dynamic
             :features $ #{} :js-ffi
+            :return $ :: 'Map 'Tag 'Dynamic
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.updater
-          :require $ quatrefoil.cursor :refer $ update-states
+          :require
+            quatrefoil.cursor :refer $ update-states
+            js-ffi.shared :as shared
     'quatrefoil.comp.control $ %{} 'FileEntry
       :defs $ {}
         'comp-2d-control $ %{} 'CodeEntry (:doc |)
@@ -1439,15 +1464,20 @@
             sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0) (:position position)
               :material $ {} (:kind :mesh-basic) (:color color) (:opacity 0.3) (:transparent true)
               :event $ {} $ :control
-                fn (states delta elapse d!) (; println |delta delta)
-                  let-sugar
-                        [] x0 y0
-                        option:unwrap-or (get state field) ([] 0 0)
-                      dx $ * speed elapse $ option:unwrap-or (nth delta 0) 0
-                      dy $ * speed elapse $ option:unwrap-or (nth delta 1) 0
-                    d! cursor $ assoc state field $ [] (+ x0 dx) (+ y0 dy)
+                fn (states delta elapse d!)
+                  hint-fn $ {}
+                    :args $ [] (:: 'List 'Number) (:: 'List 'Number) 'Number 'Dynamic
+                    :return 'Dynamic
+                  let[] (x0 y0)
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as
+                      option:unwrap-or (get state field) ([] 0 0)
+                      :: 'List 'Number
+                    let
+                        dx $ * speed elapse $ option:unwrap-or (nth delta 0) 0
+                        dy $ * speed elapse $ option:unwrap-or (nth delta 1) 0
+                      d! cursor $ assoc state field $ [] (+ x0 dx) (+ y0 dy)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic 'Dynamic 'Dynamic 'Dynamic 'Number 'Number
             :features $ #{} :js-ffi
         'comp-pin-point $ %{} 'CodeEntry (:doc |)
@@ -1455,8 +1485,10 @@
             let
                 position $ let
                     p $ field options :position
-                  if (some? p) (assert-type p 'quaternion.vector/V3) (v3 0 0 0)
-                speed $ assert-type
+                  if (non-nil? p)
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as p 'quaternion.vector/V3
+                    v3 0 0 0
+                speed $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   or (field options :speed) 1
                   , 'Number
                 text-color $ either (field options :text-color) 0xaaaaff
@@ -1471,8 +1503,8 @@
                   :event $ {}
                     :control $ fn (states delta elapse d!) (; println |delta delta)
                       let
-                          delta0 $ assert-type delta $ :: 'List 'Number
-                          elapse0 $ assert-type elapse 'Number
+                          delta0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as delta (:: 'List 'Number)
+                          elapse0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as elapse 'Number
                           next-pos $ &v+ position $ to-viewer-axis
                             * speed $ option:unwrap-or (nth delta0 0) 0
                             * speed $ option:unwrap-or (nth delta0 1) 0
@@ -1480,13 +1512,13 @@
                         on-change next-pos d!
                     :gamepad $ fn (info elapsed d!) (js/console.log info)
                       let
-                          elapsed0 $ assert-type elapsed 'Number
-                          rightward $ assert-type (field info :rightward) 'quaternion.vector/V3
-                          upward $ assert-type (field info :upward) 'quaternion.vector/V3
-                          forward-v3 $ assert-type (field info :forward) 'quaternion.vector/V3
-                          dx $ assert-type (field info :dx) 'Number
-                          dy $ assert-type (field info :dy) 'Number
-                          v2 $ assert-type (field info :v2) 'Number
+                          elapsed0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as elapsed 'Number
+                          rightward $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :rightward) 'quaternion.vector/V3
+                          upward $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :upward) 'quaternion.vector/V3
+                          forward-v3 $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :forward) 'quaternion.vector/V3
+                          dx $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :dx) 'Number
+                          dy $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :dy) 'Number
+                          v2 $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :v2) 'Number
                           speeding $ * speed $ if (field info :b) 8 1
                           forward $ * speeding elapsed0 v2 $ if (field info :a) -1 1
                           next-pos $ v+ position
@@ -1495,7 +1527,7 @@
                             v-scale forward-v3 forward
                         on-change next-pos d!
                 if
-                  some? $ field options :label
+                  non-nil? $ field options :label
                   text $ {}
                     :position $ v3 -0.6 2 0
                     :text $ str $ field options :label
@@ -1503,7 +1535,7 @@
                     :size 2
                     :depth 0.5
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
         'comp-switch $ %{} 'CodeEntry (:doc |)
@@ -1517,7 +1549,9 @@
                 {} $ :position $ field options :position
                 sphere $ {} (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0)
                   :radius $ &*
-                    or (field options :radius) 1
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as
+                      or (field options :radius) 1
+                      , 'Number
                     if value 1 0.8
                   :material $ {} (:kind :mesh-lambert) (:color color) (:transparent true)
                     :opacity $ if value
@@ -1539,14 +1573,14 @@
         'comp-value $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-value (options on-change)
             let
-                value $ assert-type (field options :value) 'Number
-                speed $ assert-type
+                value $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field options :value) 'Number
+                speed $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   or (field options :speed) 1
                   , 'Number
                 color $ either (field options :color) 0xffffff
                 text-color $ either (field options :text-color) color
                 text-size $ either (field options :text-size) 1
-                bound $ assert-type
+                bound $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   or (field options :bound) ([] 0 1)
                   :: 'List 'Number
                 label $ field options :label
@@ -1557,7 +1591,11 @@
                   :material $ {} (:kind :mesh-lambert) (:color color) (:transparent true)
                     :opacity $ either (field options :opacity) 0.6
                   :event $ {}
-                    :control $ fn (move delta elapse d!) (; println |delta delta)
+                    :control $ fn (move delta elapse d!)
+                      hint-fn $ {}
+                        :args $ [] (:: 'List 'Number) (:: 'List 'Number) 'Number 'Dynamic
+                        :return 'Dynamic
+                      ; println |delta delta
                       let
                           dx $ * speed elapse $ option:unwrap-or (nth delta 1) 0
                           w2 $ + dx value
@@ -1571,30 +1609,36 @@
                             true w2
                           , d!
                     :gamepad $ fn (info elapsed d!)
+                      hint-fn $ {}
+                        :args $ [] 'Dynamic 'Number 'Dynamic
+                        :return 'Dynamic
                       let
                           speeding $ * speed $ if (field info :b) 8 1
                         on-change
-                          + value $ * elapsed speeding $ field info :dx
+                          + value $ * elapsed speeding $ quatrefoil.util.core/require-decoded
+                            try-decode-map-as (field info :dx) 'Number
                           , d!
                 if (field options :show-text?)
                   text $ {}
                     :position $ [] -1.6 2 0
                     :text $ let
-                        prefix $ if (blank? label) | $ str label "| "
+                        prefix $ if
+                          blank? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (either label |) 'String
+                          , | $ str label "| "
                       str prefix $ .!toFixed value $ either (field options :fract-length) 2
                     :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                     :size text-size
                     :depth 0.5
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
         'comp-value-2d $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-value-2d (options on-change)
             let
-                v $ assert-type (field options :value) (:: 'List 'Number)
+                v $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field options :value) (:: 'List 'Number)
                 position $ field options :position
-                speed $ assert-type
+                speed $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   either (field options :speed) 1
                   , 'Number
                 color $ either (field options :color) 0xaaaaff
@@ -1607,23 +1651,30 @@
                 sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0)
                   :material $ {} (:kind :mesh-lambert) (:color color) (:opacity 0.7) (:transparent true)
                   :event $ {}
-                    :control $ fn (states delta elapse d!) (; println |delta delta)
-                      let-sugar
-                            [] x0 y0
-                            assert-type v $ :: 'List 'Number
+                    :control $ fn (states delta elapse d!)
+                      hint-fn $ {}
+                        :args $ [] (:: 'List 'Number) (:: 'List 'Number) 'Number 'Dynamic
+                        :return 'Dynamic
+                      ; println |delta delta
+                      let[] (x0 y0) v $ let
                           dx $ * speed elapse $ option:unwrap-or (nth delta 0) 0
                           dy $ * speed elapse $ option:unwrap-or (nth delta 1) 0
                         on-change
                           [] (+ x0 dx) (+ y0 dy)
                           , d!
                     :gamepad $ fn (info elapsed d!)
+                      hint-fn $ {}
+                        :args $ [] 'Dynamic 'Number 'Dynamic
+                        :return 'Dynamic
                       let
-                          v0 $ assert-type v $ :: 'List 'Number
+                          v0 v
                           x0 $ option:unwrap-or (nth v0 0) 0
                           y0 $ option:unwrap-or (nth v0 1) 0
                           speeding $ * speed $ if (field info :b) 8 1
-                          dx $ * elapsed speeding $ field info :dx
-                          dy $ * elapsed speeding $ field info :dy
+                          dx $ * elapsed speeding $ quatrefoil.util.core/require-decoded
+                            try-decode-map-as (field info :dx) 'Number
+                          dy $ * elapsed speeding $ quatrefoil.util.core/require-decoded
+                            try-decode-map-as (field info :dy) 'Number
                         on-change
                           [] (+ x0 dx) (- y0 dy)
                           , d!
@@ -1631,7 +1682,9 @@
                   text $ {}
                     :position $ [] -2 2 0
                     :text $ let
-                        prefix $ if (blank? label) | $ str label "| "
+                        prefix $ if
+                          blank? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (either label |) 'String
+                          , | $ str label "| "
                       str prefix
                         .!toFixed
                           option:unwrap-or (nth v 0) 0
@@ -1643,7 +1696,7 @@
                     :size text-size
                     :depth 1
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
@@ -1664,20 +1717,58 @@
     'quatrefoil.core $ %{} 'FileEntry
       :defs $ {}
         '*tmp-changes $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *tmp-changes nil
+          :code $ quote $ defref *tmp-changes ([])
           :examples $ []
-          :schema $ :: 'Ref 'Dynamic
+          :schema $ :: 'Ref $ :: 'List 'Dynamic
         '>> $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn >> (states k)
             let
-                parent-cursor $ either (field states :cursor) ([])
-                branch $ assert-type
+                parent-cursor $ quatrefoil.util.core/require-decoded $ try-decode-map-as
+                  either (field states :cursor) ([])
+                  :: 'List 'Tag
+                branch $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   option:unwrap-or (get states k) ({})
                   :: 'Map 'Tag 'Dynamic
               assoc branch :cursor $ append parent-cursor k
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
+        'CameraControl $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defenum CameraControl (:shift 'Number) (:angle 'Number) (:move 'Number 'Number 'Number)
+          :examples $ []
+          :schema $ :: 'EnumDef
+        'CameraPositionHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait CameraPositionHost (:position 'VectorCoordinatesHost)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
+        'ControllerModelFactoryHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ControllerModelFactoryHost
+            .createControllerModel $ :: 'Fn $ {} (:return 'quatrefoil.core/Object3DGroupHost)
+              :args $ [] 'quatrefoil.core/ControllerModelFactoryHost 'quatrefoil.core/Object3DGroupHost
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
+        'ControllerRayHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ControllerRayHost (:matrixWorld 'JsObject)
+            .addEventListener $ :: 'Fn $ {} (:return 'Unit)
+              :args $ [] 'quatrefoil.core/ControllerRayHost 'String $ :: 'Fn
+                {} (:return 'Unit)
+                  :args $ [] 'JsObject
+            :rotation $ quote quatrefoil.core/VectorCoordinatesHost
+          :examples $ []
+          :ffi $ {} (:kind :external-object) (:platform :browser)
+          :schema $ :: 'Trait
+        'ControllerRaycasterHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ControllerRaycasterHost
+            .setFromXRController $ :: 'Fn $ {} (:return 'quatrefoil.core/ControllerRaycasterHost)
+              :args $ [] 'quatrefoil.core/ControllerRaycasterHost 'quatrefoil.core/ControllerRayHost
+            .intersectObjects $ :: 'Fn $ {}
+              :return $ quote quatrefoil.dsl.object3d-dom/JsArrayHost
+              :args $ [] 'quatrefoil.core/ControllerRaycasterHost 'JsObject
+          :examples $ []
+          :ffi $ {} (:kind :external-object) (:platform :browser)
+          :schema $ :: 'Trait
         'CoreBufferGeometryHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait CoreBufferGeometryHost
             .setFromPoints $ :: 'Fn $ {} (:return 'Dynamic)
@@ -1692,10 +1783,58 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
+        'GamepadButtonHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait GamepadButtonHost (:value 'Number)
+          :examples $ []
+          :ffi $ {} (:kind :external-object) (:platform :browser)
+          :schema $ :: 'Trait
+        'GamepadCollectionHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait GamepadCollectionHost (:length 'Number)
+          :examples $ []
+          :ffi $ {} (:kind :external-object) (:platform :browser)
+          :schema $ :: 'Trait
+        'GamepadHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait GamepadHost (:axes 'quatrefoil.core/GamepadCollectionHost) (:buttons 'quatrefoil.core/GamepadCollectionHost)
+          :examples $ []
+          :ffi $ {} (:kind :external-object) (:platform :browser)
+          :schema $ :: 'Trait
+        'HandModelFactoryHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait HandModelFactoryHost
+            .createHandModel $ :: 'Fn $ {} (:return 'quatrefoil.core/Object3DGroupHost)
+              :args $ [] 'quatrefoil.core/HandModelFactoryHost 'quatrefoil.core/Object3DGroupHost
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
         'HsluvHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait HsluvHost (:hsluv_h 'Number) (:hsluv_s 'Number) (:hsluv_l 'Number) (:rgb_r 'Number) (:rgb_g 'Number) (:rgb_b 'Number)
             .hsluvToRgb $ :: 'Fn $ {} (:return 'Unit)
               :args $ [] 'HsluvHost
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
+        'KeyboardEventHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait KeyboardEventHost (:key 'String) (:shiftKey 'Bool)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
+        'Object3DGroupHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait Object3DGroupHost (:name 'String) (:scale 'quatrefoil.core/VectorCoordinatesHost)
+            .add $ :: 'Fn $ {} (:return 'quatrefoil.core/Object3DGroupHost)
+              :args $ [] 'quatrefoil.core/Object3DGroupHost 'quatrefoil.core/Object3DGroupHost
+            .clone $ :: 'Fn $ {} (:return 'quatrefoil.core/Object3DGroupHost)
+              :args $ [] 'quatrefoil.core/Object3DGroupHost
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :name
+          :schema $ :: 'Trait
+        'PerspectiveCameraHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait PerspectiveCameraHost (:aspect 'Number)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :aspect
+          :schema $ :: 'Trait
+        'RendererXrHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait RendererXrHost (:xr 'quatrefoil.core/WebXRManagerHost)
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
@@ -1722,13 +1861,45 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
+        'VectorCoordinatesHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait VectorCoordinatesHost (:x 'Number) (:y 'Number) (:z 'Number)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :x :y :z
+          :schema $ :: 'Trait
+        'WebXRManagerHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait WebXRManagerHost (:enabled 'Bool)
+            .getController $ :: 'Fn $ {} (:return 'JsObject)
+              :args $ [] 'quatrefoil.core/WebXRManagerHost 'Number
+            .getControllerGrip $ :: 'Fn $ {} (:return 'JsObject)
+              :args $ [] 'quatrefoil.core/WebXRManagerHost 'Number
+            .getHand $ :: 'Fn $ {} (:return 'JsObject)
+              :args $ [] 'quatrefoil.core/WebXRManagerHost 'Number
+            .getSession $ :: 'Fn $ {}
+              :return $ :: 'JsNullish 'quatrefoil.core/XRSessionHost
+              :args $ [] 'quatrefoil.core/WebXRManagerHost
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :enabled
+          :schema $ :: 'Trait
+        'XRInputSourceHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait XRInputSourceHost (:handedness 'String)
+            :gamepad $ :: 'JsNullish 'quatrefoil.core/GamepadHost
+          :examples $ []
+          :ffi $ {} (:kind :external-object) (:platform :browser)
+          :schema $ :: 'Trait
+        'XRSessionHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait XRSessionHost (:inputSources 'JsObject)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
         'camera-direction-for $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn camera-direction-for (x y z)
             let
                 v $ unsafe-coerce (new THREE/Vector3 x y z) ThreeVector3Host
                 camera $ unsafe-coerce @*global-camera ThreeCameraHost
               .!applyQuaternion v $ .-quaternion camera
-              :: :v3 (.-x v) (.-y v) (.-z v)
+              v3 (.-x v) (.-y v) (.-z v)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'quaternion.vector/V3)
             :args $ [] 'Number 'Number 'Number
@@ -1750,9 +1921,7 @@
             if (&list:empty? body)
               quasiquote $ echo "|[Warn] invalid component body for" (quote ~comp-name) (quote ~params)
               quasiquote $ defn ~comp-name (~ params)
-                %{} Component
-                  :name $ quote ~comp-name
-                  :tree $ &let () ~@body
+                quatrefoil.schema/Component :name (quote ~comp-name) :tree $ &let () ~@body
           :examples $ []
           :schema $ :: 'Macro $ {} (:rest 'Syntax)
             :capabilities $ #{}
@@ -1770,6 +1939,20 @@
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
+        'gamepad-axis-value $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn gamepad-axis-value (axes index)
+            js-number $ aget axes index
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'Number)
+            :args $ [] 'quatrefoil.core/GamepadCollectionHost 'Number
+            :features $ #{} :js-ffi
+        'gamepad-button-value $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn gamepad-button-value (buttons index)
+            js-number $ .-value $ js-cast (aget buttons index) 'quatrefoil.core/GamepadButtonHost
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'Number)
+            :args $ [] 'quatrefoil.core/GamepadCollectionHost 'Number
+            :features $ #{} :js-ffi
         'half-pi $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def half-pi (* 0.5 &PI)
           :examples $ []
@@ -1778,22 +1961,22 @@
           :code $ quote $ defn handle-control-events ()
             start-control-loop! 10 $ fn (elapsed states delta)
               let
-                  l-move $ assert-type
-                    map (field states :left-move) refine-strength
-                    :: 'List 'Number
-                  r-move $ assert-type
-                    map (field states :right-move) refine-strength
-                    :: 'List 'Number
-                  r-delta $ assert-type (field delta :right-move) (:: 'List 'Number)
+                  l-move $ map
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :left-move) (:: 'List 'Number)
+                    , refine-strength
+                  r-move $ map
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :right-move) (:: 'List 'Number)
+                    , refine-strength
+                  r-delta $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field delta :right-move) (:: 'List 'Number)
                   l0 $ option:unwrap-or (nth l-move 0) 0
                   l1 $ option:unwrap-or (nth l-move 1) 0
                   r0 $ option:unwrap-or (nth r-move 0) 0
                   r1 $ option:unwrap-or (nth r-move 1) 0
                   rd0 $ option:unwrap-or (nth r-delta 0) 0
                   rd1 $ option:unwrap-or (nth r-delta 1) 0
-                  left-a? $ assert-type (field states :left-a?) 'Bool
-                  right-b? $ assert-type (field states :right-b?) 'Bool
-                  left-b? $ assert-type (field states :left-b?) 'Bool
+                  left-a? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :left-a?) 'Bool
+                  right-b? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :right-b?) 'Bool
+                  left-b? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :left-b?) 'Bool
                 ; println |L l-move |R r-move
                 when (not= 0 l1)
                   move-viewer-by! 0 0 $ negate $ * 0.6 elapsed l1
@@ -1833,41 +2016,38 @@
         'handle-key-event $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn handle-key-event (event)
             let
-                angle @*viewer-angle
-                key $ unsafe-coerce
-                  .-key $ ffi-object event
-                  , String
-                shift? $ unsafe-coerce
-                  .-shiftKey $ ffi-object event
-                  , Bool
-              case-default key nil
+                event-host $ js-cast event 'quatrefoil.core/KeyboardEventHost
+                key $ quatrefoil.util.core/require-decoded $ try-decode-map-as (.-key event-host) 'String
+                shift? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (.-shiftKey event-host) 'Bool
+              match key
                 |ArrowDown $ if shift?
-                  tween-move-camera! $ [] :shift -1
-                  tween-move-camera! $ [] :move 0 -2 0
+                  tween-move-camera! $ CameraControl :shift -1
+                  tween-move-camera! $ CameraControl :move 0 -2 0
                 |ArrowUp $ if shift?
-                  tween-move-camera! $ [] :shift 1
-                  tween-move-camera! $ [] :move 0 2 0
-                |a $ tween-move-camera! $ [] :angle 0.04
-                |d $ tween-move-camera! $ [] :angle -0.04
-                |b $ tween-move-camera! $ [] :angle 1.653959 (; "|manual value for turn back")
+                  tween-move-camera! $ CameraControl :shift 1
+                  tween-move-camera! $ CameraControl :move 0 2 0
+                |a $ tween-move-camera! $ CameraControl :angle 0.04
+                |d $ tween-move-camera! $ CameraControl :angle -0.04
+                |b $ tween-move-camera! $ CameraControl :angle 1.653959 (; "|manual value for turn back")
                 |w $ &let (a @*viewer-angle)
-                  tween-move-camera! $ [] :move
+                  tween-move-camera! $ CameraControl :move
                     &* 4 $ cos a
                     , 0 $ &* -4 (sin a)
                 |s $ &let (a @*viewer-angle)
-                  tween-move-camera! $ [] :move
+                  tween-move-camera! $ CameraControl :move
                     &* -2 $ cos a
                     , 0 $ &* 2 (sin a)
                 |ArrowLeft $ &let
                   a $ &+ @*viewer-angle $ &/ &PI 2
-                  tween-move-camera! $ [] :move
+                  tween-move-camera! $ CameraControl :move
                     &* 1 $ cos a
                     , 0 $ &* -1 (sin a)
                 |ArrowRight $ &let
                   a $ &- @*viewer-angle $ &/ &PI 2
-                  tween-move-camera! $ [] :move
+                  tween-move-camera! $ CameraControl :move
                     &* 1 $ cos a
                     , 0 $ &* -1 (sin a)
+                _ &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic
@@ -1908,23 +2088,25 @@
         'init-controls! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn init-controls! ()
             let
-                renderer $ ffi-object @*global-renderer
-                scene $ ffi-object @*global-scene
-                xr $ ffi-object $ .-xr renderer
-                ctrl-0 $ ffi-object $ .!getController xr 0
-                ctrl-1 $ ffi-object $ .!getController xr 1
-                ctrl-grip-0 $ ffi-object $ .!getControllerGrip xr 0
-                ctrl-grip-1 $ ffi-object $ .!getControllerGrip xr 1
-                hand-0 $ ffi-object $ .!getHand xr 0
-                hand-1 $ ffi-object $ .!getHand xr 1
-                controllerModelFactory $ ffi-object $ new XRControllerModelFactory
-                handModelFactory $ ffi-object $ new XRHandModelFactory
+                renderer $ js-cast @*global-renderer 'quatrefoil.core/RendererXrHost
+                scene $ js-cast @*global-scene 'quatrefoil.core/Object3DGroupHost
+                xr $ .-xr renderer
+                ctrl-0 $ js-cast (.!getController xr 0) 'quatrefoil.core/Object3DGroupHost
+                ctrl-1 $ js-cast (.!getController xr 1) 'quatrefoil.core/Object3DGroupHost
+                ctrl-grip-0 $ js-cast (.!getControllerGrip xr 0) 'quatrefoil.core/Object3DGroupHost
+                ctrl-grip-1 $ js-cast (.!getControllerGrip xr 1) 'quatrefoil.core/Object3DGroupHost
+                hand-0 $ js-cast (.!getHand xr 0) 'quatrefoil.core/Object3DGroupHost
+                hand-1 $ js-cast (.!getHand xr 1) 'quatrefoil.core/Object3DGroupHost
+                controllerModelFactory $ js-cast (new XRControllerModelFactory) 'quatrefoil.core/ControllerModelFactoryHost
+                handModelFactory $ js-cast (new XRHandModelFactory) 'quatrefoil.core/HandModelFactoryHost
                 line-geo $ ffi-object $ .!setFromPoints
                   unsafe-coerce (new THREE/BufferGeometry) CoreBufferGeometryHost
                   js-array (new THREE/Vector3 0 0 0) (new THREE/Vector3 0 0 -1)
-                line $ ffi-object $ new THREE/Line line-geo
-              .!appendChild (ffi-object js/document.body)
-                .!createButton VRButton renderer $ js-object $ :requiredFeatures (js-array |hand-tracking)
+                line $ js-cast (new THREE/Line line-geo) 'quatrefoil.core/Object3DGroupHost
+              js-ffi.browser/append-child!
+                .unwrap $ js-ffi.browser/document-body
+                js-ffi.browser/element-host $ .!createButton VRButton renderer $ js-object
+                  :requiredFeatures $ js-array |hand-tracking
               .!add ctrl-grip-0 $ .!createControllerModel controllerModelFactory ctrl-grip-0
               .!add ctrl-grip-1 $ .!createControllerModel controllerModelFactory ctrl-grip-1
               .!add hand-0 $ .!createHandModel handModelFactory hand-0
@@ -1936,9 +2118,9 @@
               .!add scene hand-0
               .!add scene hand-1
               set! (.-name line) |line
-              ->
-                ffi-object $ .-scale $ ffi-object line
-                , .-z $ set! 5
+              set!
+                .-z $ .-scale line
+                , 5
               .!add ctrl-0 $ .!clone line
               .!add ctrl-1 $ .!clone line
               listen-on-controller! ctrl-0
@@ -1951,7 +2133,7 @@
           :code $ quote $ defn init-renderer! (canvas-el options) (.!init RectAreaLightUniformsLib)
             reset! *global-renderer $ new THREE/WebGLRenderer $ js-object (:canvas canvas-el) (:antialias true)
             set!
-              .-enabled $ ffi-object $ .-xr (ffi-object @*global-renderer)
+              .-enabled $ .-xr $ js-cast @*global-renderer 'quatrefoil.core/RendererXrHost
               , true
             ; if (:shadow-map? options)
               &let
@@ -1966,56 +2148,59 @@
               pass $ either (:composer-passes options) ([])
               .!addPass @*global-composer pass
             if
-              some? $ field options :background
+              non-nil? $ field options :background
               .!setClearColor @*global-renderer (field options :background) 1
             ; set! (.-physicallyCorrectLights @*global-renderer) true
             ; set! (.-gammaFactor @*global-renderer) 22
             .!setPixelRatio @*global-renderer $ either
-              js-number $ .-devicePixelRatio $ ffi-object js/window
+              js-number $ .-devicePixelRatio $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
               , 1
             .!setSize @*global-renderer
-              js-number $ .-innerWidth $ ffi-object js/window
-              js-number $ .-innerHeight $ ffi-object js/window
+              js-number $ .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+              js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
             .!setAnimationLoop @*global-renderer $ fn (t & aa)
               let
-                  t0 $ assert-type t 'Number
+                  t0 $ js-number t
                   prev-t @*global-time
                 reset! *global-time t0
                 if
-                  js-present? $ .!getSession $ ffi-object
-                    .-xr $ ffi-object @*global-renderer
+                  js-present? $ .!getSession $ .-xr (js-cast @*global-renderer 'quatrefoil.core/RendererXrHost)
                   let
-                      session $ ffi-object $ .!getSession
-                        ffi-object $ .-xr $ ffi-object @*global-renderer
-                      p0 $ -> session .-inputSources .?-0
-                      p1 $ -> session .-inputSources .?-1
+                      session $ js-cast
+                        .!getSession $ .-xr $ js-cast @*global-renderer 'quatrefoil.core/RendererXrHost
+                        , 'quatrefoil.core/XRSessionHost
+                      p0 $ xr-input-source-at session 0
+                      p1 $ xr-input-source-at session 1
                     let
                         d $ ->
                           []
                             if (js-present? p0) (read-input p0)
                             if (js-present? p1) (read-input p1)
-                          filter some?
+                          filter non-nil?
                       if
                         not $ empty? d
                         on-gamepad-event
-                          last $ option:unwrap-or (first d) ([])
+                          .unwrap $ last $ quatrefoil.util.core/require-decoded
+                            try-decode-map-as
+                              .unwrap $ first d
+                              :: 'List 'Dynamic
                           * 0.001 $ - t0 prev-t
               .!updateProjectionMatrix @*global-camera
               .!render @*global-renderer @*global-scene @*global-camera
-            , &unit
-              ; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight $ .!addEventListener (ffi-object canvas-el) |click $ fn (event) (on-canvas-click event)
-              .!addEventListener (ffi-object js/window) |resize $ fn (event)
+            , &unit (; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight)
+              js-ffi.browser/element-add-event-listener! (js-ffi.browser/element-host canvas-el) |click $ fn (event) (on-canvas-click event)
+              js-ffi.browser/add-event-listener! |resize $ fn (event)
                 js/console.log |resize
-                  .-innerWidth $ ffi-object js/window
-                  .-innerHeight $ ffi-object js/window
+                  .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+                  .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
                 set!
-                  .-aspect $ ffi-object @*global-camera
+                  .-aspect $ js-cast @*global-camera 'quatrefoil.core/PerspectiveCameraHost
                   /
-                    js-number $ .-innerWidth $ ffi-object js/window
-                    js-number $ .-innerHeight $ ffi-object js/window
+                    js-number $ .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+                    js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
                 .!setSize @*global-renderer
-                  js-number $ .-innerWidth $ ffi-object js/window
-                  js-number $ .-innerHeight $ ffi-object js/window
+                  js-number $ .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+                  js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
                 .!updateProjectionMatrix @*global-camera
                 ; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight
                 ; .!render @*global-composer
@@ -2027,7 +2212,8 @@
             :args $ [] 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
         'js-number $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn js-number (value) (unsafe-coerce value Number)
+          :code $ quote $ defn js-number (value)
+            quatrefoil.util.core/require-decoded $ try-decode-map-as value 'Number
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Number)
             :args $ [] 'Dynamic
@@ -2035,19 +2221,9 @@
         'listen-on-controller! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn listen-on-controller! (controller)
             let
-                temp-matrix $ ffi-object $ new THREE/Matrix4
-                raycaster $ ffi-object $ new THREE/Raycaster
-              .!addEventListener (ffi-object controller) |selectstart $ fn (event) (.!identity temp-matrix)
-                .!extractRotation temp-matrix $ .-matrixWorld $ ffi-object controller
-                .!setFromMatrixPosition
-                  ffi-object $ .-origin $ ffi-object (.-ray raycaster)
-                  .-matrixWorld $ ffi-object controller
-                .!set
-                  ffi-object $ .-direction $ ffi-object (.-ray raycaster)
-                  , 0 0 -1
-                .!applyMatrix4
-                  ffi-object $ .-direction $ ffi-object (.-ray raycaster)
-                  , temp-matrix
+                controller-host $ js-cast controller $ quote quatrefoil.core/ControllerRayHost
+                raycaster $ js-cast (new THREE/Raycaster) (quote quatrefoil.core/ControllerRaycasterHost)
+              .!addEventListener controller-host |selectstart $ fn (event) (.setFromXRController raycaster controller-host)
                 let
                     objects $ let
                         children $ js-array
@@ -2055,16 +2231,12 @@
                           .!push (unsafe-coerce children CoreJsArrayHost) x
                       collect-children @*global-scene collect!
                       , children
-                    intersects $ ffi-object $ ->
-                      ffi-object $ .!intersectObjects raycaster objects
-                      .!filter $ fn (target pos _xs)
-                        js-present? $ .-event $ ffi-object
-                          .-object $ ffi-object target
-                  if
-                    js-present? $ .-0 $ ffi-object intersects
-                    call-event-on-target!
-                      ffi-object $ .-0 $ ffi-object intersects
-                      , event
+                    intersects $ .filter
+                      js-cast (.intersectObjects raycaster objects) (quote quatrefoil.dsl.object3d-dom/JsArrayHost)
+                      , quatrefoil.dsl.object3d-dom/interactive-hit?
+                    target $ aget intersects 0
+                  if (js-present? target) (call-event-on-target! target event)
+                , &unit
               , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -2074,7 +2246,9 @@
           :code $ quote $ defn move-viewer-by! (x0 y0 z0)
             let
                 camera @*global-camera
-                position $ ffi-object $ .-position (ffi-object camera)
+                position $ js-cast
+                  .-position $ js-cast camera 'quatrefoil.core/CameraPositionHost
+                  , 'quatrefoil.core/VectorCoordinatesHost
               match (to-viewer-axis x0 y0 z0)
                 (:v3 dx dy dz)
                   let
@@ -2100,9 +2274,11 @@
             :features $ #{} :js-ffi
         'new-lookat-point $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn new-lookat-point ()
-            let-sugar
+            let
                 camera @*global-camera
-                position $ ffi-object $ .-position (ffi-object camera)
+                position $ js-cast
+                  .-position $ js-cast camera 'quatrefoil.core/CameraPositionHost
+                  , 'quatrefoil.core/VectorCoordinatesHost
                 x2 $ &+
                   js-number $ .-x position
                   &* 4 $ cos @*viewer-angle
@@ -2120,62 +2296,57 @@
         'read-input $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn read-input (p0)
             let
-                gamepad $ ffi-object $ .-gamepad (ffi-object p0)
-                axes $ ffi-object $ .-axes gamepad
-                buttons $ ffi-object $ .-buttons gamepad
-              if
-                >
-                  js-number $ .-length $ ffi-object buttons
-                  , 5
+                input-source $ js-cast p0 $ quote quatrefoil.core/XRInputSourceHost
+                maybe-gamepad $ .-gamepad input-source
+              if (js-present? maybe-gamepad)
                 let
-                    data $ {}
-                      :v1 $ js-number $ .-value
-                        ffi-object $ .-0 buttons
-                      :v2 $ js-number $ .-value
-                        ffi-object $ .-1 buttons
-                      :a $ js-number $ .-value
-                        ffi-object $ .-4 buttons
-                      :b $ js-number $ .-value
-                        ffi-object $ .-5 buttons
-                      :dx $ js-number $ .-2 axes
-                      :dy $ js-number $ .-3 axes
-                    controller $ ffi-object $ .!getController
-                      ffi-object $ .-xr $ ffi-object @*global-renderer
-                      , 0
-                    grip $ ffi-object $ .!getControllerGrip
-                      ffi-object $ .-xr $ ffi-object @*global-renderer
-                      , 0
-                    rot $ ffi-object $ .-rotation controller
-                    rotation $ :: :v3
-                      js-number $ .-x rot
-                      js-number $ .-y rot
-                      js-number $ .-z rot
-                  if (not= data data0)
-                    []
-                      turn-tag $ unsafe-coerce
-                        .-handedness $ ffi-object p0
-                        , String
-                      {}
-                        :v1 $ js-number $ .-value
-                          ffi-object $ .-0 buttons
-                        :v2 $ js-number $ .-value
-                          ffi-object $ .-1 buttons
-                        :a $ >
-                          js-number $ .-value $ ffi-object (.-4 buttons)
-                          , 0.5
-                        :b $ >
-                          js-number $ .-value $ ffi-object (.-5 buttons)
-                          , 0.5
-                        :dx $ js-number $ .-2 axes
-                        :dy $ js-number $ .-3 axes
-                        :rotation rotation
-                        :forward $ camera-direction-for 0 0 -1
-                        :upward $ camera-direction-for 0 1 0
-                        :rightward $ camera-direction-for 1 0 0
+                    gamepad $ js-cast maybe-gamepad $ quote quatrefoil.core/GamepadHost
+                    axes $ js-cast (.-axes gamepad) (quote quatrefoil.core/GamepadCollectionHost)
+                    buttons $ js-cast (.-buttons gamepad) (quote quatrefoil.core/GamepadCollectionHost)
+                  if
+                    >
+                      js-number $ .-length buttons
+                      , 5
+                    let
+                        data $ {}
+                          :v1 $ gamepad-button-value buttons 0
+                          :v2 $ gamepad-button-value buttons 1
+                          :a $ gamepad-button-value buttons 4
+                          :b $ gamepad-button-value buttons 5
+                          :dx $ gamepad-axis-value axes 2
+                          :dy $ gamepad-axis-value axes 3
+                        controller $ js-cast
+                          .!getController
+                            .-xr $ js-cast @*global-renderer 'quatrefoil.core/RendererXrHost
+                            , 0
+                          , 'quatrefoil.core/ControllerRayHost
+                        grip $ ffi-object $ .!getControllerGrip
+                          .-xr $ js-cast @*global-renderer 'quatrefoil.core/RendererXrHost
+                          , 0
+                        rot $ js-cast (.-rotation controller) 'quatrefoil.core/VectorCoordinatesHost
+                        rotation $ :: :v3
+                          js-number $ .-x rot
+                          js-number $ .-y rot
+                          js-number $ .-z rot
+                      if (not= data data0)
+                        []
+                          turn-tag $ quatrefoil.util.core/require-decoded $ try-decode-map-as (.-handedness input-source) (quote String)
+                          {}
+                            :v1 $ gamepad-button-value buttons 0
+                            :v2 $ gamepad-button-value buttons 1
+                            :a $ > (gamepad-button-value buttons 4) 0.5
+                            :b $ > (gamepad-button-value buttons 5) 0.5
+                            :dx $ gamepad-axis-value axes 2
+                            :dy $ gamepad-axis-value axes 3
+                            :rotation rotation
+                            :forward $ camera-direction-for 0 0 -1
+                            :upward $ camera-direction-for 0 1 0
+                            :rightward $ camera-direction-for 1 0 0
+                    , nil
                 , nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
-            :args $ [] 'Dynamic
+            :args $ [] 'JsObject
             :features $ #{} :js-ffi
         'refine-strength $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn refine-strength (x)
@@ -2187,18 +2358,21 @@
             :features $ #{} :js-ffi
         'render-canvas! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-canvas! (markup dispatch!) (; js/console.log |render markup) (reset! *proxied-dispatch dispatch!)
-            if (some? @*global-tree)
+            if (non-nil? @*global-tree)
               let
                   collect! $ fn (x)
-                    reset! *tmp-changes $ conj
-                      assert-type @*tmp-changes $ :: 'List 'Dynamic
-                      , x
+                    hint-fn $ {}
+                      :args $ [] 'Dynamic
+                      :return 'Unit
+                    reset! *tmp-changes $ conj @*tmp-changes x
+                    , &unit
                 reset! *tmp-changes $ []
                 diff-tree @*global-tree markup ([]) collect!
                 apply-changes @*tmp-changes
               build-tree ([]) (purify-tree markup)
             reset! *global-tree markup
             ; .!render @*global-renderer @*global-scene @*global-camera
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'Dynamic
@@ -2220,7 +2394,7 @@
             let
                 camera @*global-camera
               if (= x false) (reset! *viewer-y-shift 0)
-                swap! *viewer-y-shift &+ $ * 2 x
+                swap! *viewer-y-shift &+ $ * 2 $ quatrefoil.util.core/require-decoded (try-decode-map-as x 'Number)
               .!lookAt camera $ new-lookat-point
               .!render @*global-renderer @*global-scene @*global-camera
               , &unit
@@ -2246,13 +2420,12 @@
                     * $ js-number $ js/Math.cos (+ v-angle half-pi)
                     * $ js-number $ js/Math.sin angle
                     negate
-                from-x $ wo-log $ v3
+                from-x $ v3
                   -> x $ * $ js-number
                     js/Math.cos $ - angle half-pi
-                  , 0
-                    -> x
-                      * $ js-number $ js/Math.sin (- angle half-pi)
-                      negate
+                  , 0 $ -> x
+                    * $ js-number $ js/Math.sin (- angle half-pi)
+                    negate
                 from-z $ v3
                   -> z (negate)
                     * $ js-number $ js/Math.cos v-angle
@@ -2289,15 +2462,19 @@
                     swap! *viewer-y-shift &+ $ / shift 10
                     .!lookAt camera $ new-lookat-point
                     .!render @*global-renderer @*global-scene @*global-camera
+                    , &unit
                 (:angle angle)
                   tween-call 20 5 $ fn (i)
                     swap! *viewer-angle &+ $ / angle 10
                     .!lookAt camera $ new-lookat-point
                     .!render @*global-renderer @*global-scene @*global-camera
+                    , &unit
                 (:move dx dy dz)
                   tween-call 20 5 $ fn (i)
-                    let-sugar
-                        position $ ffi-object $ .-position (ffi-object camera)
+                    let
+                        position $ js-cast
+                          .-position $ js-cast camera 'quatrefoil.core/CameraPositionHost
+                          , 'quatrefoil.core/VectorCoordinatesHost
                         x $ &+
                           js-number $ .-x position
                           / dx 10
@@ -2312,11 +2489,21 @@
                       set! (.-z position) z
                       .!lookAt camera $ new-lookat-point
                       .!render @*global-renderer @*global-scene @*global-camera
+                    , &unit
                 _ $ println "|unknown camera control:" control
+              , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'Dynamic
+            :args $ [] 'quatrefoil.core/CameraControl
             :features $ #{} :js-ffi
+        'xr-input-source-at $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn xr-input-source-at (session index)
+            aget (.-inputSources session) index
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'quatrefoil.core/XRSessionHost 'Number
+            :features $ #{} :js-ffi
+            :return $ :: 'JsNullish 'JsObject
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.core
           :require
@@ -2343,17 +2530,18 @@
         %{} 'CodeEntry (:doc |)
           :code $ quote $ defn update-states (store pair)
             let
-                data $ assert-type pair $ :: 'List 'Dynamic
-                cursor $ assert-type
+                data $ quatrefoil.util.core/require-decoded $ try-decode-map-as pair (:: 'List 'Dynamic)
+                cursor $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   option:unwrap-or (nth data 0) ([])
                   :: 'List 'Tag
                 new-state $ option:unwrap-or (nth data 1) nil
-              assoc-in store
-                concat ([] :states) cursor $ [] :data
+              assoc store :states $ assoc-in (quatrefoil.util.core/field store :states)
+                concat cursor $ [] :data
                 , new-state
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
-            :args $ [] 'Dynamic 'Dynamic
+          :schema $ :: 'Fn $ {}
+            :args $ [] (:: 'Map 'Tag 'Dynamic) 'Dynamic
+            :return $ :: 'Map 'Tag 'Dynamic
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.cursor
     'quatrefoil.dsl.diff $ %{} 'FileEntry
@@ -2361,8 +2549,8 @@
         'diff-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-children (prev-children children coord collect!)
             let
-                prev-children0 $ assert-type prev-children $ :: 'Map 'Number 'Dynamic
-                children0 $ assert-type children $ :: 'Map 'Number 'Dynamic
+                prev-children0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as prev-children (:: 'Map 'Number 'Dynamic)
+                children0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as children (:: 'Map 'Number 'Dynamic)
                 prev-keys $ keys prev-children0
                 curr-keys $ keys children0
                 removed-keys $ difference prev-keys curr-keys
@@ -2370,7 +2558,7 @@
                   map $ fn (k)
                     let
                         k0 $ assert-type k Number
-                      [] k0 $ purify-tree $ get children0 k0
+                      [] k0 $ purify-tree $ .unwrap (get children0 k0)
                 common-keys $ intersection prev-keys curr-keys
               if
                 not $ empty? removed-keys
@@ -2382,8 +2570,8 @@
               &doseq (k common-keys) (; js/console.log "|Diffing children:" coord common-keys)
                 let
                     k0 $ assert-type k Number
-                    prev-child $ get prev-children0 k0
-                    child $ get children0 k0
+                    prev-child $ .unwrap $ get prev-children0 k0
+                    child $ .unwrap $ get children0 k0
                   if
                     not $ identical? prev-child child
                     diff-tree prev-child child (conj coord k0) collect!
@@ -2395,10 +2583,10 @@
         'diff-events $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-events (prev-events events coord collect!)
             let
-                prev-events0 $ assert-type
+                prev-events0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   either prev-events $ {}
                   :: 'Map 'Tag 'Dynamic
-                events0 $ assert-type
+                events0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   either events $ {}
                   :: 'Map 'Tag 'Dynamic
                 prev-event-names $ keys prev-events0
@@ -2420,28 +2608,30 @@
         'diff-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-material (prev-material material coord collect!)
             if
-              not= (get prev-material :kind) (get material :kind)
+              not= (quatrefoil.util.core/field prev-material :kind) (quatrefoil.util.core/field material :kind)
               collect! $ [] coord :replace-material material
               let
-                  prev-material0 $ assert-type
+                  prev-material0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                     either prev-material $ {}
                     :: 'Map 'Tag 'Dynamic
-                  material0 $ assert-type
+                  material0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                     either material $ {}
                     :: 'Map 'Tag 'Dynamic
                   prev-keys $ keys prev-material0
                   curr-keys $ keys material0
                   added-material $ -> (difference curr-keys prev-keys) (&set:to-list)
                     map $ fn (k)
-                      [] k $ get material0 k
+                      [] k $ .unwrap $ get material0 k
                     pairs-map
                   removed-keys $ difference prev-keys curr-keys
                   updated-material $ -> (intersection prev-keys curr-keys)
                     filter $ fn (k)
-                      not= (get prev-material0 k) (get material0 k)
+                      not=
+                        .unwrap $ get prev-material0 k
+                        .unwrap $ get material0 k
                     &set:to-list
                     map $ fn (k)
-                      [] k $ get material0 k
+                      [] k $ .unwrap $ get material0 k
                     pairs-map
                 if
                   not $ empty? added-material
@@ -2462,10 +2652,10 @@
           :code $ quote $ defn diff-params (prev-params params coord collect!)
             ; "|unused code, when params changed, geometry would be recreated, so not diffed"
               let
-                prev-params0 $ assert-type
+                prev-params0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   either prev-params $ {}
                   :: 'Map 'Tag 'Dynamic
-                params0 $ assert-type
+                params0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   either params $ {}
                   :: 'Map 'Tag 'Dynamic
                 prev-keys $ keys prev-params0
@@ -2488,6 +2678,7 @@
               if
                 not $ empty? changed-params
                 collect! $ [] coord :update-params changed-params
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'Dynamic (:: 'List 'Number)
@@ -2497,16 +2688,16 @@
           :code $ quote $ defn diff-tree (prev-tree tree coord collect!) (; js/console.log |Diffing: coord prev-tree tree)
             cond
                 = nil prev-tree tree
-                &let () nil
+                &let () &unit
               (and (comp? prev-tree) (comp? tree) (not= (field prev-tree :name) (field tree :name)))
                 collect! $ [] coord :replace-element $ purify-tree tree
               (comp? prev-tree)
                 recur (field prev-tree :tree) tree coord collect!
               (comp? tree)
                 recur prev-tree (field tree :tree) coord collect!
-              (and (some? tree) (nil? prev-tree))
+              (and (non-nil? tree) (nil? prev-tree))
                 collect! $ [] coord :add-element tree
-              (and (some? prev-tree) (nil? tree))
+              (and (non-nil? prev-tree) (nil? tree))
                 collect! $ [] coord :remove-element
               (not= (field prev-tree :name) (field tree :name))
                 collect! $ [] coord :replace-element $ purify-tree tree
@@ -2557,9 +2748,21 @@
     'quatrefoil.dsl.object3d-dom $ %{} 'FileEntry
       :defs $ {}
         '*focused-coord $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *focused-coord nil
+          :code $ quote $ defref *focused-coord nil
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
+        'ArrayLengthHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ArrayLengthHost (:length 'Number)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
+        'AxisSetterHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait AxisSetterHost
+            .set $ :: 'Fn $ {} (:return 'AxisSetterHost)
+              :args $ [] 'AxisSetterHost 'Number 'Number 'Number
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
         'BufferGeometryHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait BufferGeometryHost
             .setFromPoints $ :: 'Fn $ {} (:return 'Dynamic)
@@ -2580,14 +2783,34 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
+        'IntersectionHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait IntersectionHost (:object 'JsObject)
+          :examples $ []
+          :ffi $ {} (:kind :external-object) (:platform :browser)
+          :schema $ :: 'Trait
         'JsArrayHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait JsArrayHost
             .push $ :: 'Fn $ {} (:return 'Number)
               :args $ [] 'JsArrayHost 'Dynamic
             .filter $ :: 'Fn $ {} (:return 'JsArrayHost)
-              :args $ [] 'JsArrayHost 'Dynamic
+              :args $ [] 'JsArrayHost $ :: (quote Fn)
+                {}
+                  :return $ quote Bool
+                  :args $ [] (quote JsObject) (quote Number) (quote quatrefoil.dsl.object3d-dom/JsArrayHost)
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
+        'LightShadowHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait LightShadowHost (:bias 'Number)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :bias
+          :schema $ :: 'Trait
+        'MaterialSideHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait MaterialSideHost (:side 'Number)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :side
           :schema $ :: 'Trait
         'MeshLineGeometryHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait MeshLineGeometryHost
@@ -2596,34 +2819,70 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
+        'MeshRaycastHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait MeshRaycastHost
+            :raycast $ :: 'Fn $ {}
+              :args $ [] 'JsObject 'quatrefoil.dsl.object3d-dom/JsArrayHost
+              :return 'Unit
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :raycast
+          :schema $ :: 'Trait
+        'ObjectMetadataHost $ %{} 'CodeEntry
+          :doc "|Optional application-owned fields on arbitrary Three.js objects. Values may be absent on imported or ordinary meshes; use the lexical read adapter rather than js-cast presence checks. Coordinate contents must still be decoded before application use."
+          :code $ quote $ deftrait ObjectMetadataHost
+            :coord $ :: 'JsNullish $ :: 'List 'Number
+            :event $ :: 'JsNullish 'Dynamic
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :coord :event
+          :schema $ :: 'Trait
         'RaycasterHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait RaycasterHost
             .setFromCamera $ :: 'Fn $ {} (:return 'Unit)
-              :args $ [] 'RaycasterHost 'Dynamic 'Dynamic
+              :args $ [] 'RaycasterHost (quote JsObject) 'Dynamic
             .intersectObjects $ :: 'Fn $ {} (:return 'JsArrayHost)
               :args $ [] 'RaycasterHost 'Dynamic
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
+        'ShadowFlagsHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ShadowFlagsHost (:castShadow 'Bool) (:receiveShadow 'Bool)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :castShadow :receiveShadow
+          :schema $ :: 'Trait
+        'ShadowLightHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ShadowLightHost (:shadow 'quatrefoil.dsl.object3d-dom/LightShadowHost)
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
         'ThreeObjectHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ThreeObjectHost
             .lookAt $ :: 'Fn $ {} (:return 'Unit)
-              :args $ [] 'ThreeObjectHost 'Dynamic
+              :args $ [] 'ThreeObjectHost 'Number 'Number 'Number
             .add $ :: 'Fn $ {} (:return 'Unit)
               :args $ [] 'ThreeObjectHost 'Dynamic
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
+        'TransformHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait TransformHost (:position 'AxisSetterHost) (:rotation 'AxisSetterHost) (:scale 'AxisSetterHost)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
         'build-tree $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn build-tree (coord tree) (; js/console.log "|build tree:" coord tree)
-            if (some? tree)
+            if (non-nil? tree)
               let
                   object3d $ create-shape (assoc tree :children nil) coord
-                  children $ -> (field tree :children) (&map:to-list)
+                  children $ ->
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as (field tree :children) (:: 'Map 'Number 'Dynamic)
+                    &map:to-list
                     map $ fn (entry)
                       update entry 1 $ fn (child)
                         build-tree
-                          conj coord $ assert-type
+                          conj coord $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                             option:unwrap-or (first entry) 0
                             , 'Number
                           , child
@@ -2631,9 +2890,11 @@
                 ; js/console.log "|handle children" children $ :children tree
                 &doseq (entry children)
                   let
-                      child $ last entry
+                      child $ .unwrap $ last entry
                     ; js/console.log |Child: child entry
-                    .!addBy object3d (first entry) child
+                    .!addBy object3d
+                      .unwrap $ first entry
+                      , child
                 , object3d
               new THREE/Object3D
           :examples $ []
@@ -2643,21 +2904,23 @@
         'call-event-on-target! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn call-event-on-target! (maybe-target event)
             let
-                element-tree @*global-tree
-                coord $ .-coord $ ffi-object
-                  .-object $ ffi-object maybe-target
-                target-el $ find-element element-tree coord
-                maybe-handler $ field (field target-el :event) :click
-              if (js-present? coord)
-                do
-                  if (some? maybe-handler) (maybe-handler event @*proxied-dispatch) (println "|no handler" coord)
+                maybe-coord $ hit-coordinate maybe-target
+              if (.some? maybe-coord)
+                let
+                    coord $ .unwrap maybe-coord
+                    element-tree @*global-tree
+                    target-el $ find-element element-tree coord
+                    maybe-handler $ field (field target-el :event) :click
+                  if (non-nil? maybe-handler) (maybe-handler event @*proxied-dispatch) (println "|no handler" coord)
                   reset! *focused-coord coord
                   ; println "|focus to" coord
                 do (reset! *focused-coord nil) (eprintln "|lose focus")
+              , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'Dynamic 'Dynamic
+            :args $ [] 'JsObject 'E
             :features $ #{} :js-ffi
+            :generics $ [] 'E
         'create-ambient-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-ambient-light (params position)
             let
@@ -2676,21 +2939,18 @@
             let
                 geometry $ new THREE/BoxGeometry (field params :width) (field params :height) (field params :depth)
                 object3d $ new THREE/Mesh geometry $ create-material material
+                metadata-object $ unsafe-coerce object3d 'quatrefoil.dsl.object3d-dom/ObjectMetadataHost
               set-position! object3d position
               set-rotation! object3d rotation
               set-scale! object3d scale
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
-              set!
-                .-coord $ ffi-object object3d
-                , coord
-              set!
-                .-event $ ffi-object object3d
-                , event
+              set! (.-coord metadata-object) coord
+              set! (.-event metadata-object) event
               , object3d
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
@@ -2699,24 +2959,31 @@
         'create-buffer-object-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-buffer-object-element (params position rotation scale material)
             let
-                vertices $ new js/Float32Array $ js-array &
-                  either (field params :vertices) ([])
-                indices $ js-array & $ either (field params :indices) ([])
+                vertices $ new js/Float32Array $ to-js-data
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as
+                    either (field params :vertices) ([])
+                    :: 'List 'Number
+                  {} $ :js-array true
+                indices $ to-js-data
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as
+                    either (field params :indices) ([])
+                    :: 'List 'Number
+                  {} $ :js-array true
                 geometry $ new THREE/BufferGeometry
                 object3d $ do
                   geometry-set-attribute! geometry |position $ new THREE/BufferAttribute vertices 3
                   if
                     >
-                      js-number $ .-length $ ffi-object indices
+                      js-number $ .-length $ js-cast indices 'quatrefoil.dsl.object3d-dom/ArrayLengthHost
                       , 0
                     geometry-set-index! geometry indices
                   geometry-compute-normals! geometry
                   new THREE/Mesh geometry $ create-material material
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
               set-rotation! object3d rotation
@@ -2733,11 +3000,13 @@
                 intensity $ field params :intensity
                 object3d $ new THREE/DirectionalLight color intensity
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
-              ->
-                ffi-object $ .-shadow $ ffi-object object3d
-                , .-bias $ set! -0.0005
+              set!
+                .-bias $ js-cast
+                  .-shadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowLightHost
+                  , 'quatrefoil.dsl.object3d-dom/LightShadowHost
+                , -0.0005
               set-position! object3d position
               js/console.log "|directional light:" object3d
               , object3d
@@ -2763,8 +3032,9 @@
                 points $ &let
                   ps $ js-array
                   &doseq
-                    p $ field params :points
-                    push-array! ps $ new THREE/Vector3 & p
+                    p $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :points)
+                      :: 'List $ :: 'List 'Number
+                    push-array! ps $ vector3-from-list p
                   , ps
                 geometry $ geometry-set-from-points (new THREE/BufferGeometry) points
                 object3d $ new THREE/Line geometry $ create-material material
@@ -2782,17 +3052,19 @@
                 points $ &let
                   ps $ js-array
                   if
-                    some? $ field params :segments
+                    non-nil? $ field params :segments
                     &doseq
-                      segment $ field params :segments
+                      segment $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :segments)
+                        :: 'List $ :: 'List $ :: 'List 'Number
                       let
-                          p0 $ nth segment 0
-                          p1 $ nth segment 1
-                        push-array! ps $ new THREE/Vector3 & p0
-                        push-array! ps $ new THREE/Vector3 & p1
+                          p0 $ .unwrap $ nth segment 0
+                          p1 $ .unwrap $ nth segment 1
+                        push-array! ps $ vector3-from-list p0
+                        push-array! ps $ vector3-from-list p1
                     &doseq
-                      p $ field params :points
-                      push-array! ps $ new THREE/Vector3 & p
+                      p $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :points)
+                        :: 'List $ :: 'List 'Number
+                      push-array! ps $ vector3-from-list p
                   , ps
                 geometry $ geometry-set-from-points (new THREE/BufferGeometry) points
                 object3d $ new THREE/LineSegments geometry $ create-material material
@@ -2807,9 +3079,7 @@
         'create-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-material (material)
             &let
-              m $ case-default (field material :kind)
-                do (js/console.warn "|Unknown material:" material)
-                  new THREE/LineBasicMaterial $ to-js-data $ dissoc material :kind
+              m $ match (field material :kind)
                 :line-basic $ new THREE/LineBasicMaterial $ to-js-data (dissoc material :kind)
                 :line-dashed $ new THREE/LineDashedMaterial $ to-js-data (dissoc material :kind)
                 :mesh-basic $ new THREE/MeshBasicMaterial $ to-js-data (dissoc material :kind)
@@ -2819,12 +3089,14 @@
                 :raw-shader $ new THREE/RawShaderMaterial $ let
                     options $ to-js-data $ dissoc material :kind
                   , options
+                _ $ do (js/console.warn "|Unknown material:" material)
+                  new THREE/LineBasicMaterial $ to-js-data $ dissoc material :kind
               set!
-                .-side $ ffi-object m
-                , THREE/DoubleSide
+                .-side $ js-cast m 'quatrefoil.dsl.object3d-dom/MaterialSideHost
+                quatrefoil.util.core/require-decoded $ try-decode-map-as THREE/DoubleSide 'Number
               , m
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'JsObject)
             :args $ [] 'Dynamic
             :features $ #{} :js-ffi
         'create-mesh-line-element $ %{} 'CodeEntry (:doc |)
@@ -2833,8 +3105,9 @@
                 points $ &let
                   ps $ js-array
                   &doseq
-                    p $ field params :points
-                    push-array! ps $ new THREE/Vector3 & p
+                    p $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :points)
+                      :: 'List $ :: 'List 'Number
+                    push-array! ps $ vector3-from-list p
                   , ps
                 geometry $ let
                     g $ new MeshLineGeometry
@@ -2845,8 +3118,10 @@
               set-rotation! object3d rotation
               set-scale! object3d scale
               set!
-                .-raycast $ ffi-object object3d
-                , raycast
+                .-raycast $ js-cast object3d 'quatrefoil.dsl.object3d-dom/MeshRaycastHost
+                unsafe-coerce raycast $ :: 'Fn $ {}
+                  :args $ [] 'JsObject 'quatrefoil.dsl.object3d-dom/JsArrayHost
+                  :return 'Unit
               , object3d
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
@@ -2862,14 +3137,16 @@
                 stacks $ either (field params :stacks) 10
                 geometry $ new ParametricGeometry
                   fn (u v target)
-                    let[] (x y z) (func u v data) (.!set target x y z)
+                    let[] (x y z)
+                      quatrefoil.util.core/require-decoded $ try-decode-map-as (func u v data) (:: 'List 'Number)
+                      .set (js-cast target 'quatrefoil.dsl.object3d-dom/AxisSetterHost) x y z
                   , slices stacks
                 object3d $ new THREE/Mesh geometry $ create-material material
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
               set-rotation! object3d rotation
@@ -2888,11 +3165,11 @@
                 object3d $ new Reflector geometry $ js-object
                   |clipBias $ either (field params :clip-bias) 0.003
                   |textureWidth $ *
-                    js-number $ .-innerWidth $ ffi-object js/window
-                    js-number $ .-devicePixelRatio $ ffi-object js/window
+                    js-number $ .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+                    js-number $ .-devicePixelRatio $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
                   |textureHeight $ *
-                    js-number $ .-innerHeight $ ffi-object js/window
-                    js-number $ .-devicePixelRatio $ ffi-object js/window
+                    js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+                    js-number $ .-devicePixelRatio $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
                   |color $ either (field params :color) |0x7777ff
               set-position! object3d position
               set-rotation! object3d rotation
@@ -2910,12 +3187,14 @@
                 distance $ field params :distance
                 object3d $ new THREE/PointLight color intensity distance
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
-              ->
-                ffi-object $ .-shadow $ ffi-object object3d
-                , .-bias $ set! -0.005
+              set!
+                .-bias $ js-cast
+                  .-shadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowLightHost
+                  , 'quatrefoil.dsl.object3d-dom/LightShadowHost
+                , -0.005
               ; js/console.log |Light: object3d
               , object3d
           :examples $ []
@@ -2925,17 +3204,23 @@
         'create-polyhedron-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-polyhedron-element (params position rotation scale material)
             let
-                vertices $ js-array & $ concat & (field params :vertices)
-                indices $ js-array & $ concat & (field params :indices)
+                vertices $ to-js-data
+                  concat & $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :vertices)
+                    :: 'List $ :: 'List 'Number
+                  {} $ :js-array true
+                indices $ to-js-data
+                  concat & $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :indices)
+                    :: 'List $ :: 'List 'Number
+                  {} $ :js-array true
                 radius $ field params :radius
                 detail $ field params :detail
                 geometry $ new THREE/PolyhedronGeometry vertices indices radius detail
                 object3d $ new THREE/Mesh geometry $ create-material material
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
               set-rotation! object3d rotation
@@ -2954,9 +3239,14 @@
                 height $ field params :height
                 look-at $ field params :look-at
                 object3d $ new THREE/RectAreaLight color intensity width height
-              .!lookAt (three-object object3d) & look-at
+              let
+                  coordinates $ quatrefoil.util.core/require-decoded $ try-decode-map-as look-at (:: 'List 'Number)
+                .lookAt (three-object object3d)
+                  .unwrap $ nth coordinates 0
+                  .unwrap $ nth coordinates 1
+                  .unwrap $ nth coordinates 2
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
               set-rotation! object3d rotation
@@ -2970,18 +3260,21 @@
         'create-shader-mesh $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-shader-mesh (attributes params position rotation scale material)
             let
-                vertices $ new js/Float32Array $ js-array &
-                  either (field params :vertices) ([])
+                vertices $ new js/Float32Array $ to-js-data
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as
+                    either (field params :vertices) ([])
+                    :: 'List 'Number
+                  {} $ :js-array true
                 geometry $ let
                     g $ new THREE/BufferGeometry
                   set-geometry-attributes! g attributes
                   , g
                 object3d $ new THREE/Mesh geometry $ create-material material
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
               set-rotation! object3d rotation
@@ -3002,9 +3295,7 @@
                 material $ either (field element :material)
                   {} (:kind :mesh-basic) (:color 0xa0a0a0)
                 event $ field element :event
-              case-default (field element :name)
-                do (js/console.warn "|Unknown element" element) (new THREE/Object3D)
-                :scene @*global-scene
+              match (field element :name) (:scene @*global-scene)
                 :group $ create-group-element params position rotation scale
                 :box $ create-box-element params position rotation scale material event coord
                 :sphere $ create-sphere-element params position rotation scale material event coord
@@ -3027,6 +3318,7 @@
                 :buffer-object $ create-buffer-object-element params position rotation scale material
                 :shader-mesh $ create-shader-mesh (field element :attributes) params position rotation scale material
                 :some-object $ create-some-object params position rotation scale material
+                _ $ do (js/console.warn "|Unknown element" element) (new THREE/Object3D)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic $ :: 'List 'Number
@@ -3043,10 +3335,10 @@
                 geometry $ new THREE/ShapeGeometry shape-2d
                 object3d $ new THREE/Mesh geometry $ create-material material
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
               set-rotation! object3d rotation
@@ -3065,10 +3357,10 @@
               set-rotation! object3d rotation
               set-scale! object3d scale
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               if-let (loaded obj)
                 .!add (three-object object3d) loaded
@@ -3086,21 +3378,18 @@
                   or (field params :width-segments) 12
                   or (field params :height-segments) 12
                 object3d $ new THREE/Mesh geometry $ create-material material
+                metadata-object $ unsafe-coerce object3d 'quatrefoil.dsl.object3d-dom/ObjectMetadataHost
               set-position! object3d position
               set-rotation! object3d rotation
               set-scale! object3d scale
+              set! (.-coord metadata-object) coord
               set!
-                .-coord $ ffi-object object3d
-                , coord
-              set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
-              set!
-                .-event $ ffi-object object3d
-                , event
+              set! (.-event metadata-object) event
               ; js/console.log |Sphere: object3d
               , object3d
           :examples $ []
@@ -3110,17 +3399,19 @@
         'create-spline-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-spline-element (params position rotation scale material)
             let
-                points0 $ field params :points
-                curve $ new THREE/CatmullRomCurve3 $ js-array &
-                  -> points0 $ map $ fn (p) (new THREE/Vector3 & p)
+                points0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :points)
+                  :: 'List $ :: 'List 'Number
+                curve $ new THREE/CatmullRomCurve3 $ to-js-data
+                  -> points0 $ map $ fn (p) (vector3-from-list p)
+                  {} $ :js-array true
                 points $ curve-get-points curve $ * 16 (count points0)
                 geometry $ geometry-set-from-points (new THREE/BufferGeometry) points
                 object3d $ new THREE/Line geometry $ create-material material
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
               set-rotation! object3d rotation
@@ -3141,11 +3432,13 @@
                 decay $ or (field params :decay) 1.5
                 object3d $ new THREE/SpotLight color intensity distance angle penumbra decay
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
-              ->
-                ffi-object $ .-shadow $ ffi-object object3d
-                , .-bias $ set! -0.0005
+              set!
+                .-bias $ js-cast
+                  .-shadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowLightHost
+                  , 'quatrefoil.dsl.object3d-dom/LightShadowHost
+                , -0.0005
               set-position! object3d position
               js/console.log |Light: object3d
               , object3d
@@ -3164,10 +3457,10 @@
               set-rotation! object3d rotation
               set-scale! object3d scale
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               , object3d
           :examples $ []
@@ -3180,10 +3473,10 @@
                 geometry $ -> $ new THREE/TorusGeometry (field params :r1) (field params :r2) (field params :s1) (field params :s2) (field params :arc)
                 object3d $ new THREE/Mesh geometry $ create-material material
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
               set-scale! object3d scale
@@ -3208,10 +3501,10 @@
                   either (field params :closed?) false
                 object3d $ new THREE/Mesh geometry $ create-material material
               set!
-                .-castShadow $ ffi-object object3d
+                .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set!
-                .-receiveShadow $ ffi-object object3d
+                .-receiveShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
                 , true
               set-position! object3d position
               set-rotation! object3d rotation
@@ -3275,8 +3568,33 @@
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
+        'hit-coordinate $ %{} 'CodeEntry
+          :doc "|Normalize optional application coordinate metadata on a Three.js intersection into Option<List<Number>>; absence is not a malformed required host field."
+          :code $ quote $ defn hit-coordinate (target)
+            let
+                hit $ js-cast target 'quatrefoil.dsl.object3d-dom/IntersectionHost
+                coord $ .-coord $ unsafe-coerce (.-object hit) 'quatrefoil.dsl.object3d-dom/ObjectMetadataHost
+              if (js-present? coord)
+                Option :some $ quatrefoil.util.core/require-decoded $ try-decode-map-as coord (:: 'List 'Number)
+                Option :none
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'JsObject
+            :features $ #{} :js-ffi
+            :return $ :: 'Option $ :: 'List 'Number
+        'interactive-hit? $ %{} 'CodeEntry
+          :doc "|Read optional application event metadata on arbitrary Three.js objects; ordinary meshes and imported GLTF nodes may lack this property. Keep raw optional lookup semantics at this single adapter."
+          :code $ quote $ defn interactive-hit? (target pos hits)
+            let
+                hit $ js-cast target 'quatrefoil.dsl.object3d-dom/IntersectionHost
+              js-present? $ .-event $ unsafe-coerce (.-object hit) 'quatrefoil.dsl.object3d-dom/ObjectMetadataHost
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'Bool)
+            :args $ [] 'JsObject 'Number 'quatrefoil.dsl.object3d-dom/JsArrayHost
+            :features $ #{} :js-ffi
         'js-number $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn js-number (value) (unsafe-coerce value Number)
+          :code $ quote $ defn js-number (value)
+            quatrefoil.util.core/require-decoded $ try-decode-map-as value 'Number
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Number)
             :args $ [] 'Dynamic
@@ -3307,75 +3625,69 @@
         'on-canvas-click $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-canvas-click (event)
             let
+                event-host $ js-ffi.browser/mouse-event-host event
                 mouse $ new THREE/Vector2
-                raycaster $ unsafe-coerce (new THREE/Raycaster) RaycasterHost
-              set!
-                .-x $ ffi-object mouse
-                dec $ * 2 $ /
-                  js-number $ .-clientX $ ffi-object event
-                  js-number $ .-innerWidth $ ffi-object js/window
-              set!
-                .-y $ ffi-object mouse
-                - 1 $ * 2 $ /
-                  js-number $ .-clientY $ ffi-object event
-                  js-number $ .-innerHeight $ ffi-object js/window
-              .!setFromCamera raycaster mouse @*global-camera
+                  dec $ * 2 $ /
+                    js-number $ .-client-x event-host
+                    js-number $ .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+                  - 1 $ * 2 $ /
+                    js-number $ .-client-y event-host
+                    js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+                raycaster $ js-cast (new THREE/Raycaster) (quote quatrefoil.dsl.object3d-dom/RaycasterHost)
+              .setFromCamera raycaster mouse @*global-camera
               let
-                  intersects $ .!filter
-                    unsafe-coerce
-                      .!intersectObjects raycaster $ let
+                  intersects $ .filter
+                    js-cast
+                      .intersectObjects raycaster $ let
                           children $ js-array
                           collect! $ fn (x) (push-array! children x)
                         collect-children @*global-scene collect!
                         , children
-                      , JsArrayHost
-                    fn (target pos _xs)
-                      js-present? $ .-event $ ffi-object
-                        .-object $ ffi-object target
-                ; js/console.log intersects
-                if
-                  js-present? $ .-0 $ ffi-object intersects
-                  call-event-on-target!
-                    ffi-object $ .-0 $ ffi-object intersects
-                    , event
+                      quote quatrefoil.dsl.object3d-dom/JsArrayHost
+                    , interactive-hit?
+                  target $ aget intersects 0
+                if (js-present? target) (call-event-on-target! target event-host)
                   do (reset! *focused-coord nil) (println "|lose focus")
+              , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic
             :features $ #{} :js-ffi
         'on-control-event $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-control-event (move delta elapsed)
-            if (some? @*focused-coord)
+            if (non-nil? @*focused-coord)
               let
                   coord @*focused-coord
                   element-tree @*global-tree
                   target-el $ find-element element-tree coord
                   maybe-handler $ field (field target-el :event) :control
-                if (some? maybe-handler) (maybe-handler move delta elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
+                if (non-nil? maybe-handler) (maybe-handler move delta elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
               println "|no focused coord to control" @*focused-coord
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'Dynamic 'Dynamic 'Number
+            :args $ [] (:: 'List 'Number) (:: 'List 'Number) 'Number
             :features $ #{} :js-ffi
         'on-gamepad-event $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-gamepad-event (info elapsed)
-            if (some? @*focused-coord)
+            if (non-nil? @*focused-coord)
               let
                   coord @*focused-coord
                   element-tree @*global-tree
                   target-el $ find-element element-tree coord
                   maybe-handler $ field (field target-el :event) :gamepad
-                if (some? maybe-handler) (maybe-handler info elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
+                if (non-nil? maybe-handler) (maybe-handler info elapsed @*proxied-dispatch) (;nil println "|Found no handler for" coord)
               println "|no focused coord to control" @*focused-coord
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'Number
             :features $ #{} :js-ffi
         'push-array! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn push-array! (xs x)
-            unsafe-coerce
-              .!push (unsafe-coerce xs JsArrayHost) x
-              , Number
+            quatrefoil.util.core/require-decoded $ try-decode-map-as
+              .push (js-cast xs 'quatrefoil.dsl.object3d-dom/JsArrayHost) x
+              , 'Number
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Number)
             :args $ [] 'Dynamic 'Dynamic
@@ -3384,15 +3696,35 @@
           :code $ quote $ defn set-geometry-attributes! (g attributes)
             &doseq (info attributes)
               let
-                  name $ turn-string $ field info :id
-                  buffer $ field info :buffer
+                  name $ let
+                      id $ field info :id
+                    cond
+                        string? id
+                        quatrefoil.util.core/require-decoded $ try-decode-map-as id 'String
+                      (tag? id)
+                        .to-string $ quatrefoil.util.core/require-decoded $ try-decode-map-as id 'Tag
+                      (symbol? id)
+                        .to-string $ quatrefoil.util.core/require-decoded $ try-decode-map-as id 'Symbol
+                      (number? id)
+                        .to-string $ quatrefoil.util.core/require-decoded $ try-decode-map-as id 'Number
+                      (bool? id)
+                        .to-string $ quatrefoil.util.core/require-decoded $ try-decode-map-as id 'Bool
+                      (nil? id) (.to-string nil)
+                      true $ raise |geometry-attribute-id-must-be-a-scalar
+                  buffer $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :buffer) (:: 'List 'Number)
                   size $ field info :size
                   type $ field info :type
-                  attr $ case-default type
-                    do (js/console.warn "|use f32 as default attribute type")
-                      new THREE/Float32BufferAttribute (js-array & buffer) size
-                    :f32 $ new THREE/Float32BufferAttribute (js-array & buffer) size
-                    :u8 $ new THREE/Float32BufferAttribute (js-array & buffer) size
+                  attr $ match type
+                    :f32 $ new THREE/Float32BufferAttribute
+                      to-js-data buffer $ {} $ :js-array true
+                      , size
+                    :u8 $ new THREE/Float32BufferAttribute
+                      to-js-data buffer $ {} $ :js-array true
+                      , size
+                    _ $ do (js/console.warn "|use f32 as default attribute type")
+                      new THREE/Float32BufferAttribute
+                        to-js-data buffer $ {} $ :js-array true
+                        , size
                 geometry-set-attribute! g name attr
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -3417,16 +3749,23 @@
           :code $ quote $ defn set-position! (object position)
             cond
                 enum? position
-                match position
+                match
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as position 'quaternion.vector/V3
                   (:v3 x y z)
-                    .!set
-                      ffi-object $ .-position $ ffi-object object
+                    .set
+                      js-cast
+                        .-position $ js-cast object 'quatrefoil.dsl.object3d-dom/TransformHost
+                        , 'quatrefoil.dsl.object3d-dom/AxisSetterHost
                       , x y z
                   _ $ raise |unknown-position-expected-vector
               (list? position)
-                let[] (x y z) position $ .!set
-                  ffi-object $ .-position $ ffi-object object
-                  , x y z
+                let[] (x y z)
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as position $ :: 'List 'Number
+                  .set
+                    js-cast
+                      .-position $ js-cast object 'quatrefoil.dsl.object3d-dom/TransformHost
+                      , 'quatrefoil.dsl.object3d-dom/AxisSetterHost
+                    , x y z
               (nil? position) nil
               true $ raise |unknown-position
             , &unit
@@ -3436,10 +3775,14 @@
             :features $ #{} :js-ffi
         'set-rotation! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn set-rotation! (object3d rotation)
-            if (some? rotation)
-              let[] (x y z) rotation $ .!set
-                ffi-object $ .-rotation $ ffi-object object3d
-                , x y z
+            if (non-nil? rotation)
+              let[] (x y z)
+                quatrefoil.util.core/require-decoded $ try-decode-map-as rotation $ :: 'List 'Number
+                .set
+                  js-cast
+                    .-rotation $ js-cast object3d 'quatrefoil.dsl.object3d-dom/TransformHost
+                    , 'quatrefoil.dsl.object3d-dom/AxisSetterHost
+                  , x y z
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -3447,22 +3790,41 @@
             :features $ #{} :js-ffi
         'set-scale! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn set-scale! (object scale)
-            if (some? scale)
-              let[] (x y z) scale $ .!set
-                ffi-object $ .-scale $ ffi-object object
-                scale-zero x
-                scale-zero y
-                scale-zero z
+            if (non-nil? scale)
+              let[] (x y z)
+                if (enum? scale)
+                  match
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as scale 'quaternion.vector/V3
+                    (:v3 x y z) ([] x y z)
+                    _ $ raise |unknown-scale-expected-vector
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as scale $ :: 'List 'Number
+                .set
+                  js-cast
+                    .-scale $ js-cast object 'quatrefoil.dsl.object3d-dom/TransformHost
+                    , 'quatrefoil.dsl.object3d-dom/AxisSetterHost
+                  scale-zero x
+                  scale-zero y
+                  scale-zero z
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
         'three-object $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn three-object (value) (unsafe-coerce value 'ThreeObjectHost)
+          :code $ quote $ defn three-object (value) (js-cast value 'quatrefoil.dsl.object3d-dom/ThreeObjectHost)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'ThreeObjectHost)
             :args $ [] 'Dynamic
+            :features $ #{} :js-ffi
+        'vector3-from-list $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn vector3-from-list (coordinates)
+            new THREE/Vector3
+              .unwrap-or (nth coordinates 0) 0
+              .unwrap-or (nth coordinates 1) 0
+              .unwrap-or (nth coordinates 2) 0
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+            :args $ [] $ :: 'List 'Number
             :features $ #{} :js-ffi
         'write-shape-path! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn write-shape-path! (s op)
@@ -3493,13 +3855,62 @@
             |meshline :refer $ MeshLineGeometry MeshLineMaterial raycast
     'quatrefoil.dsl.patch $ %{} 'FileEntry
       :defs $ {}
+        'ColorHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ColorHost
+            .set $ :: 'Fn $ {}
+              :args $ [] 'quatrefoil.dsl.patch/ColorHost 'JsObject
+              :return 'quatrefoil.dsl.patch/ColorHost
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
+        'ColoredMaterialHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ColoredMaterialHost (:color 'quatrefoil.dsl.patch/ColorHost)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
+        'MaterialHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait MaterialHost (:opacity 'Number) (:transparent 'Bool) (:needsUpdate 'Bool)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :needsUpdate :opacity :transparent
+          :schema $ :: 'Trait
+        'MeshGeometryHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait MeshGeometryHost (:geometry 'JsObject)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
+        'MeshLineMaterialHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait MeshLineMaterialHost (:lineWidth 'Number)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :lineWidth
+          :schema $ :: 'Trait
+        'MeshMaterialHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait MeshMaterialHost (:material 'JsObject)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :material
+          :schema $ :: 'Trait
+        'ShaderMaterialHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ShaderMaterialHost (:uniforms 'JsObject) (:fragmentShader 'String) (:vertexShader 'String)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :fragmentShader :uniforms :vertexShader
+          :schema $ :: 'Trait
+        'WireframeMaterialHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait WireframeMaterialHost (:wireframe 'Bool)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :wireframe
+          :schema $ :: 'Trait
         'add-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn add-children (target coord op-data)
             &doseq (entry op-data)
-              let-sugar
-                    [] k tree
-                    , entry
-                .!addBy target k $ build-tree (conj coord k) tree
+              let[] (raw-key tree)
+                quatrefoil.util.core/require-decoded $ try-decode-map-as entry $ :: 'List 'Dynamic
+                let
+                    k $ quatrefoil.util.core/require-decoded $ try-decode-map-as raw-key 'Number
+                  .!addBy target k $ build-tree (conj coord k) tree
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic (:: 'List 'Number) 'Dynamic
@@ -3509,7 +3920,9 @@
             if (empty? coord) (js/console.warn "|Cannot remove by empty coord!")
               let
                   parent $ reach-object3d @*global-scene $ butlast coord
-                .!addBy parent (last coord) (build-tree coord op-data)
+                .!addBy parent
+                  .unwrap $ last coord
+                  build-tree coord op-data
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -3519,27 +3932,32 @@
           :code $ quote $ defn apply-changes (changes)
             ; js/console.log |changes (count changes) changes
             &doseq (change changes)
-              let-sugar
-                    [] coord op op-data
-                    , change
-                  target $ reach-object3d @*global-scene coord
-                ; js/console.log |Change: op coord op-data
-                case-default op (js/console.warn "|Unknown op:" op)
-                  :add-material $ update-material target coord op-data
-                  :update-material $ update-material target coord op-data
-                  :remove-material $ remove-material target coord op-data
-                  :replace-material $ replace-material target coord op-data
-                  :remove-children $ remove-children target coord op-data
-                  :add-children $ add-children target coord op-data
-                  :add-element $ add-element target coord op-data
-                  :remove-element $ remove-element target coord
-                  :replace-element $ replace-element target coord op-data
-                  :change-position $ set-position! target $ either op-data ([] 0 0 0)
-                  :change-rotation $ set-rotation! target $ either op-data ([] 0 0 0)
-                  :change-scale $ set-scale! target $ either op-data ([] 1 1 1)
-                  :change-attributes $ set-geometry-attributes!
-                    .-geometry $ ffi-object target
-                    , op-data
+              let
+                  data $ quatrefoil.util.core/require-decoded $ try-decode-map-as change (:: 'List 'Dynamic)
+                  raw-coord $ &list:nth data 0
+                  op $ quatrefoil.util.core/require-decoded $ try-decode-map-as (&list:nth data 1) 'Tag
+                  op-data $ if (= op :remove-element) nil $ &list:nth data 2
+                let
+                    coord $ quatrefoil.util.core/require-decoded $ try-decode-map-as raw-coord (:: 'List 'Number)
+                    target $ reach-object3d @*global-scene coord
+                  ; js/console.log |Change: op coord op-data
+                  match op
+                    :add-material $ update-material target coord op-data
+                    :update-material $ update-material target coord op-data
+                    :remove-material $ remove-material target coord op-data
+                    :replace-material $ replace-material target coord op-data
+                    :remove-children $ remove-children target coord op-data
+                    :add-children $ add-children target coord op-data
+                    :add-element $ add-element target coord op-data
+                    :remove-element $ remove-element target coord
+                    :replace-element $ replace-element target coord op-data
+                    :change-position $ set-position! target $ either op-data ([] 0 0 0)
+                    :change-rotation $ set-rotation! target $ either op-data ([] 0 0 0)
+                    :change-scale $ set-scale! target $ either op-data ([] 1 1 1)
+                    :change-attributes $ set-geometry-attributes!
+                      .-geometry $ js-cast target 'quatrefoil.dsl.patch/MeshGeometryHost
+                      , op-data
+                    _ $ js/console.warn "|Unknown op:" op
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] $ :: 'List 'Dynamic
@@ -3562,7 +3980,7 @@
             if (empty? coord) (js/console.warn "|Cannot remove by empty coord!")
               let
                   parent $ reach-object3d @*global-scene $ butlast coord
-                .!removeBy parent $ last coord
+                .!removeBy parent $ .unwrap $ last coord
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -3571,15 +3989,14 @@
         'remove-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn remove-material (target coord op-data)
             let
-                material $ ffi-object $ .-material (ffi-object target)
+                material $ js-cast
+                  .-material $ js-cast target 'quatrefoil.dsl.patch/MeshMaterialHost
+                  , 'quatrefoil.dsl.patch/MaterialHost
               &doseq (entry op-data)
-                case-default entry (println "|Unknown material prop:" op-data)
-                  :opacity $ set!
-                    .-opacity $ ffi-object material
-                    , 0.9
-                  :transparent $ set!
-                    .-transparent $ ffi-object material
-                    , 1
+                match entry
+                  :opacity $ set! (.-opacity material) 0.9
+                  :transparent $ set! (.-transparent material) true
+                  _ $ println "|Unknown material prop:" op-data
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic (:: 'List 'Number) 'Dynamic
@@ -3589,7 +4006,9 @@
             if (empty? coord) (js/console.warn "|Cannot replace with empty coord!")
               let
                   parent $ reach-object3d @*global-scene $ butlast coord
-                .!replaceBy parent (last coord) (build-tree coord op-data)
+                .!replaceBy parent
+                  .unwrap $ last coord
+                  build-tree coord op-data
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -3598,8 +4017,9 @@
         'replace-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn replace-material (target coord op-data)
             set!
-              .-material $ ffi-object target
+              .-material $ js-cast target 'quatrefoil.dsl.patch/MeshMaterialHost
               create-material op-data
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic (:: 'List 'Number) 'Dynamic
@@ -3607,38 +4027,43 @@
         'update-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn update-material (target coord op-data) (; println "|Update material" coord op-data)
             let
-                material $ ffi-object $ .-material (ffi-object target)
+                material $ js-cast
+                  .-material $ js-cast target 'quatrefoil.dsl.patch/MeshMaterialHost
+                  , 'quatrefoil.dsl.patch/MaterialHost
               ; js/console.log target
               &doseq
-                entry $ &map:to-list op-data
-                let[] (param new-value) entry $ case-default param (js/console.log "|Unknown param:" param)
-                  :color $ .!set
-                    ffi-object $ .-color $ ffi-object material
-                    new THREE/Color new-value
-                  :opacity $ set!
-                    .-opacity $ ffi-object material
-                    , new-value
-                  :transparent $ set!
-                    .-transparent $ ffi-object material
-                    , new-value
+                entry $ &map:to-list $ quatrefoil.util.core/require-decoded
+                  try-decode-map-as op-data $ :: 'Map 'Tag 'Dynamic
+                let[] (param new-value) entry $ match param
+                  :color $
+                    js-cast
+                      .-color $ js-cast material 'quatrefoil.dsl.patch/ColoredMaterialHost
+                      , 'quatrefoil.dsl.patch/ColorHost
+                    , .set $ new THREE/Color new-value
+                  :opacity $ set! (.-opacity material)
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as new-value 'Number
+                  :transparent $ set! (.-transparent material)
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as new-value 'Bool
                   :lineWidth $ set!
-                    .-lineWidth $ ffi-object material
-                    , new-value
+                    .-lineWidth $ js-cast material 'quatrefoil.dsl.patch/MeshLineMaterialHost
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as new-value 'Number
                   :uniforms $ set!
-                    .-uniforms $ ffi-object material
-                    to-js-data new-value
+                    .-uniforms $ js-cast material 'quatrefoil.dsl.patch/ShaderMaterialHost
+                    unsafe-coerce
+                      to-js-data $ quatrefoil.util.core/require-decoded $ try-decode-map-as new-value (:: 'Map 'Dynamic 'Dynamic)
+                      , 'JsObject
                   :fragmentShader $ set!
-                    .-fragmentShader $ ffi-object material
-                    , new-value
+                    .-fragmentShader $ js-cast material 'quatrefoil.dsl.patch/ShaderMaterialHost
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as new-value 'String
                   :vertexShader $ set!
-                    .-vertexShader $ ffi-object material
-                    , new-value
+                    .-vertexShader $ js-cast material 'quatrefoil.dsl.patch/ShaderMaterialHost
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as new-value 'String
                   :wireframe $ set!
-                    .-wireframe $ ffi-object material
-                    , new-value
-              set!
-                .-needsUpdate $ ffi-object material
-                , true
+                    .-wireframe $ js-cast material 'quatrefoil.dsl.patch/WireframeMaterialHost
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as new-value 'Bool
+                  _ $ js/console.log "|Unknown param:" param
+              set! (.-needsUpdate material) true
+              , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic (:: 'List 'Number) 'Dynamic
@@ -3654,43 +4079,43 @@
     'quatrefoil.globals $ %{} 'FileEntry
       :defs $ {}
         '*global-camera $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *global-camera nil
+          :code $ quote $ defref *global-camera nil
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
         '*global-composer $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *global-composer nil
+          :code $ quote $ defref *global-composer nil
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
         '*global-renderer $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *global-renderer nil
+          :code $ quote $ defref *global-renderer nil
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
         '*global-scene $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *global-scene (make-global-scene)
+          :code $ quote $ defref *global-scene (make-global-scene)
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
         '*global-time $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *global-time 0
+          :code $ quote $ defref *global-time 0
           :examples $ []
           :schema $ :: 'Ref 'Number
         '*global-tree $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *global-tree nil
+          :code $ quote $ defref *global-tree nil
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
         '*loaded-objects $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *loaded-objects ({})
+          :code $ quote $ defref *loaded-objects ({})
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
         '*proxied-dispatch $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *proxied-dispatch nil
+          :code $ quote $ defref *proxied-dispatch nil
           :examples $ []
           :schema $ :: 'Ref 'Dynamic
         '*viewer-angle $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *viewer-angle (&/ &PI 2)
+          :code $ quote $ defref *viewer-angle (&/ &PI 2)
           :examples $ []
           :schema $ :: 'Ref 'Number
         '*viewer-y-shift $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *viewer-y-shift 0
+          :code $ quote $ defref *viewer-y-shift 0
           :examples $ []
           :schema $ :: 'Ref 'Number
         'make-global-scene $ %{} 'CodeEntry (:doc |)
@@ -3706,7 +4131,9 @@
       :defs $ {} $ 'rand-around
         %{} 'CodeEntry (:doc |)
           :code $ quote $ defn rand-around (base x)
-            + base (rand x) (* -0.5 x)
+            + base
+              quatrefoil.util.core/require-decoded $ try-decode-map-as (rand x) 'Number
+              * -0.5 x
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Number)
             :args $ [] 'Number 'Number
@@ -3775,6 +4202,11 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
+        'WindowMetricsHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait WindowMetricsHost (:innerWidth 'Number) (:innerHeight 'Number) (:devicePixelRatio 'Number)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
         'collect-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn collect-children (element collect!)
             .!forEach
@@ -3795,7 +4227,7 @@
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn field (value key)
-            option:unwrap-or (get value key) nil
+            if (nil? value) nil $ option:unwrap-or (get value key) nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
@@ -3806,7 +4238,7 @@
               if (empty? coord) tree $ let
                   cursor $ option:unwrap $ first coord
                 let
-                    child $ get-in tree $ [] :children cursor
+                    child $ get (field tree :children) cursor
                   if (option:some? child)
                     recur (option:unwrap child) (rest coord)
                     , nil
@@ -3821,24 +4253,33 @@
               (comp? tree)
                 recur $ field tree :tree
               true $ update tree :children $ fn (children)
-                assert-type
-                  -> children (&map:to-list)
-                    map $ fn (entry)
-                      update entry 1 $ fn (child) (purify-tree child)
-                    pairs-map
-                  , 'Dynamic
+                ->
+                  require-decoded $ try-decode-map-as children $ :: 'Map 'Dynamic 'Dynamic
+                  &map:to-list
+                  map $ fn (entry)
+                    update entry 1 $ fn (child) (purify-tree child)
+                  pairs-map
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic
         'reach-object3d $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reach-object3d (object3d coord)
             if (empty? coord) object3d $ let
-                cursor $ first coord
+                cursor $ .unwrap $ first coord
               recur (.!reachBy object3d cursor) (rest coord)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
+        'require-decoded $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn require-decoded (result)
+            match result
+              (:ok value) value
+              (:err message) (raise message)
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'T)
+            :args $ [] $ :: 'Result 'T 'String
+            :generics $ [] 'T
         'scale-zero $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn scale-zero (x)
             if (&= 0 x) 0.01 x
