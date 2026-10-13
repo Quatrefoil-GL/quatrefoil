@@ -12,15 +12,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@calcit/procs@npm:0.29.1":
-  version: 0.29.1
-  resolution: "@calcit/procs@npm:0.29.1"
+"@calcit/procs@npm:0.29.3":
+  version: 0.29.3
+  resolution: "@calcit/procs@npm:0.29.3"
   dependencies:
     "@calcit/finger-vec": "npm:0.1.1"
     "@calcit/ternary-tree": "npm:0.0.26"
     "@cirru/parser.ts": "npm:0.0.10"
     "@cirru/writer.ts": "npm:^0.1.9"
-  checksum: 10c0/513044d9ece97a9ad222d159e4772dfe126352251d266ee2b2beb080def63d52042ed79c826048319e2fff27106d4b846d70ce9cfab283c8c508c0896509cc20
+  checksum: 10c0/88713901f7e522a42252302ae43c44aa7d68551bb4b15add8521a9f3ef553a923c2ef8d13ee1d9413d0bec934efd7b63d4e77a2cdc777a550607f3e778d086a3
   languageName: node
   linkType: hard
 
@@ -65,13 +65,6 @@ __metadata:
   version: 0.151.0
   resolution: "@oxc-project/types@npm:0.151.0"
   checksum: 10c0/7dac5399345abf368449735c31c218439e6c3a2acf7b8cbc715a88b45989390208f61bea0f3eb28bee5a034a509a7f4142ae60069e6611b07c70a30867c8ca84
-  languageName: node
-  linkType: hard
-
-"@quamolit/touch-control@npm:^0.0.13":
-  version: 0.0.13
-  resolution: "@quamolit/touch-control@npm:0.0.13"
-  checksum: 10c0/3145a0462cf41e4857c6a5f30f3b6c12221f19c55511fc38e485bb4e2edd444a3a1cfedc693733ed86b22a2f2cce9d952bb13e3e3ce589a9e259a14bd7b500cd
   languageName: node
   linkType: hard
 
@@ -627,9 +620,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "quatrefoil@workspace:."
   dependencies:
-    "@calcit/procs": "npm:0.29.1"
+    "@calcit/procs": "npm:0.29.3"
     "@calcit/std": "npm:^0.0.3"
-    "@quamolit/touch-control": "npm:^0.0.13"
     "@quatrefoil/utils": "npm:^0.0.3"
     bottom-tip: "npm:^0.1.5"
     hsluv: "npm:^1.0.1"

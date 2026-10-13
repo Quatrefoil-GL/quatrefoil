@@ -1018,6 +1018,7 @@
                           {} $ :initial $ field task :text
                           fn (text)
                             dispatch! :edit-task $ [] (field task :id) text
+                            , &unit
                 text $ {}
                   :text $ field task :text
                   :size 3
@@ -1048,7 +1049,7 @@
                             e0 $ unsafe-coerce e DomMouseEvent
                           [] (.-pageX e0) (.-pageY e0)
                         {} $ :initial |
-                        fn (text) (d! :add-task text)
+                        fn (text) (d! :add-task text) &unit
               group
                 {} $ :position $ [] 0 20 0
                 ->
@@ -1216,7 +1217,7 @@
                 {} (:id 100) (:text "|Initial task") (:done? false)
               :states $ {} $ :cursor ([])
           :examples $ []
-          :schema $ :: 'Ref 'Dynamic
+          :schema $ :: 'Ref $ :: 'Map 'Tag 'Dynamic
         'DracoLoaderHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait DracoLoaderHost
             .setDecoderPath $ :: 'Fn $ {} (:return 'Unit)
@@ -1310,12 +1311,13 @@
                     js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
                   , 1.5 0.4 0.85
             render-app!
-            add-watch! *store :changes $ fn (store prev) (render-app!)
+            add-watch! *store :changes $ fn (store prev) (render-app!) &unit
             set! js/window.onkeydown handle-key-event
             render-control!
             handle-control-events
             init-controls!
             println "|App started!"
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
@@ -1324,10 +1326,11 @@
           :code $ quote $ defn reload! ()
             if (non-nil? build-errors) (hud! |error build-errors)
               do (hud! |ok~ nil) (clear-cache!) (clear-control-loop!) (handle-control-events) (remove-watch! *store :changes)
-                add-watch! *store :changes $ fn (store prev) (render-app!)
+                add-watch! *store :changes $ fn (store prev) (render-app!) &unit
                 render-app!
                 set! js/window.onkeydown handle-key-event
                 println "|Code updated."
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
@@ -1445,9 +1448,10 @@
                   assoc store0 :tasks $ assoc-in tasks ([] task-id :text) text
                 _ store0
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {}
             :args $ [] 'Dynamic 'Tag 'Dynamic
             :features $ #{} :js-ffi
+            :return $ :: 'Map 'Tag 'Dynamic
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.updater
           :require
@@ -2531,12 +2535,13 @@
                   option:unwrap-or (nth data 0) ([])
                   :: 'List 'Tag
                 new-state $ option:unwrap-or (nth data 1) nil
-              assoc-in store
-                concat ([] :states) cursor $ [] :data
+              assoc store :states $ assoc-in (quatrefoil.util.core/field store :states)
+                concat cursor $ [] :data
                 , new-state
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
-            :args $ [] 'Dynamic 'Dynamic
+          :schema $ :: 'Fn $ {}
+            :args $ [] (:: 'Map 'Tag 'Dynamic) 'Dynamic
+            :return $ :: 'Map 'Tag 'Dynamic
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.cursor
     'quatrefoil.dsl.diff $ %{} 'FileEntry
@@ -3927,8 +3932,11 @@
           :code $ quote $ defn apply-changes (changes)
             ; js/console.log |changes (count changes) changes
             &doseq (change changes)
-              let[] (raw-coord op op-data)
-                quatrefoil.util.core/require-decoded $ try-decode-map-as change $ :: 'List 'Dynamic
+              let
+                  data $ quatrefoil.util.core/require-decoded $ try-decode-map-as change (:: 'List 'Dynamic)
+                  raw-coord $ &list:nth data 0
+                  op $ quatrefoil.util.core/require-decoded $ try-decode-map-as (&list:nth data 1) 'Tag
+                  op-data $ if (= op :remove-element) nil $ &list:nth data 2
                 let
                     coord $ quatrefoil.util.core/require-decoded $ try-decode-map-as raw-coord (:: 'List 'Number)
                     target $ reach-object3d @*global-scene coord

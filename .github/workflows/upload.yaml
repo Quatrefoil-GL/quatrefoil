@@ -52,7 +52,7 @@ jobs:
       - name: Validate Calcit snapshot and types
         run: |
           set -euo pipefail
-          test "$(calcit --version)" = "0.29.1"
+          test "$(calcit --version)" = "0.29.3"
           calcit calcit.cirru edit format
           git diff --exit-code -- calcit.cirru
           calcit calcit.cirru fix --workflow strict --verify --format edn
@@ -120,28 +120,8 @@ jobs:
           cp assets/* js-out/
           yarn build
 
-      - name: Check COS credentials
-        id: cos-credentials
-        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
-        env:
-          COS_BUCKET: ${{ secrets.COS_BUCKET }}
-          COS_SECRET_ID: ${{ secrets.COS_SECRET_ID }}
-          COS_SECRET_KEY: ${{ secrets.COS_SECRET_KEY }}
-        run: |
-          if [[ -n "$COS_BUCKET" && -n "$COS_SECRET_ID" && -n "$COS_SECRET_KEY" ]]; then
-            echo "available=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "available=false" >> "$GITHUB_OUTPUT"
-            if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
-              echo "::warning title=COS upload skipped::Configure COS_BUCKET, COS_SECRET_ID, and COS_SECRET_KEY to run public upload verification."
-            else
-              echo "::error title=COS credentials missing::COS_BUCKET, COS_SECRET_ID, and COS_SECRET_KEY are required for production deployment."
-              exit 1
-            fi
-          fi
-
       - name: Upload and verify static assets on COS
-        if: steps.cos-credentials.outputs.available == 'true'
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
         uses: worktools/cos-upload-action@v1.2.0
         timeout-minutes: 10
         with:

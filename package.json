@@ -1,12 +1,12 @@
 {
   "packageManager": "yarn@4.18.0",
   "name": "quatrefoil",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Calcit-js wrapper on three.js",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git@github.com:Quamolit/quatrefoil.calcit.git"
+    "url": "git@github.com:Quatrefoil-GL/quatrefoil.git"
   },
   "author": "jiyinyiyong",
   "license": "MIT",
@@ -21,9 +21,8 @@
     "vite": "^8.3.1"
   },
   "dependencies": {
-    "@calcit/procs": "0.29.1",
+    "@calcit/procs": "0.29.3",
     "@calcit/std": "^0.0.3",
-    "@quamolit/touch-control": "^0.0.13",
     "@quatrefoil/utils": "^0.0.3",
     "hsluv": "^1.0.1",
     "meshline": "^3.3.1",
