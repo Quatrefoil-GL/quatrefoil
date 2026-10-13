@@ -185,7 +185,7 @@
                 :position $ [] 0 0 10
                 :material $ {} (:kind :mesh-lambert) (:color 0xffcccc)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic
             :features $ #{} :js-ffi
         'comp-container $ %{} 'CodeEntry (:doc |)
@@ -229,7 +229,7 @@
                   ; point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
                     :position $ [] 0 60 0
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic
             :features $ #{} :js-ffi
         'comp-demo $ %{} 'CodeEntry (:doc |)
@@ -267,7 +267,7 @@
               point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
                 :position $ [] 10 20 10
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ []
             :features $ #{} :js-ffi
         'comp-gltf $ %{} 'CodeEntry (:doc |)
@@ -410,7 +410,7 @@
                 point-light $ {} (:color 0xffffff) (:intensity 1) (:distance 200)
                   :position $ v3 20 40 50
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
@@ -487,7 +487,7 @@
                         d! cursor $ assoc state :factor $ [] (rand-shift 1 0.92) (rand-shift 1 0.92) (rand-shift 1 0.92)
                   ambient-light $ {} $ :color 0x444422
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic
             :features $ #{} :js-ffi
         'comp-lines $ %{} 'CodeEntry (:doc |)
@@ -524,7 +524,7 @@
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 20 40 50
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ []
             :features $ #{} :js-ffi
         'ffi-object $ %{} 'CodeEntry (:doc |)
@@ -634,7 +634,7 @@
                   :position $ [] 10 0 0
                 ambient-light $ {} (:color 0x666666) (:intencity 1)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
@@ -677,7 +677,7 @@
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 20 40 50
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic
             :features $ #{} :js-ffi
         'comp-tab $ %{} 'CodeEntry (:doc |)
@@ -695,7 +695,7 @@
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true)
                   :color $ hsluvx 0 30 96
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Tag 'String 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
       :ns $ %{} 'NsEntry (:doc |)
@@ -738,7 +738,7 @@
                         :position $ v3 -10 0 0
                         :material $ assoc tube-material :color $ pick-color (:name line)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ []
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
@@ -842,7 +842,7 @@
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 20 40 50
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ []
         'inline-shader $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defmacro inline-shader (name)
@@ -905,7 +905,7 @@
                     :position $ [] 0 -40 0
                     :material paper-material
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ []
             :features $ #{} :js-ffi
         'comp-shapes $ %{} 'CodeEntry (:doc |)
@@ -943,7 +943,7 @@
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 20 40 50
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ []
             :features $ #{} :js-ffi
         'paper-fn $ %{} 'CodeEntry (:doc |)
@@ -1034,7 +1034,7 @@
                   fn (event dispatch!)
                     dispatch! :delete-task $ field task :id
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic 'Number
             :features $ #{} :js-ffi
         'comp-todolist $ %{} 'CodeEntry (:doc |)
@@ -1067,7 +1067,7 @@
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 0 20 50
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] $ :: 'Map 'Number 'Dynamic
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
@@ -1138,7 +1138,7 @@
                 point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                   :position $ [] 0 20 50
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ []
             :features $ #{} :js-ffi
         'main-branch-fn $ %{} 'CodeEntry (:doc |)
@@ -1476,7 +1476,7 @@
                         dy $ * speed elapse $ option:unwrap-or (nth delta 1) 0
                       d! cursor $ assoc state field $ [] (+ x0 dx) (+ y0 dy)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic 'Dynamic 'Dynamic 'Dynamic 'Number 'Number
             :features $ #{} :js-ffi
         'comp-pin-point $ %{} 'CodeEntry (:doc |)
@@ -1534,7 +1534,7 @@
                     :size 2
                     :depth 0.5
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
         'comp-switch $ %{} 'CodeEntry (:doc |)
@@ -1629,7 +1629,7 @@
                     :size text-size
                     :depth 0.5
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
         'comp-value-2d $ %{} 'CodeEntry (:doc |)
@@ -1695,7 +1695,7 @@
                     :size text-size
                     :depth 1
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
             :args $ [] 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
