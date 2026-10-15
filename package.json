@@ -1,7 +1,7 @@
 {
   "packageManager": "yarn@4.18.0",
   "name": "quatrefoil",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Calcit-js wrapper on three.js",
   "main": "index.js",
   "repository": {

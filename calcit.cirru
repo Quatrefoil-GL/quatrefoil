@@ -1383,7 +1383,7 @@
             quatrefoil.globals :refer $ *loaded-objects
             quatrefoil.app.comp.container :refer $ comp-container
             quatrefoil.dsl.object3d-dom :refer $ on-canvas-click
-            quatrefoil.app.updater :refer $ [] updater
+            quatrefoil.app.updater :refer $ updater
             quaternion.vector :refer $ v3
             |three :as THREE
             touch-control.core :refer $ render-control! control-states start-control-loop! clear-control-loop!
@@ -4071,8 +4071,8 @@
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.dsl.patch
           :require
-            quatrefoil.dsl.object3d-dom :refer $ [] build-tree set-position! set-rotation! set-scale! create-material
-            [] quatrefoil.util.core :refer $ [] reach-object3d scale-zero
+            quatrefoil.dsl.object3d-dom :refer $ build-tree set-position! set-rotation! set-scale! create-material
+            quatrefoil.util.core :refer $ reach-object3d scale-zero
             quatrefoil.dsl.object3d-dom :refer $ set-geometry-attributes!
             quatrefoil.globals :refer $ *global-scene
             |three :as THREE
