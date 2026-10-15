@@ -1,7 +1,7 @@
 {
   "packageManager": "yarn@4.18.0",
   "name": "quatrefoil",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Calcit-js wrapper on three.js",
   "main": "index.js",
   "repository": {
@@ -21,7 +21,7 @@
     "vite": "^8.3.1"
   },
   "dependencies": {
-    "@calcit/procs": "0.29.3",
+    "@calcit/procs": "0.30.0",
     "@calcit/std": "^0.0.3",
     "@quatrefoil/utils": "^0.0.3",
     "hsluv": "^1.0.1",
