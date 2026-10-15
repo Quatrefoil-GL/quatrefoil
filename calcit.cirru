@@ -58,7 +58,9 @@
             :args $ [] 'Dynamic
         'field $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn field (value key)
-            option:unwrap-or (get value key) nil
+            match (get value key)
+              (:some option-value) option-value
+              (:none) nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
@@ -274,7 +276,9 @@
           :code $ quote $ defn comp-gltf ()
             group ({})
               some-object $ {} (:key :sakura)
-                :object-loaded? $ option:some? $ get @*loaded-objects :sakura
+                :object-loaded? $
+                  get @*loaded-objects :sakura
+                  , .some?
                 :position $ [] 0 -100 -100
                 :scale $ [] 200 200 200
               point-light $ {} (:color 0x555555) (:intensity 2.4) (:distance 800)
@@ -290,9 +294,15 @@
               group ({}) & $ -> (range-3d 8)
                 map $ fn (pair)
                   let
-                      x $ option:unwrap-or (nth pair 0) 0
-                      y $ option:unwrap-or (nth pair 1) 0
-                      z $ option:unwrap-or (nth pair 2) 0
+                      x $
+                        nth pair 0
+                        , .unwrap-or 0
+                      y $
+                        nth pair 1
+                        , .unwrap-or 0
+                      z $
+                        nth pair 2
+                        , .unwrap-or 0
                       r 20
                     sphere $ {} (:radius 3)
                       :position $ [] (* r x) (* r y) (* r z)
@@ -309,7 +319,9 @@
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn field (value key)
-            option:unwrap-or (get value key) nil
+            match (get value key)
+              (:some option-value) option-value
+              (:none) nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
@@ -415,7 +427,9 @@
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn field (value key)
-            option:unwrap-or (get value key) nil
+            match (get value key)
+              (:some option-value) option-value
+              (:none) nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
@@ -432,9 +446,15 @@
         'cloud-fn $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn cloud-fn (ratio factor)
             let
-                f0 $ option:unwrap-or (nth factor 0) 1
-                f1 $ option:unwrap-or (nth factor 1) 1
-                f2 $ option:unwrap-or (nth factor 2) 1
+                f0 $
+                  nth factor 0
+                  , .unwrap-or 1
+                f1 $
+                  nth factor 1
+                  , .unwrap-or 1
+                f2 $
+                  nth factor 2
+                  , .unwrap-or 1
                 deg $ * ratio 20 &PI
                 r $ * 160 $ js-number (js/Math.sin deg)
                 deg2 $ / (* 5 f0 deg) 13
@@ -535,7 +555,9 @@
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn field (value key)
-            option:unwrap-or (get value key) nil
+            match (get value key)
+              (:some option-value) option-value
+              (:none) nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
@@ -639,7 +661,9 @@
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn field (value key)
-            option:unwrap-or (get value key) nil
+            match (get value key)
+              (:some option-value) option-value
+              (:none) nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
@@ -743,7 +767,9 @@
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn field (value key)
-            option:unwrap-or (get value key) nil
+            match (get value key)
+              (:some option-value) option-value
+              (:none) nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
@@ -1057,9 +1083,13 @@
                   map-indexed $ fn (idx entry)
                     let
                         task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                          option:unwrap-or (nth entry 0) 0
+                          match (nth entry 0)
+                            (:some option-value) option-value
+                            (:none) 0
                           , 'Number
-                        task $ option:unwrap-or (nth entry 1) nil
+                        task $ match (nth entry 1)
+                          (:some option-value) option-value
+                          (:none) nil
                       [] task-id $ comp-task task idx
                   pairs-map
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
@@ -1070,7 +1100,9 @@
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn field (value key)
-            option:unwrap-or (get value key) nil
+            match (get value key)
+              (:some option-value) option-value
+              (:none) nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
@@ -1267,9 +1299,7 @@
             :features $ #{} :js-ffi
         'gltf-scene $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn gltf-scene (gltf)
-            unsafe-coerce
-              .-scene $ unsafe-coerce gltf GltfHost
-              , JsObject
+            .-scene $ js-cast gltf 'quatrefoil.app.main/GltfHost
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'JsObject)
             :args $ [] 'Dynamic
@@ -1412,38 +1442,49 @@
                 :states $ update-states store0 op-data
                 :add-task $ let
                     tasks $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                      option:unwrap-or (get store0 :tasks) ({})
+                      match (get store0 :tasks)
+                        (:some option-value) option-value
+                        (:none) ({})
                       :: 'Map 'Number 'Dynamic
                     text $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data 'String
                     id $ shared/now-ms
                   assoc store0 :tasks $ assoc tasks id $ {} (:id id) (:text text) (:done? false)
                 :delete-task $ let
                     tasks $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                      option:unwrap-or (get store0 :tasks) ({})
+                      match (get store0 :tasks)
+                        (:some option-value) option-value
+                        (:none) ({})
                       :: 'Map 'Number 'Dynamic
                     task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data 'Number
                   assoc store0 :tasks $ dissoc tasks task-id
                 :toggle-task $ let
                     tasks $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                      option:unwrap-or (get store0 :tasks) ({})
+                      match (get store0 :tasks)
+                        (:some option-value) option-value
+                        (:none) ({})
                       :: 'Map 'Number 'Dynamic
                     task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data 'Number
                     done? $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                      option:unwrap-or
+                      match
                         get-in tasks $ [] task-id :done?
-                        , false
+                        (:some option-value) option-value
+                        (:none) false
                       , 'Bool
                   assoc store0 :tasks $ assoc-in tasks ([] task-id :done?) (not done?)
                 :edit-task $ let
                     tasks $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                      option:unwrap-or (get store0 :tasks) ({})
+                      match (get store0 :tasks)
+                        (:some option-value) option-value
+                        (:none) ({})
                       :: 'Map 'Number 'Dynamic
                     data $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data (:: 'List 'Dynamic)
                     task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                       .unwrap $ first data
                       , 'Number
                     text $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                      option:unwrap-or (last data) |
+                      match (last data)
+                        (:some option-value) option-value
+                        (:none) |
                       , 'String
                   assoc store0 :tasks $ assoc-in tasks ([] task-id :text) text
                 _ store0
@@ -1470,11 +1511,17 @@
                     :return 'Dynamic
                   let[] (x0 y0)
                     quatrefoil.util.core/require-decoded $ try-decode-map-as
-                      option:unwrap-or (get state field) ([] 0 0)
+                      match (get state field)
+                        (:some option-value) option-value
+                        (:none) ([] 0 0)
                       :: 'List 'Number
                     let
-                        dx $ * speed elapse $ option:unwrap-or (nth delta 0) 0
-                        dy $ * speed elapse $ option:unwrap-or (nth delta 1) 0
+                        dx $ * speed elapse $
+                          nth delta 0
+                          , .unwrap-or 0
+                        dy $ * speed elapse $
+                          nth delta 1
+                          , .unwrap-or 0
                       d! cursor $ assoc state field $ [] (+ x0 dx) (+ y0 dy)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Component)
@@ -1506,8 +1553,12 @@
                           delta0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as delta (:: 'List 'Number)
                           elapse0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as elapse 'Number
                           next-pos $ &v+ position $ to-viewer-axis
-                            * speed $ option:unwrap-or (nth delta0 0) 0
-                            * speed $ option:unwrap-or (nth delta0 1) 0
+                            * speed $
+                              nth delta0 0
+                              , .unwrap-or 0
+                            * speed $
+                              nth delta0 1
+                              , .unwrap-or 0
                             , 0
                         on-change next-pos d!
                     :gamepad $ fn (info elapsed d!) (js/console.log info)
@@ -1597,10 +1648,16 @@
                         :return 'Dynamic
                       ; println |delta delta
                       let
-                          dx $ * speed elapse $ option:unwrap-or (nth delta 1) 0
+                          dx $ * speed elapse $
+                            nth delta 1
+                            , .unwrap-or 0
                           w2 $ + dx value
-                          up $ option:unwrap-or (nth bound 1) 1
-                          low $ option:unwrap-or (nth bound 0) 0
+                          up $
+                            nth bound 1
+                            , .unwrap-or 1
+                          low $
+                            nth bound 0
+                            , .unwrap-or 0
                         on-change
                           cond
                               > w2 up
@@ -1657,8 +1714,12 @@
                         :return 'Dynamic
                       ; println |delta delta
                       let[] (x0 y0) v $ let
-                          dx $ * speed elapse $ option:unwrap-or (nth delta 0) 0
-                          dy $ * speed elapse $ option:unwrap-or (nth delta 1) 0
+                          dx $ * speed elapse $
+                            nth delta 0
+                            , .unwrap-or 0
+                          dy $ * speed elapse $
+                            nth delta 1
+                            , .unwrap-or 0
                         on-change
                           [] (+ x0 dx) (+ y0 dy)
                           , d!
@@ -1668,8 +1729,12 @@
                         :return 'Dynamic
                       let
                           v0 v
-                          x0 $ option:unwrap-or (nth v0 0) 0
-                          y0 $ option:unwrap-or (nth v0 1) 0
+                          x0 $
+                            nth v0 0
+                            , .unwrap-or 0
+                          y0 $
+                            nth v0 1
+                            , .unwrap-or 0
                           speeding $ * speed $ if (field info :b) 8 1
                           dx $ * elapsed speeding $ quatrefoil.util.core/require-decoded
                             try-decode-map-as (field info :dx) 'Number
@@ -1687,10 +1752,12 @@
                           , | $ str label "| "
                       str prefix
                         .!toFixed
-                          option:unwrap-or (nth v 0) 0
+                            nth v 0
+                            , .unwrap-or 0
                           , fract-len
                         , "|, " $ .!toFixed
-                          option:unwrap-or (nth v 1) 0
+                            nth v 1
+                            , .unwrap-or 0
                           , fract-len
                     :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                     :size text-size
@@ -1701,7 +1768,9 @@
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn field (value key)
-            option:unwrap-or (get value key) nil
+            match (get value key)
+              (:some option-value) option-value
+              (:none) nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
@@ -1727,7 +1796,9 @@
                   either (field states :cursor) ([])
                   :: 'List 'Tag
                 branch $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                  option:unwrap-or (get states k) ({})
+                  match (get states k)
+                    (:some option-value) option-value
+                    (:none) ({})
                   :: 'Map 'Tag 'Dynamic
               assoc branch :cursor $ append parent-cursor k
           :examples $ []
@@ -1935,7 +2006,9 @@
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn field (value key)
-            option:unwrap-or (get value key) nil
+            match (get value key)
+              (:some option-value) option-value
+              (:none) nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
@@ -1968,12 +2041,24 @@
                     quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :right-move) (:: 'List 'Number)
                     , refine-strength
                   r-delta $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field delta :right-move) (:: 'List 'Number)
-                  l0 $ option:unwrap-or (nth l-move 0) 0
-                  l1 $ option:unwrap-or (nth l-move 1) 0
-                  r0 $ option:unwrap-or (nth r-move 0) 0
-                  r1 $ option:unwrap-or (nth r-move 1) 0
-                  rd0 $ option:unwrap-or (nth r-delta 0) 0
-                  rd1 $ option:unwrap-or (nth r-delta 1) 0
+                  l0 $
+                    nth l-move 0
+                    , .unwrap-or 0
+                  l1 $
+                    nth l-move 1
+                    , .unwrap-or 0
+                  r0 $
+                    nth r-move 0
+                    , .unwrap-or 0
+                  r1 $
+                    nth r-move 1
+                    , .unwrap-or 0
+                  rd0 $
+                    nth r-delta 0
+                    , .unwrap-or 0
+                  rd1 $
+                    nth r-delta 1
+                    , .unwrap-or 0
                   left-a? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :left-a?) 'Bool
                   right-b? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :right-b?) 'Bool
                   left-b? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :left-b?) 'Bool
@@ -2532,9 +2617,13 @@
             let
                 data $ quatrefoil.util.core/require-decoded $ try-decode-map-as pair (:: 'List 'Dynamic)
                 cursor $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                  option:unwrap-or (nth data 0) ([])
+                  match (nth data 0)
+                    (:some option-value) option-value
+                    (:none) ([])
                   :: 'List 'Tag
-                new-state $ option:unwrap-or (nth data 1) nil
+                new-state $ match (nth data 1)
+                  (:some option-value) option-value
+                  (:none) nil
               assoc store :states $ assoc-in (quatrefoil.util.core/field store :states)
                 concat cursor $ [] :data
                 , new-state
@@ -2729,14 +2818,18 @@
                 :args $ [] 'Dynamic
         'field $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn field (value key)
-            option:unwrap-or (get value key) nil
+            match (get value key)
+              (:some option-value) option-value
+              (:none) nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
         'select-keys $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn select-keys (m xs)
             foldl ({}) xs $ fn (acc x)
-              assoc acc x $ option:unwrap-or (get m x) nil
+              assoc acc x $ match (get m x)
+                (:some option-value) option-value
+                (:none) nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
@@ -2883,7 +2976,9 @@
                       update entry 1 $ fn (child)
                         build-tree
                           conj coord $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                            option:unwrap-or (first entry) 0
+                            match (first entry)
+                              (:some option-value) option-value
+                              (:none) 0
                             , 'Number
                           , child
                   virtual-element $ {} (:object3d object3d) (:children children)
@@ -3352,7 +3447,10 @@
           :code $ quote $ defn create-some-object (params position rotation scale material)
             let
                 object3d $ new THREE/Object3D
-                obj $ get @*loaded-objects $ field params :key
+                obj $ match
+                  try-decode-map-as (field params :key) 'Tag
+                  (:ok asset-key) (get @*loaded-objects asset-key)
+                  (:err _) (Option :none)
               set-position! object3d position
               set-rotation! object3d rotation
               set-scale! object3d scale
@@ -3529,7 +3627,9 @@
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn field (value key)
-            option:unwrap-or (get value key) nil
+            match (get value key)
+              (:some option-value) option-value
+              (:none) nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
@@ -4105,7 +4205,7 @@
         '*loaded-objects $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defref *loaded-objects ({})
           :examples $ []
-          :schema $ :: 'Ref 'Dynamic
+          :schema $ :: 'Ref $ :: 'Map 'Tag 'JsObject
         '*proxied-dispatch $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defref *proxied-dispatch nil
           :examples $ []
@@ -4227,7 +4327,9 @@
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn field (value key)
-            if (nil? value) nil $ option:unwrap-or (get value key) nil
+            if (nil? value) nil $ match (get value key)
+              (:some option-value) option-value
+              (:none) nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
@@ -4236,11 +4338,13 @@
             if (comp? tree)
               recur (field tree :tree) coord
               if (empty? coord) tree $ let
-                  cursor $ option:unwrap $ first coord
+                  cursor $
+                    first coord
+                    , .unwrap
                 let
                     child $ get (field tree :children) cursor
-                  if (option:some? child)
-                    recur (option:unwrap child) (rest coord)
+                  if (child .some?)
+                    recur (child .unwrap) (rest coord)
                     , nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)

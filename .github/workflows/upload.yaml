@@ -52,7 +52,7 @@ jobs:
       - name: Validate Calcit snapshot and types
         run: |
           set -euo pipefail
-          test "$(calcit --version)" = "0.29.3"
+          test "$(calcit --version)" = "0.30.0"
           calcit calcit.cirru edit format
           git diff --exit-code -- calcit.cirru
           calcit calcit.cirru fix --workflow strict --verify --format json | jq '{validation:.data.validation,suggestions:[.data.suggestions[]? | {definition,path,message}],diagnostics:.diagnostics}'
