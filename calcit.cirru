@@ -18,12 +18,15 @@
         'arrange-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn arrange-children (children)
             let
-                cursor $ .unwrap-or (first children) nil
+                cursor $ first children
                 result $ if
                   and
                     = 1 $ count children
-                    not $ or (comp? cursor) (shape? cursor)
-                  , cursor $ -> children
+                    not $ or
+                      comp? $ .unwrap cursor
+                      shape? $ .unwrap cursor
+                  .unwrap cursor
+                  -> children
                     map-indexed $ fn (idx p) ([] idx p)
                     pairs-map
               ; .log js/console "|Handle children:" children result
@@ -1087,9 +1090,7 @@
                             (:some option-value) option-value
                             (:none) 0
                           , 'Number
-                        task $ match (nth entry 1)
-                          (:some option-value) option-value
-                          (:none) nil
+                        task $ .unwrap $ nth entry 1
                       [] task-id $ comp-task task idx
                   pairs-map
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
@@ -2621,9 +2622,7 @@
                     (:some option-value) option-value
                     (:none) ([])
                   :: 'List 'Tag
-                new-state $ match (nth data 1)
-                  (:some option-value) option-value
-                  (:none) nil
+                new-state $ .unwrap $ nth data 1
               assoc store :states $ assoc-in (quatrefoil.util.core/field store :states)
                 concat cursor $ [] :data
                 , new-state
@@ -2827,9 +2826,9 @@
         'select-keys $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn select-keys (m xs)
             foldl ({}) xs $ fn (acc x)
-              assoc acc x $ match (get m x)
-                (:some option-value) option-value
-                (:none) nil
+              match (get m x)
+                (:some option-value) (assoc acc x option-value)
+                (:none) acc
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
