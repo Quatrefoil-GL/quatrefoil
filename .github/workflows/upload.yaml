@@ -52,7 +52,6 @@ jobs:
       - name: Validate Calcit snapshot and types
         run: |
           set -euo pipefail
-          test "$(calcit --version)" = "0.30.0"
           calcit calcit.cirru edit format
           git diff --exit-code -- calcit.cirru
           calcit calcit.cirru fix --workflow strict --verify --format json | jq '{validation:.data.validation,suggestions:[.data.suggestions[]? | {definition,path,message}],diagnostics:.diagnostics}'
@@ -90,6 +89,18 @@ jobs:
             --summary-only --format json | jq '.data.summary'
           calcit calcit.cirru analyze weak-types --only deprecated-call --summary-only --format json | jq '.data.summary'
           calcit calcit.cirru analyze weak-types --only dynamic-method
+
+      - name: Validate existing Option contracts
+        run: |
+          calcit eval --dep ./ -- 'do
+            assert= ({}) $ quatrefoil.alias/arrange-children $ []
+            assert= nil $ quatrefoil.alias/arrange-children $ [] nil
+            assert= false $ quatrefoil.alias/arrange-children $ [] false
+            assert= 0 $ quatrefoil.alias/arrange-children $ [] 0
+            assert= | $ quatrefoil.alias/arrange-children $ [] |
+            assert= ({} (:states $ {} (:probe $ {} (:data nil))))
+              quatrefoil.cursor/update-states ({} (:states $ {})) ([] ([] :probe) nil)
+            println |option-contracts-passed'
 
       - name: Verify tree-utils lockfile
         working-directory: tree-utils
