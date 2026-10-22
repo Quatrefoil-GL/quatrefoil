@@ -54,7 +54,7 @@ jobs:
           set -euo pipefail
           calcit calcit.cirru edit format
           git diff --exit-code -- calcit.cirru
-          calcit calcit.cirru fix --workflow strict --verify --format json | jq '{validation:.data.validation,suggestions:[.data.suggestions[]? | {definition,path,message}],diagnostics:.diagnostics}'
+          calcit calcit.cirru fix --workflow strict --verify --format json | jq -e '.data.workflow.status == "passed" and .diagnostics == []'
           calcit calcit.cirru --check-only --all-defs --format json | jq '{summary:.data.summary,failures:[.data.definitions[]? | select(.status != "passed")],diagnostics:.diagnostics}'
           calcit calcit.cirru --check-only \
             --ns quatrefoil.alias \
