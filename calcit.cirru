@@ -1468,8 +1468,8 @@
                     done? $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                       match
                         get-in tasks $ [] task-id :done?
-                        (:some option-value) option-value
-                        (:none) false
+                        (:ok value) value
+                        (:err _) false
                       , 'Bool
                   assoc store0 :tasks $ assoc-in tasks ([] task-id :done?) (not done?)
                 :edit-task $ let
