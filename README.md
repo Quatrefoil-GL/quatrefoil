@@ -10,12 +10,18 @@ Demo(Chrome with a touch screen) http://r.tiye.me/Quatrefoil-GL/quatrefoil/ .
 PR 的 COS/CDN 路径按编号、run ID、attempt 隔离，Vite base 与上传 prefix 同源；
 生产前缀 `Quatrefoil-GL/quatrefoil/` 和原 web-assets rsync 路径保持不变。
 上传按事件/分支排队，job/上传分别限制为 15/10 分钟，保留现有类型及 tree-utils 门禁。
-使用者影响：待发布候选 0.1.10 配对正式 Calcit/procs 0.30.1，并使用正式 Touch Control 0.0.32、Pointed Prompt 0.0.20、Quaternion 0.2.16；strict Caps 消费者需同步工具链和模块依赖，旧 tag 保留原内容。浏览器入口仍为 JS。当前已发布版本是 0.1.9，不把源码候选当作已发布依赖。
+使用者影响：当前 main 声明为候选 0.2.0-alpha.1，配对 Calcit/procs 0.31.0-alpha.6；
+它不是正式 0.30.1 的纯依赖更新，也不代表该候选已发版。strict Caps 消费者需同步
+工具链和依赖图；留在正式 0.30.1 的项目应继续核对对应正式 tag，不直接追随 main。
+已发布正式版为 0.1.10，旧 tag 保留原内容。浏览器入口仍为 JS。
+本轮已合并 #75 改动坐标遍历：find-element、reach-object3d 在原 empty? 判断之后，
+只继续遍历 List，否则抛出明确错误；`empty?` 判空分支仍先执行，不能理解成所有非 List 都抛错。
+=seq? 保留原 `empty?` 判空分支，仅在双方为 List 时继续比较头部并递归。
+无内部调用的 =component? 已删除；外部若引用该 helper，需自行审阅并迁移，不能据此承诺公开 API 完全兼容。
 CI 使用严格 Caps 解析、全量及原有公开命名空间类型检查；开放的动态类型仍需逐步收敛。
-本候选将已发布的 Touch Control 0.0.32、Pointed Prompt 0.0.20 和 Quaternion 0.2.16
-组成与 Calcit 0.30.1 配对的严格依赖图，前两者统一使用正式 js-ffi 0.2.5。
-根项目升级这两个模块时，不再被 Quatrefoil 的旧精确版本约束阻止；
-不使用 hash、alpha、非 strict 或忽略警告绕过。本轮 Snapshot、JS/Three.js 依赖与场景代码不变。
+当前模块依赖仍为正式 Touch Control 0.0.32、Pointed Prompt 0.0.20 和 Quaternion 0.2.16。
+此前 0.1.10 的正式 0.30.1 配对说明不适用于当前 alpha 工具链；本轮 Snapshot 确有上述源码修改，
+并非“无 alpha、源码不变”。没有以非 strict 或忽略警告绕过原门禁。
 Pointed Prompt 0.0.20 会更早拒绝非法 textarea? 值；本项目原有调用仅提供 initial，不传该选项。
 
 以下是此前 0.1.9（已发布）相对 0.1.8 的迁移背景，不是本轮新增的执行代码改动：
