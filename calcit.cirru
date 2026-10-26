@@ -4266,24 +4266,14 @@
         :code $ quote $ ns quatrefoil.schema
     'quatrefoil.util.core $ %{} 'FileEntry
       :defs $ {}
-        '=component? $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn =component? (prev-tree markup)
-            let
-                prev-args $ field prev-tree :args
-                prev-states $ field prev-tree :states
-              and
-                =seq? (field markup :args) prev-args
-                identical? (field markup :states) prev-states
-          :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Bool)
-            :args $ [] 'Dynamic 'Dynamic
         '=seq? $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn =seq? (xs ys)
             let
                 xs-empty? $ empty? xs
                 ys-empty? $ empty? ys
               if xs-empty? ys-empty? $ if ys-empty? false $ if
-                identical? (first xs) (first ys)
+                and (list? xs) (list? ys)
+                  identical? (first xs) (first ys)
                 recur (rest xs) (rest ys)
                 , false
           :examples $ []
@@ -4336,15 +4326,17 @@
           :code $ quote $ defn find-element (tree coord)
             if (comp? tree)
               recur (field tree :tree) coord
-              if (empty? coord) tree $ let
-                  cursor $
-                    first coord
-                    , .unwrap
+              if (empty? coord) tree $ if (list? coord)
                 let
-                    child $ get (field tree :children) cursor
-                  if (child .some?)
-                    recur (child .unwrap) (rest coord)
-                    , nil
+                    cursor $
+                      first coord
+                      , .unwrap
+                  let
+                      child $ get (field tree :children) cursor
+                    if (child .some?)
+                      recur (child .unwrap) (rest coord)
+                      , nil
+                raise $ str "|find-element expects a coord list, got: " coord
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
@@ -4367,9 +4359,11 @@
             :args $ [] 'Dynamic
         'reach-object3d $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reach-object3d (object3d coord)
-            if (empty? coord) object3d $ let
-                cursor $ .unwrap $ first coord
-              recur (.!reachBy object3d cursor) (rest coord)
+            if (empty? coord) object3d $ if (list? coord)
+              let
+                  cursor $ .unwrap $ first coord
+                recur (.!reachBy object3d cursor) (rest coord)
+              raise $ str "|reach-object3d expects a coord list, got: " coord
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
