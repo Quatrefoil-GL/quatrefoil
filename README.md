@@ -10,7 +10,7 @@ Demo(Chrome with a touch screen) http://r.tiye.me/Quatrefoil-GL/quatrefoil/ .
 PR 的 COS/CDN 路径按编号、run ID、attempt 隔离，Vite base 与上传 prefix 同源；
 生产前缀 `Quatrefoil-GL/quatrefoil/` 和原 web-assets rsync 路径保持不变。
 上传按事件/分支排队，job/上传分别限制为 15/10 分钟，保留现有类型及 tree-utils 门禁。
-使用者影响：当前 main 声明为候选 0.2.0-alpha.1，配对 Calcit/procs 0.31.0-alpha.6；
+使用者影响：当前 main 声明为候选 0.2.0-alpha.1，配对 Calcit/procs 0.31.0-alpha.7；
 它不是正式 0.30.1 的纯依赖更新，也不代表该候选已发版。strict Caps 消费者需同步
 工具链和依赖图；留在正式 0.30.1 的项目应继续核对对应正式 tag，不直接追随 main。
 已发布正式版为 0.1.10，旧 tag 保留原内容。浏览器入口仍为 JS。

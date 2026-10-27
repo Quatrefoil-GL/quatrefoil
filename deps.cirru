@@ -1,5 +1,5 @@
 
-{} (:calcit-version |0.31.0-alpha.6)
+{} (:calcit-version |0.31.0-alpha.7)
   :version |0.2.0-alpha.1
   :dependencies $ {} (|Triadica/touch-control |0.0.32)
     |calcit-lang/quaternion |0.2.16
