@@ -288,7 +288,7 @@
                 :position $ [] 10 100 100
               ambient-light $ {} (:color 0xaaaaaa) (:intensity 1)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Shape)
             :args $ []
             :features $ #{} :js-ffi
         'comp-sphere-grid $ %{} 'CodeEntry (:doc |)
@@ -317,7 +317,7 @@
               point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
                 :position $ [] 10 20 10
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Shape)
             :args $ []
             :features $ #{} :js-ffi
         'field $ %{} 'CodeEntry (:doc |)
@@ -903,7 +903,7 @@
               sphere $ {} (:radius 1) (:emissive 0xffffff) (:metalness 0.8) (:color 0xffffff) (:emissiveIntensity 1) (:roughness 0) (:position position) (:material bubble-material)
               point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 400) (:position position)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'quatrefoil.schema/Shape)
             :args $ [] $ :: 'List 'Number
             :features $ #{} :js-ffi
         'comp-quilling $ %{} 'CodeEntry (:doc |)
@@ -1985,7 +1985,7 @@
           :code $ quote $ def data0
             {} (:v1 0) (:v2 0) (:a 0) (:b 0) (:dx 0) (:dy 0)
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Map 'Tag 'Number
         'defcomp $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defmacro defcomp (comp-name params & body)
             ; assert "|expected symbol of comp-name" $ symbol? comp-name
@@ -2030,7 +2030,7 @@
         'half-pi $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def half-pi (* 0.5 &PI)
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Number
         'handle-control-events $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn handle-control-events ()
             start-control-loop! 10 $ fn (elapsed states delta)
@@ -2376,7 +2376,7 @@
                   &* -4 $ sin @*viewer-angle
               new THREE/Vector3 x2 y2 z2
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'JsObject)
             :args $ []
             :features $ #{} :js-ffi
         'read-input $ %{} 'CodeEntry (:doc |)
@@ -3710,7 +3710,7 @@
           :code $ quote $ defn load-font-resource ()
             new Font $ js/JSON.parse $ load-file |assets/hind.json
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'JsObject)
             :args $ []
             :features $ #{} :js-ffi
         'mesh-line-set-points! $ %{} 'CodeEntry (:doc |)
@@ -3922,7 +3922,7 @@
               .unwrap-or (nth coordinates 1) 0
               .unwrap-or (nth coordinates 2) 0
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'JsObject)
             :args $ [] $ :: 'List 'Number
             :features $ #{} :js-ffi
         'write-shape-path! $ %{} 'CodeEntry (:doc |)
@@ -4220,7 +4220,7 @@
         'make-global-scene $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn make-global-scene () (new THREE/Scene)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'JsObject)
             :args $ []
             :features $ #{} :js-ffi
       :ns $ %{} 'NsEntry (:doc |)
