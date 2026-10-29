@@ -92,7 +92,7 @@ jobs:
 
       - name: Keep unresolved weak types from growing
         env:
-          UNRESOLVED_LIMIT: "183"
+          UNRESOLVED_LIMIT: "181"
         run: |
           set -euo pipefail
           actual="$(calcit calcit.cirru analyze weak-types --summary-only --format json | jq -e '.data.summary.intents.unresolved')"
