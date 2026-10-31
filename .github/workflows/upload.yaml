@@ -19,12 +19,12 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
 
       - name: Set up Node.js
-        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        uses: actions/setup-node@v6.5.0
         with:
           node-version: 24
           package-manager-cache: false
@@ -36,7 +36,7 @@ jobs:
           yarn --version
 
       - name: Set up Calcit and Caps
-        uses: calcit-lang/setup-calcit@ca701be5a471759e442aa053cd100720bbe1f09f # v1.5.0
+        uses: calcit-lang/setup-calcit@v1.5.0
         with:
           tools: calcit,caps
           caps-version: "0.1.1"
@@ -53,7 +53,7 @@ jobs:
         run: |
           set -euo pipefail
           calcit calcit.cirru edit format
-          git diff --exit-code -- calcit.cirru
+          git diff --exit-code --quiet -- calcit.cirru
           calcit calcit.cirru fix --workflow strict --verify --format json | jq -e '.data.workflow.status == "passed" and .diagnostics == []'
           calcit calcit.cirru --check-only --all-defs --format json | jq '{summary:.data.summary,failures:[.data.definitions[]? | select(.status != "passed")],diagnostics:.diagnostics}'
           calcit calcit.cirru --check-only \
@@ -162,7 +162,7 @@ jobs:
       - name: Deploy to server
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         id: deploy
-        uses: Pendect/action-rsyncer@8e05ffa5c93e5d9c9b167796b26044d2c616b2b9 # v2.0.0
+        uses: Pendect/action-rsyncer@v2.0.0
         env:
           DEPLOY_KEY: ${{ secrets.rsync_private_key }}
         with:
