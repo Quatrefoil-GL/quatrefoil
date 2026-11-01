@@ -166,11 +166,10 @@
         'comp-container $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-container (store)
             let
-                states $ field store :states
-                cursor $ field states :cursor
-                state $ either (field states :data)
-                  {} $ :tab :portal
-                tab $ field state :tab
+                states $ quatrefoil.util.core/field-or store :states $ {}
+                cursor $ quatrefoil.util.core/field-or states :cursor $ []
+                state $ quatrefoil.util.core/field-or states :data $ {} (:tab :portal)
+                tab $ quatrefoil.util.core/require-field state :tab
               scene ({})
                 group
                   {}
@@ -180,7 +179,8 @@
                     :portal $ comp-portal $ fn (next d!)
                       d! cursor $ assoc state :tab next
                     :todolist $ comp-todolist $ quatrefoil.util.core/require-decoded
-                      try-decode-map-as (field store :tasks) (:: 'Map 'Number 'Dynamic)
+                      try-decode-map-as (quatrefoil.util.core/require-field store :tasks)
+                        quote $ Map Number Dynamic
                     :demo $ comp-demo
                     :lines $ comp-lines
                     :shapes $ comp-shapes
@@ -282,13 +282,6 @@
                 :position $ [] 10 20 10
           :examples $ []
           :schema $ quote $ Fn (-> quatrefoil.schema/Shape) (:features :js-ffi)
-        'field $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn field (value key)
-            match (get value key)
-              (:some option-value) option-value
-              (:none) nil
-          :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic)
         'range-2d $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn range-2d (n)
             ->
@@ -340,26 +333,25 @@
             quatrefoil.app.comp.shader :refer $ comp-shader
             quatrefoil.globals :refer $ *loaded-objects
     'quatrefoil.app.comp.control $ %{} 'FileEntry
-      :defs $ {}
-        'comp-control-demo $ %{} 'CodeEntry (:doc |)
+      :defs $ {} $ 'comp-control-demo
+        %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-control-demo (states)
             let
-                cursor $ field states :cursor
-                state $ or (field states :data)
-                  {}
-                    :p0 $ v3 0 0 0
-                    :v0 0
-                    :v1 $ [] 1 1
-                    :on? false
+                cursor $ quatrefoil.util.core/field-or states :cursor $ []
+                state $ quatrefoil.util.core/field-or states :data $ {}
+                  :p0 $ v3 0 0 0
+                  :v0 0
+                  :v1 $ [] 1 1
+                  :on? false
               group ({})
                 comp-pin-point
                   {} (:speed 8) (:label |C) (:color 0xddaaff) (:radius 1) (:opacity 1)
-                    :position $ field state :p0
+                    :position $ quatrefoil.util.core/require-field state :p0
                   fn (next d!)
                     d! cursor $ assoc state :p0 next
                 comp-value
                   {} (:speed 0.2) (:show-text? true) (:label |A)
-                    :value $ field state :v0
+                    :value $ quatrefoil.util.core/require-field state :v0
                     :position $ v3 10 0 0
                     :bound $ [] -2 20
                     :color $ hslx 10 90 80
@@ -367,7 +359,7 @@
                     d! cursor $ assoc state :v0 v
                 comp-value-2d
                   {} (:label |B)
-                    :value $ field state :v1
+                    :value $ quatrefoil.util.core/require-field state :v1
                     :position $ v3 0 10 0
                     :speed 0.2
                     :color 0xccaaff
@@ -377,7 +369,7 @@
                     d! cursor $ assoc state :v1 v
                 comp-switch
                   {} (:label |Status) (:color 0xaa88ff)
-                    :value $ field state :on?
+                    :value $ quatrefoil.util.core/require-field state :on?
                     :position $ v3 20 0 0
                   fn (v d!)
                     d! cursor $ assoc state :on? v
@@ -385,13 +377,6 @@
                   :position $ v3 20 40 50
           :examples $ []
           :schema $ quote $ Fn Dynamic (-> quatrefoil.schema/Component) (:features :js-ffi)
-        'field $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn field (value key)
-            match (get value key)
-              (:some option-value) option-value
-              (:none) nil
-          :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.comp.control
           :require
@@ -429,15 +414,14 @@
         'comp-fly-city $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-fly-city (states)
             let
-                cursor $ field states :cursor
-                state $ or (field states :data)
-                  {}
-                    :buildings $ make-building-data 80
-                    :factor $ [] 1 1 1
+                cursor $ quatrefoil.util.core/field-or states :cursor $ []
+                state $ quatrefoil.util.core/field-or states :data $ {}
+                  :buildings $ make-building-data 80
+                  :factor $ [] 1 1 1
               group ({}) & $ concat horizontal-lines forward-lines
                 ->
-                  quatrefoil.util.core/require-decoded $ try-decode-map-as (field state :buildings)
-                    :: 'List $ :: 'List 'Number
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field state :buildings)
+                    quote $ List $ List Number
                   map $ fn (vec)
                     let[] (x y w d h) vec $ box $ {} (:width w) (:height h) (:depth d)
                       :position $ [] x (* h 0.5) (+ y)
@@ -454,7 +438,7 @@
                   point-light $ {} (:color 0xffff55) (:intensity 2) (:distance 600)
                     :position $ [] 30 20 40
                   tube $ {} (:points-fn cloud-fn) (:radius 0.6) (:tubular-segments 1600) (:radial-segments 4)
-                    :factor $ field state :factor
+                    :factor $ quatrefoil.util.core/require-field state :factor
                     :position $ [] 0 200 0
                     :material $ {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
                   sphere $ {} (:radius 4) (:emissive 0xffffff) (:metalness 0.8) (:color 0x00ff00) (:emissiveIntensity 1) (:roughness 0)
@@ -505,13 +489,6 @@
           :code $ quote $ defn ffi-object (value) (unsafe-coerce value JsObject)
           :examples $ []
           :schema $ quote $ Fn Dynamic (-> Dynamic) (:features :js-ffi)
-        'field $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn field (value key)
-            match (get value key)
-              (:some option-value) option-value
-              (:none) nil
-          :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic)
         'forward-lines $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def forward-lines
             -> (range 20)
@@ -574,9 +551,8 @@
         'comp-mirror $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-mirror (states)
             let
-                cursor $ field states :cursor
-                state $ either (field states :data)
-                  {} $ :v 0
+                cursor $ quatrefoil.util.core/field-or states :cursor $ []
+                state $ quatrefoil.util.core/field-or states :data $ {} (:v 0)
               group ({})
                 group ({}) & $ -> (range 2)
                   map $ fn (i)
@@ -604,13 +580,6 @@
                 ambient-light $ {} (:color 0x666666) (:intencity 1)
           :examples $ []
           :schema $ quote $ Fn Dynamic (-> quatrefoil.schema/Component) (:features :js-ffi)
-        'field $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn field (value key)
-            match (get value key)
-              (:some option-value) option-value
-              (:none) nil
-          :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic)
         'heart-path $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def heart-path
             [] (:: :move-to 25 25) (:: :bezier-curve-to 25 25 20 50 0 50) (:: :bezier-curve-to -30 50 -30 15 -30 15) (:: :bezier-curve-to -30 -5 -10 -27 25 -45) (:: :bezier-curve-to 60 -22 80 -5 80 15) (:: :bezier-curve-to 80 15 80 50 50 50) (:: :bezier-curve-to 35 50 25 25 25 25)
@@ -703,13 +672,6 @@
                         :material $ assoc tube-material :color $ pick-color (:name line)
           :examples $ []
           :schema $ quote $ Fn (-> quatrefoil.schema/Component) (:features :js-ffi)
-        'field $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn field (value key)
-            match (get value key)
-              (:some option-value) option-value
-              (:none) nil
-          :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic)
         'generate-lines $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn generate-lines (base l0 level name)
             let
@@ -739,15 +701,16 @@
         'straight-fn $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn straight-fn (t factor)
             let
-                factor0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as factor (:: 'Map 'Tag 'quaternion.core/Quaternion)
+                factor0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as factor
+                  quote $ Map Tag quaternion.core/Quaternion
               let[] (w1 x1 y1 z1)
                 quatrefoil.util.core/require-decoded $ try-decode-map-as
                   &enum:params $ .unwrap $ get factor0 :from
-                  :: 'List 'Number
+                  quote $ List Number
                 let[] (w2 x2 y2 z2)
                   quatrefoil.util.core/require-decoded $ try-decode-map-as
                     &enum:params $ .unwrap $ get factor0 :to
-                    :: 'List 'Number
+                    quote $ List Number
                   []
                     &+ (&* x1 t)
                       &* x2 $ &- 1 t
@@ -951,26 +914,26 @@
               sphere $ {} (:radius 2)
                 :position $ [] -30 0 0
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.8) (:transparent true)
-                  :color $ if (field task :done?) 0x905055 0x9050ff
+                  :color $ if (quatrefoil.util.core/field-or task :done? false) 0x905055 0x9050ff
                 :event $ {} $ :click
                   fn (event dispatch!)
-                    dispatch! :toggle-task $ field task :id
+                    dispatch! :toggle-task $ quatrefoil.util.core/require-field task :id
               box
                 {} (:width 40) (:height 4) (:depth 1)
                   :material $ {} (:kind :mesh-lambert) (:color 0xcccccc) (:opacity 0.6) (:transparent true)
                   :event $ {} $ :click
                     fn (event dispatch!)
-                      [] (field task :id)
+                      [] (quatrefoil.util.core/require-field task :id)
                         prompt-at!
                           let
                               event0 $ unsafe-coerce event DomMouseEvent
                             [] (.-pageX event0) (.-pageY event0)
-                          {} $ :initial $ field task :text
+                          {} $ :initial $ quatrefoil.util.core/require-field task :text
                           fn (text)
-                            dispatch! :edit-task $ [] (field task :id) text
+                            dispatch! :edit-task $ [] (quatrefoil.util.core/require-field task :id) text
                             , &unit
                 text $ {}
-                  :text $ field task :text
+                  :text $ quatrefoil.util.core/require-field task :text
                   :size 3
                   :depth 1
                   :position $ [] -10 0 0
@@ -980,7 +943,7 @@
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.8) (:color 0xff5050) (:transparent true)
                 :event $ {} $ :click
                   fn (event dispatch!)
-                    dispatch! :delete-task $ field task :id
+                    dispatch! :delete-task $ quatrefoil.util.core/require-field task :id
           :examples $ []
           :schema $ quote $ Fn Dynamic Number (-> quatrefoil.schema/Component) (:features :js-ffi)
         'comp-todolist $ %{} 'CodeEntry (:doc |)
@@ -1001,7 +964,8 @@
               group
                 {} $ :position $ [] 0 20 0
                 ->
-                  &map:to-list $ quatrefoil.util.core/require-decoded $ try-decode-map-as tasks (:: 'Map 'Number 'Dynamic)
+                  &map:to-list $ quatrefoil.util.core/require-decoded $ try-decode-map-as tasks
+                    quote $ Map Number Dynamic
                   map-indexed $ fn (idx entry)
                     let
                         task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as
@@ -1016,13 +980,6 @@
                 :position $ [] 0 20 50
           :examples $ []
           :schema $ quote $ Fn (Map Number Dynamic) (-> quatrefoil.schema/Component) (:features :js-ffi)
-        'field $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn field (value key)
-            match (get value key)
-              (:some option-value) option-value
-              (:none) nil
-          :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.comp.todolist
           :require
@@ -1323,7 +1280,8 @@
         %{} 'CodeEntry (:doc |)
           :code $ quote $ defn updater (store op op-data)
             let
-                store0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as store (:: 'Map 'Tag 'Dynamic)
+                store0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as store
+                  quote $ Map Tag Dynamic
               match op
                 :states $ update-states store0 op-data
                 :add-task $ let
@@ -1331,7 +1289,7 @@
                       match (get store0 :tasks)
                         (:some option-value) option-value
                         (:none) ({})
-                      :: 'Map 'Number 'Dynamic
+                      quote $ Map Number Dynamic
                     text $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data 'String
                     id $ shared/now-ms
                   assoc store0 :tasks $ assoc tasks id $ {} (:id id) (:text text) (:done? false)
@@ -1340,7 +1298,7 @@
                       match (get store0 :tasks)
                         (:some option-value) option-value
                         (:none) ({})
-                      :: 'Map 'Number 'Dynamic
+                      quote $ Map Number Dynamic
                     task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data 'Number
                   assoc store0 :tasks $ dissoc tasks task-id
                 :toggle-task $ let
@@ -1348,7 +1306,7 @@
                       match (get store0 :tasks)
                         (:some option-value) option-value
                         (:none) ({})
-                      :: 'Map 'Number 'Dynamic
+                      quote $ Map Number Dynamic
                     task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data 'Number
                     done? $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                       match
@@ -1362,8 +1320,9 @@
                       match (get store0 :tasks)
                         (:some option-value) option-value
                         (:none) ({})
-                      :: 'Map 'Number 'Dynamic
-                    data $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data (:: 'List 'Dynamic)
+                      quote $ Map Number Dynamic
+                    data $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data
+                      quote $ List Dynamic
                     task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                       .unwrap $ first data
                       , 'Number
@@ -1397,7 +1356,7 @@
                       match (get state field)
                         (:some option-value) option-value
                         (:none) ([] 0 0)
-                      :: 'List 'Number
+                      quote $ List Number
                     let
                         dx $ * speed elapse $
                           nth delta 0
@@ -1416,22 +1375,21 @@
                   if (non-nil? p)
                     quatrefoil.util.core/require-decoded $ try-decode-map-as p 'quaternion.vector/V3
                     v3 0 0 0
-                speed $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                  or (field options :speed) 1
-                  , 'Number
-                text-color $ either (field options :text-color) 0xaaaaff
+                speed $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/field-or options :speed 1) 'Number
+                text-color $ quatrefoil.util.core/field-or options :text-color 0xaaaaff
               group
                 {} $ :position position
                 sphere $ {} (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0)
                   :position $ v3 0 0 0
-                  :radius $ or (field options :radius) 1
+                  :radius $ quatrefoil.util.core/field-or options :radius 1
                   :material $ {} (:kind :mesh-lambert) (:transparent true)
-                    :color $ either (field options :color) 0xaaaaff
-                    :opacity $ either (field options :opacity) 0.7
+                    :color $ quatrefoil.util.core/field-or options :color 0xaaaaff
+                    :opacity $ quatrefoil.util.core/field-or options :opacity 0.7
                   :event $ {}
                     :control $ fn (states delta elapse d!) (; println |delta delta)
                       let
-                          delta0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as delta (:: 'List 'Number)
+                          delta0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as delta
+                            quote $ List Number
                           elapse0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as elapse 'Number
                           next-pos $ &v+ position $ to-viewer-axis
                             * speed $
@@ -1445,21 +1403,21 @@
                     :gamepad $ fn (info elapsed d!) (js/console.log info)
                       let
                           elapsed0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as elapsed 'Number
-                          rightward $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :rightward) 'quaternion.vector/V3
-                          upward $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :upward) 'quaternion.vector/V3
-                          forward-v3 $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :forward) 'quaternion.vector/V3
-                          dx $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :dx) 'Number
-                          dy $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :dy) 'Number
-                          v2 $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :v2) 'Number
-                          speeding $ * speed $ if (field info :b) 8 1
-                          forward $ * speeding elapsed0 v2 $ if (field info :a) -1 1
+                          rightward $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field info :rightward) 'quaternion.vector/V3
+                          upward $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field info :upward) 'quaternion.vector/V3
+                          forward-v3 $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field info :forward) 'quaternion.vector/V3
+                          dx $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field info :dx) 'Number
+                          dy $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field info :dy) 'Number
+                          v2 $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field info :v2) 'Number
+                          speeding $ * speed $ if (quatrefoil.util.core/field-or info :b false) 8 1
+                          forward $ * speeding elapsed0 v2 $ if (quatrefoil.util.core/field-or info :a false) -1 1
                           next-pos $ v+ position
                             v-scale rightward $ * speeding elapsed0 dx
                             v-scale upward $ * -1 speeding elapsed0 dy
                             v-scale forward-v3 forward
                         on-change next-pos d!
                 if
-                  non-nil? $ field options :label
+                  .some? $ quatrefoil.util.core/field-option options :label
                   text $ {}
                     :position $ v3 -0.6 2 0
                     :text $ str $ field options :label
@@ -1472,21 +1430,17 @@
           :code $ quote $ defn comp-switch (options on-toggle)
             let
                 value $ field options :value
-                color $ either (field options :color) 0xffffff
-                text-color $ either (field options :text-color) color
+                color $ quatrefoil.util.core/field-or options :color 0xffffff
+                text-color $ quatrefoil.util.core/field-or options :text-color color
                 label $ field options :label
               group
                 {} $ :position $ field options :position
                 sphere $ {} (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0)
                   :radius $ &*
-                    quatrefoil.util.core/require-decoded $ try-decode-map-as
-                      or (field options :radius) 1
-                      , 'Number
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/field-or options :radius 1) 'Number
                     if value 1 0.8
                   :material $ {} (:kind :mesh-lambert) (:color color) (:transparent true)
-                    :opacity $ if value
-                      either (field options :opacity) 0.8
-                      , 0.3
+                    :opacity $ if value (quatrefoil.util.core/field-or options :opacity 0.8) 0.3
                   :event $ {} $ :click
                     fn (e d!)
                       on-toggle (not value) d!
@@ -1501,23 +1455,21 @@
         'comp-value $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-value (options on-change)
             let
-                value $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field options :value) 'Number
-                speed $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                  or (field options :speed) 1
-                  , 'Number
-                color $ either (field options :color) 0xffffff
-                text-color $ either (field options :text-color) color
-                text-size $ either (field options :text-size) 1
+                value $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field options :value) 'Number
+                speed $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/field-or options :speed 1) 'Number
+                color $ quatrefoil.util.core/field-or options :color 0xffffff
+                text-color $ quatrefoil.util.core/field-or options :text-color color
+                text-size $ quatrefoil.util.core/field-or options :text-size 1
                 bound $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                  or (field options :bound) ([] 0 1)
-                  :: 'List 'Number
+                  quatrefoil.util.core/field-or options :bound $ [] 0 1
+                  quote $ List Number
                 label $ field options :label
               group
                 {} $ :position $ field options :position
                 sphere $ {} (:emissive 0xffffff) (:metalness 0.8) (:emissiveIntensity 1) (:roughness 0)
-                  :radius $ or (field options :radius) 1
+                  :radius $ quatrefoil.util.core/field-or options :radius 1
                   :material $ {} (:kind :mesh-lambert) (:color color) (:transparent true)
-                    :opacity $ either (field options :opacity) 0.6
+                    :opacity $ quatrefoil.util.core/field-or options :opacity 0.6
                   :event $ {}
                     :control $ fn (move delta elapse d!)
                       hint-fn $ Fn (List Number) (List Number) Number Dynamic $ -> Dynamic
@@ -1543,19 +1495,19 @@
                     :gamepad $ fn (info elapsed d!)
                       hint-fn $ Fn Dynamic Number Dynamic $ -> Dynamic
                       let
-                          speeding $ * speed $ if (field info :b) 8 1
+                          speeding $ * speed $ if (quatrefoil.util.core/field-or info :b false) 8 1
                         on-change
                           + value $ * elapsed speeding $ quatrefoil.util.core/require-decoded
-                            try-decode-map-as (field info :dx) 'Number
+                            try-decode-map-as (quatrefoil.util.core/require-field info :dx) 'Number
                           , d!
-                if (field options :show-text?)
+                if (quatrefoil.util.core/field-or options :show-text? false)
                   text $ {}
                     :position $ [] -1.6 2 0
                     :text $ let
                         prefix $ if
                           blank? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (either label |) 'String
                           , | $ str label "| "
-                      str prefix $ .!toFixed value $ either (field options :fract-length) 2
+                      str prefix $ .!toFixed value $ quatrefoil.util.core/field-or options :fract-length 2
                     :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                     :size text-size
                     :depth 0.5
@@ -1564,15 +1516,14 @@
         'comp-value-2d $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-value-2d (options on-change)
             let
-                v $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field options :value) (:: 'List 'Number)
+                v $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field options :value)
+                  quote $ List Number
                 position $ field options :position
-                speed $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                  either (field options :speed) 1
-                  , 'Number
-                color $ either (field options :color) 0xaaaaff
-                text-color $ either (field options :text-color) color
-                text-size $ either (field options :text-size) 1
-                fract-len $ either (field options :fract-length) 2
+                speed $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/field-or options :speed 1) 'Number
+                color $ quatrefoil.util.core/field-or options :color 0xaaaaff
+                text-color $ quatrefoil.util.core/field-or options :text-color color
+                text-size $ quatrefoil.util.core/field-or options :text-size 1
+                fract-len $ quatrefoil.util.core/field-or options :fract-length 2
                 label $ field options :label
               group
                 {} $ :position $ field options :position
@@ -1602,15 +1553,15 @@
                           y0 $
                             nth v0 1
                             , .unwrap-or 0
-                          speeding $ * speed $ if (field info :b) 8 1
+                          speeding $ * speed $ if (quatrefoil.util.core/field-or info :b false) 8 1
                           dx $ * elapsed speeding $ quatrefoil.util.core/require-decoded
-                            try-decode-map-as (field info :dx) 'Number
+                            try-decode-map-as (quatrefoil.util.core/require-field info :dx) 'Number
                           dy $ * elapsed speeding $ quatrefoil.util.core/require-decoded
-                            try-decode-map-as (field info :dy) 'Number
+                            try-decode-map-as (quatrefoil.util.core/require-field info :dy) 'Number
                         on-change
                           [] (+ x0 dx) (- y0 dy)
                           , d!
-                if (field options :show-text?)
+                if (quatrefoil.util.core/field-or options :show-text? false)
                   text $ {}
                     :position $ [] -2 2 0
                     :text $ let
@@ -1657,13 +1608,13 @@
           :code $ quote $ defn >> (states k)
             let
                 parent-cursor $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                  either (field states :cursor) ([])
-                  :: 'List 'Tag
+                  quatrefoil.util.core/field-or states :cursor $ []
+                  quote $ List Tag
                 branch $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   match (get states k)
                     (:some option-value) option-value
                     (:none) ({})
-                  :: 'Map 'Tag 'Dynamic
+                  quote $ Map Tag Dynamic
               assoc branch :cursor $ append parent-cursor k
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic)
@@ -1843,13 +1794,6 @@
           :code $ quote $ defn ffi-object (value) (unsafe-coerce value JsObject)
           :examples $ []
           :schema $ quote $ Fn Dynamic (-> Dynamic) (:features :js-ffi)
-        'field $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn field (value key)
-            match (get value key)
-              (:some option-value) option-value
-              (:none) nil
-          :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic)
         'gamepad-axis-value $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn gamepad-axis-value (axes index)
             js-number $ aget axes index
@@ -1869,12 +1813,15 @@
             start-control-loop! 10 $ fn (elapsed states delta)
               let
                   l-move $ map
-                    quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :left-move) (:: 'List 'Number)
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field states :left-move)
+                      quote $ List Number
                     , refine-strength
                   r-move $ map
-                    quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :right-move) (:: 'List 'Number)
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field states :right-move)
+                      quote $ List Number
                     , refine-strength
-                  r-delta $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field delta :right-move) (:: 'List 'Number)
+                  r-delta $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field delta :right-move)
+                    quote $ List Number
                   l0 $
                     nth l-move 0
                     , .unwrap-or 0
@@ -1893,9 +1840,9 @@
                   rd1 $
                     nth r-delta 1
                     , .unwrap-or 0
-                  left-a? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :left-a?) 'Bool
-                  right-b? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :right-b?) 'Bool
-                  left-b? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field states :left-b?) 'Bool
+                  left-a? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field states :left-a?) 'Bool
+                  right-b? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field states :right-b?) 'Bool
+                  left-b? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field states :left-b?) 'Bool
                 ; println |L l-move |R r-move
                 when (not= 0 l1)
                   move-viewer-by! 0 0 $ negate $ * 0.6 elapsed l1
@@ -2055,8 +2002,8 @@
               pass $ either (:composer-passes options) ([])
               .!addPass @*global-composer pass
             if
-              non-nil? $ field options :background
-              .!setClearColor @*global-renderer (field options :background) 1
+              .some? $ quatrefoil.util.core/field-option options :background
+              .!setClearColor @*global-renderer (quatrefoil.util.core/require-field options :background) 1
             ; set! (.-physicallyCorrectLights @*global-renderer) true
             ; set! (.-gammaFactor @*global-renderer) 22
             .!setPixelRatio @*global-renderer $ either
@@ -2090,7 +2037,7 @@
                           .unwrap $ last $ quatrefoil.util.core/require-decoded
                             try-decode-map-as
                               .unwrap $ first d
-                              :: 'List 'Dynamic
+                              quote $ List Dynamic
                           * 0.001 $ - t0 prev-t
               .!updateProjectionMatrix @*global-camera
               .!render @*global-renderer @*global-scene @*global-camera
@@ -2408,12 +2355,13 @@
         %{} 'CodeEntry (:doc |)
           :code $ quote $ defn update-states (store pair)
             let
-                data $ quatrefoil.util.core/require-decoded $ try-decode-map-as pair (:: 'List 'Dynamic)
+                data $ quatrefoil.util.core/require-decoded $ try-decode-map-as pair
+                  quote $ List Dynamic
                 cursor $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   match (nth data 0)
                     (:some option-value) option-value
                     (:none) ([])
-                  :: 'List 'Tag
+                  quote $ List Tag
                 new-state $ .unwrap $ nth data 1
               assoc store :states $ assoc-in (quatrefoil.util.core/field store :states)
                 concat cursor $ [] :data
@@ -2428,8 +2376,10 @@
         'diff-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-children (prev-children children coord collect!)
             let
-                prev-children0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as prev-children (:: 'Map 'Number 'Dynamic)
-                children0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as children (:: 'Map 'Number 'Dynamic)
+                prev-children0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as prev-children
+                  quote $ Map Number Dynamic
+                children0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as children
+                  quote $ Map Number Dynamic
                 prev-keys $ keys prev-children0
                 curr-keys $ keys children0
                 removed-keys $ difference prev-keys curr-keys
@@ -2463,10 +2413,10 @@
             let
                 prev-events0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   either prev-events $ {}
-                  :: 'Map 'Tag 'Dynamic
+                  quote $ Map Tag Dynamic
                 events0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   either events $ {}
-                  :: 'Map 'Tag 'Dynamic
+                  quote $ Map Tag Dynamic
                 prev-event-names $ keys prev-events0
                 event-names $ keys events0
                 added-events $ difference event-names prev-event-names
@@ -2490,10 +2440,10 @@
               let
                   prev-material0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                     either prev-material $ {}
-                    :: 'Map 'Tag 'Dynamic
+                    quote $ Map Tag Dynamic
                   material0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                     either material $ {}
-                    :: 'Map 'Tag 'Dynamic
+                    quote $ Map Tag Dynamic
                   prev-keys $ keys prev-material0
                   curr-keys $ keys material0
                   added-material $ -> (difference curr-keys prev-keys) (&set:to-list)
@@ -2530,10 +2480,10 @@
               let
                 prev-params0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   either prev-params $ {}
-                  :: 'Map 'Tag 'Dynamic
+                  quote $ Map Tag Dynamic
                 params0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   either params $ {}
-                  :: 'Map 'Tag 'Dynamic
+                  quote $ Map Tag Dynamic
                 prev-keys $ keys prev-params0
                 curr-keys $ keys params0
                 added-params $ difference curr-keys prev-keys
@@ -2740,7 +2690,8 @@
               let
                   object3d $ create-shape (assoc tree :children nil) coord
                   children $ ->
-                    quatrefoil.util.core/require-decoded $ try-decode-map-as (field tree :children) (:: 'Map 'Number 'Dynamic)
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field tree :children)
+                      quote $ Map Number Dynamic
                     &map:to-list
                     map $ fn (entry)
                       update entry 1 $ fn (child)
@@ -2785,7 +2736,7 @@
           :code $ quote $ defn create-ambient-light (params position)
             let
                 color $ field params :color
-                intensity $ either (field params :intensity) 1
+                intensity $ quatrefoil.util.core/field-or params :intensity 1
                 object3d $ new THREE/AmbientLight color intensity
               set-position! object3d position
               ; js/console.log |Light: object3d
@@ -2817,13 +2768,13 @@
             let
                 vertices $ new js/Float32Array $ to-js-data
                   quatrefoil.util.core/require-decoded $ try-decode-map-as
-                    either (field params :vertices) ([])
-                    :: 'List 'Number
+                    quatrefoil.util.core/field-or params :vertices $ []
+                    quote $ List Number
                   {} $ :js-array true
                 indices $ to-js-data
                   quatrefoil.util.core/require-decoded $ try-decode-map-as
-                    either (field params :indices) ([])
-                    :: 'List 'Number
+                    quatrefoil.util.core/field-or params :indices $ []
+                    quote $ List Number
                   {} $ :js-array true
                 geometry $ new THREE/BufferGeometry
                 object3d $ do
@@ -2882,8 +2833,8 @@
                 points $ &let
                   ps $ js-array
                   &doseq
-                    p $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :points)
-                      :: 'List $ :: 'List 'Number
+                    p $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field params :points)
+                      quote $ List $ List Number
                     push-array! ps $ vector3-from-list p
                   , ps
                 geometry $ geometry-set-from-points (new THREE/BufferGeometry) points
@@ -2900,18 +2851,18 @@
                 points $ &let
                   ps $ js-array
                   if
-                    non-nil? $ field params :segments
+                    .some? $ quatrefoil.util.core/field-option params :segments
                     &doseq
-                      segment $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :segments)
-                        :: 'List $ :: 'List $ :: 'List 'Number
+                      segment $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field params :segments)
+                        quote $ List $ List (List Number)
                       let
                           p0 $ .unwrap $ nth segment 0
                           p1 $ .unwrap $ nth segment 1
                         push-array! ps $ vector3-from-list p0
                         push-array! ps $ vector3-from-list p1
                     &doseq
-                      p $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :points)
-                        :: 'List $ :: 'List 'Number
+                      p $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field params :points)
+                        quote $ List $ List Number
                       push-array! ps $ vector3-from-list p
                   , ps
                 geometry $ geometry-set-from-points (new THREE/BufferGeometry) points
@@ -2949,8 +2900,8 @@
                 points $ &let
                   ps $ js-array
                   &doseq
-                    p $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :points)
-                      :: 'List $ :: 'List 'Number
+                    p $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field params :points)
+                      quote $ List $ List Number
                     push-array! ps $ vector3-from-list p
                   , ps
                 geometry $ let
@@ -2970,15 +2921,15 @@
         'create-parametric-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-parametric-element (params position rotation scale material)
             let
-                func $ either (field params :func)
-                  fn (a b data) ([] a b 0)
+                func $ quatrefoil.util.core/field-or params :func $ fn (a b data) ([] a b 0)
                 data $ field params :data
-                slices $ either (field params :slices) 10
-                stacks $ either (field params :stacks) 10
+                slices $ quatrefoil.util.core/field-or params :slices 10
+                stacks $ quatrefoil.util.core/field-or params :stacks 10
                 geometry $ new ParametricGeometry
                   fn (u v target)
                     let[] (x y z)
-                      quatrefoil.util.core/require-decoded $ try-decode-map-as (func u v data) (:: 'List 'Number)
+                      quatrefoil.util.core/require-decoded $ try-decode-map-as (func u v data)
+                        quote $ List Number
                       .set (js-cast target 'quatrefoil.dsl.object3d-dom/AxisSetterHost) x y z
                   , slices stacks
                 object3d $ new THREE/Mesh geometry $ create-material material
@@ -2997,18 +2948,16 @@
         'create-plane-reflector $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-plane-reflector (params position rotation scale)
             let
-                geometry $ new THREE/PlaneGeometry
-                  either (field params :width) 80
-                  either (field params :height) 80
+                geometry $ new THREE/PlaneGeometry (quatrefoil.util.core/field-or params :width 80) (quatrefoil.util.core/field-or params :height 80)
                 object3d $ new Reflector geometry $ js-object
-                  |clipBias $ either (field params :clip-bias) 0.003
+                  |clipBias $ quatrefoil.util.core/field-or params :clip-bias 0.003
                   |textureWidth $ *
                     js-number $ .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
                     js-number $ .-devicePixelRatio $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
                   |textureHeight $ *
                     js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
                     js-number $ .-devicePixelRatio $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
-                  |color $ either (field params :color) |0x7777ff
+                  |color $ quatrefoil.util.core/field-or params :color |0x7777ff
               set-position! object3d position
               set-rotation! object3d rotation
               set-scale! object3d scale
@@ -3039,12 +2988,12 @@
           :code $ quote $ defn create-polyhedron-element (params position rotation scale material)
             let
                 vertices $ to-js-data
-                  concat & $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :vertices)
-                    :: 'List $ :: 'List 'Number
+                  concat & $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field params :vertices)
+                    quote $ List $ List Number
                   {} $ :js-array true
                 indices $ to-js-data
-                  concat & $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :indices)
-                    :: 'List $ :: 'List 'Number
+                  concat & $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field params :indices)
+                    quote $ List $ List Number
                   {} $ :js-array true
                 radius $ field params :radius
                 detail $ field params :detail
@@ -3072,7 +3021,8 @@
                 look-at $ field params :look-at
                 object3d $ new THREE/RectAreaLight color intensity width height
               let
-                  coordinates $ quatrefoil.util.core/require-decoded $ try-decode-map-as look-at (:: 'List 'Number)
+                  coordinates $ quatrefoil.util.core/require-decoded $ try-decode-map-as look-at
+                    quote $ List Number
                 .lookAt (three-object object3d)
                   .unwrap $ nth coordinates 0
                   .unwrap $ nth coordinates 1
@@ -3092,8 +3042,8 @@
             let
                 vertices $ new js/Float32Array $ to-js-data
                   quatrefoil.util.core/require-decoded $ try-decode-map-as
-                    either (field params :vertices) ([])
-                    :: 'List 'Number
+                    quatrefoil.util.core/field-or params :vertices $ []
+                    quote $ List Number
                   {} $ :js-array true
                 geometry $ let
                     g $ new THREE/BufferGeometry
@@ -3120,8 +3070,7 @@
                 position $ field element :position
                 scale $ field element :scale
                 rotation $ field element :rotation
-                material $ either (field element :material)
-                  {} (:kind :mesh-basic) (:color 0xa0a0a0)
+                material $ quatrefoil.util.core/field-or element :material $ {} (:kind :mesh-basic) (:color 0xa0a0a0)
                 event $ field element :event
               match (field element :name) (:scene @*global-scene)
                 :group $ create-group-element params position rotation scale
@@ -3177,7 +3126,7 @@
             let
                 object3d $ new THREE/Object3D
                 obj $ match
-                  try-decode-map-as (field params :key) 'Tag
+                  try-decode-map-as (quatrefoil.util.core/require-field params :key) 'Tag
                   (:ok asset-key) (get @*loaded-objects asset-key)
                   (:err _) (Option :none)
               set-position! object3d position
@@ -3198,10 +3147,7 @@
         'create-sphere-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-sphere-element (params position rotation scale material event coord)
             let
-                geometry $ new THREE/SphereGeometry
-                  or (field params :radius) 8
-                  or (field params :width-segments) 12
-                  or (field params :height-segments) 12
+                geometry $ new THREE/SphereGeometry (quatrefoil.util.core/field-or params :radius 8) (quatrefoil.util.core/field-or params :width-segments 12) (quatrefoil.util.core/field-or params :height-segments 12)
                 object3d $ new THREE/Mesh geometry $ create-material material
                 metadata-object $ unsafe-coerce object3d 'quatrefoil.dsl.object3d-dom/ObjectMetadataHost
               set-position! object3d position
@@ -3222,8 +3168,8 @@
         'create-spline-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-spline-element (params position rotation scale material)
             let
-                points0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field params :points)
-                  :: 'List $ :: 'List 'Number
+                points0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field params :points)
+                  quote $ List $ List Number
                 curve $ new THREE/CatmullRomCurve3 $ to-js-data
                   -> points0 $ map $ fn (p) (vector3-from-list p)
                   {} $ :js-array true
@@ -3248,9 +3194,9 @@
                 color $ field params :color
                 intensity $ field params :intensity
                 distance $ field params :distance
-                angle $ or (field params :angle) (* 0.5 &PI)
-                penumbra $ or (field params :penumbra) 0.5
-                decay $ or (field params :decay) 1.5
+                angle $ quatrefoil.util.core/field-or params :angle $ * 0.5 &PI
+                penumbra $ quatrefoil.util.core/field-or params :penumbra 0.5
+                decay $ quatrefoil.util.core/field-or params :decay 1.5
                 object3d $ new THREE/SpotLight color intensity distance angle penumbra decay
               set!
                 .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
@@ -3268,8 +3214,7 @@
         'create-text-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-text-element (params position rotation scale material)
             let
-                geometry $ new TextGeometry
-                  or (field params :text) |Quatrefoil
+                geometry $ new TextGeometry (quatrefoil.util.core/field-or params :text |Quatrefoil)
                   to-js-data $ assoc params :font font-resource
                 object3d $ new THREE/Mesh geometry $ create-material material
               set-position! object3d position
@@ -3306,14 +3251,10 @@
                 points-fn $ field params :points-fn
                 factor $ field params :factor
                 geometry $ -> $ new THREE/TubeGeometry (make-tube-curve points-fn factor)
-                  -> (field params :tubular-segments)
-                    either $ field params :tubular
-                    either 40
-                  either (field params :radius) 2
-                  -> (field params :radial-segments)
-                    either $ field params :radial
-                    either 8
-                  either (field params :closed?) false
+                  quatrefoil.util.core/field-or params :tubular-segments $ quatrefoil.util.core/field-or params :tubular 40
+                  quatrefoil.util.core/field-or params :radius 2
+                  quatrefoil.util.core/field-or params :radial-segments $ quatrefoil.util.core/field-or params :radial 8
+                  quatrefoil.util.core/field-or params :closed? false
                 object3d $ new THREE/Mesh geometry $ create-material material
               set!
                 .-castShadow $ js-cast object3d 'quatrefoil.dsl.object3d-dom/ShadowFlagsHost
@@ -3377,7 +3318,8 @@
                 hit $ js-cast target 'quatrefoil.dsl.object3d-dom/IntersectionHost
                 coord $ .-coord $ unsafe-coerce (.-object hit) 'quatrefoil.dsl.object3d-dom/ObjectMetadataHost
               if (js-present? coord)
-                Option :some $ quatrefoil.util.core/require-decoded $ try-decode-map-as coord (:: 'List 'Number)
+                Option :some $ quatrefoil.util.core/require-decoded $ try-decode-map-as coord
+                  quote $ List Number
                 Option :none
           :examples $ []
           :schema $ quote $ Fn JsObject
@@ -3495,7 +3437,8 @@
                         .to-string $ quatrefoil.util.core/require-decoded $ try-decode-map-as id 'Bool
                       (nil? id) (.to-string nil)
                       true $ raise |geometry-attribute-id-must-be-a-scalar
-                  buffer $ quatrefoil.util.core/require-decoded $ try-decode-map-as (field info :buffer) (:: 'List 'Number)
+                  buffer $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field info :buffer)
+                    quote $ List Number
                   size $ field info :size
                   type $ field info :type
                   attr $ match type
@@ -3540,7 +3483,7 @@
                   _ $ raise |unknown-position-expected-vector
               (list? position)
                 let[] (x y z)
-                  quatrefoil.util.core/require-decoded $ try-decode-map-as position $ :: 'List 'Number
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as position $ quote (List Number)
                   .set
                     js-cast
                       .-position $ js-cast object 'quatrefoil.dsl.object3d-dom/TransformHost
@@ -3555,7 +3498,7 @@
           :code $ quote $ defn set-rotation! (object3d rotation)
             if (non-nil? rotation)
               let[] (x y z)
-                quatrefoil.util.core/require-decoded $ try-decode-map-as rotation $ :: 'List 'Number
+                quatrefoil.util.core/require-decoded $ try-decode-map-as rotation $ quote (List Number)
                 .set
                   js-cast
                     .-rotation $ js-cast object3d 'quatrefoil.dsl.object3d-dom/TransformHost
@@ -3573,7 +3516,7 @@
                     quatrefoil.util.core/require-decoded $ try-decode-map-as scale 'quaternion.vector/V3
                     (:v3 x y z) ([] x y z)
                     _ $ raise |unknown-scale-expected-vector
-                  quatrefoil.util.core/require-decoded $ try-decode-map-as scale $ :: 'List 'Number
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as scale $ quote (List Number)
                 .set
                   js-cast
                     .-scale $ js-cast object 'quatrefoil.dsl.object3d-dom/TransformHost
@@ -3673,7 +3616,7 @@
           :code $ quote $ defn add-children (target coord op-data)
             &doseq (entry op-data)
               let[] (raw-key tree)
-                quatrefoil.util.core/require-decoded $ try-decode-map-as entry $ :: 'List 'Dynamic
+                quatrefoil.util.core/require-decoded $ try-decode-map-as entry $ quote (List Dynamic)
                 let
                     k $ quatrefoil.util.core/require-decoded $ try-decode-map-as raw-key 'Number
                   .!addBy target k $ build-tree (conj coord k) tree
@@ -3695,12 +3638,14 @@
             ; js/console.log |changes (count changes) changes
             &doseq (change changes)
               let
-                  data $ quatrefoil.util.core/require-decoded $ try-decode-map-as change (:: 'List 'Dynamic)
+                  data $ quatrefoil.util.core/require-decoded $ try-decode-map-as change
+                    quote $ List Dynamic
                   raw-coord $ &list:nth data 0
                   op $ quatrefoil.util.core/require-decoded $ try-decode-map-as (&list:nth data 1) 'Tag
                   op-data $ if (= op :remove-element) nil $ &list:nth data 2
                 let
-                    coord $ quatrefoil.util.core/require-decoded $ try-decode-map-as raw-coord (:: 'List 'Number)
+                    coord $ quatrefoil.util.core/require-decoded $ try-decode-map-as raw-coord
+                      quote $ List Number
                     target $ reach-object3d @*global-scene coord
                   ; js/console.log |Change: op coord op-data
                   match op
@@ -3781,7 +3726,7 @@
               ; js/console.log target
               &doseq
                 entry $ &map:to-list $ quatrefoil.util.core/require-decoded
-                  try-decode-map-as op-data $ :: 'Map 'Tag 'Dynamic
+                  try-decode-map-as op-data $ quote $ Map Tag Dynamic
                 let[] (param new-value) entry $ match param
                   :color $
                     js-cast
@@ -3798,7 +3743,8 @@
                   :uniforms $ set!
                     .-uniforms $ js-cast material 'quatrefoil.dsl.patch/ShaderMaterialHost
                     unsafe-coerce
-                      to-js-data $ quatrefoil.util.core/require-decoded $ try-decode-map-as new-value (:: 'Map 'Dynamic 'Dynamic)
+                      to-js-data $ quatrefoil.util.core/require-decoded $ try-decode-map-as new-value
+                        quote $ Map Dynamic Dynamic
                       , 'JsObject
                   :fragmentShader $ set!
                     .-fragmentShader $ js-cast material 'quatrefoil.dsl.patch/ShaderMaterialHost
@@ -3957,6 +3903,26 @@
               (:none) nil
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic)
+        'field-option $ %{} 'CodeEntry
+          :doc "|Read a field of an untyped map as an Option: a nil map, a missing key and a nil value are all none."
+          :code $ quote $ defn field-option (value key)
+            if (nil? value) (Option :none)
+              match (get value key)
+                (:some field-value)
+                  if (nil? field-value) (Option :none) (Option :some field-value)
+                (:none) (Option :none)
+          :examples $ []
+          :schema $ quote $ Fn M Tag
+            -> $ Option Dynamic
+            :generics M
+        'field-or $ %{} 'CodeEntry
+          :doc "|Read a field of an untyped map, or default when the map is nil, the key is missing or the value is nil."
+          :code $ quote $ defn field-or (value key default)
+            match (field-option value key)
+              (:some field-value) field-value
+              (:none) default
+          :examples $ []
+          :schema $ quote $ Fn M Tag Dynamic (-> Dynamic) (:generics M)
         'find-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn find-element (tree coord)
             if (comp? tree)
@@ -3983,7 +3949,7 @@
                 recur $ field tree :tree
               true $ update tree :children $ fn (children)
                 ->
-                  require-decoded $ try-decode-map-as children $ :: 'Map 'Dynamic 'Dynamic
+                  require-decoded $ try-decode-map-as children $ quote (Map Dynamic Dynamic)
                   &map:to-list
                   map $ fn (entry)
                     update entry 1 $ fn (child) (purify-tree child)
@@ -4006,6 +3972,15 @@
               (:err message) (raise message)
           :examples $ []
           :schema $ quote $ Fn (Result T String) (-> T) (:generics T)
+        'require-field $ %{} 'CodeEntry
+          :doc "|Read a field of an untyped map that must be present; a nil map, a missing key or a nil value raises with the field name."
+          :code $ quote $ defn require-field (value key)
+            match (field-option value key)
+              (:some field-value) field-value
+              (:none)
+                raise $ str "|[quatrefoil] missing field " key
+          :examples $ []
+          :schema $ quote $ Fn M Tag (-> Dynamic) (:generics M)
         'scale-zero $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn scale-zero (x)
             if (&= 0 x) 0.01 x
