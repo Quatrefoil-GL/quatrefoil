@@ -657,11 +657,11 @@
     'quatrefoil.app.comp.quat-tree $ %{} 'FileEntry
       :defs $ {}
         'TreeLine $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defstruct TreeLine (:from 'quaternion.core/Quaternion) (:to 'quaternion.core/Quaternion) (:name 'Tag) (:line 'quaternion.core/Quaternion)
+          :code $ quote $ defstruct TreeLine (:from quaternion.core/Quaternion) (:to quaternion.core/Quaternion) (:name Tag) (:line quaternion.core/Quaternion)
           :examples $ []
           :schema $ quote StructDef
         'TreeTransform $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defstruct TreeTransform (:name 'Tag) (:vector 'quaternion.core/Quaternion)
+          :code $ quote $ defstruct TreeTransform (:name Tag) (:vector quaternion.core/Quaternion)
           :examples $ []
           :schema $ quote StructDef
         'comp-quat-tree $ %{} 'CodeEntry (:doc |)
@@ -1635,7 +1635,7 @@
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic)
         'CameraControl $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defenum CameraControl (:shift 'Number) (:angle 'Number) (:move 'Number 'Number 'Number)
+          :code $ quote $ defenum CameraControl (:shift Number) (:angle Number) (:move Number Number Number)
           :examples $ []
           :schema $ quote EnumDef
         'CameraPositionHost $ %{} 'CodeEntry (:doc |)
@@ -3441,6 +3441,19 @@
               , 'Number
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (-> Number) (:features :js-ffi)
+        'read-vec3 $ %{} 'CodeEntry
+          :doc "|Decode a `:position` or `:scale` prop into its three components."
+          :code $ quote $ defn read-vec3 (raw)
+            match
+              quatrefoil.util.core/require-decoded $ try-decode-map-as raw quatrefoil.schema/Vec3Value
+              (V3 v)
+                match v $
+                  :v3 x y z
+                  [] x y z
+              (List xs) xs
+          :examples $ []
+          :schema $ quote $ Fn Dynamic
+            -> $ List Number
         'set-geometry-attributes! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn set-geometry-attributes! (g attributes)
             &doseq (info attributes)
@@ -3499,29 +3512,15 @@
               (:none) &unit
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (-> Unit) (:features :js-ffi)
-        'set-position-value! $ %{} 'CodeEntry (:doc |)
+        'set-position-value! $ %{} 'CodeEntry
+          :doc "|Set a three.js position from a `:position` prop, a V3 or a list of three numbers."
           :code $ quote $ defn set-position-value! (object position)
-            cond
-                enum? position
-                match
-                  quatrefoil.util.core/require-decoded $ try-decode-map-as position 'quaternion.vector/V3
-                  (:v3 x y z)
-                    .set
-                      js-cast
-                        .-position $ js-cast object 'quatrefoil.dsl.object3d-dom/TransformHost
-                        , 'quatrefoil.dsl.object3d-dom/AxisSetterHost
-                      , x y z
-                  _ $ raise |unknown-position-expected-vector
-              (list? position)
-                let[] (x y z)
-                  quatrefoil.util.core/require-decoded $ try-decode-map-as position $ quote (List Number)
-                  .set
-                    js-cast
-                      .-position $ js-cast object 'quatrefoil.dsl.object3d-dom/TransformHost
-                      , 'quatrefoil.dsl.object3d-dom/AxisSetterHost
-                    , x y z
-              (nil? position) nil
-              true $ raise |unknown-position
+            let[] (x y z) (read-vec3 position)
+              .set
+                js-cast
+                  .-position $ js-cast object 'quatrefoil.dsl.object3d-dom/TransformHost
+                  , 'quatrefoil.dsl.object3d-dom/AxisSetterHost
+                , x y z
             , &unit
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (-> Unit) (:features :js-ffi)
@@ -3554,23 +3553,17 @@
               (:none) &unit
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (-> Unit) (:features :js-ffi)
-        'set-scale-value! $ %{} 'CodeEntry (:doc |)
+        'set-scale-value! $ %{} 'CodeEntry
+          :doc "|Set a three.js scale from a `:scale` prop, a V3 or a list of three numbers; zero factors are nudged by `scale-zero`."
           :code $ quote $ defn set-scale-value! (object scale)
-            if (non-nil? scale)
-              let[] (x y z)
-                if (enum? scale)
-                  match
-                    quatrefoil.util.core/require-decoded $ try-decode-map-as scale 'quaternion.vector/V3
-                    (:v3 x y z) ([] x y z)
-                    _ $ raise |unknown-scale-expected-vector
-                  quatrefoil.util.core/require-decoded $ try-decode-map-as scale $ quote (List Number)
-                .set
-                  js-cast
-                    .-scale $ js-cast object 'quatrefoil.dsl.object3d-dom/TransformHost
-                    , 'quatrefoil.dsl.object3d-dom/AxisSetterHost
-                  scale-zero x
-                  scale-zero y
-                  scale-zero z
+            let[] (x y z) (read-vec3 scale)
+              .set
+                js-cast
+                  .-scale $ js-cast object 'quatrefoil.dsl.object3d-dom/TransformHost
+                  , 'quatrefoil.dsl.object3d-dom/AxisSetterHost
+                scale-zero x
+                scale-zero y
+                scale-zero z
             , &unit
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (-> Unit) (:features :js-ffi)
@@ -3880,13 +3873,19 @@
     'quatrefoil.schema $ %{} 'FileEntry
       :defs $ {}
         'Component $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defstruct Component (:name 'Dynamic) (:tree 'Dynamic)
+          :code $ quote $ defstruct Component (:name Dynamic) (:tree Dynamic)
           :examples $ []
           :schema $ quote StructDef
         'Shape $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defstruct Shape (:name 'Dynamic) (:params 'Dynamic) (:position 'Dynamic) (:scale 'Dynamic) (:rotation 'Dynamic) (:material 'Dynamic) (:event 'Dynamic) (:attributes 'Dynamic) (:children 'Dynamic)
+          :code $ quote $ defstruct Shape (:name Dynamic) (:params Dynamic) (:position Dynamic) (:scale Dynamic) (:rotation Dynamic) (:material Dynamic) (:event Dynamic) (:attributes Dynamic) (:children Dynamic)
           :examples $ []
           :schema $ quote StructDef
+        'Vec3Value $ %{} 'CodeEntry
+          :doc "|A `:position` or `:scale` prop: a quaternion V3 or a list of three numbers."
+          :code $ quote $ defunion Vec3Value quaternion.vector/V3
+            quote $ List Number
+          :examples $ []
+          :schema $ quote UnionDef
         'comp? $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn comp? (x)
             and (struct? x) (&struct:matches? x Component)
