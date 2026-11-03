@@ -989,14 +989,7 @@
                   &map:to-list $ quatrefoil.util.core/require-decoded $ try-decode-map-as tasks
                     quote $ Map Number Dynamic
                   map-indexed $ fn (idx entry)
-                    let
-                        task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                          match (nth entry 0)
-                            (:some option-value) option-value
-                            (:none) 0
-                          , 'Number
-                        task $ .unwrap $ nth entry 1
-                      [] task-id $ comp-task task idx
+                    let[] (task-id task) entry $ [] task-id $ comp-task task idx
                   pairs-map
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 0 20 50
@@ -2710,23 +2703,11 @@
                       quote $ Map Number Dynamic
                     &map:to-list
                     map $ fn (entry)
-                      update entry 1 $ fn (child)
-                        build-tree
-                          conj coord $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                            match (first entry)
-                              (:some option-value) option-value
-                              (:none) 0
-                            , 'Number
-                          , child
+                      let[] (child-key child) entry $ [] child-key $ build-tree (conj coord child-key) child
                   virtual-element $ {} (:object3d object3d) (:children children)
                 ; js/console.log "|handle children" children $ :children tree
                 &doseq (entry children)
-                  let
-                      child $ .unwrap $ last entry
-                    ; js/console.log |Child: child entry
-                    .!addBy object3d
-                      .unwrap $ first entry
-                      , child
+                  let[] (child-key child) entry (; js/console.log |Child: child entry) (.!addBy object3d child-key child)
                 , object3d
               new THREE/Object3D
           :examples $ []
@@ -3442,7 +3423,7 @@
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (-> Number) (:features :js-ffi)
         'read-vec3 $ %{} 'CodeEntry
-          :doc "|Decode a `:position` or `:scale` prop into its three components."
+          :doc "|Decode a position/scale prop, require exactly three components, and return a fixed-length Number Tuple."
           :code $ quote $ defn read-vec3 (raw)
             match
               quatrefoil.util.core/require-decoded $ try-decode-map-as raw quatrefoil.schema/Vec3Value
@@ -3450,10 +3431,32 @@
                 match v $
                   :v3 x y z
                   [] x y z
-              (List xs) xs
+              (List xs)
+                if
+                  = 3 $ count xs
+                  let[] (x y z) xs $ [] x y z
+                  raise "|[Quatrefoil] expected exactly three Vec3 components"
           :examples $ []
           :schema $ quote $ Fn Dynamic
-            -> $ List Number
+            -> $ Tuple Number Number Number
+          :tests $ []
+            %{} 'TestEntry (:name |accepts-v3-and-three-number-list)
+              :code $ quote $ do
+                assert= ([] 1 2 3)
+                  read-vec3 $ [] 1 2 3
+                assert= ([] 4 5 6)
+                  read-vec3 $ quaternion.vector/v3 4 5 6
+            %{} 'TestEntry (:name |rejects-non-triple-lists)
+              :code $ quote $ each
+                [] ([]) ([] 1 2) ([] 1 2 3 4)
+                fn (value)
+                  let
+                      rejected? $ ref false
+                    try (read-vec3 value)
+                      fn (message)
+                        assert= "|[Quatrefoil] expected exactly three Vec3 components" message
+                        reset! rejected? true
+                    assert= true $ deref rejected?
         'set-geometry-attributes! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn set-geometry-attributes! (g attributes)
             &doseq (info attributes)
@@ -3881,7 +3884,7 @@
           :examples $ []
           :schema $ quote StructDef
         'Vec3Value $ %{} 'CodeEntry
-          :doc "|A `:position` or `:scale` prop: a quaternion V3 or a list of three numbers."
+          :doc "|A position/scale representation: a quaternion V3 or a Number List. read-vec3 checks exactly three components; this representation union alone does not prove cardinality."
           :code $ quote $ defunion Vec3Value quaternion.vector/V3
             quote $ List Number
           :examples $ []
