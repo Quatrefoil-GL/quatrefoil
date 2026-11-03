@@ -1,17 +1,33 @@
 # Quatrefoil
 
-使用者注意：本候选 **0.2.0（尚未发布）** 将当前 main 的 Calcit/procs **0.31.0** 同步到正式 **0.32.1**，调用方须同步安装工具链与精确依赖图、重新生成 JS 并重启旧 Vite 服务。本轮仅转换旧类型表示，280 个定义的完整官方视图与规范化 main 等价；不改变渲染算法、场景密度或公开类型。
+## 使用者需要注意
 
-本库是 Three.js 的 Calcit JS 包装与 Demo，源码和浏览器入口以 `calcit.cirru` 为准，版本以 `deps.cirru` 为准；不承诺 native/WASM 渲染。当前已发布正式版 `0.1.10` 配对 `0.30.1`，历史 tag 不移动。`0.2.0` 包含 main 先前的 API 变更，不能作为 `0.1.10` 的纯元数据 patch 使用。
+候选 **0.3.0** 配对正式 Calcit CLI / `@calcit/procs` **0.34.2**，消费者须同步完整精确依赖图并重新生成 JS。已发布 0.2.0 的历史 tag 保持。
+
+`:position` / `:scale` 接受 Quaternion V3 或恰好三个 Number 的 List。当前 main 已加入的 `Vec3Value` union 保持；本轮补足长度检查，空、两项、四项列表会在写入 Three 对象前明确报错，合法向量与原缩放处理保持。公开辅助函数 `read-vec3` 现在返回 `Tuple Number Number Number`，使用 `let[]` 读取三个位置；不要再将 Tuple 的位置读取当作 Option 解包。本轮包含合同收紧，因此使用新 minor 0.3.0。
+
+Map.to-list 已保留异构键值 Tuple；Todo 与构建树改用 `let[]`，不再把键和值当作同质 List 或把真实字段当成 Option。Number key、顺序和内容保持。原场景、Three.js 依赖范围、控制器、HUD 与部署路径保持。
+
+完整正式依赖图为 Touch Control **0.0.36**、Pointed Prompt **0.0.24**、Quaternion **0.2.19**，传递 JS-FFI **0.2.9**。已从正式 tags 完成 Caps strict/toolchain 安装，不用 main/hash 或本地候选替代依赖。候选 0.3.0 尚未发布，不发布 npm。
+
+本库是 Three.js 的 Calcit JS 包装与 Demo，不承诺 native/WASM 渲染。
 
 - [文档](https://github.com/Quatrefoil-GL/guidebook)
 - [Demo](https://r.tiye.me/Quatrefoil-GL/quatrefoil/)
 
-## 开发与验证
+## 验证与边界
 
-精确已发布依赖为 Touch Control `0.0.35`、Pointed Prompt `0.0.24`、Quaternion `0.2.19`，传递 JS-FFI `0.2.9`；不以本地候选或 hash 替代版本。保留原 Three.js 依赖范围，控制器 CSS 来自 Caps 模块。
+本地全部 **366** 定义（含依赖）、**278** 个项目公开定义及完整 strict（diagnostics=[]）通过。原 Option 的 nil/false/0/空字符串、显式 nil 状态存储断言保持；未解决类型总量 **137**，原上限不放宽，dynamic-method/deprecated 为零。开放宿主与场景数据仍存在，不宣称 Dynamic 清零。
 
-使用 Node.js 24、Yarn 4.18.0 和 Calcit 0.32.1：
+`read-vec3` 的两项附带回归覆盖两种合法表示和错误长度，复用原 CI 验证步骤，不新增脚本或框架。原构建及 tree-utils 独立 immutable 安装通过。生成 JS 已通过 Vite 内存 SSR 的向量正反例、真实 Three.Object3D 的位置/缩放、键控对象树及合成 Todo 检查；不创建 WebGL 上下文，不是实际浏览器视觉/交互验收。
+
+官方 Node 回放器的 JS 预加载目前被已发布 `@quatrefoil/utils` 的扩展名导入阻塞；没有新增排除或将它记为通过。上述打包辅助的内存检查与 Node 直接模块加载是不同范围。
+
+正式 0.34.2 尚不支持将 Tuple 直接作为受检解码目标，见 [Calcit #2557](https://github.com/calcit-lang/calcit/issues/2557)。因此保留 V3 / List Number 的表示 union，由 `read-vec3` 检查准确长度并重建三项 Tuple；该 union 本身不证明长度。方法查询将 Tuple 的 Add 标成 proven，但实际 strict 正确拒绝，见 [Calcit #2558](https://github.com/calcit-lang/calcit/issues/2558)，本轮不依赖这条误导提示或放宽门禁。
+
+## 开发
+
+使用 Node.js 24、Yarn 4.18.0、Caps 0.1.1 和 Calcit 0.34.2：
 
 ```bash
 caps --strict --ci
@@ -20,26 +36,26 @@ caps verify --toolchain
 yarn dev
 ```
 
-`yarn dev` 先生成 JS 并复制原 assets，再启动 Vite；`yarn release` 执行相同资源准备与生产构建。Calcit 源码修改后需重新编译；必要时用 `yarn vite --force` 重建旧预构建缓存。`js-out/`、`dist/` 与 `.calcit/` 不提交。
+`yarn dev` 先生成 JS 并复制原 assets，再启动 Vite；`yarn release` 执行相同资源准备与生产构建。源码修改后需重新编译；必要时用 `yarn vite --force` 重建旧预构建缓存。`js-out/`、`dist/` 与 `.calcit/` 不提交。
 
-修改 Snapshot 前读取 `calcit docs agents --contract`，通过官方 `query`、`tree`、`edit` 读取和修改，不能按文本处理 Snapshot。原全定义、24 个公开命名空间、完整 strict、未解析弱类型上限和 Option 语义断言保留；tree-utils 继续独立 immutable 安装。不关闭默认审计、不扩大预算，不声称现有动态/unsafe 债务清零。
+Snapshot 只通过官方 query/tree/edit 读取和修改，先读 `calcit docs agents --contract`。原全定义、24 个公开命名空间、完整 strict、未解析弱类型上限和 Option 断言保持；tree-utils 保留独立 immutable 安装。
 
-## 从旧正式版升级
+## 从旧版升级
 
-以下是当前 main 已包含的变更，本轮不再重复修改其执行逻辑：
+当前 main 还已包含此前的字段/Option 清理，本轮不恢复旧路径：
 
-- `find-element`、`reach-object3d` 在原 `empty?` 判断之后只继续遍历 List；`=seq?` 同样保留原判空分支，仅在双方为 List 时递归。不能理解成所有非 List 均直接抛错。
-- `=component?` helper 已删除；外部引用者须迁移。`update-states` 缺少第二 payload 会报错，已有显式 nil payload 仍存为真实 nil；nil/false/0/空字符串的 children 原语义继续由原断言保护。
-- GLTF 缓存已收紧为 `Ref<Map<Tag,JsObject>>`，加载结果经既有 GltfHost 受检转换。非法查询 key 仍走未加载提示，不改为强制解码抛错。
-- Pointed Prompt 会更早拒绝非法 `textarea?` 值；本 Demo 只提供 initial，不传该选项。`remove-element` 仍只为需要 payload 的操作读取第三字段。
+- `find-element`、`reach-object3d` 在原 empty? 判断后只继续遍历 List；`=seq?` 保留原判空顺序。
+- `=component?` helper 已删除，旧调用者须迁移；update-states 缺少第二 payload 仍报错，显式 nil payload 仍保留。
+- GLTF 缓存保持 `Ref<Map<Tag,JsObject>>` 和 GltfHost 检查，非法 key 仍走未加载提示。
+- Pointed Prompt 对非法 textarea? 值的拒绝保持；Demo 只提供 initial。
 
 ## 部署与已知限制
 
-前端 COS 仅使用 `cos-upload-action` 的内置 `public-base-url` 校验。PR 的 prefix 按编号/run/attempt 隔离，Vite base 同源；生产前缀 `Quatrefoil-GL/quatrefoil/` 和原 web-assets rsync 路径保持。合并与生产部署单独决定，本轮不触发。
+COS 只上传前端 dist，使用 action 内置 verify，PR 前缀包含编号/run/attempt；Vite base、生产前缀和原 web-assets 路径保持。仅创建 PR 和隔离预览，合并/正式发版另按验收决定。
 
-Actions 使用精确正式 tag，维护者已接受 tag 可移动风险；只读权限与关闭 checkout 凭据持久化保持，不把它们描述为不可变保障。npm 统一 60 分钟包龄，无包级豁免。
+[几何切换可见性 #64](https://github.com/Quatrefoil-GL/quatrefoil/issues/64) 尚未确认解决，不能用类型/CI 通过冒称修复。内部 select-keys 的 foldl 顺序问题由 [#69](https://github.com/Quatrefoil-GL/quatrefoil/issues/69) 跟踪，唯一引用在注释旧 diff 逻辑中，本次不恢复旧路径或擅自删除可能被外部引用的 helper。VR、多点触控和所有场景组合未完整验收。
 
-[几何切换可见性 #64](https://github.com/Quatrefoil-GL/quatrefoil/issues/64) 尚未确认解决，不能用类型/CI 通过冒称已修复。内部 `select-keys` 的 foldl 顺序错误继续由 [#69](https://github.com/Quatrefoil-GL/quatrefoil/issues/69) 跟踪；其唯一引用在注释旧 diff 逻辑中，本次不恢复旧路径或擅自删除可能被外部引用的 helper。VR、真实多点触控及所有场景组合未完整验收。
+Actions 保持精确正式 tag，npm 保持统一 60 分钟包龄，无包级豁免。
 
 ## Credits
 
