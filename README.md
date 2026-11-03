@@ -1,5 +1,23 @@
 # Quatrefoil
 
+## 0.3.2 依赖配对候选
+
+使用者影响：继续配对正式 Calcit / @calcit/procs **0.34.2**，改用正式 Touch Control
+**0.0.37**、Pointed Prompt **0.0.25**、Quaternion **0.2.20**，传递 JS-FFI **0.2.10**。
+消费者需要协调完整模块图后重新生成 JS；不要与 JS-FFI 0.2.9 混装，不移动 0.3.1 旧 tag。
+
+本次 Snapshot 与 0.3.1 字节一致，没有改变渲染公式、相机、状态/事件、HUD 或公开类型。
+Three 和其他 npm 依赖保持。正式 Caps strict/toolchain、immutable、全定义 366/366、
+公开定义 278/278、完整 strict（diagnostics=[]）、原两项 Vec3、Option 断言、tree-utils
+独立 immutable 与构建通过；unresolved 137、unsafe 32，原预算不放宽，
+deprecated-call / dynamic-method 均为零。
+
+全新临时 Chrome 156 headless profile 实际启动 WebGL 和控制器，hslx 三原色返回值正确；
+通过公开 dispatch 切换 Portal、Demo、Lines、Shapes、Shader、Control 六个场景，
+Three geometry 坐标均有限，并能刷新启动。程序化派发不是鼠标 raycast 命中或视觉保真验收；
+实体移动设备、VR 和跨 GPU 行为未在本轮复验。新精确 CI 和下游正式安装仍需跟进。
+0.3.2 在正式 Git tag 创建前为候选，不发布 npm，不合并或部署下游业务应用。
+
 ## 0.3.1 使用者需要注意
 
 `hslx(h,s,l)` 继续接收角度/百分比并使用原 Three.Color 取色算法，现在公开返回 Number。
