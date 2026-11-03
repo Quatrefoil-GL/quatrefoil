@@ -1941,15 +1941,15 @@
                 , ThreeColorHost
           :examples $ []
           :schema $ quote $ Fn Number Number Number (-> Dynamic) (:features :js-ffi)
-        'hslx $ %{} 'CodeEntry (:doc |)
+        'hslx $ %{} 'CodeEntry
+          :doc "|Convert degree/percentage HSL using the original Three.Color algorithm; check host capabilities and the getHex Number result at this boundary."
           :code $ quote $ defn hslx (h s l)
             let
-                c $ unsafe-coerce (new THREE/Color) ThreeColorHost
-              .!getHex $ unsafe-coerce
-                .!setHSL c (/ h 360) (/ s 100) (/ l 100)
-                , ThreeColorHost
+                c $ js-cast (new THREE/Color) 'quatrefoil.core/ThreeColorHost
+              .!setHSL c (/ h 360) (/ s 100) (/ l 100)
+              quatrefoil.util.core/require-decoded $ try-decode-map-as (.!getHex c) 'Number
           :examples $ []
-          :schema $ quote $ Fn Number Number Number (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Number Number Number (-> Number) (:features :js-ffi)
         'init-controls! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn init-controls! ()
             let

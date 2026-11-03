@@ -1,14 +1,35 @@
 # Quatrefoil
 
-## 使用者需要注意
+## 0.3.1 使用者需要注意
 
-候选 **0.3.0** 配对正式 Calcit CLI / `@calcit/procs` **0.34.2**，消费者须同步完整精确依赖图并重新生成 JS。已发布 0.2.0 的历史 tag 保持。
+`hslx(h,s,l)` 继续接收角度/百分比并使用原 Three.Color 取色算法，现在公开返回 Number。
+消费者可直接把结果用于数值颜色，不再需要为 hslx 重复检查 Number；仍需保留其他真实
+宿主/状态入口的检查。CLI/procs 与全部模块依赖保持 0.34.2 / 原正式图，Three 版本不变。
+
+仅 hslx 的 code/schema/doc 改变：以 js-cast 检查 Color 能力，在同一接收者调用 setHSL，
+再检查 getHex 数值结果。保留 JS FFI 标记，删除该函数两处 unsafe，不把 setHSL 返回值
+当作已经证明的宿主。整个库的 unsafe 34→32、schema Dynamic 357→356，unresolved
+仍为 137，原上限和原检查不变；没有新增脚本、测试框架、排除或编译器改写规则。
+
+全部 366 定义、公开 278 定义、完整 strict、原两项 Vec3 回归、原 Option 断言、
+严格 Caps/工具链、immutable、tree-utils 独立锁及构建通过。真实 Three 0.168 的七组
+颜色与 0.3.0 原实现一致。Grid 用本地 0.3.1 候选源码去掉三处冗余颜色解码后，
+全部定义/完整 strict/构建和实际 Three 0.166 的五个场景摘要与正式 0.3.0 基线一致，
+坐标有限。这是明确的候选消费者预检，不是尚未发布 tag 的正式安装验收。
+
+临时 Vite 内存检查只用 div/键盘监听占位初始化模块；WebSocket 绑定限制保留，
+不当作 DOM 交互、WebGL、VR 或跨 GPU 验收。此补丁处理 [#66](https://github.com/Quatrefoil-GL/quatrefoil/issues/66)，
+不改变 #67 的控件合同或 #86 的 parametric Option 合同。
+
+## 0.3.0 已发布合同
+
+正式 **0.3.0** 配对正式 Calcit CLI / `@calcit/procs` **0.34.2**，消费者须同步完整精确依赖图并重新生成 JS。已发布 0.2.0 的历史 tag 保持。
 
 `:position` / `:scale` 接受 Quaternion V3 或恰好三个 Number 的 List。当前 main 已加入的 `Vec3Value` union 保持；本轮补足长度检查，空、两项、四项列表会在写入 Three 对象前明确报错，合法向量与原缩放处理保持。公开辅助函数 `read-vec3` 现在返回 `Tuple Number Number Number`，使用 `let[]` 读取三个位置；不要再将 Tuple 的位置读取当作 Option 解包。本轮包含合同收紧，因此使用新 minor 0.3.0。
 
 Map.to-list 已保留异构键值 Tuple；Todo 与构建树改用 `let[]`，不再把键和值当作同质 List 或把真实字段当成 Option。Number key、顺序和内容保持。原场景、Three.js 依赖范围、控制器、HUD 与部署路径保持。
 
-完整正式依赖图为 Touch Control **0.0.36**、Pointed Prompt **0.0.24**、Quaternion **0.2.19**，传递 JS-FFI **0.2.9**。已从正式 tags 完成 Caps strict/toolchain 安装，不用 main/hash 或本地候选替代依赖。候选 0.3.0 尚未发布，不发布 npm。
+完整正式依赖图为 Touch Control **0.0.36**、Pointed Prompt **0.0.24**、Quaternion **0.2.19**，传递 JS-FFI **0.2.9**。已从正式 tags 完成 Caps strict/toolchain 安装，不用 main/hash 或本地候选替代依赖。0.3.0 已发布正式 Git tag，不发布 npm。
 
 本库是 Three.js 的 Calcit JS 包装与 Demo，不承诺 native/WASM 渲染。
 
