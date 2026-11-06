@@ -1,5 +1,11 @@
 # Quatrefoil
 
+## 0.3.3 候选
+
+使用 Calcit CLI / `@calcit/procs` 0.35.1、Touch Control 0.0.38、Pointed Prompt 0.0.26、Quaternion 0.2.22 及传递依赖 JS-FFI 0.2.13。升级时重新安装精确依赖图并生成 JS。
+
+`ShapePathCommand` 提供移动、直线、二次曲线和三次曲线的名义类型与数值参数。内置 Shapes 和 Mirror 用它构造路径，渲染入口继续接受已有的匿名路径元组。
+
 ## 0.3.2 依赖配对候选
 
 使用者影响：继续配对正式 Calcit / @calcit/procs **0.34.2**，改用正式 Touch Control
