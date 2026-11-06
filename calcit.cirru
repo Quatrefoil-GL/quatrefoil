@@ -196,8 +196,7 @@
                     :portal $ comp-portal $ fn (next d!)
                       d! cursor $ assoc state :tab next
                     :todolist $ comp-todolist $ quatrefoil.util.core/require-decoded
-                      try-decode-map-as (quatrefoil.util.core/require-field store :tasks)
-                        quote $ Map Number Dynamic
+                      try-decode-map-as (quatrefoil.util.core/require-field store :tasks) (Map Number Dynamic)
                     :demo $ comp-demo
                     :lines $ comp-lines
                     :shapes $ comp-shapes
@@ -439,7 +438,7 @@
               group ({}) & $ concat horizontal-lines forward-lines
                 ->
                   quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field state :buildings)
-                    quote $ List $ List Number
+                    List $ List Number
                   map $ fn (vec)
                     let[] (x y w d h) vec $ box $ {} (:width w) (:height h) (:depth d)
                       :position $ [] x (* h 0.5) (+ y)
@@ -600,9 +599,9 @@
           :schema $ quote $ Fn Dynamic (-> quatrefoil.schema/Component) (:features :js-ffi)
         'heart-path $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def heart-path
-            [] (:: :move-to 25 25) (:: :bezier-curve-to 25 25 20 50 0 50) (:: :bezier-curve-to -30 50 -30 15 -30 15) (:: :bezier-curve-to -30 -5 -10 -27 25 -45) (:: :bezier-curve-to 60 -22 80 -5 80 15) (:: :bezier-curve-to 80 15 80 50 50 50) (:: :bezier-curve-to 35 50 25 25 25 25)
+            [] (quatrefoil.schema/ShapePathCommand :move-to 25 25) (quatrefoil.schema/ShapePathCommand :bezier-curve-to 25 25 20 50 0 50) (quatrefoil.schema/ShapePathCommand :bezier-curve-to -30 50 -30 15 -30 15) (quatrefoil.schema/ShapePathCommand :bezier-curve-to -30 -5 -10 -27 25 -45) (quatrefoil.schema/ShapePathCommand :bezier-curve-to 60 -22 80 -5 80 15) (quatrefoil.schema/ShapePathCommand :bezier-curve-to 80 15 80 50 50 50) (quatrefoil.schema/ShapePathCommand :bezier-curve-to 35 50 25 25 25 25)
           :examples $ []
-          :schema $ quote $ List Enum
+          :schema $ quote $ List quatrefoil.schema/ShapePathCommand
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.comp.mirror
           :require
@@ -719,16 +718,15 @@
         'straight-fn $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn straight-fn (t factor)
             let
-                factor0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as factor
-                  quote $ Map Tag quaternion.core/Quaternion
+                factor0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as factor (Map Tag quaternion.core/Quaternion)
               let[] (w1 x1 y1 z1)
                 quatrefoil.util.core/require-decoded $ try-decode-map-as
                   &enum:params $ .unwrap $ get factor0 :from
-                  quote $ List Number
+                  List Number
                 let[] (w2 x2 y2 z2)
                   quatrefoil.util.core/require-decoded $ try-decode-map-as
                     &enum:params $ .unwrap $ get factor0 :to
-                    quote $ List Number
+                    List Number
                   []
                     &+ (&* x1 t)
                       &* x2 $ &- 1 t
@@ -851,7 +849,7 @@
                 :position $ [] 0 0 0
                 :material $ {} (:kind :mesh-standard) (:opacity 0.9) (:transparent true) (:roughness 0.5) (:metalness 0.9) (:color 0x9050c0)
               shape $ {}
-                :path $ [] (:: :move-to 0 0) (:: :line-to 7 2) (:: :line-to 16 10) (:: :line-to 20 20) (:: :line-to 8 17) (:: :line-to 4 12) (:: :line-to 0 0)
+                :path $ [] (quatrefoil.schema/ShapePathCommand :move-to 0 0) (quatrefoil.schema/ShapePathCommand :line-to 7 2) (quatrefoil.schema/ShapePathCommand :line-to 16 10) (quatrefoil.schema/ShapePathCommand :line-to 20 20) (quatrefoil.schema/ShapePathCommand :line-to 8 17) (quatrefoil.schema/ShapePathCommand :line-to 4 12) (quatrefoil.schema/ShapePathCommand :line-to 0 0)
                 :position $ [] 20 0 0
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true) (:color 0x249825)
               rect-area-light $ {} (:intensity 18) (:width 8) (:color 0xffca00) (:height 30)
@@ -986,8 +984,7 @@
               group
                 {} $ :position $ [] 0 20 0
                 ->
-                  &map:to-list $ quatrefoil.util.core/require-decoded $ try-decode-map-as tasks
-                    quote $ Map Number Dynamic
+                  &map:to-list $ quatrefoil.util.core/require-decoded $ try-decode-map-as tasks (Map Number Dynamic)
                   map-indexed $ fn (idx entry)
                     let[] (task-id task) entry $ [] task-id $ comp-task task idx
                   pairs-map
@@ -1136,7 +1133,7 @@
           :schema $ quote $ Ref (Map Tag Dynamic)
         'DracoLoaderHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait DracoLoaderHost
-            .setDecoderPath $ quote $ Fn DracoLoaderHost String (-> Unit)
+            .setDecoderPath $ Fn DracoLoaderHost String $ -> Unit
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
@@ -1147,8 +1144,8 @@
           :schema $ quote Trait
         'GltfLoaderHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait GltfLoaderHost
-            .setDRACOLoader $ quote $ Fn GltfLoaderHost Dynamic (-> Unit)
-            .load $ quote $ Fn GltfLoaderHost String
+            .setDRACOLoader $ Fn GltfLoaderHost Dynamic $ -> Unit
+            .load $ Fn GltfLoaderHost String
               Fn Dynamic $ -> Dynamic
               Fn Dynamic $ -> Dynamic
               Fn Dynamic $ -> Dynamic
@@ -1295,8 +1292,7 @@
         %{} 'CodeEntry (:doc |)
           :code $ quote $ defn updater (store op op-data)
             let
-                store0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as store
-                  quote $ Map Tag Dynamic
+                store0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as store (Map Tag Dynamic)
               match op
                 :states $ update-states store0 op-data
                 :add-task $ let
@@ -1304,7 +1300,7 @@
                       match (get store0 :tasks)
                         (:some option-value) option-value
                         (:none) ({})
-                      quote $ Map Number Dynamic
+                      Map Number Dynamic
                     text $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data 'String
                     id $ shared/now-ms
                   assoc store0 :tasks $ assoc tasks id $ {} (:id id) (:text text) (:done? false)
@@ -1313,7 +1309,7 @@
                       match (get store0 :tasks)
                         (:some option-value) option-value
                         (:none) ({})
-                      quote $ Map Number Dynamic
+                      Map Number Dynamic
                     task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data 'Number
                   assoc store0 :tasks $ dissoc tasks task-id
                 :toggle-task $ let
@@ -1321,7 +1317,7 @@
                       match (get store0 :tasks)
                         (:some option-value) option-value
                         (:none) ({})
-                      quote $ Map Number Dynamic
+                      Map Number Dynamic
                     task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data 'Number
                     done? $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                       match
@@ -1335,9 +1331,8 @@
                       match (get store0 :tasks)
                         (:some option-value) option-value
                         (:none) ({})
-                      quote $ Map Number Dynamic
-                    data $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data
-                      quote $ List Dynamic
+                      Map Number Dynamic
+                    data $ quatrefoil.util.core/require-decoded $ try-decode-map-as op-data (List Dynamic)
                     task-id $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                       .unwrap $ first data
                       , 'Number
@@ -1371,7 +1366,7 @@
                       match (get state field)
                         (:some option-value) option-value
                         (:none) ([] 0 0)
-                      quote $ List Number
+                      List Number
                     let
                         dx $ * speed elapse $
                           nth delta 0
@@ -1402,8 +1397,7 @@
                   :event $ {}
                     :control $ fn (states delta elapse d!) (; println |delta delta)
                       let
-                          delta0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as delta
-                            quote $ List Number
+                          delta0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as delta (List Number)
                           elapse0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as elapse 'Number
                           next-pos $ &v+ position $ to-viewer-axis
                             * speed $
@@ -1477,7 +1471,7 @@
                 text-size $ quatrefoil.util.core/field-or options :text-size 1
                 bound $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   quatrefoil.util.core/field-or options :bound $ [] 0 1
-                  quote $ List Number
+                  List Number
                 label $ quatrefoil.util.core/field-or options :label |
               group
                 {} $ :position $ quatrefoil.util.core/field-or options :position ([] 0 0 0)
@@ -1532,8 +1526,7 @@
         'comp-value-2d $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-value-2d (options on-change)
             let
-                v $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field options :value)
-                  quote $ List Number
+                v $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field options :value) (List Number)
                 speed $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/field-or options :speed 1) 'Number
                 color $ quatrefoil.util.core/field-or options :color 0xaaaaff
                 text-color $ quatrefoil.util.core/field-or options :text-color color
@@ -1618,12 +1611,12 @@
             let
                 parent-cursor $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   quatrefoil.util.core/field-or states :cursor $ []
-                  quote $ List Tag
+                  List Tag
                 branch $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   match (get states k)
                     (:some option-value) option-value
                     (:none) ({})
-                  quote $ Map Tag Dynamic
+                  Map Tag Dynamic
               assoc branch :cursor $ append parent-cursor k
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic)
@@ -1638,13 +1631,13 @@
           :schema $ quote Trait
         'ControllerModelFactoryHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ControllerModelFactoryHost
-            .createControllerModel $ quote $ Fn quatrefoil.core/ControllerModelFactoryHost quatrefoil.core/Object3DGroupHost (-> quatrefoil.core/Object3DGroupHost)
+            .createControllerModel $ Fn quatrefoil.core/ControllerModelFactoryHost quatrefoil.core/Object3DGroupHost $ -> quatrefoil.core/Object3DGroupHost
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
         'ControllerRayHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ControllerRayHost (:matrixWorld 'JsObject)
-            .addEventListener $ quote $ Fn quatrefoil.core/ControllerRayHost String
+            .addEventListener $ Fn quatrefoil.core/ControllerRayHost String
               Fn JsObject $ -> Unit
               -> Unit
             :rotation $ quote quatrefoil.core/VectorCoordinatesHost
@@ -1653,7 +1646,7 @@
           :schema $ quote Trait
         'ControllerRaycasterHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ControllerRaycasterHost
-            .setFromXRController $ quote $ Fn quatrefoil.core/ControllerRaycasterHost quatrefoil.core/ControllerRayHost (-> quatrefoil.core/ControllerRaycasterHost)
+            .setFromXRController $ Fn quatrefoil.core/ControllerRaycasterHost quatrefoil.core/ControllerRayHost $ -> quatrefoil.core/ControllerRaycasterHost
             .intersectObjects $ :: 'Fn $ {}
               :return $ quote quatrefoil.dsl.object3d-dom/JsArrayHost
               :args $ [] 'quatrefoil.core/ControllerRaycasterHost 'JsObject
@@ -1662,13 +1655,13 @@
           :schema $ quote Trait
         'CoreBufferGeometryHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait CoreBufferGeometryHost
-            .setFromPoints $ quote $ Fn CoreBufferGeometryHost Dynamic (-> Dynamic)
+            .setFromPoints $ Fn CoreBufferGeometryHost Dynamic $ -> Dynamic
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
         'CoreJsArrayHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait CoreJsArrayHost
-            .push $ quote $ Fn CoreJsArrayHost Dynamic (-> Number)
+            .push $ Fn CoreJsArrayHost Dynamic $ -> Number
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
@@ -1689,13 +1682,13 @@
           :schema $ quote Trait
         'HandModelFactoryHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait HandModelFactoryHost
-            .createHandModel $ quote $ Fn quatrefoil.core/HandModelFactoryHost quatrefoil.core/Object3DGroupHost (-> quatrefoil.core/Object3DGroupHost)
+            .createHandModel $ Fn quatrefoil.core/HandModelFactoryHost quatrefoil.core/Object3DGroupHost $ -> quatrefoil.core/Object3DGroupHost
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
         'HsluvHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait HsluvHost (:hsluv_h 'Number) (:hsluv_s 'Number) (:hsluv_l 'Number) (:rgb_r 'Number) (:rgb_g 'Number) (:rgb_b 'Number)
-            .hsluvToRgb $ quote $ Fn HsluvHost (-> Unit)
+            .hsluvToRgb $ Fn HsluvHost $ -> Unit
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
@@ -1706,8 +1699,8 @@
           :schema $ quote Trait
         'Object3DGroupHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait Object3DGroupHost (:name 'String) (:scale 'quatrefoil.core/VectorCoordinatesHost)
-            .add $ quote $ Fn quatrefoil.core/Object3DGroupHost quatrefoil.core/Object3DGroupHost (-> quatrefoil.core/Object3DGroupHost)
-            .clone $ quote $ Fn quatrefoil.core/Object3DGroupHost (-> quatrefoil.core/Object3DGroupHost)
+            .add $ Fn quatrefoil.core/Object3DGroupHost quatrefoil.core/Object3DGroupHost $ -> quatrefoil.core/Object3DGroupHost
+            .clone $ Fn quatrefoil.core/Object3DGroupHost $ -> quatrefoil.core/Object3DGroupHost
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :writable $ #{} :name
@@ -1730,15 +1723,15 @@
           :schema $ quote Trait
         'ThreeColorHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ThreeColorHost
-            .setRGB $ quote $ Fn ThreeColorHost Number Number Number (-> Dynamic)
-            .setHSL $ quote $ Fn ThreeColorHost Number Number Number (-> Dynamic)
-            .getHex $ quote $ Fn ThreeColorHost (-> Dynamic)
+            .setRGB $ Fn ThreeColorHost Number Number Number $ -> Dynamic
+            .setHSL $ Fn ThreeColorHost Number Number Number $ -> Dynamic
+            .getHex $ Fn ThreeColorHost $ -> Dynamic
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
         'ThreeVector3Host $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ThreeVector3Host (:x 'Number) (:y 'Number) (:z 'Number)
-            .applyQuaternion $ quote $ Fn ThreeVector3Host Dynamic (-> Dynamic)
+            .applyQuaternion $ Fn ThreeVector3Host Dynamic $ -> Dynamic
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
@@ -1750,18 +1743,17 @@
           :schema $ quote Trait
         'WebXRManagerHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait WebXRManagerHost (:enabled 'Bool)
-            .getController $ quote $ Fn quatrefoil.core/WebXRManagerHost Number (-> JsObject)
-            .getControllerGrip $ quote $ Fn quatrefoil.core/WebXRManagerHost Number (-> JsObject)
-            .getHand $ quote $ Fn quatrefoil.core/WebXRManagerHost Number (-> JsObject)
-            .getSession $ quote $ Fn quatrefoil.core/WebXRManagerHost
-              -> $ JsNullish quatrefoil.core/XRSessionHost
+            .getController $ Fn quatrefoil.core/WebXRManagerHost Number $ -> JsObject
+            .getControllerGrip $ Fn quatrefoil.core/WebXRManagerHost Number $ -> JsObject
+            .getHand $ Fn quatrefoil.core/WebXRManagerHost Number $ -> JsObject
+            .getSession $ Fn quatrefoil.core/WebXRManagerHost $ -> (JsNullish quatrefoil.core/XRSessionHost)
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :writable $ #{} :enabled
           :schema $ quote Trait
         'XRInputSourceHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait XRInputSourceHost (:handedness 'String)
-            :gamepad $ quote $ JsNullish quatrefoil.core/GamepadHost
+            :gamepad $ JsNullish quatrefoil.core/GamepadHost
           :examples $ []
           :ffi $ {} (:kind :external-object) (:platform :browser)
           :schema $ quote Trait
@@ -1822,15 +1814,12 @@
             start-control-loop! 10 $ fn (elapsed states delta)
               let
                   l-move $ map
-                    quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field states :left-move)
-                      quote $ List Number
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field states :left-move) (List Number)
                     , refine-strength
                   r-move $ map
-                    quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field states :right-move)
-                      quote $ List Number
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field states :right-move) (List Number)
                     , refine-strength
-                  r-delta $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field delta :right-move)
-                    quote $ List Number
+                  r-delta $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field delta :right-move) (List Number)
                   l0 $
                     nth l-move 0
                     , .unwrap-or 0
@@ -2046,7 +2035,7 @@
                           .unwrap $ last $ quatrefoil.util.core/require-decoded
                             try-decode-map-as
                               .unwrap $ first d
-                              quote $ List Dynamic
+                              List Dynamic
                           * 0.001 $ - t0 prev-t
               .!updateProjectionMatrix @*global-camera
               .!render @*global-renderer @*global-scene @*global-camera
@@ -2364,13 +2353,12 @@
         %{} 'CodeEntry (:doc |)
           :code $ quote $ defn update-states (store pair)
             let
-                data $ quatrefoil.util.core/require-decoded $ try-decode-map-as pair
-                  quote $ List Dynamic
+                data $ quatrefoil.util.core/require-decoded $ try-decode-map-as pair (List Dynamic)
                 cursor $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   match (nth data 0)
                     (:some option-value) option-value
                     (:none) ([])
-                  quote $ List Tag
+                  List Tag
                 new-state $ .unwrap $ nth data 1
               assoc store :states $ assoc-in
                 quatrefoil.util.core/field-or store :states $ {}
@@ -2386,10 +2374,8 @@
         'diff-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-children (prev-children children coord collect!)
             let
-                prev-children0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as prev-children
-                  quote $ Map Number Dynamic
-                children0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as children
-                  quote $ Map Number Dynamic
+                prev-children0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as prev-children (Map Number Dynamic)
+                children0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as children (Map Number Dynamic)
                 prev-keys $ keys prev-children0
                 curr-keys $ keys children0
                 removed-keys $ difference prev-keys curr-keys
@@ -2423,10 +2409,10 @@
             let
                 prev-events0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   either prev-events $ {}
-                  quote $ Map Tag Dynamic
+                  Map Tag Dynamic
                 events0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   either events $ {}
-                  quote $ Map Tag Dynamic
+                  Map Tag Dynamic
                 prev-event-names $ keys prev-events0
                 event-names $ keys events0
                 added-events $ difference event-names prev-event-names
@@ -2450,10 +2436,10 @@
               let
                   prev-material0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                     either prev-material $ {}
-                    quote $ Map Tag Dynamic
+                    Map Tag Dynamic
                   material0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                     either material $ {}
-                    quote $ Map Tag Dynamic
+                    Map Tag Dynamic
                   prev-keys $ keys prev-material0
                   curr-keys $ keys material0
                   added-material $ -> (difference curr-keys prev-keys) (&set:to-list)
@@ -2490,10 +2476,10 @@
               let
                 prev-params0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   either prev-params $ {}
-                  quote $ Map Tag Dynamic
+                  Map Tag Dynamic
                 params0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                   either params $ {}
-                  quote $ Map Tag Dynamic
+                  Map Tag Dynamic
                 prev-keys $ keys prev-params0
                 curr-keys $ keys params0
                 added-params $ difference curr-keys prev-keys
@@ -2593,22 +2579,22 @@
           :schema $ quote Trait
         'AxisSetterHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait AxisSetterHost
-            .set $ quote $ Fn AxisSetterHost Number Number Number (-> AxisSetterHost)
+            .set $ Fn AxisSetterHost Number Number Number $ -> AxisSetterHost
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
         'BufferGeometryHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait BufferGeometryHost
-            .setFromPoints $ quote $ Fn BufferGeometryHost Dynamic (-> Dynamic)
-            .setAttribute $ quote $ Fn BufferGeometryHost String Dynamic (-> Unit)
-            .setIndex $ quote $ Fn BufferGeometryHost Dynamic (-> Unit)
-            .computeVertexNormals $ quote $ Fn BufferGeometryHost (-> Unit)
+            .setFromPoints $ Fn BufferGeometryHost Dynamic $ -> Dynamic
+            .setAttribute $ Fn BufferGeometryHost String Dynamic $ -> Unit
+            .setIndex $ Fn BufferGeometryHost Dynamic $ -> Unit
+            .computeVertexNormals $ Fn BufferGeometryHost $ -> Unit
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
         'CurveHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait CurveHost
-            .getPoints $ quote $ Fn CurveHost Number (-> Dynamic)
+            .getPoints $ Fn CurveHost Number $ -> Dynamic
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
@@ -2619,7 +2605,7 @@
           :schema $ quote Trait
         'JsArrayHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait JsArrayHost
-            .push $ quote $ Fn JsArrayHost Dynamic (-> Number)
+            .push $ Fn JsArrayHost Dynamic $ -> Number
             .filter $ :: 'Fn $ {} (:return 'JsArrayHost)
               :args $ [] 'JsArrayHost $ :: (quote Fn)
                 {}
@@ -2642,13 +2628,13 @@
           :schema $ quote Trait
         'MeshLineGeometryHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait MeshLineGeometryHost
-            .setPoints $ quote $ Fn MeshLineGeometryHost Dynamic (-> Unit)
+            .setPoints $ Fn MeshLineGeometryHost Dynamic $ -> Unit
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
         'MeshRaycastHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait MeshRaycastHost
-            :raycast $ quote $ Fn JsObject quatrefoil.dsl.object3d-dom/JsArrayHost (-> Unit)
+            :raycast $ Fn JsObject quatrefoil.dsl.object3d-dom/JsArrayHost $ -> Unit
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :writable $ #{} :raycast
@@ -2656,8 +2642,8 @@
         'ObjectMetadataHost $ %{} 'CodeEntry
           :doc "|Optional application-owned fields on arbitrary Three.js objects. Values may be absent on imported or ordinary meshes; use the lexical read adapter rather than js-cast presence checks. Coordinate contents must still be decoded before application use."
           :code $ quote $ deftrait ObjectMetadataHost
-            :coord $ quote $ JsNullish (List Number)
-            :event $ quote $ JsNullish Dynamic
+            :coord $ JsNullish $ List Number
+            :event $ JsNullish Dynamic
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :writable $ #{} :coord :event
@@ -2666,7 +2652,7 @@
           :code $ quote $ deftrait RaycasterHost
             .setFromCamera $ :: 'Fn $ {} (:return 'Unit)
               :args $ [] 'RaycasterHost (quote JsObject) 'Dynamic
-            .intersectObjects $ quote $ Fn RaycasterHost Dynamic (-> JsArrayHost)
+            .intersectObjects $ Fn RaycasterHost Dynamic $ -> JsArrayHost
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
@@ -2683,8 +2669,8 @@
           :schema $ quote Trait
         'ThreeObjectHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ThreeObjectHost
-            .lookAt $ quote $ Fn ThreeObjectHost Number Number Number (-> Unit)
-            .add $ quote $ Fn ThreeObjectHost Dynamic (-> Unit)
+            .lookAt $ Fn ThreeObjectHost Number Number Number $ -> Unit
+            .add $ Fn ThreeObjectHost Dynamic $ -> Unit
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
@@ -2699,8 +2685,7 @@
               let
                   object3d $ create-shape (assoc tree :children nil) coord
                   children $ ->
-                    quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field tree :children)
-                      quote $ Map Number Dynamic
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field tree :children) (Map Number Dynamic)
                     &map:to-list
                     map $ fn (entry)
                       let[] (child-key child) entry $ [] child-key $ build-tree (conj coord child-key) child
@@ -2770,12 +2755,12 @@
                 vertices $ new js/Float32Array $ to-js-data
                   quatrefoil.util.core/require-decoded $ try-decode-map-as
                     quatrefoil.util.core/field-or params :vertices $ []
-                    quote $ List Number
+                    List Number
                   {} $ :js-array true
                 indices $ to-js-data
                   quatrefoil.util.core/require-decoded $ try-decode-map-as
                     quatrefoil.util.core/field-or params :indices $ []
-                    quote $ List Number
+                    List Number
                   {} $ :js-array true
                 geometry $ new THREE/BufferGeometry
                 object3d $ do
@@ -2835,7 +2820,7 @@
                   ps $ js-array
                   &doseq
                     p $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field params :points)
-                      quote $ List $ List Number
+                      List $ List Number
                     push-array! ps $ vector3-from-list p
                   , ps
                 geometry $ geometry-set-from-points (new THREE/BufferGeometry) points
@@ -2855,7 +2840,7 @@
                     .some? $ quatrefoil.util.core/field-option params :segments
                     &doseq
                       segment $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field params :segments)
-                        quote $ List $ List (List Number)
+                        List $ List $ List Number
                       let
                           p0 $ .unwrap $ nth segment 0
                           p1 $ .unwrap $ nth segment 1
@@ -2863,7 +2848,7 @@
                         push-array! ps $ vector3-from-list p1
                     &doseq
                       p $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field params :points)
-                        quote $ List $ List Number
+                        List $ List Number
                       push-array! ps $ vector3-from-list p
                   , ps
                 geometry $ geometry-set-from-points (new THREE/BufferGeometry) points
@@ -2902,7 +2887,7 @@
                   ps $ js-array
                   &doseq
                     p $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field params :points)
-                      quote $ List $ List Number
+                      List $ List Number
                     push-array! ps $ vector3-from-list p
                   , ps
                 geometry $ let
@@ -2915,7 +2900,7 @@
               set-scale! object3d scale
               set!
                 .-raycast $ js-cast object3d 'quatrefoil.dsl.object3d-dom/MeshRaycastHost
-                unsafe-coerce raycast $ quote $ Fn JsObject quatrefoil.dsl.object3d-dom/JsArrayHost (-> Unit)
+                unsafe-coerce raycast $ Fn JsObject quatrefoil.dsl.object3d-dom/JsArrayHost $ -> Unit
               , object3d
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
@@ -2930,8 +2915,7 @@
                 geometry $ new ParametricGeometry
                   fn (u v target)
                     let[] (x y z)
-                      quatrefoil.util.core/require-decoded $ try-decode-map-as (func u v data)
-                        quote $ List Number
+                      quatrefoil.util.core/require-decoded $ try-decode-map-as (func u v data) (List Number)
                       .set (js-cast target 'quatrefoil.dsl.object3d-dom/AxisSetterHost) x y z
                   , slices stacks
                 object3d $ new THREE/Mesh geometry $ create-material material
@@ -2991,11 +2975,11 @@
             let
                 vertices $ to-js-data
                   concat & $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field params :vertices)
-                    quote $ List $ List Number
+                    List $ List Number
                   {} $ :js-array true
                 indices $ to-js-data
                   concat & $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field params :indices)
-                    quote $ List $ List Number
+                    List $ List Number
                   {} $ :js-array true
                 radius $ quatrefoil.util.core/field-or params :radius 1
                 detail $ quatrefoil.util.core/field-or params :detail 0
@@ -3023,8 +3007,7 @@
                 look-at $ quatrefoil.util.core/require-field params :look-at
                 object3d $ new THREE/RectAreaLight color intensity width height
               let
-                  coordinates $ quatrefoil.util.core/require-decoded $ try-decode-map-as look-at
-                    quote $ List Number
+                  coordinates $ quatrefoil.util.core/require-decoded $ try-decode-map-as look-at (List Number)
                 .lookAt (three-object object3d)
                   .unwrap $ nth coordinates 0
                   .unwrap $ nth coordinates 1
@@ -3045,7 +3028,7 @@
                 vertices $ new js/Float32Array $ to-js-data
                   quatrefoil.util.core/require-decoded $ try-decode-map-as
                     quatrefoil.util.core/field-or params :vertices $ []
-                    quote $ List Number
+                    List Number
                   {} $ :js-array true
                 geometry $ let
                     g $ new THREE/BufferGeometry
@@ -3171,7 +3154,7 @@
           :code $ quote $ defn create-spline-element (params position rotation scale material)
             let
                 points0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field params :points)
-                  quote $ List $ List Number
+                  List $ List Number
                 curve $ new THREE/CatmullRomCurve3 $ to-js-data
                   -> points0 $ map $ fn (p) (vector3-from-list p)
                   {} $ :js-array true
@@ -3314,8 +3297,7 @@
                 hit $ js-cast target 'quatrefoil.dsl.object3d-dom/IntersectionHost
                 coord $ .-coord $ unsafe-coerce (.-object hit) 'quatrefoil.dsl.object3d-dom/ObjectMetadataHost
               if (js-present? coord)
-                Option :some $ quatrefoil.util.core/require-decoded $ try-decode-map-as coord
-                  quote $ List Number
+                Option :some $ quatrefoil.util.core/require-decoded $ try-decode-map-as coord (List Number)
                 Option :none
           :examples $ []
           :schema $ quote $ Fn JsObject
@@ -3476,8 +3458,7 @@
                         .to-string $ quatrefoil.util.core/require-decoded $ try-decode-map-as id 'Bool
                       (nil? id) (.to-string nil)
                       true $ raise |geometry-attribute-id-must-be-a-scalar
-                  buffer $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field info :buffer)
-                    quote $ List Number
+                  buffer $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field info :buffer) (List Number)
                   size $ quatrefoil.util.core/require-field info :size
                   type $ quatrefoil.util.core/field-or info :type :unknown
                   attr $ match type
@@ -3539,7 +3520,7 @@
           :code $ quote $ defn set-rotation-value! (object3d rotation)
             if (non-nil? rotation)
               let[] (x y z)
-                quatrefoil.util.core/require-decoded $ try-decode-map-as rotation $ quote (List Number)
+                quatrefoil.util.core/require-decoded $ try-decode-map-as rotation $ List Number
                 .set
                   js-cast
                     .-rotation $ js-cast object3d 'quatrefoil.dsl.object3d-dom/TransformHost
@@ -3611,7 +3592,7 @@
       :defs $ {}
         'ColorHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ColorHost
-            .set $ quote $ Fn quatrefoil.dsl.patch/ColorHost JsObject (-> quatrefoil.dsl.patch/ColorHost)
+            .set $ Fn quatrefoil.dsl.patch/ColorHost JsObject $ -> quatrefoil.dsl.patch/ColorHost
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
@@ -3659,7 +3640,7 @@
           :code $ quote $ defn add-children (target coord op-data)
             &doseq (entry op-data)
               let[] (raw-key tree)
-                quatrefoil.util.core/require-decoded $ try-decode-map-as entry $ quote (List Dynamic)
+                quatrefoil.util.core/require-decoded $ try-decode-map-as entry $ List Dynamic
                 let
                     k $ quatrefoil.util.core/require-decoded $ try-decode-map-as raw-key 'Number
                   .!addBy target k $ build-tree (conj coord k) tree
@@ -3681,14 +3662,12 @@
             ; js/console.log |changes (count changes) changes
             &doseq (change changes)
               let
-                  data $ quatrefoil.util.core/require-decoded $ try-decode-map-as change
-                    quote $ List Dynamic
+                  data $ quatrefoil.util.core/require-decoded $ try-decode-map-as change (List Dynamic)
                   raw-coord $ &list:nth data 0
                   op $ quatrefoil.util.core/require-decoded $ try-decode-map-as (&list:nth data 1) 'Tag
                   op-data $ if (= op :remove-element) nil $ &list:nth data 2
                 let
-                    coord $ quatrefoil.util.core/require-decoded $ try-decode-map-as raw-coord
-                      quote $ List Number
+                    coord $ quatrefoil.util.core/require-decoded $ try-decode-map-as raw-coord (List Number)
                     target $ reach-object3d @*global-scene coord
                   ; js/console.log |Change: op coord op-data
                   match op
@@ -3769,7 +3748,7 @@
               ; js/console.log target
               &doseq
                 entry $ &map:to-list $ quatrefoil.util.core/require-decoded
-                  try-decode-map-as op-data $ quote $ Map Tag Dynamic
+                  try-decode-map-as op-data $ Map Tag Dynamic
                 let[] (param new-value) entry $ match param
                   :color $
                     js-cast
@@ -3786,8 +3765,7 @@
                   :uniforms $ set!
                     .-uniforms $ js-cast material 'quatrefoil.dsl.patch/ShaderMaterialHost
                     unsafe-coerce
-                      to-js-data $ quatrefoil.util.core/require-decoded $ try-decode-map-as new-value
-                        quote $ Map Dynamic Dynamic
+                      to-js-data $ quatrefoil.util.core/require-decoded $ try-decode-map-as new-value (Map Dynamic Dynamic)
                       , 'JsObject
                   :fragmentShader $ set!
                     .-fragmentShader $ js-cast material 'quatrefoil.dsl.patch/ShaderMaterialHost
@@ -3883,10 +3861,13 @@
           :code $ quote $ defstruct Shape (:name Dynamic) (:params Dynamic) (:position Dynamic) (:scale Dynamic) (:rotation Dynamic) (:material Dynamic) (:event Dynamic) (:attributes Dynamic) (:children Dynamic)
           :examples $ []
           :schema $ quote StructDef
+        'ShapePathCommand $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defenum ShapePathCommand (:move-to Number Number) (:line-to Number Number) (:quadratic-curve-to Number Number Number Number) (:bezier-curve-to Number Number Number Number Number Number)
+          :examples $ []
+          :schema $ quote EnumDef
         'Vec3Value $ %{} 'CodeEntry
           :doc "|A position/scale representation: a quaternion V3 or a Number List. read-vec3 checks exactly three components; this representation union alone does not prove cardinality."
-          :code $ quote $ defunion Vec3Value quaternion.vector/V3
-            quote $ List Number
+          :code $ quote $ defunion Vec3Value quaternion.vector/V3 (List Number)
           :examples $ []
           :schema $ quote UnionDef
         'comp? $ %{} 'CodeEntry (:doc |)
@@ -3917,7 +3898,7 @@
           :schema $ quote $ Fn Dynamic Dynamic (-> Bool)
         'JsIterableHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait JsIterableHost
-            .forEach $ quote $ Fn JsIterableHost Dynamic (-> Unit)
+            .forEach $ Fn JsIterableHost Dynamic $ -> Unit
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
@@ -3991,7 +3972,7 @@
                 recur $ quatrefoil.util.core/require-field tree :tree
               true $ update tree :children $ fn (children)
                 ->
-                  require-decoded $ try-decode-map-as children $ quote (Map Dynamic Dynamic)
+                  require-decoded $ try-decode-map-as children $ Map Dynamic Dynamic
                   &map:to-list
                   map $ fn (entry)
                     update entry 1 $ fn (child) (purify-tree child)
