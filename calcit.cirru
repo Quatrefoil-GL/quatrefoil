@@ -13,7 +13,7 @@
         'ambient-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn ambient-light (props & children) (create-element :ambient-light props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'arrange-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn arrange-children (children0)
             let
@@ -36,11 +36,11 @@
         'box $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn box (props & children) (create-element :box props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'buffer-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn buffer-object (props & children) (create-element :buffer-object props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'create-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-element (el-name props children)
             Shape :name el-name :params
@@ -59,51 +59,51 @@
         'directional-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn directional-light (props & children) (create-element :directional-light props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'flat-values $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defmacro flat-values (& points)
             &let
               chunk $ &list:concat & points
               quasiquote $ [] ~@chunk
           :examples $ []
-          :schema $ quote $ Macro & Syntax
+          :schema $ quote $ Macro (& Syntax)
             -> $ Expr Dynamic
         'group $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn group (props & children) (create-element :group props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'line $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn line (props & children) (create-element :line props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'line-segments $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn line-segments (props & children) (create-element :line-segments props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'mesh-line $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn mesh-line (props & children) (create-element :mesh-line props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'parametric $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn parametric (props & children) (create-element :parametric props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'plane-reflector $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn plane-reflector (props & children) (create-element :plane-reflector props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'point-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn point-light (props & children) (create-element :point-light props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'polyhedron $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn polyhedron (props & children) (create-element :polyhedron props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'rect-area-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn rect-area-light (props & children) (create-element :rect-area-light props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'resolve-children $ %{} 'CodeEntry
           :doc "|Children with Options resolved: a some child is unwrapped, a none child is left out, other children stay."
           :code $ quote $ defn resolve-children (children)
@@ -124,15 +124,15 @@
         'scene $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn scene (props & children) (create-element :scene props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'shader-mesh $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn shader-mesh (props & children) (create-element :shader-mesh props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'shape $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn shape (props & children) (create-element :shape props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'some-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn some-object (props)
             create-element :some-object props $ []
@@ -141,27 +141,27 @@
         'sphere $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn sphere (props & children) (create-element :sphere props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'spline $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn spline (props & children) (create-element :spline props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'spot-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn spot-light (props & children) (create-element :spot-light props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'text $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn text (props & children) (create-element :text props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'torus $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn torus (props & children) (create-element :torus props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
         'tube $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn tube (props & children) (create-element :tube props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic & Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.alias
           :require $ quatrefoil.schema :refer $ Shape Component comp? shape?
@@ -1789,7 +1789,7 @@
               quasiquote $ defn ~comp-name (~ params)
                 quatrefoil.schema/Component :name (quote ~comp-name) :tree $ &let () ~@body
           :examples $ []
-          :schema $ quote $ Macro SyntaxSymbol SyntaxList & Syntax
+          :schema $ quote $ Macro SyntaxSymbol SyntaxList (& Syntax)
             -> $ Definition Fn
         'ffi-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn ffi-object (value) (unsafe-coerce value JsObject)
@@ -2606,11 +2606,9 @@
         'JsArrayHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait JsArrayHost
             .push $ Fn JsArrayHost Dynamic $ -> Number
-            .filter $ :: 'Fn $ {} (:return 'JsArrayHost)
-              :args $ [] 'JsArrayHost $ :: (quote Fn)
-                {}
-                  :return $ quote Bool
-                  :args $ [] (quote JsObject) (quote Number) (quote quatrefoil.dsl.object3d-dom/JsArrayHost)
+            .filter $ Fn JsArrayHost
+              Fn JsObject Number JsArrayHost $ -> Bool
+              -> JsArrayHost
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
