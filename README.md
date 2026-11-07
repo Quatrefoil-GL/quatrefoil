@@ -1,6 +1,10 @@
 # Quatrefoil
 
-## 0.3.3 候选
+## 0.3.4 候选：Calcit 0.37.0
+
+配对正式 Calcit CLI / `@calcit/procs` **0.37.0**、Touch Control 0.0.39、Pointed Prompt 0.0.27、Quaternion 0.2.23，传递 JS-FFI 保持 0.2.13。`edit format` 把 rest 类型改为 `(& T)` 写法；`JsArrayHost.filter` 的旧记录式 Fn 签名改为同义的 `Fn` 写法，回调仍为 `JsObject Number JsArrayHost -> Bool`。渲染与公开合同不变。仍在 0.35.1 的消费者保留 0.3.3。
+
+## 历史 0.3.3 候选
 
 使用 Calcit CLI / `@calcit/procs` 0.35.1、Touch Control 0.0.38、Pointed Prompt 0.0.26、Quaternion 0.2.22 及传递依赖 JS-FFI 0.2.13。升级时重新安装精确依赖图并生成 JS。
 
