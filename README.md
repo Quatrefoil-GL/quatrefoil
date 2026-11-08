@@ -1,5 +1,12 @@
 # Quatrefoil
 
+## 0.3.5 候选：Calcit 0.38.0
+
+升级后请配套使用正式 Calcit 与 `@calcit/procs` 0.38.0，重新安装依赖并生成 JS。
+`Shape` 的位置与缩放仍接受四元数库的 `V3` 或数字列表，旋转接受数字列表。
+省略或传入 nil 时沿用 Three.js 默认变换。错误的变换值会在构造形状时提前报错。
+形状名使用 Tag，组件名和子节点合同沿用原接口。
+
 ## 0.3.4 候选：Calcit 0.37.0
 
 配对正式 Calcit CLI / `@calcit/procs` **0.37.0**、Touch Control 0.0.39、Pointed Prompt 0.0.27、Quaternion 0.2.23，传递 JS-FFI 保持 0.2.13。`edit format` 把 rest 类型改为 `(& T)` 写法；`JsArrayHost.filter` 的旧记录式 Fn 签名改为同义的 `Fn` 写法，回调仍为 `JsObject Number JsArrayHost -> Bool`。渲染与公开合同不变。仍在 0.35.1 的消费者保留 0.3.3。
