@@ -7,6 +7,17 @@
 省略或传入 nil 时沿用 Three.js 默认变换。错误的变换值会在构造形状时提前报错。
 形状名使用 Tag，组件名和子节点合同沿用原接口。
 
+需要给应用事件做类型检查时，可以把渲染调用改为
+`render-canvas-with-dispatch! markup read-state read-action on-event!`。
+`markup` 接受 `Component | Shape`。提供 `read-state(raw)` 和
+`read-action(tag, raw)` 解码器后，`on-event!` 收到
+`DispatchEvent<S, A>`，可分别匹配 `(:states cursor value)` 和 `(:action action)`。
+现有 `render-canvas!` 调用可继续使用。
+
+新入口把 `d! cursor data` 和 `d! :states ([] cursor data)` 统一为同一种状态事件。
+游标必须由 Tag 组成，状态 pair 必须有第二项。应用解码器决定是否接收该项的 nil，
+以及接受哪些操作和数据。操作名、游标或数据解码失败时，事件不会送到 `on-event!`。
+
 ## 0.3.4 候选：Calcit 0.37.0
 
 配对正式 Calcit CLI / `@calcit/procs` **0.37.0**、Touch Control 0.0.39、Pointed Prompt 0.0.27、Quaternion 0.2.23，传递 JS-FFI 保持 0.2.13。`edit format` 把 rest 类型改为 `(& T)` 写法；`JsArrayHost.filter` 的旧记录式 Fn 签名改为同义的 `Fn` 写法，回调仍为 `JsObject Number JsArrayHost -> Bool`。渲染与公开合同不变。仍在 0.35.1 的消费者保留 0.3.3。
