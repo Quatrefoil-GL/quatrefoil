@@ -45,11 +45,15 @@
           :code $ quote $ defn create-element (el-name props children)
             Shape :name el-name :params
               -> props (dissoc :material) (dissoc :event) (dissoc :position) (dissoc :scale) (dissoc :rotation) (dissoc :attributes) (dissoc :on) (dissoc :event)
-              , :position (quatrefoil.util.core/field-option props :position) :scale (quatrefoil.util.core/field-option props :scale) :material (quatrefoil.util.core/field-or props :material default-material) :rotation (quatrefoil.util.core/field-option props :rotation) :attributes
-                quatrefoil.util.core/field-or props :attributes $ []
-                , :event
-                  quatrefoil.util.core/field-or props :on $ quatrefoil.util.core/field-or props :event $ {}
-                  , :children $ arrange-children children
+              , :position (read-vector-prop props :position) :scale (read-vector-prop props :scale) :material (quatrefoil.util.core/field-or props :material default-material) :rotation
+                .map (quatrefoil.util.core/field-option props :rotation)
+                  fn (raw)
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as raw $ List Number
+                , :attributes
+                  quatrefoil.util.core/field-or props :attributes $ []
+                  , :event
+                    quatrefoil.util.core/field-or props :on $ quatrefoil.util.core/field-or props :event $ {}
+                    , :children $ arrange-children children
           :examples $ []
           :schema $ quote $ Fn Tag Dynamic (List Dynamic) (-> quatrefoil.schema/Shape)
         'default-material $ %{} 'CodeEntry (:doc "|Material of an element that gives no :material.")
@@ -100,6 +104,16 @@
           :code $ quote $ defn polyhedron (props & children) (create-element :polyhedron props children)
           :examples $ []
           :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+        'read-vector-prop $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn read-vector-prop (props key)
+            match (quatrefoil.util.core/field-option props key)
+              (:some raw)
+                Option :some $ quatrefoil.util.core/require-decoded $ try-decode-map-as raw quatrefoil.schema/Vec3Value
+              (:none) (Option :none)
+          :examples $ []
+          :schema $ quote $ Fn M Tag
+            -> $ Option quatrefoil.schema/Vec3Value
+            :generics M
         'rect-area-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn rect-area-light (props & children) (create-element :rect-area-light props children)
           :examples $ []
@@ -3856,7 +3870,14 @@
           :examples $ []
           :schema $ quote StructDef
         'Shape $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defstruct Shape (:name Dynamic) (:params Dynamic) (:position Dynamic) (:scale Dynamic) (:rotation Dynamic) (:material Dynamic) (:event Dynamic) (:attributes Dynamic) (:children Dynamic)
+          :code $ quote $ defstruct Shape (:name Tag) (:params Dynamic)
+            :position $ Option quatrefoil.schema/Vec3Value
+            :scale $ Option quatrefoil.schema/Vec3Value
+            :rotation $ Option $ List Number
+            :material Dynamic
+            :event Dynamic
+            :attributes Dynamic
+            :children Dynamic
           :examples $ []
           :schema $ quote StructDef
         'ShapePathCommand $ %{} 'CodeEntry (:doc |)
