@@ -1169,17 +1169,17 @@
           :schema $ quote Trait
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch! (op op-data)
-            if (list? op)
-              recur :states $ [] op op-data
-              let
-                  store $ updater @*store
-                    quatrefoil.util.core/require-decoded $ try-decode-map-as op 'Tag
-                    , op-data
-                ; js/console.log |Dispatch: op op-data store
-                reset! *store store
-                , &unit
+            match op
+              (List cursor)
+                recur :states $ [] cursor op-data
+              (Tag tag)
+                let
+                    store $ updater @*store tag op-data
+                  ; js/console.log |Dispatch: op op-data store
+                  reset! *store store
+                  , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Unit)
+          :schema $ quote $ Fn quatrefoil.cursor/DispatchTarget Dynamic (-> Unit)
         'ffi-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn ffi-object (value) (unsafe-coerce value JsObject)
           :examples $ []
@@ -2229,13 +2229,11 @@
           :doc "|Render a Component or Shape with separate state and action decoders for Quatrefoil events."
           :code $ quote $ defn render-canvas-with-dispatch! (markup read-state read-action on-event!)
             render-canvas! markup $ fn (op payload)
-              hint-fn $ Fn Dynamic Dynamic $ -> Unit
-              on-event! $ if (list? op)
-                quatrefoil.cursor/DispatchEvent :states
-                  quatrefoil.util.core/require-decoded $ try-decode-map-as op $ List Tag
-                  read-state payload
-                let
-                    tag $ quatrefoil.util.core/require-decoded $ try-decode-map-as op 'Tag
+              hint-fn $ Fn quatrefoil.cursor/DispatchTarget Dynamic $ -> Unit
+              on-event! $ match (quatrefoil.cursor/read-dispatch-target op)
+                (List cursor)
+                  quatrefoil.cursor/DispatchEvent :states cursor $ read-state payload
+                (Tag tag)
                   if (= tag :states)
                     let[] (cursor value) (quatrefoil.cursor/read-state-pair payload)
                       quatrefoil.cursor/DispatchEvent :states cursor $ read-state value
@@ -2394,6 +2392,16 @@
             :action A
           :examples $ []
           :schema $ quote EnumDef
+        'DispatchTarget $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defunion DispatchTarget Tag (List Tag)
+          :examples $ []
+        'read-dispatch-target $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn read-dispatch-target (raw)
+            if (list? raw)
+              quatrefoil.util.core/require-decoded $ try-decode-map-as raw $ List Tag
+              quatrefoil.util.core/require-decoded $ try-decode-map-as raw 'Tag
+          :examples $ []
+          :schema $ quote $ Fn T (-> quatrefoil.cursor/DispatchTarget) (:generics T)
         'read-state-pair $ %{} 'CodeEntry
           :doc "|Decode the legacy cursor and value pair, retaining a present nil value."
           :code $ quote $ defn read-state-pair (pair)
