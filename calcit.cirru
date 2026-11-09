@@ -1619,7 +1619,7 @@
         '*tmp-changes $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defref *tmp-changes ([])
           :examples $ []
-          :schema $ quote $ Ref (List Dynamic)
+          :schema $ quote $ Ref (List quatrefoil.schema/ScenePatch)
         '>> $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn >> (states k)
             let
@@ -2213,7 +2213,7 @@
             if (non-nil? @*global-tree)
               let
                   collect! $ fn (x)
-                    hint-fn $ Fn Dynamic $ -> Unit
+                    hint-fn $ Fn quatrefoil.schema/ScenePatch $ -> Unit
                     reset! *tmp-changes $ conj @*tmp-changes x
                     , &unit
                 reset! *tmp-changes $ []
@@ -2448,10 +2448,10 @@
                 common-keys $ intersection prev-keys curr-keys
               if
                 not $ empty? removed-keys
-                collect! $ [] coord :remove-children removed-keys
+                collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :remove-children removed-keys
               if
                 not $ empty? added-children
-                collect! $ [] coord :add-children added-children
+                collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :add-children added-children
               ; js/console.log "|Common keys to diff:" common-keys prev-children children
               &doseq (k common-keys) (; js/console.log "|Diffing children:" coord common-keys)
                 let
@@ -2463,7 +2463,7 @@
                     diff-tree prev-child child (conj coord k0) collect!
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (List Number)
-            Fn Dynamic $ -> Unit
+            Fn quatrefoil.schema/ScenePatch $ -> Unit
             -> Unit
         'diff-events $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-events (prev-events events coord collect!)
@@ -2480,20 +2480,20 @@
                 removed-events $ difference prev-event-names event-names
               if
                 not $ empty? added-events
-                collect! $ [] coord :add-events added-events
+                collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :add-events added-events
               if
                 not $ empty? removed-events
-                collect! $ [] coord :remove-events removed-events
+                collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :remove-events removed-events
               , &unit
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (List Number)
-            Fn Dynamic $ -> Unit
+            Fn quatrefoil.schema/ScenePatch $ -> Unit
             -> Unit
         'diff-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-material (prev-material material coord collect!)
             if
               not= (quatrefoil.util.core/field-option prev-material :kind) (quatrefoil.util.core/field-option material :kind)
-              collect! $ [] coord :replace-material material
+              collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :replace-material material
               let
                   prev-material0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
                     either prev-material $ {}
@@ -2519,17 +2519,17 @@
                     pairs-map
                 if
                   not $ empty? added-material
-                  collect! $ [] coord :add-material added-material
+                  collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :add-material added-material
                 if
                   not $ empty? removed-keys
-                  collect! $ [] coord :remove-material removed-keys
+                  collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :remove-material removed-keys
                 if
                   not $ empty? updated-material
-                  collect! $ [] coord :update-material updated-material
+                  collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :update-material updated-material
                 , &unit
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (List Number)
-            Fn Dynamic $ -> Unit
+            Fn quatrefoil.schema/ScenePatch $ -> Unit
             -> Unit
         'diff-params $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-params (prev-params params coord collect!)
@@ -2572,47 +2572,56 @@
                 = nil prev-tree tree
                 &let () &unit
               (and (comp? prev-tree) (comp? tree) (not= (quatrefoil.util.core/require-field prev-tree :name) (quatrefoil.util.core/require-field tree :name)))
-                collect! $ [] coord :replace-element $ purify-tree tree
+                collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :replace-element (purify-tree tree)
               (comp? prev-tree)
                 recur (quatrefoil.util.core/require-field prev-tree :tree) tree coord collect!
               (comp? tree)
                 recur prev-tree (quatrefoil.util.core/require-field tree :tree) coord collect!
               (and (non-nil? tree) (nil? prev-tree))
-                collect! $ [] coord :add-element tree
+                collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :add-element tree
               (and (non-nil? prev-tree) (nil? tree))
-                collect! $ [] coord :remove-element
+                collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :remove-element
               (not= (quatrefoil.util.core/require-field prev-tree :name) (quatrefoil.util.core/require-field tree :name))
-                collect! $ [] coord :replace-element $ purify-tree tree
+                collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :replace-element (purify-tree tree)
               (and (= :text (quatrefoil.util.core/require-field tree :name) (quatrefoil.util.core/require-field prev-tree :name)) (not= (quatrefoil.util.core/require-field tree :params) (quatrefoil.util.core/require-field prev-tree :params)))
-                collect! $ [] coord :replace-element $ purify-tree tree
+                collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :replace-element (purify-tree tree)
               (and (= (quatrefoil.util.core/require-field tree :name) (quatrefoil.util.core/require-field prev-tree :name)) (not= (quatrefoil.util.core/require-field tree :params) (quatrefoil.util.core/require-field prev-tree :params)))
-                collect! $ [] coord :replace-element $ purify-tree tree
+                collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :replace-element (purify-tree tree)
               true $ do
                 ; diff-params (:params prev-tree) (:params tree) coord collect!
                 if
                   not= (quatrefoil.util.core/require-field prev-tree :position) (quatrefoil.util.core/require-field tree :position)
-                  collect! $ [] coord :change-position $ match (quatrefoil.util.core/require-field tree :position)
-                    (:some value) value
-                    (:none) ([] 0 0 0)
+                  collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :change-position
+                    decode-map-as
+                      match (quatrefoil.util.core/require-field tree :position)
+                        (:some value) value
+                        (:none) ([] 0 0 0)
+                      , quatrefoil.schema/Vec3Value
                 if
                   not= (quatrefoil.util.core/require-field prev-tree :rotation) (quatrefoil.util.core/require-field tree :rotation)
-                  collect! $ [] coord :change-rotation $ match (quatrefoil.util.core/require-field tree :rotation)
-                    (:some value) value
-                    (:none) ([] 0 0 0)
+                  collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :change-rotation
+                    decode-map-as
+                      match (quatrefoil.util.core/require-field tree :rotation)
+                        (:some value) value
+                        (:none) ([] 0 0 0)
+                      List Number
                 if
                   not= (quatrefoil.util.core/require-field prev-tree :scale) (quatrefoil.util.core/require-field tree :scale)
-                  collect! $ [] coord :change-scale $ match (quatrefoil.util.core/require-field tree :scale)
-                    (:some value) value
-                    (:none) ([] 1 1 1)
+                  collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :change-scale
+                    decode-map-as
+                      match (quatrefoil.util.core/require-field tree :scale)
+                        (:some value) value
+                        (:none) ([] 1 1 1)
+                      , quatrefoil.schema/Vec3Value
                 if
                   not= (quatrefoil.util.core/require-field prev-tree :attributes) (quatrefoil.util.core/require-field tree :attributes)
-                  collect! $ [] coord :change-attributes $ quatrefoil.util.core/require-field tree :attributes
+                  collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :change-attributes (quatrefoil.util.core/require-field tree :attributes)
                 diff-material (quatrefoil.util.core/require-field prev-tree :material) (quatrefoil.util.core/require-field tree :material) coord collect!
                 diff-events (quatrefoil.util.core/require-field prev-tree :event) (quatrefoil.util.core/require-field tree :event) coord collect!
                 diff-children (quatrefoil.util.core/require-field prev-tree :children) (quatrefoil.util.core/require-field tree :children) coord collect!
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (List Number)
-            Fn Dynamic $ -> Unit
+            Fn quatrefoil.schema/ScenePatch $ -> Unit
             -> Unit
         'select-keys $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn select-keys (m xs)
@@ -3719,35 +3728,31 @@
         'apply-changes $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn apply-changes (changes)
             ; js/console.log |changes (count changes) changes
-            &doseq (change changes)
+            &doseq (patch changes)
               let
-                  data $ quatrefoil.util.core/require-decoded $ try-decode-map-as change (List Dynamic)
-                  raw-coord $ &list:nth data 0
-                  op $ quatrefoil.util.core/require-decoded $ try-decode-map-as (&list:nth data 1) 'Tag
-                  op-data $ if (= op :remove-element) nil $ &list:nth data 2
-                let
-                    coord $ quatrefoil.util.core/require-decoded $ try-decode-map-as raw-coord (List Number)
-                    target $ reach-object3d @*global-scene coord
-                  ; js/console.log |Change: op coord op-data
-                  match op
-                    :add-material $ update-material target coord op-data
-                    :update-material $ update-material target coord op-data
-                    :remove-material $ remove-material target coord op-data
-                    :replace-material $ replace-material target coord op-data
-                    :remove-children $ remove-children target coord op-data
-                    :add-children $ add-children target coord op-data
-                    :add-element $ add-element target coord op-data
-                    :remove-element $ remove-element target coord
-                    :replace-element $ replace-element target coord op-data
-                    :change-position $ set-position-value! target op-data
-                    :change-rotation $ set-rotation-value! target op-data
-                    :change-scale $ set-scale-value! target op-data
-                    :change-attributes $ set-geometry-attributes!
+                  coord $ :coord patch
+                  target $ reach-object3d @*global-scene coord
+                match (:change patch)
+                  (:add-material op-data) (update-material target coord op-data)
+                  (:update-material op-data) (update-material target coord op-data)
+                  (:remove-material op-data) (remove-material target coord op-data)
+                  (:replace-material op-data) (replace-material target coord op-data)
+                  (:remove-children op-data) (remove-children target coord op-data)
+                  (:add-children op-data) (add-children target coord op-data)
+                  (:add-element op-data) (add-element target coord op-data)
+                  (:remove-element) (remove-element target coord)
+                  (:replace-element op-data) (replace-element target coord op-data)
+                  (:change-position op-data) (set-position-value! target op-data)
+                  (:change-rotation op-data) (set-rotation-value! target op-data)
+                  (:change-scale op-data) (set-scale-value! target op-data)
+                  (:change-attributes op-data)
+                    set-geometry-attributes!
                       .-geometry $ js-cast target 'quatrefoil.dsl.patch/MeshGeometryHost
                       , op-data
-                    _ $ js/console.warn "|Unknown op:" op
+                  (:add-events _names) (js/console.warn "|Unknown op:" :add-events)
+                  (:remove-events _names) (js/console.warn "|Unknown op:" :remove-events)
           :examples $ []
-          :schema $ quote $ Fn (List Dynamic) (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (List quatrefoil.schema/ScenePatch) (-> Unit) (:features :js-ffi)
         'ffi-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn ffi-object (value) (unsafe-coerce value JsObject)
           :examples $ []
@@ -3921,6 +3926,29 @@
           :code $ quote $ defunion RenderTree Component Shape
           :examples $ []
           :schema $ quote UnionDef
+        'SceneChange $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defenum SceneChange (:add-material Dynamic) (:update-material Dynamic)
+            :remove-material $ Set Tag
+            :replace-material Dynamic
+            :remove-children $ Set Number
+            :add-children Dynamic
+            :add-element Dynamic
+            :remove-element
+            :replace-element Dynamic
+            :change-position quatrefoil.schema/Vec3Value
+            :change-rotation $ List Number
+            :change-scale quatrefoil.schema/Vec3Value
+            :change-attributes Dynamic
+            :add-events $ Set Tag
+            :remove-events $ Set Tag
+          :examples $ []
+          :schema $ quote EnumDef
+        'ScenePatch $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defstruct ScenePatch
+            :coord $ List Number
+            :change quatrefoil.schema/SceneChange
+          :examples $ []
+          :schema $ quote StructDef
         'Shape $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstruct Shape (:name Tag) (:params Dynamic)
             :position $ Option quatrefoil.schema/Vec3Value
