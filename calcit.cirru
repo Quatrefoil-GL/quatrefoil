@@ -2225,6 +2225,29 @@
             , &unit
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (-> Unit) (:features :js-ffi)
+        'render-canvas-with-dispatch! $ %{} 'CodeEntry
+          :doc "|Render a Component or Shape with separate state and action decoders for Quatrefoil events."
+          :code $ quote $ defn render-canvas-with-dispatch! (markup read-state read-action on-event!)
+            render-canvas! markup $ fn (op payload)
+              hint-fn $ Fn Dynamic Dynamic $ -> Unit
+              on-event! $ if (list? op)
+                quatrefoil.cursor/DispatchEvent :states
+                  quatrefoil.util.core/require-decoded $ try-decode-map-as op $ List Tag
+                  read-state payload
+                let
+                    tag $ quatrefoil.util.core/require-decoded $ try-decode-map-as op 'Tag
+                  if (= tag :states)
+                    let[] (cursor value) (quatrefoil.cursor/read-state-pair payload)
+                      quatrefoil.cursor/DispatchEvent :states cursor $ read-state value
+                    quatrefoil.cursor/DispatchEvent :action $ read-action tag payload
+          :examples $ []
+          :schema $ quote $ Fn quatrefoil.schema/RenderTree
+            Fn Dynamic $ -> S
+            Fn Tag Dynamic $ -> A
+            Fn (quatrefoil.cursor/DispatchEvent S A) (-> Unit)
+            -> Unit
+            :generics S A
+            :features :js-ffi
         'rotate-viewer-by! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn rotate-viewer-by! (x)
             let
@@ -2363,9 +2386,17 @@
             |hsluv :refer $ Hsluv
             |three/addons/webxr/VRButton.js :refer $ VRButton
     'quatrefoil.cursor $ %{} 'FileEntry
-      :defs $ {} $ 'update-states
-        %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn update-states (store pair)
+      :defs $ {}
+        'DispatchEvent $ %{} 'CodeEntry
+          :doc "|A decoded cursor state update or a decoded application action."
+          :code $ quote $ defenum DispatchEvent ([] S A)
+            :states (List Tag) S
+            :action A
+          :examples $ []
+          :schema $ quote EnumDef
+        'read-state-pair $ %{} 'CodeEntry
+          :doc "|Decode the legacy cursor and value pair, retaining a present nil value."
+          :code $ quote $ defn read-state-pair (pair)
             let
                 data $ quatrefoil.util.core/require-decoded $ try-decode-map-as pair (List Dynamic)
                 cursor $ quatrefoil.util.core/require-decoded $ try-decode-map-as
@@ -2373,14 +2404,22 @@
                     (:some option-value) option-value
                     (:none) ([])
                   List Tag
-                new-state $ .unwrap $ nth data 1
+              [] cursor $ .unwrap $ nth data 1
+          :examples $ []
+          :schema $ quote $ Fn P
+            -> $ Tuple (List Tag) Dynamic
+            :generics P
+        'update-states $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn update-states (store pair)
+            let[] (cursor new-state) (read-state-pair pair)
               assoc store :states $ assoc-in
                 quatrefoil.util.core/field-or store :states $ {}
                 concat cursor $ [] :data
                 , new-state
           :examples $ []
-          :schema $ quote $ Fn (Map Tag Dynamic) Dynamic
+          :schema $ quote $ Fn (Map Tag Dynamic) P
             -> $ Map Tag Dynamic
+            :generics P
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.cursor
     'quatrefoil.dsl.diff $ %{} 'FileEntry
@@ -3869,6 +3908,11 @@
           :code $ quote $ defstruct Component (:name Dynamic) (:tree Dynamic)
           :examples $ []
           :schema $ quote StructDef
+        'RenderTree $ %{} 'CodeEntry
+          :doc "|A render root may be a component or a concrete shape."
+          :code $ quote $ defunion RenderTree Component Shape
+          :examples $ []
+          :schema $ quote UnionDef
         'Shape $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstruct Shape (:name Tag) (:params Dynamic)
             :position $ Option quatrefoil.schema/Vec3Value
