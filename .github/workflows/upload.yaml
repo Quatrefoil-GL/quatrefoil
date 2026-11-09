@@ -107,7 +107,7 @@ jobs:
 
       - name: Validate existing Option contracts
         run: |
-          calcit calcit.cirru test 'quatrefoil.dsl.object3d-dom/read-vec3' --require-match --summary-only --format json
+          calcit calcit.cirru test --require-match --summary-only --format json
           calcit eval --dep ./ -- 'do
             assert= ({}) $ quatrefoil.alias/arrange-children $ []
             assert= nil $ quatrefoil.alias/arrange-children $ [] nil
