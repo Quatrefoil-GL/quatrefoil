@@ -2825,7 +2825,7 @@
               ; js/console.log |Light: object3d
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value) (-> Dynamic) (:features :js-ffi)
         'create-box-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-box-element (params position rotation scale material event coord)
             let
@@ -2845,7 +2845,10 @@
               set! (.-event metadata-object) event
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic Dynamic Dynamic (List Number) (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value)
+            Option $ List Number
+            Option quatrefoil.schema/Vec3Value
+            , Dynamic Dynamic (List Number) (-> Dynamic) (:features :js-ffi)
         'create-buffer-object-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-buffer-object-element (params position rotation scale material)
             let
@@ -2880,7 +2883,10 @@
               set-scale! object3d scale
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value)
+            Option $ List Number
+            Option quatrefoil.schema/Vec3Value
+            , Dynamic (-> Dynamic) (:features :js-ffi)
         'create-directional-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-directional-light (params position)
             let
@@ -2899,7 +2905,7 @@
               js/console.log "|directional light:" object3d
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value) (-> Dynamic) (:features :js-ffi)
         'create-group-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-group-element (params position rotation scale)
             let
@@ -2909,7 +2915,11 @@
               set-scale! object3d scale
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value)
+            Option $ List Number
+            Option quatrefoil.schema/Vec3Value
+            -> Dynamic
+            :features :js-ffi
         'create-line-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-line-element (params position rotation scale material)
             let
@@ -2927,7 +2937,10 @@
               set-scale! object3d scale
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value)
+            Option $ List Number
+            Option quatrefoil.schema/Vec3Value
+            , Dynamic (-> Dynamic) (:features :js-ffi)
         'create-line-segments-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-line-segments-element (params position rotation scale material)
             let
@@ -2955,7 +2968,10 @@
               set-scale! object3d scale
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value)
+            Option $ List Number
+            Option quatrefoil.schema/Vec3Value
+            , Dynamic (-> Dynamic) (:features :js-ffi)
         'create-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-material (material)
             &let
@@ -3000,7 +3016,10 @@
                 unsafe-coerce raycast $ Fn JsObject quatrefoil.dsl.object3d-dom/JsArrayHost $ -> Unit
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value)
+            Option $ List Number
+            Option quatrefoil.schema/Vec3Value
+            , Dynamic (-> Dynamic) (:features :js-ffi)
         'create-parametric-element $ %{} 'CodeEntry
           :doc "|Parametric geometry: :func is called with u, v and the element's :data as an Option, and returns [x y z]; :slices and :stacks default to 10."
           :code $ quote $ defn create-parametric-element (params position rotation scale material)
@@ -3027,7 +3046,10 @@
               set-scale! object3d scale
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value)
+            Option $ List Number
+            Option quatrefoil.schema/Vec3Value
+            , Dynamic (-> Dynamic) (:features :js-ffi)
         'create-plane-reflector $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-plane-reflector (params position rotation scale)
             let
@@ -3046,7 +3068,11 @@
               set-scale! object3d scale
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value)
+            Option $ List Number
+            Option quatrefoil.schema/Vec3Value
+            -> Dynamic
+            :features :js-ffi
         'create-point-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-point-light (params position)
             let
@@ -3066,7 +3092,7 @@
               ; js/console.log |Light: object3d
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value) (-> Dynamic) (:features :js-ffi)
         'create-polyhedron-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-polyhedron-element (params position rotation scale material)
             let
@@ -3093,7 +3119,10 @@
               set-scale! object3d scale
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value)
+            Option $ List Number
+            Option quatrefoil.schema/Vec3Value
+            , Dynamic (-> Dynamic) (:features :js-ffi)
         'create-rect-area-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-rect-area-light (params position rotation)
             let
@@ -3118,7 +3147,10 @@
               .!add (three-object object3d) (new RectAreaLightHelper object3d)
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value)
+            Option $ List Number
+            -> Dynamic
+            :features :js-ffi
         'create-shader-mesh $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-shader-mesh (attributes params position rotation scale material)
             let
@@ -3143,15 +3175,19 @@
               set-scale! object3d scale
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic Dynamic (Option quatrefoil.schema/Vec3Value)
+            Option $ List Number
+            Option quatrefoil.schema/Vec3Value
+            , Dynamic (-> Dynamic) (:features :js-ffi)
         'create-shape $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-shape (element coord)
             ; js/console.log |Element: element $ :coord element
             let
                 params $ quatrefoil.util.core/require-field element :params
-                position $ quatrefoil.util.core/require-field element :position
-                scale $ quatrefoil.util.core/require-field element :scale
-                rotation $ quatrefoil.util.core/require-field element :rotation
+                position $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field element :position) (Option quatrefoil.schema/Vec3Value)
+                scale $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field element :scale) (Option quatrefoil.schema/Vec3Value)
+                rotation $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field element :rotation)
+                  Option $ List Number
                 material $ quatrefoil.util.core/require-field element :material
                 event $ quatrefoil.util.core/require-field element :event
               match (quatrefoil.util.core/require-field element :name) (:scene @*global-scene)
@@ -3202,7 +3238,10 @@
               set-scale! object3d scale
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value)
+            Option $ List Number
+            Option quatrefoil.schema/Vec3Value
+            , Dynamic (-> Dynamic) (:features :js-ffi)
         'create-some-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-some-object (params position rotation scale material)
             let
@@ -3225,7 +3264,10 @@
                 js/console.warn |object-not-loaded-for $ quatrefoil.util.core/field-option params :key
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value)
+            Option $ List Number
+            Option quatrefoil.schema/Vec3Value
+            , Dynamic (-> Dynamic) (:features :js-ffi)
         'create-sphere-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-sphere-element (params position rotation scale material event coord)
             let
@@ -3246,7 +3288,10 @@
               ; js/console.log |Sphere: object3d
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic Dynamic Dynamic (List Number) (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value)
+            Option $ List Number
+            Option quatrefoil.schema/Vec3Value
+            , Dynamic Dynamic (List Number) (-> Dynamic) (:features :js-ffi)
         'create-spline-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-spline-element (params position rotation scale material)
             let
@@ -3269,7 +3314,10 @@
               set-scale! object3d scale
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value)
+            Option $ List Number
+            Option quatrefoil.schema/Vec3Value
+            , Dynamic (-> Dynamic) (:features :js-ffi)
         'create-spot-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-spot-light (params position)
             let
@@ -3292,7 +3340,7 @@
               js/console.log |Light: object3d
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value) (-> Dynamic) (:features :js-ffi)
         'create-text-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-text-element (params position rotation scale material)
             let
@@ -3310,7 +3358,10 @@
                 , true
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value)
+            Option $ List Number
+            Option quatrefoil.schema/Vec3Value
+            , Dynamic (-> Dynamic) (:features :js-ffi)
         'create-torus-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-torus-element (params position rotation scale material)
             let
@@ -3327,7 +3378,10 @@
               set-scale! object3d scale
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value)
+            Option $ List Number
+            Option quatrefoil.schema/Vec3Value
+            , Dynamic (-> Dynamic) (:features :js-ffi)
         'create-tube-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-tube-element (params position rotation scale material)
             let
@@ -3350,7 +3404,10 @@
               set-scale! object3d scale
               , object3d
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value)
+            Option $ List Number
+            Option quatrefoil.schema/Vec3Value
+            , Dynamic (-> Dynamic) (:features :js-ffi)
         'curve-get-points $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn curve-get-points (curve n)
             .!getPoints (unsafe-coerce curve CurveHost) n
@@ -3580,7 +3637,10 @@
                 near $ quatrefoil.util.core/field-or params :near 0.1
                 far $ quatrefoil.util.core/field-or params :far 2000
                 object3d $ new THREE/PerspectiveCamera fov aspect near far
-              set-position! object3d $ quatrefoil.util.core/field-option params :position
+              match (quatrefoil.util.core/field-option params :position)
+                (:none) &unit
+                (:some raw-position)
+                  set-position-value! object3d $ quatrefoil.util.core/require-decoded $ try-decode-map-as raw-position quatrefoil.schema/Vec3Value
               reset! *global-camera object3d
               , &unit
           :examples $ []
@@ -3592,7 +3652,7 @@
               (:some value) (set-position-value! object value)
               (:none) &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value) (-> Unit) (:features :js-ffi)
         'set-position-value! $ %{} 'CodeEntry
           :doc "|Set a three.js position from a `:position` prop, a V3 or a list of three numbers."
           :code $ quote $ defn set-position-value! (object position)
@@ -3604,7 +3664,7 @@
                 , x y z
             , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic quatrefoil.schema/Vec3Value (-> Unit) (:features :js-ffi)
         'set-rotation! $ %{} 'CodeEntry
           :doc "|Apply an optional rotation to a three.js object; none leaves the object's own default."
           :code $ quote $ defn set-rotation! (object rotation-option)
@@ -3612,10 +3672,13 @@
               (:some value) (set-rotation-value! object value)
               (:none) &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic
+            Option $ List Number
+            -> Unit
+            :features :js-ffi
         'set-rotation-value! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn set-rotation-value! (object3d rotation)
-            if (non-nil? rotation)
+            if (js-present? rotation)
               let[] (x y z)
                 quatrefoil.util.core/require-decoded $ try-decode-map-as rotation $ List Number
                 .set
@@ -3625,7 +3688,10 @@
                   , x y z
             , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic
+            JsNullish $ List Number
+            -> Unit
+            :features :js-ffi
         'set-scale! $ %{} 'CodeEntry
           :doc "|Apply an optional scale to a three.js object; none leaves the object's own default."
           :code $ quote $ defn set-scale! (object scale-option)
@@ -3633,7 +3699,7 @@
               (:some value) (set-scale-value! object value)
               (:none) &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value) (-> Unit) (:features :js-ffi)
         'set-scale-value! $ %{} 'CodeEntry
           :doc "|Set a three.js scale from a `:scale` prop, a V3 or a list of three numbers; zero factors are nudged by `scale-zero`."
           :code $ quote $ defn set-scale-value! (object scale)
@@ -3647,7 +3713,7 @@
                 scale-zero z
             , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic quatrefoil.schema/Vec3Value (-> Unit) (:features :js-ffi)
         'three-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn three-object (value) (js-cast value 'quatrefoil.dsl.object3d-dom/ThreeObjectHost)
           :examples $ []
@@ -3790,7 +3856,7 @@
           :code $ quote $ defn remove-children (target coord op-data)
             &doseq (child-key op-data) (.!removeBy target child-key)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (List Number) Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (List Number) (Set Number) (-> Unit) (:features :js-ffi)
         'remove-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn remove-element (target coord)
             if (empty? coord) (js/console.warn "|Cannot remove by empty coord!")
@@ -3812,7 +3878,7 @@
                   :transparent $ set! (.-transparent material) true
                   _ $ println "|Unknown material prop:" op-data
           :examples $ []
-          :schema $ quote $ Fn Dynamic (List Number) Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (List Number) (Set Tag) (-> Unit) (:features :js-ffi)
         'replace-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn replace-element (target coord op-data)
             if (empty? coord) (js/console.warn "|Cannot replace with empty coord!")
