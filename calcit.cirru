@@ -3753,7 +3753,7 @@
                   build-tree coord op-data
             , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic (List Number) Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (List Number) quatrefoil.schema/RenderTree (-> Unit) (:features :js-ffi)
         'apply-changes $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn apply-changes (changes)
             ; js/console.log |changes (count changes) changes
@@ -3823,7 +3823,7 @@
                   build-tree coord op-data
             , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic (List Number) Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (List Number) (JsNullish quatrefoil.schema/Shape) (-> Unit) (:features :js-ffi)
         'replace-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn replace-material (target coord op-data)
             set!
@@ -3963,9 +3963,9 @@
             :replace-material Dynamic
             :remove-children $ Set Number
             :add-children Dynamic
-            :add-element Dynamic
+            :add-element quatrefoil.schema/RenderTree
             :remove-element
-            :replace-element Dynamic
+            :replace-element $ JsNullish quatrefoil.schema/Shape
             :change-position quatrefoil.schema/Vec3Value
             :change-rotation $ List Number
             :change-scale quatrefoil.schema/Vec3Value
