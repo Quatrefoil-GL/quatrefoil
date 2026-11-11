@@ -13,7 +13,7 @@
         'ambient-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn ambient-light (props & children) (create-element :ambient-light props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'arrange-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn arrange-children (children0)
             let
@@ -32,15 +32,15 @@
               ; .log js/console "|Handle children:" children result
               , result
           :examples $ []
-          :schema $ quote $ Fn (List Dynamic) (-> Dynamic)
+          :schema $ quote $ Fn (List C) (-> Dynamic) (:generics C)
         'box $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn box (props & children) (create-element :box props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'buffer-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn buffer-object (props & children) (create-element :buffer-object props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'create-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-element (el-name props children)
             Shape :name el-name :params
@@ -55,7 +55,7 @@
                     quatrefoil.util.core/field-or props :on $ quatrefoil.util.core/field-or props :event $ {}
                     , :children $ arrange-children children
           :examples $ []
-          :schema $ quote $ Fn Tag Dynamic (List Dynamic) (-> Shape)
+          :schema $ quote $ Fn Tag P (List C) (-> Shape) (:generics P C)
         'default-material $ %{} 'CodeEntry (:doc "|Material of an element that gives no :material.")
           :code $ quote $ def default-material
             {} (:kind :mesh-basic) (:color 0xa0a0a0)
@@ -63,7 +63,7 @@
         'directional-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn directional-light (props & children) (create-element :directional-light props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'flat-values $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defmacro flat-values (& points)
             &let
@@ -75,35 +75,35 @@
         'group $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn group (props & children) (create-element :group props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'line $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn line (props & children) (create-element :line props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'line-segments $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn line-segments (props & children) (create-element :line-segments props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'mesh-line $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn mesh-line (props & children) (create-element :mesh-line props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'parametric $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn parametric (props & children) (create-element :parametric props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'plane-reflector $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn plane-reflector (props & children) (create-element :plane-reflector props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'point-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn point-light (props & children) (create-element :point-light props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'polyhedron $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn polyhedron (props & children) (create-element :polyhedron props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'read-vector-prop $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn read-vector-prop (props key)
             match (quatrefoil.util.core/field-option props key)
@@ -117,7 +117,7 @@
         'rect-area-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn rect-area-light (props & children) (create-element :rect-area-light props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'resolve-children $ %{} 'CodeEntry
           :doc "|Children with Options resolved: a some child is unwrapped, a none child is left out, other children stay."
           :code $ quote $ defn resolve-children (children)
@@ -133,20 +133,21 @@
                     , acc
                   append acc child
           :examples $ []
-          :schema $ quote $ Fn (List Dynamic)
+          :schema $ quote $ Fn (List C)
             -> $ List Dynamic
+            :generics C
         'scene $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn scene (props & children) (create-element :scene props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'shader-mesh $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn shader-mesh (props & children) (create-element :shader-mesh props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'shape $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn shape (props & children) (create-element :shape props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'some-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn some-object (props)
             create-element :some-object props $ []
@@ -155,27 +156,27 @@
         'sphere $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn sphere (props & children) (create-element :sphere props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'spline $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn spline (props & children) (create-element :spline props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'spot-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn spot-light (props & children) (create-element :spot-light props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'text $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn text (props & children) (create-element :text props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'torus $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn torus (props & children) (create-element :torus props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
         'tube $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn tube (props & children) (create-element :tube props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
+          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.alias
           :require $ quatrefoil.schema :refer $ Shape Component comp? shape?
