@@ -1,11 +1,11 @@
 # Quatrefoil
 
-## 0.3.6 候选 / Calcit 0.40.0
+## 0.3.6 候选 / Calcit 0.41.0
 
-升级后请配套使用正式 Calcit 与 `@calcit/procs` 0.40.0，以及 Quaternion 0.2.25。重新安装依赖并生成 JS。直接构造场景补丁时，新增节点使用 `RenderTree`，替换节点使用清理后的 `Shape` 或空值。
+升级后请配套使用正式 Calcit 与 `@calcit/procs` 0.41.0，以及 Quaternion 0.2.25。重新安装依赖并生成 JS。直接构造场景补丁时，新增节点使用 `RenderTree`，替换节点使用清理后的 `Shape` 或空值。
 `Shape` 的位置与缩放仍接受四元数库的 `V3` 或数字列表，旋转接受数字列表。
 省略或传入 nil 时沿用 Three.js 默认变换。错误的变换值会在构造形状时提前报错。
-形状名使用 Tag，组件名和子节点合同沿用原接口。
+形状名使用 Tag，组件名和子节点合同沿用原接口。 直接构造新增或更新材质的补丁时，属性 Map 使用 Tag 键。
 
 需要给应用事件做类型检查时，可以把渲染调用改为
 `render-canvas-with-dispatch! markup read-state read-action on-event!`。

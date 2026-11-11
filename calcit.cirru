@@ -13,7 +13,7 @@
         'ambient-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn ambient-light (props & children) (create-element :ambient-light props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'arrange-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn arrange-children (children0)
             let
@@ -36,11 +36,11 @@
         'box $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn box (props & children) (create-element :box props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'buffer-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn buffer-object (props & children) (create-element :buffer-object props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'create-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-element (el-name props children)
             Shape :name el-name :params
@@ -55,7 +55,7 @@
                     quatrefoil.util.core/field-or props :on $ quatrefoil.util.core/field-or props :event $ {}
                     , :children $ arrange-children children
           :examples $ []
-          :schema $ quote $ Fn Tag Dynamic (List Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Tag Dynamic (List Dynamic) (-> Shape)
         'default-material $ %{} 'CodeEntry (:doc "|Material of an element that gives no :material.")
           :code $ quote $ def default-material
             {} (:kind :mesh-basic) (:color 0xa0a0a0)
@@ -63,7 +63,7 @@
         'directional-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn directional-light (props & children) (create-element :directional-light props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'flat-values $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defmacro flat-values (& points)
             &let
@@ -75,41 +75,41 @@
         'group $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn group (props & children) (create-element :group props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'line $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn line (props & children) (create-element :line props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'line-segments $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn line-segments (props & children) (create-element :line-segments props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'mesh-line $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn mesh-line (props & children) (create-element :mesh-line props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'parametric $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn parametric (props & children) (create-element :parametric props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'plane-reflector $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn plane-reflector (props & children) (create-element :plane-reflector props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'point-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn point-light (props & children) (create-element :point-light props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'polyhedron $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn polyhedron (props & children) (create-element :polyhedron props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'read-vector-prop $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn read-vector-prop (props key)
             match (quatrefoil.util.core/field-option props key)
               (:some raw)
-                Option :some $ quatrefoil.util.core/require-decoded $ try-decode-map-as raw quatrefoil.schema/Vec3Value
-              (:none) (Option :none)
+                Some $ quatrefoil.util.core/require-decoded $ try-decode-map-as raw quatrefoil.schema/Vec3Value
+              (:none) None
           :examples $ []
           :schema $ quote $ Fn M Tag
             -> $ Option quatrefoil.schema/Vec3Value
@@ -117,7 +117,7 @@
         'rect-area-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn rect-area-light (props & children) (create-element :rect-area-light props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'resolve-children $ %{} 'CodeEntry
           :doc "|Children with Options resolved: a some child is unwrapped, a none child is left out, other children stay."
           :code $ quote $ defn resolve-children (children)
@@ -126,7 +126,7 @@
                 hint-fn $ Fn (List Dynamic) Dynamic $ -> (List Dynamic)
                 if
                   and (enum? child)
-                    = (&enum:definition child) (Option :some Option)
+                    = (&enum:definition child) (Some Option)
                   if
                     = :some $ &enum:nth child 0
                     append acc $ &enum:nth child 1
@@ -138,44 +138,44 @@
         'scene $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn scene (props & children) (create-element :scene props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'shader-mesh $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn shader-mesh (props & children) (create-element :shader-mesh props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'shape $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn shape (props & children) (create-element :shape props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'some-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn some-object (props)
             create-element :some-object props $ []
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (-> Shape)
         'sphere $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn sphere (props & children) (create-element :sphere props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'spline $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn spline (props & children) (create-element :spline props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'spot-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn spot-light (props & children) (create-element :spot-light props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'text $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn text (props & children) (create-element :text props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'torus $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn torus (props & children) (create-element :torus props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
         'tube $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn tube (props & children) (create-element :tube props children)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (& Dynamic) (-> quatrefoil.schema/Shape)
+          :schema $ quote $ Fn Dynamic (& Dynamic) (-> Shape)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.alias
           :require $ quatrefoil.schema :refer $ Shape Component comp? shape?
@@ -226,9 +226,9 @@
                     _ $ comp-portal $ fn (next d!)
                       d! cursor $ assoc state :tab next
                   if (not= tab :portal)
-                    Option :some $ comp-back $ fn (d!)
+                    Some $ comp-back $ fn (d!)
                       d! cursor $ assoc state :tab :portal
-                    Option :none
+                    , None
                   ambient-light $ {} (:color 0x666666) (:intensity 1)
                   ; point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                     :position $ [] 20 40 50
@@ -718,7 +718,7 @@
                 [] line
           :examples $ []
           :schema $ quote $ Fn quaternion.core/Quaternion quaternion.core/Quaternion Number Tag
-            -> $ List quatrefoil.app.comp.quat-tree/TreeLine
+            -> $ List TreeLine
         'leaf-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def leaf-material
             {} (:kind :mesh-standard) (:color 0x66cc55) (:opacity 0.5) (:transparent true)
@@ -758,7 +758,7 @@
               TreeTransform :name :b :vector $ quaternion 0.7 0.2 -0.3 -0.43
               TreeTransform :name :c :vector $ quaternion 0.4 -0.44 0.12 0.33
           :examples $ []
-          :schema $ quote $ List quatrefoil.app.comp.quat-tree/TreeTransform
+          :schema $ quote $ List TreeTransform
         'tube-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def tube-material
             {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
@@ -1440,13 +1440,13 @@
                         on-change next-pos d!
                 if
                   .some? $ quatrefoil.util.core/field-option options :label
-                  Option :some $ text $ {}
+                  Some $ text $ {}
                     :position $ v3 -0.6 2 0
                     :text $ str $ quatrefoil.util.core/require-field options :label
                     :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                     :size 2
                     :depth 0.5
-                  Option :none
+                  , None
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (-> quatrefoil.schema/Component) (:features :js-ffi)
         'comp-switch $ %{} 'CodeEntry (:doc |)
@@ -1524,7 +1524,7 @@
                             try-decode-map-as (quatrefoil.util.core/require-field info :dx) 'Number
                           , d!
                 if (quatrefoil.util.core/field-or options :show-text? false)
-                  Option :some $ text $ {}
+                  Some $ text $ {}
                     :position $ [] -1.6 2 0
                     :text $ let
                         prefix $ if
@@ -1534,7 +1534,7 @@
                     :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                     :size text-size
                     :depth 0.5
-                  Option :none
+                  , None
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (-> quatrefoil.schema/Component) (:features :js-ffi)
         'comp-value-2d $ %{} 'CodeEntry (:doc |)
@@ -1584,7 +1584,7 @@
                           [] (+ x0 dx) (- y0 dy)
                           , d!
                 if (quatrefoil.util.core/field-or options :show-text? false)
-                  Option :some $ text $ {}
+                  Some $ text $ {}
                     :position $ [] -2 2 0
                     :text $ let
                         prefix $ if
@@ -1602,7 +1602,7 @@
                     :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                     :size text-size
                     :depth 1
-                  Option :none
+                  , None
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (-> quatrefoil.schema/Component) (:features :js-ffi)
       :ns $ %{} 'NsEntry (:doc |)
@@ -1813,12 +1813,12 @@
           :code $ quote $ defn gamepad-axis-value (axes index)
             js-number $ aget axes index
           :examples $ []
-          :schema $ quote $ Fn quatrefoil.core/GamepadCollectionHost Number (-> Number) (:features :js-ffi)
+          :schema $ quote $ Fn GamepadCollectionHost Number (-> Number) (:features :js-ffi)
         'gamepad-button-value $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn gamepad-button-value (buttons index)
             js-number $ .-value $ js-cast (aget buttons index) 'quatrefoil.core/GamepadButtonHost
           :examples $ []
-          :schema $ quote $ Fn quatrefoil.core/GamepadCollectionHost Number (-> Number) (:features :js-ffi)
+          :schema $ quote $ Fn GamepadCollectionHost Number (-> Number) (:features :js-ffi)
         'half-pi $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def half-pi (* 0.5 &PI)
           :examples $ []
@@ -2354,12 +2354,12 @@
                 _ $ println "|unknown camera control:" control
               , &unit
           :examples $ []
-          :schema $ quote $ Fn quatrefoil.core/CameraControl (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn CameraControl (-> Unit) (:features :js-ffi)
         'xr-input-source-at $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn xr-input-source-at (session index)
             aget (.-inputSources session) index
           :examples $ []
-          :schema $ quote $ Fn quatrefoil.core/XRSessionHost Number
+          :schema $ quote $ Fn XRSessionHost Number
             -> $ JsNullish JsObject
             :features :js-ffi
       :ns $ %{} 'NsEntry (:doc |)
@@ -2401,7 +2401,7 @@
               quatrefoil.util.core/require-decoded $ try-decode-map-as raw $ List Tag
               quatrefoil.util.core/require-decoded $ try-decode-map-as raw 'Tag
           :examples $ []
-          :schema $ quote $ Fn T (-> quatrefoil.cursor/DispatchTarget) (:generics T)
+          :schema $ quote $ Fn T (-> DispatchTarget) (:generics T)
         'read-state-pair $ %{} 'CodeEntry
           :doc "|Decode the legacy cursor and value pair, retaining a present nil value."
           :code $ quote $ defn read-state-pair (pair)
@@ -2441,11 +2441,11 @@
                 curr-keys $ keys children0
                 removed-keys $ difference prev-keys curr-keys
                 added-children $ -> (difference curr-keys prev-keys)
-                  map $ fn (k)
-                    let
-                        k0 $ assert-type k Number
-                      [] k0 $ purify-tree $ quatrefoil.util.core/read-render-tree
-                        .unwrap $ get children0 k0
+                  map $ fn (key)
+                    hint-fn $ Fn Number $ ->
+                      Tuple Number $ JsNullish quatrefoil.schema/Shape
+                    [] key $ purify-tree $ quatrefoil.util.core/read-render-tree
+                      .unwrap $ get children0 key
                 common-keys $ intersection prev-keys curr-keys
               if
                 not $ empty? removed-keys
@@ -2505,20 +2505,14 @@
                     Map Tag Dynamic
                   prev-keys $ keys prev-material0
                   curr-keys $ keys material0
-                  added-material $ -> (difference curr-keys prev-keys) (&set:to-list)
-                    map $ fn (k)
-                      [] k $ .unwrap $ get material0 k
-                    pairs-map
+                  added-material $ filter-map-kv material0 $ fn (k v)
+                    if (contains? prev-material0 k) (MapEntryDecision :drop) (MapEntryDecision :keep k v)
                   removed-keys $ difference prev-keys curr-keys
-                  updated-material $ -> (intersection prev-keys curr-keys)
-                    filter $ fn (k)
-                      not=
-                        .unwrap $ get prev-material0 k
-                        .unwrap $ get material0 k
-                    &set:to-list
-                    map $ fn (k)
-                      [] k $ .unwrap $ get material0 k
-                    pairs-map
+                  updated-material $ filter-map-kv material0 $ fn (k v)
+                    match (get prev-material0 k)
+                      (:some prev)
+                        if (not= prev v) (MapEntryDecision :keep k v) (MapEntryDecision :drop)
+                      (:none) (MapEntryDecision :drop)
                 if
                   not $ empty? added-material
                   collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :add-material added-material
@@ -2640,7 +2634,7 @@
             :code $ quote $ let
                 wrap $ fn (shape)
                   hint-fn $ Fn quatrefoil.schema/Shape $ -> quatrefoil.schema/Component
-                  quatrefoil.schema/Component :name 'outer :tree $ Option :some $ quatrefoil.schema/Component :name 'inner :tree (Option :some shape)
+                  quatrefoil.schema/Component :name 'outer :tree $ Some $ quatrefoil.schema/Component :name 'inner :tree (Some shape)
                 before $ wrap $ quatrefoil.alias/group ({})
                 after $ wrap $ quatrefoil.alias/group
                   {} $ :position $ [] 2 3 4
@@ -3249,7 +3243,7 @@
                 obj $ match
                   try-decode-map-as (quatrefoil.util.core/require-field params :key) 'Tag
                   (:ok asset-key) (get @*loaded-objects asset-key)
-                  (:err _) (Option :none)
+                  (:err _) None
               set-position! object3d position
               set-rotation! object3d rotation
               set-scale! object3d scale
@@ -3451,8 +3445,8 @@
                 hit $ js-cast target 'quatrefoil.dsl.object3d-dom/IntersectionHost
                 coord $ .-coord $ unsafe-coerce (.-object hit) 'quatrefoil.dsl.object3d-dom/ObjectMetadataHost
               if (js-present? coord)
-                Option :some $ quatrefoil.util.core/require-decoded $ try-decode-map-as coord (List Number)
-                Option :none
+                Some $ quatrefoil.util.core/require-decoded $ try-decode-map-as coord (List Number)
+                , None
           :examples $ []
           :schema $ quote $ Fn JsObject
             -> $ Option $ List Number
@@ -3464,7 +3458,7 @@
                 hit $ js-cast target 'quatrefoil.dsl.object3d-dom/IntersectionHost
               js-present? $ .-event $ unsafe-coerce (.-object hit) 'quatrefoil.dsl.object3d-dom/ObjectMetadataHost
           :examples $ []
-          :schema $ quote $ Fn JsObject Number quatrefoil.dsl.object3d-dom/JsArrayHost (-> Bool) (:features :js-ffi)
+          :schema $ quote $ Fn JsObject Number JsArrayHost (-> Bool) (:features :js-ffi)
         'js-number $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn js-number (value)
             quatrefoil.util.core/require-decoded $ try-decode-map-as value 'Number
@@ -3802,13 +3796,12 @@
         'add-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn add-children (target coord op-data)
             &doseq (entry op-data)
-              let[] (raw-key tree)
-                quatrefoil.util.core/require-decoded $ try-decode-map-as entry $ List Dynamic
-                let
-                    k $ quatrefoil.util.core/require-decoded $ try-decode-map-as raw-key 'Number
-                  .!addBy target k $ build-tree (conj coord k) tree
+              let[] (key tree) entry $ .!addBy target key $ build-tree (conj coord key) tree
           :examples $ []
-          :schema $ quote $ Fn Dynamic (List Number) Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (List Number)
+            Set $ Tuple Number $ JsNullish quatrefoil.schema/Shape
+            -> Unit
+            :features :js-ffi
         'add-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn add-element (target coord op-data)
             if (empty? coord) (js/console.warn "|Cannot remove by empty coord!")
@@ -3906,8 +3899,7 @@
                   , 'quatrefoil.dsl.patch/MaterialHost
               ; js/console.log target
               &doseq
-                entry $ &map:to-list $ quatrefoil.util.core/require-decoded
-                  try-decode-map-as op-data $ Map Tag Dynamic
+                entry $ &map:to-list op-data
                 let[] (param new-value) entry $ match param
                   :color $
                     js-cast
@@ -3925,7 +3917,7 @@
                     .-uniforms $ js-cast material 'quatrefoil.dsl.patch/ShaderMaterialHost
                     unsafe-coerce
                       to-js-data $ quatrefoil.util.core/require-decoded $ try-decode-map-as new-value (Map Dynamic Dynamic)
-                      , 'JsObject
+                      , JsObject
                   :fragmentShader $ set!
                     .-fragmentShader $ js-cast material 'quatrefoil.dsl.patch/ShaderMaterialHost
                     quatrefoil.util.core/require-decoded $ try-decode-map-as new-value 'String
@@ -3939,7 +3931,7 @@
               set! (.-needsUpdate material) true
               , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic (List Number) Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (List Number) (Map Tag Dynamic) (-> Unit) (:features :js-ffi)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.dsl.patch
           :require
@@ -4024,11 +4016,13 @@
           :examples $ []
           :schema $ quote UnionDef
         'SceneChange $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defenum SceneChange (:add-material Dynamic) (:update-material Dynamic)
+          :code $ quote $ defenum SceneChange
+            :add-material $ Map Tag Dynamic
+            :update-material $ Map Tag Dynamic
             :remove-material $ Set Tag
             :replace-material Dynamic
             :remove-children $ Set Number
-            :add-children Dynamic
+            :add-children $ Set $ Tuple Number (JsNullish quatrefoil.schema/Shape)
             :add-element quatrefoil.schema/RenderTree
             :remove-element
             :replace-element $ JsNullish quatrefoil.schema/Shape
@@ -4078,8 +4072,8 @@
               (:some tree) tree
               (:none) nil
           :examples $ []
-          :schema $ quote $ Fn quatrefoil.schema/Component
-            -> $ JsNullish quatrefoil.schema/RenderTree
+          :schema $ quote $ Fn Component
+            -> $ JsNullish RenderTree
         'shape? $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn shape? (x)
             and (struct? x) (&struct:matches? x Shape)
@@ -4134,11 +4128,10 @@
         'field-option $ %{} 'CodeEntry
           :doc "|Read a field of an untyped map as an Option: a nil map, a missing key and a nil value are all none."
           :code $ quote $ defn field-option (value key)
-            if (nil? value) (Option :none)
-              match (get value key)
-                (:some field-value)
-                  if (nil? field-value) (Option :none) (Option :some field-value)
-                (:none) (Option :none)
+            if (nil? value) None $ match (get value key)
+              (:some field-value)
+                if (nil? field-value) None $ Some field-value
+              (:none) None
           :examples $ []
           :schema $ quote $ Fn M Tag
             -> $ Option Dynamic
@@ -4183,7 +4176,7 @@
                     MapEntryDecision :keep key $ purify-tree $ read-render-tree child
           :examples $ []
           :schema $ quote $ Fn (JsNullish quatrefoil.schema/RenderTree)
-            -> $ JsNullish quatrefoil.schema/Shape
+            -> $ JsNullish Shape
             :features :js-ffi
         'reach-object3d $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reach-object3d (object3d coord)
