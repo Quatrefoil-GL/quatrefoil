@@ -1475,7 +1475,7 @@
                   :size 2
                   :depth 0.5
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic Dynamic (-> quatrefoil.schema/Shape) (:features :js-ffi)
         'comp-value $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-value (options on-change)
             let
@@ -2388,7 +2388,7 @@
       :defs $ {}
         'DispatchEvent $ %{} 'CodeEntry
           :doc "|A decoded cursor state update or a decoded application action."
-          :code $ quote $ defenum DispatchEvent ([] S A)
+          :code $ quote $ defenum DispatchEvent (:generics S A)
             :states (List Tag) S
             :action A
           :examples $ []
@@ -4150,7 +4150,7 @@
             if
               and (struct? tree) (&struct:matches? tree quatrefoil.schema/Component)
               recur
-                quatrefoil.schema/component-tree $ assert-type tree quatrefoil.schema/Component
+                quatrefoil.schema/component-tree $ assert-type tree Component
                 , coord
               if (empty? coord) tree $ if (list? coord)
                 let
@@ -4195,9 +4195,9 @@
                 nil? value
                 , nil
               (and (struct? value) (&struct:matches? value quatrefoil.schema/Component))
-                assert-type value quatrefoil.schema/Component
+                assert-type value Component
               (and (struct? value) (&struct:matches? value quatrefoil.schema/Shape))
-                assert-type value quatrefoil.schema/Shape
+                assert-type value Shape
               true $ raise "|expected a Quatrefoil component or shape"
           :examples $ []
           :schema $ quote $ Fn Dynamic
