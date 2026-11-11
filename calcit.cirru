@@ -2441,11 +2441,11 @@
                 curr-keys $ keys children0
                 removed-keys $ difference prev-keys curr-keys
                 added-children $ -> (difference curr-keys prev-keys)
-                  map $ fn (k)
-                    let
-                        k0 $ assert-type k Number
-                      [] k0 $ purify-tree $ quatrefoil.util.core/read-render-tree
-                        .unwrap $ get children0 k0
+                  map $ fn (key)
+                    hint-fn $ Fn Number $ ->
+                      Tuple Number $ JsNullish quatrefoil.schema/Shape
+                    [] key $ purify-tree $ quatrefoil.util.core/read-render-tree
+                      .unwrap $ get children0 key
                 common-keys $ intersection prev-keys curr-keys
               if
                 not $ empty? removed-keys
@@ -3796,13 +3796,12 @@
         'add-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn add-children (target coord op-data)
             &doseq (entry op-data)
-              let[] (raw-key tree)
-                quatrefoil.util.core/require-decoded $ try-decode-map-as entry $ List Dynamic
-                let
-                    k $ quatrefoil.util.core/require-decoded $ try-decode-map-as raw-key 'Number
-                  .!addBy target k $ build-tree (conj coord k) tree
+              let[] (key tree) entry $ .!addBy target key $ build-tree (conj coord key) tree
           :examples $ []
-          :schema $ quote $ Fn Dynamic (List Number) Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (List Number)
+            Set $ Tuple Number $ JsNullish quatrefoil.schema/Shape
+            -> Unit
+            :features :js-ffi
         'add-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn add-element (target coord op-data)
             if (empty? coord) (js/console.warn "|Cannot remove by empty coord!")
@@ -4023,7 +4022,7 @@
             :remove-material $ Set Tag
             :replace-material Dynamic
             :remove-children $ Set Number
-            :add-children Dynamic
+            :add-children $ Set $ Tuple Number (JsNullish quatrefoil.schema/Shape)
             :add-element quatrefoil.schema/RenderTree
             :remove-element
             :replace-element $ JsNullish quatrefoil.schema/Shape
