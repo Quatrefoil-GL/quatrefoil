@@ -5,6 +5,7 @@
 升级后请配套使用正式 Calcit 与 `@calcit/procs` 0.42.0，以及 Quaternion 0.2.25。重新安装依赖并生成 JS。直接构造场景补丁时，新增节点使用 `RenderTree`，替换节点使用清理后的 `Shape` 或空值。
 
 按 0.42.0 效果边界，`quatrefoil.core` 的 `render-canvas!`、`init-renderer!`、`init-controls!`、`tween-move-camera!` 等读写全局渲染状态的函数，`Fn` schema 声明了 `:state`（部分另有 `:io`）。应用里调用它们的 `render-app!`、`dispatch!` 等也要声明，否则 0.42 会给出 `W_STATE_FEATURE_REQUIRED` / `W_IO_FEATURE_REQUIRED` 提示，可用 `calcit fix --rule effect-features-v1` 一次补齐。
+
 `Shape` 的位置与缩放仍接受四元数库的 `V3` 或数字列表，旋转接受数字列表。
 省略或传入 nil 时沿用 Three.js 默认变换。错误的变换值会在构造形状时提前报错。
 形状名使用 Tag，组件名和子节点合同沿用原接口。 直接构造新增或更新材质的补丁时，属性 Map 使用 Tag 键。
