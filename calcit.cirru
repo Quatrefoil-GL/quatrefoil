@@ -236,7 +236,7 @@
                   ; point-light $ {} (:color 0xffffff) (:intensity 2) (:distance 200)
                     :position $ [] 0 60 0
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> quatrefoil.schema/Component) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (-> quatrefoil.schema/Component) (:features :js-ffi :state)
         'comp-demo $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-demo ()
             group ({})
@@ -286,7 +286,7 @@
                 :position $ [] 10 100 100
               ambient-light $ {} (:color 0xaaaaaa) (:intensity 1)
           :examples $ []
-          :schema $ quote $ Fn (-> quatrefoil.schema/Shape) (:features :js-ffi)
+          :schema $ quote $ Fn (-> quatrefoil.schema/Shape) (:features :js-ffi :state)
         'comp-sphere-grid $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn comp-sphere-grid ()
             group ({})
@@ -408,7 +408,7 @@
                 point-light $ {} (:color 0xffffff) (:intensity 1) (:distance 200)
                   :position $ v3 20 40 50
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> quatrefoil.schema/Component) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (-> quatrefoil.schema/Component) (:features :js-ffi :state)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.comp.control
           :require
@@ -1180,7 +1180,7 @@
                   reset! *store store
                   , &unit
           :examples $ []
-          :schema $ quote $ Fn quatrefoil.cursor/DispatchTarget Dynamic (-> Unit)
+          :schema $ quote $ Fn quatrefoil.cursor/DispatchTarget Dynamic (-> Unit) (:features :state)
         'ffi-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn ffi-object (value) (unsafe-coerce value JsObject)
           :examples $ []
@@ -1230,7 +1230,7 @@
             println "|App started!"
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :io :js-ffi :state)
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
             if (non-nil? build-errors) (hud! |error build-errors)
@@ -1241,12 +1241,12 @@
                 println "|Code updated."
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :io :js-ffi :state)
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! () (; println "|Render app:")
             render-canvas! (comp-container @*store) dispatch!
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :io :state)
         'set-decoder-path! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn set-decoder-path! (loader path)
             .!setDecoderPath (unsafe-coerce loader DracoLoaderHost) path
@@ -1274,7 +1274,7 @@
                 fn $ xhr
                 fn (err) (js/console.log err)
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :io :js-ffi :state)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.main
           :require
@@ -1449,7 +1449,7 @@
                     :depth 0.5
                   , None
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> quatrefoil.schema/Component) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic Dynamic (-> quatrefoil.schema/Component) (:features :js-ffi :state)
         'comp-switch $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn comp-switch (options on-toggle)
             let
@@ -1785,7 +1785,7 @@
               .!applyQuaternion v $ .-quaternion camera
               v3 (.-x v) (.-y v) (.-z v)
           :examples $ []
-          :schema $ quote $ Fn Number Number Number (-> quaternion.vector/V3) (:features :js-ffi)
+          :schema $ quote $ Fn Number Number Number (-> quaternion.vector/V3) (:features :js-ffi :state)
         'clear-cache! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn clear-cache! () (; "|TODO memof...")
           :examples $ []
@@ -1889,7 +1889,7 @@
                   on-control-event r-move r-delta elapsed
                 , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :io :js-ffi :state)
         'handle-key-event $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn handle-key-event (event)
             let
@@ -1926,7 +1926,7 @@
                     , 0 $ &* -1 (sin a)
                 _ &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (-> Unit) (:features :io :js-ffi :state)
         'hclx $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn hclx (h c l) (hcl-to-hex h c l)
           :examples $ []
@@ -1995,7 +1995,7 @@
               listen-on-controller! ctrl-0
               listen-on-controller! ctrl-1
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :io :js-ffi :state)
         'init-renderer! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn init-renderer! (canvas-el options) (.!init RectAreaLightUniformsLib)
             reset! *global-renderer $ new THREE/WebGLRenderer $ js-object (:canvas canvas-el) (:antialias true)
@@ -2075,7 +2075,7 @@
                 , &unit
               , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic Dynamic (-> Unit) (:features :io :js-ffi :state)
         'js-number $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn js-number (value)
             quatrefoil.util.core/require-decoded $ try-decode-map-as value 'Number
@@ -2102,7 +2102,7 @@
                 , &unit
               , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (-> Unit) (:features :io :js-ffi :state)
         'move-viewer-by! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn move-viewer-by! (x0 y0 z0)
             let
@@ -2130,7 +2130,7 @@
                     .!render @*global-renderer @*global-scene @*global-camera
                     , &unit
           :examples $ []
-          :schema $ quote $ Fn Number Number Number (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Number Number Number (-> Unit) (:features :js-ffi :state)
         'new-lookat-point $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn new-lookat-point ()
             let
@@ -2149,7 +2149,7 @@
                   &* -4 $ sin @*viewer-angle
               new THREE/Vector3 x2 y2 z2
           :examples $ []
-          :schema $ quote $ Fn (-> JsObject) (:features :js-ffi)
+          :schema $ quote $ Fn (-> JsObject) (:features :js-ffi :state)
         'read-input $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn read-input (p0)
             let
@@ -2202,7 +2202,7 @@
                     , nil
                 , nil
           :examples $ []
-          :schema $ quote $ Fn JsObject (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn JsObject (-> Dynamic) (:features :js-ffi :state)
         'refine-strength $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn refine-strength (x)
             &* x $ sqrt $ js-number
@@ -2225,7 +2225,7 @@
             ; .!render @*global-renderer @*global-scene @*global-camera
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (JsNullish quatrefoil.schema/RenderTree) Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (JsNullish quatrefoil.schema/RenderTree) Dynamic (-> Unit) (:features :io :js-ffi :state)
         'render-canvas-with-dispatch! $ %{} 'CodeEntry
           :doc "|Render a Component or Shape with separate state and action decoders for Quatrefoil events."
           :code $ quote $ defn render-canvas-with-dispatch! (markup read-state read-action on-event!)
@@ -2246,7 +2246,7 @@
             Fn (quatrefoil.cursor/DispatchEvent S A) (-> Unit)
             -> Unit
             :generics S A
-            :features :js-ffi
+            :features :io :js-ffi :state
         'rotate-viewer-by! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn rotate-viewer-by! (x)
             let
@@ -2256,7 +2256,7 @@
               .!render @*global-renderer @*global-scene @*global-camera
               , &unit
           :examples $ []
-          :schema $ quote $ Fn Number (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Number (-> Unit) (:features :js-ffi :state)
         'shift-viewer-by! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn shift-viewer-by! (x)
             let
@@ -2267,7 +2267,7 @@
               .!render @*global-renderer @*global-scene @*global-camera
               , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (-> Unit) (:features :js-ffi :state)
         'to-viewer-axis $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn to-viewer-axis (x y z)
             let
@@ -2304,7 +2304,7 @@
                     negate
               -> from-x (&v+ from-y) (&v+ from-z)
           :examples $ []
-          :schema $ quote $ Fn Number Number Number (-> quaternion.vector/V3) (:features :js-ffi)
+          :schema $ quote $ Fn Number Number Number (-> quaternion.vector/V3) (:features :js-ffi :state)
         'tween-call $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn tween-call (n d f)
             &doseq
@@ -2355,7 +2355,7 @@
                 _ $ println "|unknown camera control:" control
               , &unit
           :examples $ []
-          :schema $ quote $ Fn CameraControl (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn CameraControl (-> Unit) (:features :io :js-ffi :state)
         'xr-input-source-at $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn xr-input-source-at (session index)
             aget (.-inputSources session) index
@@ -2788,7 +2788,7 @@
                 , object3d
               new THREE/Object3D
           :examples $ []
-          :schema $ quote $ Fn (List Number) Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn (List Number) Dynamic (-> Dynamic) (:features :js-ffi :state)
         'call-event-on-target! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn call-event-on-target! (maybe-target event)
             let
@@ -2809,7 +2809,7 @@
                 do (reset! *focused-coord nil) (eprintln "|lose focus")
               , &unit
           :examples $ []
-          :schema $ quote $ Fn JsObject E (-> Unit) (:generics E) (:features :js-ffi)
+          :schema $ quote $ Fn JsObject E (-> Unit) (:generics E) (:features :io :js-ffi :state)
         'create-ambient-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-ambient-light (params position)
             let
@@ -3210,7 +3210,7 @@
                 :some-object $ create-some-object params position rotation scale material
                 _ $ do (js/console.warn "|Unknown element" element) (new THREE/Object3D)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (List Number) (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (List Number) (-> Dynamic) (:features :js-ffi :state)
         'create-shape-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-shape-element (params position rotation scale material)
             let
@@ -3262,7 +3262,7 @@
           :schema $ quote $ Fn Dynamic (Option quatrefoil.schema/Vec3Value)
             Option $ List Number
             Option quatrefoil.schema/Vec3Value
-            , Dynamic (-> Dynamic) (:features :js-ffi)
+            , Dynamic (-> Dynamic) (:features :js-ffi :state)
         'create-sphere-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-sphere-element (params position rotation scale material event coord)
             let
@@ -3511,7 +3511,7 @@
                   do (reset! *focused-coord nil) (println "|lose focus")
               , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (-> Unit) (:features :io :js-ffi :state)
         'on-control-event $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-control-event (move delta elapsed)
             if (non-nil? @*focused-coord)
@@ -3528,7 +3528,7 @@
               println "|no focused coord to control" @*focused-coord
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (List Number) (List Number) Number (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (List Number) (List Number) Number (-> Unit) (:features :io :js-ffi :state)
         'on-gamepad-event $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-gamepad-event (info elapsed)
             if (non-nil? @*focused-coord)
@@ -3545,7 +3545,7 @@
               println "|no focused coord to control" @*focused-coord
             , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic Number (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic Number (-> Unit) (:features :io :js-ffi :state)
         'push-array! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn push-array! (xs x)
             quatrefoil.util.core/require-decoded $ try-decode-map-as
@@ -3639,7 +3639,7 @@
               reset! *global-camera object3d
               , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (-> Unit) (:features :js-ffi :state)
         'set-position! $ %{} 'CodeEntry
           :doc "|Apply an optional position to a three.js object; none leaves the object's own default."
           :code $ quote $ defn set-position! (object position-option)
@@ -3802,7 +3802,7 @@
           :schema $ quote $ Fn Dynamic (List Number)
             Set $ Tuple Number $ JsNullish quatrefoil.schema/Shape
             -> Unit
-            :features :js-ffi
+            :features :js-ffi :state
         'add-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn add-element (target coord op-data)
             if (empty? coord) (js/console.warn "|Cannot remove by empty coord!")
@@ -3813,7 +3813,7 @@
                   build-tree coord op-data
             , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic (List Number) quatrefoil.schema/RenderTree (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (List Number) quatrefoil.schema/RenderTree (-> Unit) (:features :js-ffi :state)
         'apply-changes $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn apply-changes (changes)
             ; js/console.log |changes (count changes) changes
@@ -3841,7 +3841,7 @@
                   (:add-events _names) (js/console.warn "|Unknown op:" :add-events)
                   (:remove-events _names) (js/console.warn "|Unknown op:" :remove-events)
           :examples $ []
-          :schema $ quote $ Fn (List quatrefoil.schema/ScenePatch) (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (List quatrefoil.schema/ScenePatch) (-> Unit) (:features :io :js-ffi :state)
         'ffi-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn ffi-object (value) (unsafe-coerce value JsObject)
           :examples $ []
@@ -3859,7 +3859,7 @@
                 .!removeBy parent $ .unwrap $ last coord
             , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic (List Number) (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (List Number) (-> Unit) (:features :js-ffi :state)
         'remove-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn remove-material (target coord op-data)
             let
@@ -3872,7 +3872,7 @@
                   :transparent $ set! (.-transparent material) true
                   _ $ println "|Unknown material prop:" op-data
           :examples $ []
-          :schema $ quote $ Fn Dynamic (List Number) (Set Tag) (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (List Number) (Set Tag) (-> Unit) (:features :io :js-ffi)
         'replace-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn replace-element (target coord op-data)
             if (empty? coord) (js/console.warn "|Cannot replace with empty coord!")
@@ -3883,7 +3883,7 @@
                   build-tree coord op-data
             , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic (List Number) (JsNullish quatrefoil.schema/Shape) (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic (List Number) (JsNullish quatrefoil.schema/Shape) (-> Unit) (:features :js-ffi :state)
         'replace-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn replace-material (target coord op-data)
             set!
