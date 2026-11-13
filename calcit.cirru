@@ -13,6 +13,10 @@
         'DefaultMaterialValue $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defunion DefaultMaterialValue Tag Number
           :examples $ []
+        'ResolvedSceneChild $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defunion ResolvedSceneChild quatrefoil.schema/RenderTree (Map Number quatrefoil.schema/RenderTree)
+          :examples $ []
+          :schema $ quote UnionDef
         'SceneChild $ %{} 'CodeEntry
           :doc "|A scene child can be a render tree, an optional tree, or a Number-keyed child map."
           :code $ quote $ defunion SceneChild quatrefoil.schema/RenderTree (Option quatrefoil.schema/RenderTree) (Map Number quatrefoil.schema/RenderTree)
@@ -142,9 +146,9 @@
           :doc "|Unwrap optional render nodes and retain keyed child maps."
           :code $ quote $ defn resolve-children (children)
             foldl children
-              assert-type ([]) (List SceneChild)
+              assert-type ([]) (List ResolvedSceneChild)
               fn (acc child)
-                hint-fn $ Fn (List SceneChild) SceneChild $ -> (List SceneChild)
+                hint-fn $ Fn (List ResolvedSceneChild) SceneChild $ -> (List ResolvedSceneChild)
                 match child
                   (Option optional)
                     match optional
@@ -155,7 +159,7 @@
                   (Map keyed) (append acc keyed)
           :examples $ []
           :schema $ quote $ Fn (List SceneChild)
-            -> $ List SceneChild
+            -> $ List ResolvedSceneChild
         'scene $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn scene (props & children) (create-element :scene props children)
           :examples $ []
