@@ -2225,7 +2225,10 @@
             ; .!render @*global-renderer @*global-scene @*global-camera
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (JsNullish quatrefoil.schema/RenderTree) (JsNullish AnyFn) (-> Unit) (:features :io :js-ffi :state) (:open :reflect)
+          :schema $ quote $ Fn (JsNullish quatrefoil.schema/RenderTree)
+            JsNullish $ Fn quatrefoil.cursor/DispatchTarget Dynamic (-> Unit) (:features :io :js-ffi :state)
+            -> Unit
+            :features :io :js-ffi :state
         'render-canvas-with-dispatch! $ %{} 'CodeEntry
           :doc "|Render a Component or Shape with separate state and action decoders for Quatrefoil events."
           :code $ quote $ defn render-canvas-with-dispatch! (markup read-state read-action on-event!)
@@ -3975,7 +3978,8 @@
         '*proxied-dispatch $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defref *proxied-dispatch nil
           :examples $ []
-          :schema $ quote $ Ref (JsNullish AnyFn)
+          :schema $ quote $ Ref
+            JsNullish $ Fn quatrefoil.cursor/DispatchTarget Dynamic (-> Unit) (:features :io :js-ffi :state)
         '*viewer-angle $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defref *viewer-angle (&/ &PI 2)
           :examples $ []
