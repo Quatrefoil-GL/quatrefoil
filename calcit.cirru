@@ -2493,9 +2493,10 @@
                 collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :remove-events removed-events
               , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (List Number)
+          :schema $ quote $ Fn Previous Current (List Number)
             Fn quatrefoil.schema/ScenePatch $ -> Unit
             -> Unit
+            :generics Previous Current
         'diff-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-material (prev-material material coord collect!)
             if
