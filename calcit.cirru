@@ -10,6 +10,9 @@
   :files $ {}
     'quatrefoil.alias $ %{} 'FileEntry
       :defs $ {}
+        'DefaultMaterialValue $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defunion DefaultMaterialValue Tag Number
+          :examples $ []
         'ambient-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn ambient-light (props & children) (create-element :ambient-light props children)
           :examples $ []
@@ -60,6 +63,7 @@
           :code $ quote $ def default-material
             {} (:kind :mesh-basic) (:color 0xa0a0a0)
           :examples $ []
+          :schema $ quote $ Map Tag DefaultMaterialValue
         'directional-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn directional-light (props & children) (create-element :directional-light props children)
           :examples $ []
@@ -2492,9 +2496,10 @@
                 collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :remove-events removed-events
               , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (List Number)
+          :schema $ quote $ Fn Previous Current (List Number)
             Fn quatrefoil.schema/ScenePatch $ -> Unit
             -> Unit
+            :generics Previous Current
         'diff-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-material (prev-material material coord collect!)
             if
