@@ -4080,7 +4080,7 @@
           :code $ quote $ defn comp? (x)
             and (struct? x) (&struct:matches? x Component)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Bool)
+          :schema $ quote $ Fn Input (-> Bool) (:generics Input)
         'component-tree $ %{} 'CodeEntry
           :doc "|Expose the inner node in the renderer’s existing nullable tree representation."
           :code $ quote $ defn component-tree (component)
@@ -4094,7 +4094,7 @@
           :code $ quote $ defn shape? (x)
             and (struct? x) (&struct:matches? x Shape)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Bool)
+          :schema $ quote $ Fn Input (-> Bool) (:generics Input)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.schema
     'quatrefoil.util.core $ %{} 'FileEntry
