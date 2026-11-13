@@ -63,7 +63,7 @@
                     quatrefoil.util.core/field-or props :on $ quatrefoil.util.core/field-or props :event $ {}
                     , :children $ arrange-children children
           :examples $ []
-          :schema $ quote $ Fn Tag P (List C) (-> Shape) (:generics P C)
+          :schema $ quote $ Fn Tag P (List SceneChild) (-> Shape) (:generics P)
         'default-material $ %{} 'CodeEntry (:doc "|Material of an element that gives no :material.")
           :code $ quote $ def default-material
             {} (:kind :mesh-basic) (:color 0xa0a0a0)
