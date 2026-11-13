@@ -27,7 +27,8 @@
             let
                 children $ resolve-children children0
                 cursor $ first children
-                result $ if
+              decode-map-as
+                if
                   and
                     = 1 $ count children
                     not $ or
@@ -37,10 +38,20 @@
                   -> children
                     map-indexed $ fn (idx p) ([] idx p)
                     pairs-map
-              ; .log js/console "|Handle children:" children result
-              , result
+                Map Number quatrefoil.schema/RenderTree
           :examples $ []
-          :schema $ quote $ Fn (List C) (-> Dynamic) (:generics C)
+          :schema $ quote $ Fn (List SceneChild)
+            -> $ Map Number quatrefoil.schema/RenderTree
+          :tests $ [] $ %{} 'TestEntry (:name |preserves-optional-and-keyed-children)
+            :code $ quote $ let
+                child $ group $ {}
+              assert=
+                {} $ 0 child
+                arrange-children $ [] None $ Some child
+              assert=
+                {} $ 7 child
+                arrange-children $ [] $ {} (7 child)
+            :tags $ #{} :unit
         'box $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn box (props & children) (create-element :box props children)
           :examples $ []
