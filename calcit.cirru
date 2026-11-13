@@ -21,7 +21,7 @@
         'ambient-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn ambient-light (props & children) (create-element :ambient-light props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'arrange-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn arrange-children (children0)
             let
@@ -44,11 +44,11 @@
         'box $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn box (props & children) (create-element :box props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'buffer-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn buffer-object (props & children) (create-element :buffer-object props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'create-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-element (el-name props children)
             Shape :name el-name :params
@@ -72,7 +72,7 @@
         'directional-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn directional-light (props & children) (create-element :directional-light props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'flat-values $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defmacro flat-values (& points)
             &let
@@ -84,35 +84,35 @@
         'group $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn group (props & children) (create-element :group props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'line $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn line (props & children) (create-element :line props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'line-segments $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn line-segments (props & children) (create-element :line-segments props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'mesh-line $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn mesh-line (props & children) (create-element :mesh-line props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'parametric $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn parametric (props & children) (create-element :parametric props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'plane-reflector $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn plane-reflector (props & children) (create-element :plane-reflector props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'point-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn point-light (props & children) (create-element :point-light props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'polyhedron $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn polyhedron (props & children) (create-element :polyhedron props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'read-vector-prop $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn read-vector-prop (props key)
             match (quatrefoil.util.core/field-option props key)
@@ -126,7 +126,7 @@
         'rect-area-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn rect-area-light (props & children) (create-element :rect-area-light props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'resolve-children $ %{} 'CodeEntry
           :doc "|Children with Options resolved: a some child is unwrapped, a none child is left out, other children stay."
           :code $ quote $ defn resolve-children (children)
@@ -152,11 +152,11 @@
         'shader-mesh $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn shader-mesh (props & children) (create-element :shader-mesh props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'shape $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn shape (props & children) (create-element :shape props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'some-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn some-object (props)
             create-element :some-object props $ []
@@ -165,27 +165,27 @@
         'sphere $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn sphere (props & children) (create-element :sphere props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'spline $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn spline (props & children) (create-element :spline props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'spot-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn spot-light (props & children) (create-element :spot-light props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'text $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn text (props & children) (create-element :text props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'torus $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn torus (props & children) (create-element :torus props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'tube $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn tube (props & children) (create-element :tube props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.alias
           :require $ quatrefoil.schema :refer $ Shape Component comp? shape?
@@ -216,25 +216,27 @@
                   {}
                     :scale $ [] 0.01 0.01 0.01
                     :position $ [] 0 1.2 -0.8
-                  match tab
-                    :portal $ comp-portal $ fn (next d!)
-                      d! cursor $ assoc state :tab next
-                    :todolist $ comp-todolist $ quatrefoil.util.core/require-decoded
-                      try-decode-map-as (quatrefoil.util.core/require-field store :tasks) (Map Number Dynamic)
-                    :demo $ comp-demo
-                    :lines $ comp-lines
-                    :shapes $ comp-shapes
-                    :triflorum $ comp-triflorum
-                    :mirror $ comp-mirror $ >> states :mirror
-                    :fly $ comp-fly-city $ >> states :fly
-                    :quat-tree $ comp-quat-tree
-                    :quilling $ comp-quilling
-                    :control $ comp-control-demo $ >> states :control
-                    :shader $ comp-shader
-                    :gltf $ comp-gltf
-                    :sphere-grid $ comp-sphere-grid
-                    _ $ comp-portal $ fn (next d!)
-                      d! cursor $ assoc state :tab next
+                  decode-map-as
+                    match tab
+                      :portal $ comp-portal $ fn (next d!)
+                        d! cursor $ assoc state :tab next
+                      :todolist $ comp-todolist $ quatrefoil.util.core/require-decoded
+                        try-decode-map-as (quatrefoil.util.core/require-field store :tasks) (Map Number Dynamic)
+                      :demo $ comp-demo
+                      :lines $ comp-lines
+                      :shapes $ comp-shapes
+                      :triflorum $ comp-triflorum
+                      :mirror $ comp-mirror $ >> states :mirror
+                      :fly $ comp-fly-city $ >> states :fly
+                      :quat-tree $ comp-quat-tree
+                      :quilling $ comp-quilling
+                      :control $ comp-control-demo $ >> states :control
+                      :shader $ comp-shader
+                      :gltf $ comp-gltf
+                      :sphere-grid $ comp-sphere-grid
+                      _ $ comp-portal $ fn (next d!)
+                        d! cursor $ assoc state :tab next
+                    , 'quatrefoil.schema/RenderTree
                   if (not= tab :portal)
                     Some $ comp-back $ fn (d!)
                       d! cursor $ assoc state :tab :portal
@@ -1007,11 +1009,13 @@
                         fn (text) (d! :add-task text) &unit
               group
                 {} $ :position $ [] 0 20 0
-                ->
-                  &map:to-list $ quatrefoil.util.core/require-decoded $ try-decode-map-as tasks (Map Number Dynamic)
-                  map-indexed $ fn (idx entry)
-                    let[] (task-id task) entry $ [] task-id $ comp-task task idx
-                  pairs-map
+                decode-map-as
+                  ->
+                    &map:to-list $ quatrefoil.util.core/require-decoded $ try-decode-map-as tasks (Map Number Dynamic)
+                    map-indexed $ fn (idx entry)
+                      let[] (task-id task) entry $ [] task-id $ comp-task task idx
+                    pairs-map
+                  Map Number quatrefoil.schema/RenderTree
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 0 20 50
           :examples $ []
