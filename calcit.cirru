@@ -3639,8 +3639,9 @@
                   let[] (x y z) xs $ [] x y z
                   raise "|[Quatrefoil] expected exactly three Vec3 components"
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn Input
             -> $ Tuple Number Number Number
+            :generics Input
           :tests $ []
             %{} 'TestEntry (:name |accepts-v3-and-three-number-list)
               :code $ quote $ do
