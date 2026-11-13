@@ -4217,7 +4217,7 @@
               (:some field-value) field-value
               (:none) default
           :examples $ []
-          :schema $ quote $ Fn M Tag Dynamic (-> Dynamic) (:generics M)
+          :schema $ quote $ Fn M Tag Fallback (-> Dynamic) (:generics M Fallback)
         'find-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn find-element (tree coord)
             if
