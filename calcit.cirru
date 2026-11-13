@@ -2663,9 +2663,10 @@
     'quatrefoil.dsl.object3d-dom $ %{} 'FileEntry
       :defs $ {}
         '*focused-coord $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defref *focused-coord nil
+          :code $ quote $ defref *focused-coord None
           :examples $ []
-          :schema $ quote $ Ref Dynamic
+          :schema $ quote $ Ref
+            Option $ List Number
         'ArrayLengthHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ArrayLengthHost (:length 'Number)
           :examples $ []
@@ -2804,9 +2805,9 @@
                   match maybe-handler
                     (:some handler) (handler event @*proxied-dispatch)
                     (:none) (println "|no handler" coord)
-                  reset! *focused-coord coord
+                  reset! *focused-coord $ Some coord
                   ; println "|focus to" coord
-                do (reset! *focused-coord nil) (eprintln "|lose focus")
+                do (reset! *focused-coord None) (eprintln "|lose focus")
               , &unit
           :examples $ []
           :schema $ quote $ Fn JsObject E (-> Unit) (:generics E) (:features :io :js-ffi :state)
@@ -3415,7 +3416,7 @@
         'font-resource $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def font-resource (load-font-resource)
           :examples $ []
-          :schema $ quote Dynamic
+          :schema $ quote JsObject
         'geometry-compute-normals! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn geometry-compute-normals! (g)
             .!computeVertexNormals $ unsafe-coerce g BufferGeometryHost
@@ -3508,41 +3509,41 @@
                     , interactive-hit?
                   target $ aget intersects 0
                 if (js-present? target) (call-event-on-target! target event-host)
-                  do (reset! *focused-coord nil) (println "|lose focus")
+                  do (reset! *focused-coord None) (println "|lose focus")
               , &unit
           :examples $ []
           :schema $ quote $ Fn Dynamic (-> Unit) (:features :io :js-ffi :state)
         'on-control-event $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-control-event (move delta elapsed)
-            if (non-nil? @*focused-coord)
-              let
-                  coord @*focused-coord
-                  element-tree @*global-tree
-                  target-el $ find-element element-tree coord
-                  maybe-handler $ quatrefoil.util.core/field-option
-                    quatrefoil.util.core/field-or target-el :event $ {}
-                    , :control
-                match maybe-handler
-                  (:some handler) (handler move delta elapsed @*proxied-dispatch)
-                  (:none) &unit
-              println "|no focused coord to control" @*focused-coord
+            match @*focused-coord
+              (:some coord)
+                let
+                    element-tree @*global-tree
+                    target-el $ find-element element-tree coord
+                    maybe-handler $ quatrefoil.util.core/field-option
+                      quatrefoil.util.core/field-or target-el :event $ {}
+                      , :control
+                  match maybe-handler
+                    (:some handler) (handler move delta elapsed @*proxied-dispatch)
+                    (:none) &unit
+              (:none) (println "|no focused coord to control" nil)
             , &unit
           :examples $ []
           :schema $ quote $ Fn (List Number) (List Number) Number (-> Unit) (:features :io :js-ffi :state)
         'on-gamepad-event $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-gamepad-event (info elapsed)
-            if (non-nil? @*focused-coord)
-              let
-                  coord @*focused-coord
-                  element-tree @*global-tree
-                  target-el $ find-element element-tree coord
-                  maybe-handler $ quatrefoil.util.core/field-option
-                    quatrefoil.util.core/field-or target-el :event $ {}
-                    , :gamepad
-                match maybe-handler
-                  (:some handler) (handler info elapsed @*proxied-dispatch)
-                  (:none) &unit
-              println "|no focused coord to control" @*focused-coord
+            match @*focused-coord
+              (:some coord)
+                let
+                    element-tree @*global-tree
+                    target-el $ find-element element-tree coord
+                    maybe-handler $ quatrefoil.util.core/field-option
+                      quatrefoil.util.core/field-or target-el :event $ {}
+                      , :gamepad
+                  match maybe-handler
+                    (:some handler) (handler info elapsed @*proxied-dispatch)
+                    (:none) &unit
+              (:none) (println "|no focused coord to control" nil)
             , &unit
           :examples $ []
           :schema $ quote $ Fn Dynamic Number (-> Unit) (:features :io :js-ffi :state)
