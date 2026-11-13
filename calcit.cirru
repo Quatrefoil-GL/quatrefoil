@@ -13,6 +13,11 @@
         'DefaultMaterialValue $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defunion DefaultMaterialValue Tag Number
           :examples $ []
+        'SceneChild $ %{} 'CodeEntry
+          :doc "|A scene child can be a render tree, an optional tree, or a Number-keyed child map."
+          :code $ quote $ defunion SceneChild quatrefoil.schema/RenderTree (Option quatrefoil.schema/RenderTree) (Map Number quatrefoil.schema/RenderTree)
+          :examples $ []
+          :schema $ quote UnionDef
         'ambient-light $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn ambient-light (props & children) (create-element :ambient-light props children)
           :examples $ []
@@ -143,7 +148,7 @@
         'scene $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn scene (props & children) (create-element :scene props children)
           :examples $ []
-          :schema $ quote $ Fn P (& Dynamic) (-> Shape) (:generics P)
+          :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'shader-mesh $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn shader-mesh (props & children) (create-element :shader-mesh props children)
           :examples $ []
