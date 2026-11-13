@@ -2480,9 +2480,10 @@
                     not $ identical? prev-child child
                     diff-tree prev-child child (conj coord k0) collect!
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (List Number)
+          :schema $ quote $ Fn Previous Current (List Number)
             Fn quatrefoil.schema/ScenePatch $ -> Unit
             -> Unit
+            :generics Previous Current
             :features :js-ffi
         'diff-events $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-events (prev-events events coord collect!)
