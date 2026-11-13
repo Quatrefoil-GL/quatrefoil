@@ -13,6 +13,10 @@
         'DefaultMaterialValue $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defunion DefaultMaterialValue Tag Number
           :examples $ []
+        'ResolvedSceneChild $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defunion ResolvedSceneChild quatrefoil.schema/RenderTree (Map Number quatrefoil.schema/RenderTree)
+          :examples $ []
+          :schema $ quote UnionDef
         'SceneChild $ %{} 'CodeEntry
           :doc "|A scene child can be a render tree, an optional tree, or a Number-keyed child map."
           :code $ quote $ defunion SceneChild quatrefoil.schema/RenderTree (Option quatrefoil.schema/RenderTree) (Map Number quatrefoil.schema/RenderTree)
@@ -139,23 +143,23 @@
           :examples $ []
           :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'resolve-children $ %{} 'CodeEntry
-          :doc "|Children with Options resolved: a some child is unwrapped, a none child is left out, other children stay."
+          :doc "|Unwrap optional render nodes and retain keyed child maps."
           :code $ quote $ defn resolve-children (children)
-            foldl children ([])
+            foldl children
+              assert-type ([]) (List ResolvedSceneChild)
               fn (acc child)
-                hint-fn $ Fn (List Dynamic) Dynamic $ -> (List Dynamic)
-                if
-                  and (enum? child)
-                    = (&enum:definition child) (Some Option)
-                  if
-                    = :some $ &enum:nth child 0
-                    append acc $ &enum:nth child 1
-                    , acc
-                  append acc child
+                hint-fn $ Fn (List ResolvedSceneChild) SceneChild $ -> (List ResolvedSceneChild)
+                match child
+                  (Option optional)
+                    match optional
+                      (:some tree) (append acc tree)
+                      (:none) acc
+                  (quatrefoil.schema/Component tree) (append acc tree)
+                  (quatrefoil.schema/Shape tree) (append acc tree)
+                  (Map keyed) (append acc keyed)
           :examples $ []
-          :schema $ quote $ Fn (List C)
-            -> $ List Dynamic
-            :generics C
+          :schema $ quote $ Fn (List SceneChild)
+            -> $ List ResolvedSceneChild
         'scene $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn scene (props & children) (create-element :scene props children)
           :examples $ []
