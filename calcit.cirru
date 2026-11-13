@@ -31,6 +31,25 @@
             let
                 children $ resolve-children children0
                 cursor $ first children
+                result $ if
+                  and
+                    = 1 $ count children
+                    not $ or
+                      comp? $ .unwrap cursor
+                      shape? $ .unwrap cursor
+                  .unwrap cursor
+                  -> children
+                    map-indexed $ fn (idx p) ([] idx p)
+                    pairs-map
+              ; .log js/console "|Handle children:" children result
+              , result
+          :examples $ []
+          :schema $ quote $ Fn (List C) (-> Dynamic) (:generics C)
+        'arrange-scene-children $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn arrange-scene-children (children0)
+            let
+                children $ resolve-scene-children children0
+                cursor $ first children
               decode-map-as
                 if
                   and
@@ -51,10 +70,10 @@
                 child $ group $ {}
               assert=
                 {} $ 0 child
-                arrange-children $ [] None $ Some child
+                arrange-scene-children $ [] None $ Some child
               assert=
                 {} $ 7 child
-                arrange-children $ [] $ {} (7 child)
+                arrange-scene-children $ [] $ {} (7 child)
             :tags $ #{} :unit
         'box $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn box (props & children) (create-element :box props children)
@@ -76,7 +95,7 @@
                   quatrefoil.util.core/field-or props :attributes $ []
                   , :event
                     quatrefoil.util.core/field-or props :on $ quatrefoil.util.core/field-or props :event $ {}
-                    , :children $ arrange-children children
+                    , :children $ arrange-scene-children children
           :examples $ []
           :schema $ quote $ Fn Tag P (List SceneChild) (-> Shape) (:generics P)
         'default-material $ %{} 'CodeEntry (:doc "|Material of an element that gives no :material.")
@@ -143,8 +162,26 @@
           :examples $ []
           :schema $ quote $ Fn P (& SceneChild) (-> Shape) (:generics P)
         'resolve-children $ %{} 'CodeEntry
-          :doc "|Unwrap optional render nodes and retain keyed child maps."
+          :doc "|Children with Options resolved: a some child is unwrapped, a none child is left out, other children stay."
           :code $ quote $ defn resolve-children (children)
+            foldl children ([])
+              fn (acc child)
+                hint-fn $ Fn (List Dynamic) Dynamic $ -> (List Dynamic)
+                if
+                  and (enum? child)
+                    = (&enum:definition child) (Some Option)
+                  if
+                    = :some $ &enum:nth child 0
+                    append acc $ &enum:nth child 1
+                    , acc
+                  append acc child
+          :examples $ []
+          :schema $ quote $ Fn (List C)
+            -> $ List Dynamic
+            :generics C
+        'resolve-scene-children $ %{} 'CodeEntry
+          :doc "|Unwrap optional render nodes and retain keyed child maps."
+          :code $ quote $ defn resolve-scene-children (children)
             foldl children
               assert-type ([]) (List ResolvedSceneChild)
               fn (acc child)
