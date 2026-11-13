@@ -4,7 +4,7 @@
 
 升级后请配套使用正式 Calcit 与 `@calcit/procs` 0.42.1，以及 Quaternion 0.2.25。重新安装依赖并生成 JS。直接构造场景补丁时，新增节点使用 `RenderTree`，替换节点使用清理后的 `Shape` 或空值。
 
-旧入口 `render-canvas!` 的第二个参数现在需要是函数或空值。新增调用可以使用 `render-canvas-with-dispatch!`，通过解码器给事件状态和动作提供具体类型。
+旧入口 `render-canvas!` 的第二个参数可以为空，也可以传入接受 `(DispatchTarget, payload)` 并返回 `Unit` 的回调。`DispatchTarget` 接受操作 Tag 或由 Tag 组成的状态游标。新增调用可以使用 `render-canvas-with-dispatch!`，通过解码器给事件状态和动作提供具体类型。
 
 按 0.42.1 效果边界，`quatrefoil.core` 的 `render-canvas!`、`init-renderer!`、`init-controls!`、`tween-move-camera!` 等读写全局渲染状态的函数，`Fn` schema 声明了 `:state`（部分另有 `:io`）。应用里调用它们的 `render-app!`、`dispatch!` 等也要声明，否则 0.42 会给出 `W_STATE_FEATURE_REQUIRED` / `W_IO_FEATURE_REQUIRED` 提示，可用 `calcit fix --rule effect-features-v1` 一次补齐。
 
