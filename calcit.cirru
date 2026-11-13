@@ -558,7 +558,7 @@
           :code $ quote $ defn js-number (value)
             quatrefoil.util.core/require-decoded $ try-decode-map-as value 'Number
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Number) (:features :js-ffi)
+          :schema $ quote $ Fn Input (-> Number) (:generics Input) (:features :js-ffi)
         'make-building-data $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn make-building-data (n)
             -> (range n)
@@ -1203,7 +1203,7 @@
           :code $ quote $ defn js-number (value)
             quatrefoil.util.core/require-decoded $ try-decode-map-as value 'Number
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Number) (:features :js-ffi)
+          :schema $ quote $ Fn Input (-> Number) (:generics Input) (:features :js-ffi)
         'load-gltf! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn load-gltf! (loader url on-load on-progress on-error)
             .!load (unsafe-coerce loader GltfLoaderHost) url on-load on-progress on-error
@@ -2089,7 +2089,7 @@
           :code $ quote $ defn js-number (value)
             quatrefoil.util.core/require-decoded $ try-decode-map-as value 'Number
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Number) (:features :js-ffi)
+          :schema $ quote $ Fn Input (-> Number) (:generics Input) (:features :js-ffi)
         'listen-on-controller! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn listen-on-controller! (controller)
             let
@@ -3478,7 +3478,7 @@
           :code $ quote $ defn js-number (value)
             quatrefoil.util.core/require-decoded $ try-decode-map-as value 'Number
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Number) (:features :js-ffi)
+          :schema $ quote $ Fn Input (-> Number) (:generics Input) (:features :js-ffi)
         'load-file $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defmacro load-file (filename)
             read-file $ str filename
