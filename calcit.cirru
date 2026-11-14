@@ -213,7 +213,7 @@
           :code $ quote $ defn some-object (props)
             create-element :some-object props $ []
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Shape)
+          :schema $ quote $ Fn P (-> Shape) (:generics P)
         'sphere $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn sphere (props & children) (create-element :sphere props children)
           :examples $ []
@@ -632,8 +632,9 @@
                 + 2 $ * t 20
                 cos $ * 40 t
           :examples $ []
-          :schema $ quote $ Fn Number Dynamic
+          :schema $ quote $ Fn Number Factor
             -> $ List Number
+            :generics Factor
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.comp.lines
           :require
@@ -725,7 +726,7 @@
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true)
                   :color $ hsluvx 0 30 96
           :examples $ []
-          :schema $ quote $ Fn Tag String Dynamic Dynamic (-> quatrefoil.schema/Component) (:features :js-ffi)
+          :schema $ quote $ Fn Tag String (List Number) Dynamic (-> quatrefoil.schema/Component) (:features :js-ffi)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.comp.portal
           :require
@@ -813,7 +814,7 @@
                     &+ (&* z1 t)
                       &* z2 $ &- 1 t
           :examples $ []
-          :schema $ quote $ Fn Number Dynamic
+          :schema $ quote $ Fn Number (Map Tag quaternion.core/Quaternion)
             -> $ List Number
         'transformers $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def transformers
@@ -990,8 +991,9 @@
                 * 1 $ cos $ + (* 10 &PI v) (* 3 &PI u)
               * 8 v
           :examples $ []
-          :schema $ quote $ Fn Number Number Dynamic
+          :schema $ quote $ Fn Number Number Data
             -> $ List Number
+            :generics Data
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.comp.shapes
           :require
@@ -3639,8 +3641,9 @@
                   let[] (x y z) xs $ [] x y z
                   raise "|[Quatrefoil] expected exactly three Vec3 components"
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn Input
             -> $ Tuple Number Number Number
+            :generics Input
           :tests $ []
             %{} 'TestEntry (:name |accepts-v3-and-three-number-list)
               :code $ quote $ do
@@ -4216,7 +4219,7 @@
               (:some field-value) field-value
               (:none) default
           :examples $ []
-          :schema $ quote $ Fn M Tag Dynamic (-> Dynamic) (:generics M)
+          :schema $ quote $ Fn M Tag Fallback (-> Dynamic) (:generics M Fallback)
         'find-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn find-element (tree coord)
             if
