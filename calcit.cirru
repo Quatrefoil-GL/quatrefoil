@@ -213,7 +213,7 @@
           :code $ quote $ defn some-object (props)
             create-element :some-object props $ []
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Shape)
+          :schema $ quote $ Fn P (-> Shape) (:generics P)
         'sphere $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn sphere (props & children) (create-element :sphere props children)
           :examples $ []
