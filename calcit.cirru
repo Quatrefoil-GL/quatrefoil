@@ -814,7 +814,7 @@
                     &+ (&* z1 t)
                       &* z2 $ &- 1 t
           :examples $ []
-          :schema $ quote $ Fn Number Dynamic
+          :schema $ quote $ Fn Number (Map Tag quaternion.core/Quaternion)
             -> $ List Number
         'transformers $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def transformers
