@@ -2597,9 +2597,10 @@
                   collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :update-material updated-material
                 , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (List Number)
+          :schema $ quote $ Fn Previous Current (List Number)
             Fn quatrefoil.schema/ScenePatch $ -> Unit
             -> Unit
+            :generics Previous Current
         'diff-params $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-params (prev-params params coord collect!)
             ; "|unused code, when params changed, geometry would be recreated, so not diffed"
