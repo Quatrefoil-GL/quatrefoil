@@ -615,12 +615,19 @@
           :schema $ quote $ Fn Input (-> Number) (:generics Input) (:features :js-ffi)
         'make-building-data $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn make-building-data (n)
-            -> (range n)
-              map $ fn (i)
-                [] (rand-shift 0 160) (rand-shift 0 160) (rand-shift 12 8) (rand-shift 8 6) (rand-shift 60 50)
+            .map (range n)
+              fn (i)
+                hint-fn $ Fn Number $ -> (List Number)
+                []
+                  js-number $ rand-shift 0 160
+                  js-number $ rand-shift 0 160
+                  js-number $ rand-shift 12 8
+                  js-number $ rand-shift 8 6
+                  js-number $ rand-shift 60 50
           :examples $ []
           :schema $ quote $ Fn Number
-            -> $ List Dynamic
+            -> $ List $ List Number
+            :features :js-ffi
         'tube-fn $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn tube-fn (t factor)
             []
@@ -2597,9 +2604,10 @@
                   collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :update-material updated-material
                 , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (List Number)
+          :schema $ quote $ Fn Previous Current (List Number)
             Fn quatrefoil.schema/ScenePatch $ -> Unit
             -> Unit
+            :generics Previous Current
         'diff-params $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-params (prev-params params coord collect!)
             ; "|unused code, when params changed, geometry would be recreated, so not diffed"
