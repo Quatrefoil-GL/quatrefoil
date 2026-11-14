@@ -632,8 +632,9 @@
                 + 2 $ * t 20
                 cos $ * 40 t
           :examples $ []
-          :schema $ quote $ Fn Number Dynamic
+          :schema $ quote $ Fn Number Factor
             -> $ List Number
+            :generics Factor
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.comp.lines
           :require
@@ -725,7 +726,7 @@
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.9) (:transparent true)
                   :color $ hsluvx 0 30 96
           :examples $ []
-          :schema $ quote $ Fn Tag String Dynamic Dynamic (-> quatrefoil.schema/Component) (:features :js-ffi)
+          :schema $ quote $ Fn Tag String (List Number) Dynamic (-> quatrefoil.schema/Component) (:features :js-ffi)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.comp.portal
           :require
@@ -990,8 +991,9 @@
                 * 1 $ cos $ + (* 10 &PI v) (* 3 &PI u)
               * 8 v
           :examples $ []
-          :schema $ quote $ Fn Number Number Dynamic
+          :schema $ quote $ Fn Number Number Data
             -> $ List Number
+            :generics Data
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.comp.shapes
           :require
