@@ -795,7 +795,7 @@
           :code $ quote $ def leaf-material
             {} (:kind :mesh-standard) (:color 0x66cc55) (:opacity 0.5) (:transparent true)
           :examples $ []
-          :schema $ quote Dynamic
+          :schema $ quote $ Map Tag quatrefoil.app.materials/DemoMaterialValue
         'pick-color $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn pick-color (name)
             match name (:a 0xbbaaff) (:b 0x88bbff) (:c 0x77ccaa) (_ 0xffffff)
@@ -835,7 +835,7 @@
           :code $ quote $ def tube-material
             {} (:kind :mesh-standard) (:color 0xcccc77) (:opacity 1) (:transparent true)
           :examples $ []
-          :schema $ quote Dynamic
+          :schema $ quote $ Map Tag quatrefoil.app.materials/DemoMaterialValue
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.comp.quat-tree
           :require
@@ -885,12 +885,12 @@
           :code $ quote $ def box-material
             {} (:kind :mesh-lambert) (:color 0x808080) (:opacity 0.6)
           :examples $ []
-          :schema $ quote Dynamic
+          :schema $ quote $ Map Tag quatrefoil.app.materials/DemoMaterialValue
         'bubble-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def bubble-material
             {} (:kind :mesh-basic) (:color 0xffffff) (:opacity 1) (:transparent true)
           :examples $ []
-          :schema $ quote Dynamic
+          :schema $ quote $ Map Tag quatrefoil.app.materials/DemoMaterialValue
         'comp-bubble $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn comp-bubble (position)
             group ({})
@@ -989,7 +989,7 @@
           :code $ quote $ def paper-material
             {} (:kind :mesh-standard) (:roughness 0.99) (; :emissive 0x6611ee) (:metalness 0.02) (:transparent false) (:color 0x6666ff)
           :examples $ []
-          :schema $ quote Dynamic
+          :schema $ quote $ Map Tag quatrefoil.app.materials/DemoMaterialValue
         'wave-fn $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn wave-fn (u v data)
             [] (* 8 u)
@@ -1368,12 +1368,15 @@
             |three/examples/jsm/loaders/GLTFLoader :refer $ GLTFLoader
             |three/examples/jsm/loaders/DRACOLoader :refer $ DRACOLoader
     'quatrefoil.app.materials $ %{} 'FileEntry
-      :defs $ {} $ 'cover-line
-        %{} 'CodeEntry (:doc |)
+      :defs $ {}
+        'DemoMaterialValue $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defunion DemoMaterialValue Tag Number Bool
+          :examples $ []
+        'cover-line $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def cover-line
             {} (:kind :line-basic) (:color 0xaaaaff) (:opacity 0.9) (:transparent true)
           :examples $ []
-          :schema $ quote Dynamic
+          :schema $ quote $ Map Tag DemoMaterialValue
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.materials
     'quatrefoil.app.updater $ %{} 'FileEntry
