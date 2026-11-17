@@ -1052,7 +1052,7 @@
                   fn (event dispatch!)
                     dispatch! :delete-task $ quatrefoil.util.core/require-field task :id
           :examples $ []
-          :schema $ quote $ Fn Dynamic Number (-> quatrefoil.schema/Component) (:features :js-ffi)
+          :schema $ quote $ Fn Dynamic Number (-> quatrefoil.schema/Component) (:features :js-ffi :state)
         'comp-todolist $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-todolist (tasks)
             group ({})
@@ -1080,7 +1080,7 @@
               point-light $ {} (:color 0xffffff) (:intensity 1.4) (:distance 200)
                 :position $ [] 0 20 50
           :examples $ []
-          :schema $ quote $ Fn (Map Number Dynamic) (-> quatrefoil.schema/Component) (:features :js-ffi)
+          :schema $ quote $ Fn (Map Number Dynamic) (-> quatrefoil.schema/Component) (:features :js-ffi :state)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.app.comp.todolist
           :require
@@ -2118,8 +2118,8 @@
                     let
                         d $ ->
                           []
-                            if (js-present? p0) (read-input p0)
-                            if (js-present? p1) (read-input p1)
+                            if (js-present? p0) (read-input p0) nil
+                            if (js-present? p1) (read-input p1) nil
                           filter non-nil?
                       if
                         not $ empty? d
