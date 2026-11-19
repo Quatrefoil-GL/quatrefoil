@@ -2735,12 +2735,24 @@
                 quatrefoil.schema/SceneChange :change-position $ [] 2 3 4
         'select-keys $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn select-keys (m xs)
-            foldl ({}) xs $ fn (acc x)
-              match (get m x)
-                (:some option-value) (assoc acc x option-value)
-                (:none) acc
+            let
+                keys-list $ if (set? xs) (.to-list xs) xs
+              foldl keys-list ({})
+                fn (acc x)
+                  match (get m x)
+                    (:some option-value) (assoc acc x option-value)
+                    (:none) acc
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic)
+          :tests $ [] $ %{} 'TestEntry (:name |selects-present-list-and-set-keys)
+            :code $ quote $ let
+                input $ {} (:a 1) (:b false) (:c nil)
+                expected $ {} (:a 1) (:b false) (:c nil)
+              assert= expected $ quatrefoil.dsl.diff/select-keys input $ [] :c :missing :b :a
+              assert= expected $ quatrefoil.dsl.diff/select-keys input $ #{} :a :b :c :missing
+              assert= ({})
+                quatrefoil.dsl.diff/select-keys input $ []
+            :tags $ #{} :unit
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.dsl.diff
           :require
