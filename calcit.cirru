@@ -13,6 +13,7 @@
         'DefaultMaterialValue $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defunion DefaultMaterialValue Tag Number
           :examples $ []
+          :schema $ quote UnionDef
         'ResolvedSceneChild $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defunion ResolvedSceneChild quatrefoil.schema/RenderTree (Map Number quatrefoil.schema/RenderTree)
           :examples $ []
@@ -1372,6 +1373,7 @@
         'DemoMaterialValue $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defunion DemoMaterialValue Tag Number Bool
           :examples $ []
+          :schema $ quote UnionDef
         'cover-line $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def cover-line
             {} (:kind :line-basic) (:color 0xaaaaff) (:opacity 0.9) (:transparent true)
@@ -2476,6 +2478,7 @@
         'DispatchTarget $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defunion DispatchTarget Tag (List Tag)
           :examples $ []
+          :schema $ quote UnionDef
         'read-dispatch-target $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn read-dispatch-target (raw)
             if (list? raw)
