@@ -13,6 +13,7 @@
         'DefaultMaterialValue $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defunion DefaultMaterialValue Tag Number
           :examples $ []
+          :schema $ quote UnionDef
         'ResolvedSceneChild $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defunion ResolvedSceneChild quatrefoil.schema/RenderTree (Map Number quatrefoil.schema/RenderTree)
           :examples $ []
@@ -1372,6 +1373,7 @@
         'DemoMaterialValue $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defunion DemoMaterialValue Tag Number Bool
           :examples $ []
+          :schema $ quote UnionDef
         'cover-line $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def cover-line
             {} (:kind :line-basic) (:color 0xaaaaff) (:opacity 0.9) (:transparent true)
@@ -2476,6 +2478,7 @@
         'DispatchTarget $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defunion DispatchTarget Tag (List Tag)
           :examples $ []
+          :schema $ quote UnionDef
         'read-dispatch-target $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn read-dispatch-target (raw)
             if (list? raw)
@@ -2732,12 +2735,24 @@
                 quatrefoil.schema/SceneChange :change-position $ [] 2 3 4
         'select-keys $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn select-keys (m xs)
-            foldl ({}) xs $ fn (acc x)
-              match (get m x)
-                (:some option-value) (assoc acc x option-value)
-                (:none) acc
+            let
+                keys-list $ if (set? xs) (.to-list xs) xs
+              foldl keys-list ({})
+                fn (acc x)
+                  match (get m x)
+                    (:some option-value) (assoc acc x option-value)
+                    (:none) acc
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic)
+          :tests $ [] $ %{} 'TestEntry (:name |selects-present-list-and-set-keys)
+            :code $ quote $ let
+                input $ {} (:a 1) (:b false) (:c nil)
+                expected $ {} (:a 1) (:b false) (:c nil)
+              assert= expected $ quatrefoil.dsl.diff/select-keys input $ [] :c :missing :b :a
+              assert= expected $ quatrefoil.dsl.diff/select-keys input $ #{} :a :b :c :missing
+              assert= ({})
+                quatrefoil.dsl.diff/select-keys input $ []
+            :tags $ #{} :unit
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.dsl.diff
           :require

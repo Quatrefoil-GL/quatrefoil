@@ -1,5 +1,9 @@
 # Quatrefoil
 
+## 0.3.7 候选 / Calcit 0.44.0
+
+开发和构建配对正式 Calcit 与 `@calcit/procs` 0.44.0，Touch Control 0.0.42、Pointed Prompt 0.0.29、Quaternion 0.2.25。重新安装依赖并生成 JS；渲染及交互源码未改。`select-keys` 现在正确返回筛选后的 Map，支持 List 和 Set 的键集合。
+
 ## 0.3.6 候选 / Calcit 0.42.1
 
 升级后请配套使用正式 Calcit 与 `@calcit/procs` 0.42.1，以及 Quaternion 0.2.25。重新安装依赖并生成 JS。直接构造场景补丁时，新增节点使用 `RenderTree`，替换节点使用清理后的 `Shape` 或空值。
