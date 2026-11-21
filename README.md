@@ -2,7 +2,7 @@
 
 ## 0.3.7 候选 / Calcit 0.44.0
 
-开发和构建配对正式 Calcit 与 `@calcit/procs` 0.44.0，Touch Control 0.0.42、Pointed Prompt 0.0.29、Quaternion 0.2.25。重新安装依赖并生成 JS；渲染及交互源码未改。`select-keys` 现在正确返回筛选后的 Map，支持 List 和 Set 的键集合。
+开发和构建配对正式 Calcit 与 `@calcit/procs` 0.44.0，Touch Control 0.0.43、Pointed Prompt 0.0.30、Quaternion 0.2.26，传递依赖 JS-FFI 0.2.19。重新安装依赖并生成 JS；渲染及交互源码未改。`select-keys` 现在正确返回筛选后的 Map，支持 List 和 Set 的键集合。
 
 ## 0.3.6 候选 / Calcit 0.42.1
 
