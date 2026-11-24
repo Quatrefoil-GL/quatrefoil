@@ -2007,9 +2007,10 @@
           :examples $ []
           :schema $ quote $ Fn Dynamic (-> Unit) (:features :io :js-ffi :state)
         'hclx $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn hclx (h c l) (hcl-to-hex h c l)
+          :code $ quote $ defn hclx (h c l)
+            decode-map-as (hcl-to-hex h c l) String
           :examples $ []
-          :schema $ quote $ Fn Number Number Number (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Number Number Number (-> String) (:features :js-ffi)
         'hsluvx $ %{} 'CodeEntry
           :doc "|Convert HSLuv to a Three.js numeric color using all three RGB channels."
           :code $ quote $ defn hsluvx (h c l)
