@@ -1749,7 +1749,7 @@
           :schema $ quote Trait
         'CoreBufferGeometryHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait CoreBufferGeometryHost
-            .setFromPoints $ Fn CoreBufferGeometryHost Dynamic $ -> Dynamic
+            .setFromPoints $ Fn CoreBufferGeometryHost JsObject $ -> JsObject
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
@@ -2047,8 +2047,8 @@
                 hand-1 $ js-cast (.!getHand xr 1) 'quatrefoil.core/Object3DGroupHost
                 controllerModelFactory $ js-cast (new XRControllerModelFactory) 'quatrefoil.core/ControllerModelFactoryHost
                 handModelFactory $ js-cast (new XRHandModelFactory) 'quatrefoil.core/HandModelFactoryHost
-                line-geo $ ffi-object $ .!setFromPoints
-                  unsafe-coerce (new THREE/BufferGeometry) CoreBufferGeometryHost
+                line-geo $ .!setFromPoints
+                  js-cast (new THREE/BufferGeometry) 'quatrefoil.core/CoreBufferGeometryHost
                   js-array (new THREE/Vector3 0 0 0) (new THREE/Vector3 0 0 -1)
                 line $ js-cast (new THREE/Line line-geo) 'quatrefoil.core/Object3DGroupHost
               js-ffi.browser/append-child!
@@ -2256,7 +2256,7 @@
                             .-xr $ js-cast @*global-renderer 'quatrefoil.core/RendererXrHost
                             , 0
                           , 'quatrefoil.core/ControllerRayHost
-                        grip $ ffi-object $ .!getControllerGrip
+                        grip $ .!getControllerGrip
                           .-xr $ js-cast @*global-renderer 'quatrefoil.core/RendererXrHost
                           , 0
                         rot $ js-cast (.-rotation controller) 'quatrefoil.core/VectorCoordinatesHost
