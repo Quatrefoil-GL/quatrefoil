@@ -5,7 +5,7 @@
   :entries $ {} $ :default
     {} (:description |) (:init-fn 'quatrefoil.app.main/main!) (:mode :js) (:reload-fn 'quatrefoil.app.main/reload!) (:target :browser)
       :feature-policy $ {}
-      :modules $ [] |touch-control/ |pointed-prompt/ |quaternion/
+      :modules $ [] |touch-control/ |pointed-prompt/ |quaternion/ |js-ffi/
       :type-slots $ {}
   :files $ {}
     'quatrefoil.alias $ %{} 'FileEntry
@@ -2787,7 +2787,7 @@
           :schema $ quote Trait
         'CurveHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait CurveHost
-            .getPoints $ Fn CurveHost Number $ -> Dynamic
+            .getPoints $ Fn CurveHost Number $ -> JsObject
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
@@ -2838,6 +2838,12 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :writable $ #{} :coord :event
+          :schema $ quote Trait
+        'PointsGeometryHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait PointsGeometryHost
+            .setFromPoints $ Fn PointsGeometryHost JsObject $ -> JsObject
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
         'RaycasterHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait RaycasterHost
@@ -3504,9 +3510,9 @@
             , Dynamic (-> Dynamic) (:features :js-ffi)
         'curve-get-points $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn curve-get-points (curve n)
-            .!getPoints (unsafe-coerce curve CurveHost) n
+            contract/expect-object |Curve.getPoints $ .!getPoints (js-cast curve 'quatrefoil.dsl.object3d-dom/CurveHost) n
           :examples $ []
-          :schema $ quote $ Fn Dynamic Number (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn JsObject Number (-> JsObject) (:features :js-ffi)
         'ffi-object $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn ffi-object (value) (unsafe-coerce value JsObject)
           :examples $ []
@@ -3529,9 +3535,9 @@
           :schema $ quote $ Fn Dynamic String Dynamic (-> Unit) (:features :js-ffi)
         'geometry-set-from-points $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn geometry-set-from-points (g points)
-            .!setFromPoints (unsafe-coerce g BufferGeometryHost) points
+            contract/expect-object |BufferGeometry.setFromPoints $ .!setFromPoints (js-cast g 'quatrefoil.dsl.object3d-dom/PointsGeometryHost) points
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn JsObject JsObject (-> JsObject) (:features :js-ffi)
         'geometry-set-index! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn geometry-set-index! (g indices)
             .!setIndex (unsafe-coerce g BufferGeometryHost) indices
@@ -3846,6 +3852,7 @@
             |three/examples/jsm/loaders/FontLoader :refer $ Font
             |three/examples/jsm/geometries/ParametricGeometry :refer $ ParametricGeometry
             |meshline :refer $ MeshLineGeometry MeshLineMaterial raycast
+            js-ffi.contract :as contract
     'quatrefoil.dsl.patch $ %{} 'FileEntry
       :defs $ {}
         'ColorHost $ %{} 'CodeEntry (:doc |)
