@@ -2396,7 +2396,11 @@
                 fn () $ f i
                 * d i
           :examples $ []
-          :schema $ quote $ Fn Number Number Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Number Number
+            Fn Number (-> R) (:features :io :js-ffi :state)
+            -> Unit
+            :generics R
+            :features :io :js-ffi :state
         'tween-move-camera! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn tween-move-camera! (control)
             let
