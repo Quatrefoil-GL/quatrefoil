@@ -2010,20 +2010,20 @@
           :code $ quote $ defn hclx (h c l) (hcl-to-hex h c l)
           :examples $ []
           :schema $ quote $ Fn Number Number Number (-> Dynamic) (:features :js-ffi)
-        'hsluvx $ %{} 'CodeEntry (:doc |)
+        'hsluvx $ %{} 'CodeEntry
+          :doc "|Convert HSLuv to a Three.js numeric color using all three RGB channels."
           :code $ quote $ defn hsluvx (h c l)
             let
-                color $ unsafe-coerce (new THREE/Color) ThreeColorHost
-                conv $ unsafe-coerce (new Hsluv) HsluvHost
+                color $ js-cast (new THREE/Color) quatrefoil.core/ThreeColorHost
+                conv $ js-cast (new Hsluv) quatrefoil.core/HsluvHost
               set! (.-hsluv_h conv) h
               set! (.-hsluv_s conv) c
               set! (.-hsluv_l conv) l
               .!hsluvToRgb conv
-              .!getHex $ unsafe-coerce
-                .!setRGB color (.-rgb_r conv) (.-rgb_g conv) (.-rgb_r conv)
-                , ThreeColorHost
+              .!setRGB color (.-rgb_r conv) (.-rgb_g conv) (.-rgb_b conv)
+              quatrefoil.util.core/require-decoded $ try-decode-map-as (.!getHex color) Number
           :examples $ []
-          :schema $ quote $ Fn Number Number Number (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Number Number Number (-> Number) (:features :js-ffi)
         'hslx $ %{} 'CodeEntry
           :doc "|Convert degree/percentage HSL using the original Three.Color algorithm; check host capabilities and the getHex Number result at this boundary."
           :code $ quote $ defn hslx (h s l)
