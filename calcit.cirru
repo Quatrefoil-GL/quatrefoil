@@ -1323,11 +1323,9 @@
           :examples $ []
           :schema $ quote $ Fn (-> Unit) (:features :io :state)
         'set-decoder-path! $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn set-decoder-path! (loader path)
-            .!setDecoderPath (unsafe-coerce loader DracoLoaderHost) path
-            , &unit
+          :code $ quote $ defn set-decoder-path! (loader path) (.!setDecoderPath loader path) &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic String (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn DracoLoaderHost String (-> Unit) (:features :js-ffi)
         'set-draco-loader! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn set-draco-loader! (loader draco-loader)
             .!setDRACOLoader (unsafe-coerce loader GltfLoaderHost) draco-loader
@@ -1338,7 +1336,7 @@
           :code $ quote $ defn start-loading-sakura! ()
             let
                 loader $ new GLTFLoader
-                dracoLoader $ new DRACOLoader
+                dracoLoader $ js-cast (new DRACOLoader) DracoLoaderHost
               set-decoder-path! dracoLoader |https://cdn.tiye.me/gltf/
               set-draco-loader! loader dracoLoader
               load-gltf! loader |https://cdn.tiye.me/gltf/fantasy_sakura/scene.gltf
