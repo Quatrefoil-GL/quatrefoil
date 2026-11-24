@@ -582,9 +582,9 @@
           :examples $ []
           :schema $ quote $ Fn (-> quatrefoil.schema/Component) (:features :js-ffi)
         'ffi-object $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn ffi-object (value) (unsafe-coerce value JsObject)
+          :code $ quote $ defn ffi-object (value) value
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn T (-> T) (:generics T) (:features :js-ffi)
         'forward-lines $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def forward-lines
             -> (range 20)
@@ -1257,9 +1257,9 @@
           :examples $ []
           :schema $ quote $ Fn quatrefoil.cursor/DispatchTarget Dynamic (-> Unit) (:features :state)
         'ffi-object $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn ffi-object (value) (unsafe-coerce value JsObject)
+          :code $ quote $ defn ffi-object (value) value
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn T (-> T) (:generics T) (:features :js-ffi)
         'gltf-scene $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn gltf-scene (gltf)
             .-scene $ js-cast gltf 'quatrefoil.app.main/GltfHost
@@ -1886,9 +1886,9 @@
           :schema $ quote $ Macro SyntaxSymbol SyntaxList (& Syntax)
             -> $ Definition Fn
         'ffi-object $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn ffi-object (value) (unsafe-coerce value JsObject)
+          :code $ quote $ defn ffi-object (value) value
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn T (-> T) (:generics T) (:features :js-ffi)
         'gamepad-axis-value $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn gamepad-axis-value (axes index)
             js-number $ aget axes index
