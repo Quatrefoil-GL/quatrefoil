@@ -2778,7 +2778,7 @@
           :schema $ quote Trait
         'BufferGeometryHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait BufferGeometryHost
-            .setFromPoints $ Fn BufferGeometryHost JsObject $ -> JsObject
+            .setFromPoints $ Fn BufferGeometryHost Dynamic $ -> Dynamic
             .setAttribute $ Fn BufferGeometryHost String Dynamic $ -> Unit
             .setIndex $ Fn BufferGeometryHost Dynamic $ -> Unit
             .computeVertexNormals $ Fn BufferGeometryHost $ -> Unit
@@ -2838,6 +2838,12 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :writable $ #{} :coord :event
+          :schema $ quote Trait
+        'PointsGeometryHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait PointsGeometryHost
+            .setFromPoints $ Fn PointsGeometryHost JsObject $ -> JsObject
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
         'RaycasterHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait RaycasterHost
@@ -3529,7 +3535,7 @@
           :schema $ quote $ Fn Dynamic String Dynamic (-> Unit) (:features :js-ffi)
         'geometry-set-from-points $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn geometry-set-from-points (g points)
-            contract/expect-object |BufferGeometry.setFromPoints $ .!setFromPoints (js-cast g 'quatrefoil.dsl.object3d-dom/BufferGeometryHost) points
+            contract/expect-object |BufferGeometry.setFromPoints $ .!setFromPoints (js-cast g 'quatrefoil.dsl.object3d-dom/PointsGeometryHost) points
           :examples $ []
           :schema $ quote $ Fn JsObject JsObject (-> JsObject) (:features :js-ffi)
         'geometry-set-index! $ %{} 'CodeEntry (:doc |)
