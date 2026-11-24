@@ -1022,7 +1022,9 @@
               sphere $ {} (:radius 2)
                 :position $ [] -30 0 0
                 :material $ {} (:kind :mesh-lambert) (:opacity 0.8) (:transparent true)
-                  :color $ if (quatrefoil.util.core/field-or task :done? false) 0x905055 0x9050ff
+                  :color $ if
+                    decode-map-as (quatrefoil.util.core/field-or task :done? false) Bool
+                    , 0x905055 0x9050ff
                 :event $ {} $ :click
                   fn (event dispatch!)
                     dispatch! :toggle-task $ quatrefoil.util.core/require-field task :id
@@ -1511,8 +1513,12 @@
                           dx $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field info :dx) 'Number
                           dy $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field info :dy) 'Number
                           v2 $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field info :v2) 'Number
-                          speeding $ * speed $ if (quatrefoil.util.core/field-or info :b false) 8 1
-                          forward $ * speeding elapsed0 v2 $ if (quatrefoil.util.core/field-or info :a false) -1 1
+                          speeding $ * speed $ if
+                            decode-map-as (quatrefoil.util.core/field-or info :b false) Bool
+                            , 8 1
+                          forward $ * speeding elapsed0 v2 $ if
+                            decode-map-as (quatrefoil.util.core/field-or info :a false) Bool
+                            , -1 1
                           next-pos $ v+ position
                             v-scale rightward $ * speeding elapsed0 dx
                             v-scale upward $ * -1 speeding elapsed0 dy
@@ -1532,7 +1538,7 @@
         'comp-switch $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn comp-switch (options on-toggle)
             let
-                value $ quatrefoil.util.core/field-or options :value false
+                value $ decode-map-as (quatrefoil.util.core/field-or options :value false) Bool
                 color $ quatrefoil.util.core/field-or options :color 0xffffff
                 text-color $ quatrefoil.util.core/field-or options :text-color color
                 label $ quatrefoil.util.core/field-or options :label |On
@@ -1549,7 +1555,7 @@
                       on-toggle (not value) d!
                 text $ {}
                   :position $ [] 1.6 -0.8 0
-                  :text $ or label |On
+                  :text $ either label |On
                   :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                   :size 2
                   :depth 0.5
@@ -1598,12 +1604,15 @@
                     :gamepad $ fn (info elapsed d!)
                       hint-fn $ Fn Dynamic Number Dynamic $ -> Dynamic
                       let
-                          speeding $ * speed $ if (quatrefoil.util.core/field-or info :b false) 8 1
+                          speeding $ * speed $ if
+                            decode-map-as (quatrefoil.util.core/field-or info :b false) Bool
+                            , 8 1
                         on-change
                           + value $ * elapsed speeding $ quatrefoil.util.core/require-decoded
                             try-decode-map-as (quatrefoil.util.core/require-field info :dx) 'Number
                           , d!
-                if (quatrefoil.util.core/field-or options :show-text? false)
+                if
+                  decode-map-as (quatrefoil.util.core/field-or options :show-text? false) Bool
                   Some $ text $ {}
                     :position $ [] -1.6 2 0
                     :text $ let
@@ -1655,7 +1664,9 @@
                           y0 $
                             nth v0 1
                             , .unwrap-or 0
-                          speeding $ * speed $ if (quatrefoil.util.core/field-or info :b false) 8 1
+                          speeding $ * speed $ if
+                            decode-map-as (quatrefoil.util.core/field-or info :b false) Bool
+                            , 8 1
                           dx $ * elapsed speeding $ quatrefoil.util.core/require-decoded
                             try-decode-map-as (quatrefoil.util.core/require-field info :dx) 'Number
                           dy $ * elapsed speeding $ quatrefoil.util.core/require-decoded
@@ -1663,7 +1674,8 @@
                         on-change
                           [] (+ x0 dx) (- y0 dy)
                           , d!
-                if (quatrefoil.util.core/field-or options :show-text? false)
+                if
+                  decode-map-as (quatrefoil.util.core/field-or options :show-text? false) Bool
                   Some $ text $ {}
                     :position $ [] -2 2 0
                     :text $ let
