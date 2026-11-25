@@ -1847,6 +1847,10 @@
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :writable $ #{} :x :y :z
           :schema $ quote Trait
+        'ViewerShift $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defunion ViewerShift Number Bool
+          :examples $ []
+          :schema $ quote UnionDef
         'WebXRManagerHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait WebXRManagerHost (:enabled 'Bool)
             .getController $ Fn quatrefoil.core/WebXRManagerHost Number $ -> JsObject
@@ -2019,9 +2023,10 @@
           :examples $ []
           :schema $ quote $ Fn Dynamic (-> Unit) (:features :io :js-ffi :state)
         'hclx $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn hclx (h c l) (hcl-to-hex h c l)
+          :code $ quote $ defn hclx (h c l)
+            decode-map-as (hcl-to-hex h c l) String
           :examples $ []
-          :schema $ quote $ Fn Number Number Number (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn Number Number Number (-> String) (:features :js-ffi)
         'hsluvx $ %{} 'CodeEntry
           :doc "|Convert HSLuv to a Three.js numeric color using all three RGB channels."
           :code $ quote $ defn hsluvx (h c l)
@@ -2355,13 +2360,18 @@
           :code $ quote $ defn shift-viewer-by! (x)
             let
                 camera @*global-camera
-              if (= x false) (reset! *viewer-y-shift 0)
-                swap! *viewer-y-shift &+ $ * 2 $ quatrefoil.util.core/require-decoded (try-decode-map-as x 'Number)
+              match x
+                (Number amount)
+                  swap! *viewer-y-shift &+ $ * 2 amount
+                (Bool flag)
+                  if flag
+                    swap! *viewer-y-shift &+ $ * 2 $ quatrefoil.util.core/require-decoded (try-decode-map-as flag Number)
+                    reset! *viewer-y-shift 0
               .!lookAt camera $ new-lookat-point
               .!render @*global-renderer @*global-scene @*global-camera
               , &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Unit) (:features :js-ffi :state)
+          :schema $ quote $ Fn ViewerShift (-> Unit) (:features :js-ffi :state)
         'to-viewer-axis $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn to-viewer-axis (x y z)
             let
@@ -2407,7 +2417,11 @@
                 fn () $ f i
                 * d i
           :examples $ []
-          :schema $ quote $ Fn Number Number Dynamic (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn Number Number
+            Fn Number (-> R) (:features :io :js-ffi :state)
+            -> Unit
+            :generics R
+            :features :io :js-ffi :state
         'tween-move-camera! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn tween-move-camera! (control)
             let
