@@ -1,5 +1,9 @@
 # Quatrefoil
 
+## 0.3.9 候选 / Calcit 0.45.1
+
+配对正式 Calcit / `@calcit/procs` 0.45.1、Touch Control 0.0.45、Pointed Prompt 0.0.32、Quaternion 0.2.27 和 JS-FFI 0.2.24；重新安装依赖并生成 JS。控件布尔状态需为 Bool，非法输入会报错；正式 tag 发布后再升级。
+
 ## 0.3.8 候选 / Calcit 0.44.0
 
 开发和构建配对正式 Calcit 与 `@calcit/procs` 0.44.0，Touch Control 0.0.44、Pointed Prompt 0.0.31、Quaternion 0.2.26，传递依赖 JS-FFI 0.2.23。重新安装依赖并生成 JS；渲染及交互源码未改。`select-keys` 现在正确返回筛选后的 Map，支持 List 和 Set 的键集合。
