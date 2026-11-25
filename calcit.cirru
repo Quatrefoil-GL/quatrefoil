@@ -582,9 +582,9 @@
           :examples $ []
           :schema $ quote $ Fn (-> quatrefoil.schema/Component) (:features :js-ffi)
         'ffi-object $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn ffi-object (value) (unsafe-coerce value JsObject)
+          :code $ quote $ defn ffi-object (value) value
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn T (-> T) (:generics T) (:features :js-ffi)
         'forward-lines $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def forward-lines
             -> (range 20)
@@ -1259,9 +1259,9 @@
           :examples $ []
           :schema $ quote $ Fn quatrefoil.cursor/DispatchTarget Dynamic (-> Unit) (:features :state)
         'ffi-object $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn ffi-object (value) (unsafe-coerce value JsObject)
+          :code $ quote $ defn ffi-object (value) value
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn T (-> T) (:generics T) (:features :js-ffi)
         'gltf-scene $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn gltf-scene (gltf)
             .-scene $ js-cast gltf 'quatrefoil.app.main/GltfHost
@@ -1325,11 +1325,9 @@
           :examples $ []
           :schema $ quote $ Fn (-> Unit) (:features :io :state)
         'set-decoder-path! $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn set-decoder-path! (loader path)
-            .!setDecoderPath (unsafe-coerce loader DracoLoaderHost) path
-            , &unit
+          :code $ quote $ defn set-decoder-path! (loader path) (.!setDecoderPath loader path) &unit
           :examples $ []
-          :schema $ quote $ Fn Dynamic String (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn DracoLoaderHost String (-> Unit) (:features :js-ffi)
         'set-draco-loader! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn set-draco-loader! (loader draco-loader)
             .!setDRACOLoader (unsafe-coerce loader GltfLoaderHost) draco-loader
@@ -1340,7 +1338,7 @@
           :code $ quote $ defn start-loading-sakura! ()
             let
                 loader $ new GLTFLoader
-                dracoLoader $ new DRACOLoader
+                dracoLoader $ js-cast (new DRACOLoader) DracoLoaderHost
               set-decoder-path! dracoLoader |https://cdn.tiye.me/gltf/
               set-draco-loader! loader dracoLoader
               load-gltf! loader |https://cdn.tiye.me/gltf/fantasy_sakura/scene.gltf
@@ -1902,9 +1900,9 @@
           :schema $ quote $ Macro SyntaxSymbol SyntaxList (& Syntax)
             -> $ Definition Fn
         'ffi-object $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn ffi-object (value) (unsafe-coerce value JsObject)
+          :code $ quote $ defn ffi-object (value) value
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Dynamic) (:features :js-ffi)
+          :schema $ quote $ Fn T (-> T) (:generics T) (:features :js-ffi)
         'gamepad-axis-value $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn gamepad-axis-value (axes index)
             js-number $ aget axes index
