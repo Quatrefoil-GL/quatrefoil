@@ -1,5 +1,9 @@
 # Quatrefoil
 
+## 0.3.10 候选 / Calcit 0.46.0
+
+升级时配对正式 Calcit / `@calcit/procs` 0.46.0、Touch Control 0.0.47、Pointed Prompt 0.0.34、Quaternion 0.2.28 和 JS-FFI 0.2.26，重新安装依赖并生成 JS。场景和材质的异构值比较沿用原有行为；待正式 tag 发布后再升级。
+
 ## 0.3.9 候选 / Calcit 0.45.1
 
 配对正式 Calcit / `@calcit/procs` 0.45.1、Touch Control 0.0.45、Pointed Prompt 0.0.32、Quaternion 0.2.27 和 JS-FFI 0.2.24；重新安装依赖并生成 JS。控件布尔状态需为 Bool，非法输入会报错；正式 tag 发布后再升级。
