@@ -172,7 +172,7 @@
                   and (enum? child)
                     = (&enum:definition child) (Some Option)
                   if
-                    = :some $ &enum:nth child 0
+                    &= :some $ &enum:nth child 0
                     append acc $ &enum:nth child 1
                     , acc
                   append acc child
@@ -290,7 +290,8 @@
                       _ $ comp-portal $ fn (next d!)
                         d! cursor $ assoc state :tab next
                     , 'quatrefoil.schema/RenderTree
-                  if (not= tab :portal)
+                  if
+                    not $ &= tab :portal
                     Some $ comp-back $ fn (d!)
                       d! cursor $ assoc state :tab :portal
                     , None
@@ -2604,7 +2605,7 @@
         'diff-material $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-material (prev-material material coord collect!)
             if
-              not= (quatrefoil.util.core/field-option prev-material :kind) (quatrefoil.util.core/field-option material :kind)
+              not $ &= (quatrefoil.util.core/field-option prev-material :kind) (quatrefoil.util.core/field-option material :kind)
               collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :replace-material material
               let
                   prev-material0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
@@ -2621,7 +2622,10 @@
                   updated-material $ filter-map-kv material0 $ fn (k v)
                     match (get prev-material0 k)
                       (:some prev)
-                        if (not= prev v) (MapEntryDecision :keep k v) (MapEntryDecision :drop)
+                        if
+                          not $ &= prev v
+                          MapEntryDecision :keep k v
+                          MapEntryDecision :drop
                       (:none) (MapEntryDecision :drop)
                 if
                   not $ empty? added-material
@@ -2638,6 +2642,25 @@
             Fn quatrefoil.schema/ScenePatch $ -> Unit
             -> Unit
             :generics Previous Current
+          :tests $ [] $ %{} 'TestEntry (:name |material-comparison-preserves-equal-and-changed)
+            :code $ quote $ let
+                *patches $ ref $ assert-type ([]) (List quatrefoil.schema/ScenePatch)
+                collect! $ fn (patch)
+                  hint-fn $ Fn quatrefoil.schema/ScenePatch $ -> Unit
+                  swap! *patches conj patch
+                  , &unit
+                before $ {} (:kind :basic) (:opacity 0.5) (:visible true)
+              diff-material before
+                {} (:kind :basic) (:opacity 0.5) (:visible true)
+                []
+                , collect!
+              assert= @*patches $ []
+              diff-material before
+                {} (:kind :basic) (:opacity 0.75) (:visible true)
+                []
+                , collect!
+              assert= @*patches $ [] $ quatrefoil.schema/ScenePatch :coord ([]) :change
+                quatrefoil.schema/SceneChange :update-material $ {} $ :opacity 0.75
         'diff-params $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-params (prev-params params coord collect!)
             ; "|unused code, when params changed, geometry would be recreated, so not diffed"
@@ -2698,16 +2721,16 @@
                 collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :add-element tree
               (and (js-present? prev-tree) (js-nullish? tree))
                 collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :remove-element
-              (not= (quatrefoil.util.core/require-field prev-tree :name) (quatrefoil.util.core/require-field tree :name))
+              (not (&= (quatrefoil.util.core/require-field prev-tree :name) (quatrefoil.util.core/require-field tree :name)))
                 collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :replace-element (purify-tree tree)
-              (and (= :text (quatrefoil.util.core/require-field tree :name) (quatrefoil.util.core/require-field prev-tree :name)) (not= (quatrefoil.util.core/require-field tree :params) (quatrefoil.util.core/require-field prev-tree :params)))
+              (and (let ((name-now (quatrefoil.util.core/require-field tree :name)) (name-before (quatrefoil.util.core/require-field prev-tree :name))) (and (&= :text name-now) (&= name-now name-before))) (not (&= (quatrefoil.util.core/require-field tree :params) (quatrefoil.util.core/require-field prev-tree :params))))
                 collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :replace-element (purify-tree tree)
-              (and (= (quatrefoil.util.core/require-field tree :name) (quatrefoil.util.core/require-field prev-tree :name)) (not= (quatrefoil.util.core/require-field tree :params) (quatrefoil.util.core/require-field prev-tree :params)))
+              (and (&= (quatrefoil.util.core/require-field tree :name) (quatrefoil.util.core/require-field prev-tree :name)) (not (&= (quatrefoil.util.core/require-field tree :params) (quatrefoil.util.core/require-field prev-tree :params))))
                 collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :replace-element (purify-tree tree)
               true $ do
                 ; diff-params (:params prev-tree) (:params tree) coord collect!
                 if
-                  not= (quatrefoil.util.core/require-field prev-tree :position) (quatrefoil.util.core/require-field tree :position)
+                  not $ &= (quatrefoil.util.core/require-field prev-tree :position) (quatrefoil.util.core/require-field tree :position)
                   collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :change-position
                     decode-map-as
                       match (quatrefoil.util.core/require-field tree :position)
@@ -2715,7 +2738,7 @@
                         (:none) ([] 0 0 0)
                       , quatrefoil.schema/Vec3Value
                 if
-                  not= (quatrefoil.util.core/require-field prev-tree :rotation) (quatrefoil.util.core/require-field tree :rotation)
+                  not $ &= (quatrefoil.util.core/require-field prev-tree :rotation) (quatrefoil.util.core/require-field tree :rotation)
                   collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :change-rotation
                     decode-map-as
                       match (quatrefoil.util.core/require-field tree :rotation)
@@ -2723,7 +2746,7 @@
                         (:none) ([] 0 0 0)
                       List Number
                 if
-                  not= (quatrefoil.util.core/require-field prev-tree :scale) (quatrefoil.util.core/require-field tree :scale)
+                  not $ &= (quatrefoil.util.core/require-field prev-tree :scale) (quatrefoil.util.core/require-field tree :scale)
                   collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :change-scale
                     decode-map-as
                       match (quatrefoil.util.core/require-field tree :scale)
@@ -2731,7 +2754,7 @@
                         (:none) ([] 1 1 1)
                       , quatrefoil.schema/Vec3Value
                 if
-                  not= (quatrefoil.util.core/require-field prev-tree :attributes) (quatrefoil.util.core/require-field tree :attributes)
+                  not $ &= (quatrefoil.util.core/require-field prev-tree :attributes) (quatrefoil.util.core/require-field tree :attributes)
                   collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :change-attributes (quatrefoil.util.core/require-field tree :attributes)
                 diff-material (quatrefoil.util.core/require-field prev-tree :material) (quatrefoil.util.core/require-field tree :material) coord collect!
                 diff-events (quatrefoil.util.core/require-field prev-tree :event) (quatrefoil.util.core/require-field tree :event) coord collect!
@@ -2767,16 +2790,26 @@
                     (:some option-value) (assoc acc x option-value)
                     (:none) acc
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic)
-          :tests $ [] $ %{} 'TestEntry (:name |selects-present-list-and-set-keys)
-            :code $ quote $ let
-                input $ {} (:a 1) (:b false) (:c nil)
-                expected $ {} (:a 1) (:b false) (:c nil)
-              assert= expected $ quatrefoil.dsl.diff/select-keys input $ [] :c :missing :b :a
-              assert= expected $ quatrefoil.dsl.diff/select-keys input $ #{} :a :b :c :missing
-              assert= ({})
-                quatrefoil.dsl.diff/select-keys input $ []
-            :tags $ #{} :unit
+          :schema $ quote $ Fn (Map K V) Dynamic
+            -> $ Map Dynamic V
+            :generics K V
+          :tests $ []
+            %{} 'TestEntry (:name |selects-present-list-and-set-keys)
+              :code $ quote $ let
+                  input $ {} (:a 1) (:b false) (:c nil)
+                  expected $ {} (:a 1) (:b false) (:c nil)
+                assert= expected $ quatrefoil.dsl.diff/select-keys input $ [] :c :missing :b :a
+                assert= expected $ quatrefoil.dsl.diff/select-keys input $ #{} :a :b :c :missing
+                assert= ({})
+                  quatrefoil.dsl.diff/select-keys input $ []
+              :tags $ #{} :unit
+            %{} 'TestEntry (:name |preserves-map-values)
+              :code $ quote $ let
+                  selected $ select-keys
+                    {} (1 |Ada) (2 |Bo)
+                    [] 1 9
+                assert= |Ada $ .unwrap $ get selected 1
+                assert= None $ get selected 2
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.dsl.diff
           :require
