@@ -2790,16 +2790,26 @@
                     (:some option-value) (assoc acc x option-value)
                     (:none) acc
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic)
-          :tests $ [] $ %{} 'TestEntry (:name |selects-present-list-and-set-keys)
-            :code $ quote $ let
-                input $ {} (:a 1) (:b false) (:c nil)
-                expected $ {} (:a 1) (:b false) (:c nil)
-              assert= expected $ quatrefoil.dsl.diff/select-keys input $ [] :c :missing :b :a
-              assert= expected $ quatrefoil.dsl.diff/select-keys input $ #{} :a :b :c :missing
-              assert= ({})
-                quatrefoil.dsl.diff/select-keys input $ []
-            :tags $ #{} :unit
+          :schema $ quote $ Fn (Map K V) Dynamic
+            -> $ Map Dynamic V
+            :generics K V
+          :tests $ []
+            %{} 'TestEntry (:name |selects-present-list-and-set-keys)
+              :code $ quote $ let
+                  input $ {} (:a 1) (:b false) (:c nil)
+                  expected $ {} (:a 1) (:b false) (:c nil)
+                assert= expected $ quatrefoil.dsl.diff/select-keys input $ [] :c :missing :b :a
+                assert= expected $ quatrefoil.dsl.diff/select-keys input $ #{} :a :b :c :missing
+                assert= ({})
+                  quatrefoil.dsl.diff/select-keys input $ []
+              :tags $ #{} :unit
+            %{} 'TestEntry (:name |preserves-map-values)
+              :code $ quote $ let
+                  selected $ select-keys
+                    {} (1 |Ada) (2 |Bo)
+                    [] 1 9
+                assert= |Ada $ .unwrap $ get selected 1
+                assert= None $ get selected 2
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns quatrefoil.dsl.diff
           :require
