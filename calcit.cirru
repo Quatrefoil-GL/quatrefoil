@@ -1724,7 +1724,8 @@
                   Map Tag Dynamic
               assoc branch :cursor $ append parent-cursor k
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic)
+          :schema $ quote $ Fn Dynamic Dynamic
+            -> $ Map Tag Dynamic
         'CameraControl $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defenum CameraControl (:shift Number) (:angle Number) (:move Number Number Number)
           :examples $ []
