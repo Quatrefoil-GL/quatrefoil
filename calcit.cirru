@@ -35,9 +35,10 @@
                 result $ if
                   and
                     = 1 $ count children
-                    not $ or
-                      comp? $ .unwrap cursor
-                      shape? $ .unwrap cursor
+                    not $ match
+                      try-decode-map-as (.unwrap cursor) quatrefoil.schema/RenderTree
+                      (:ok _) true
+                      (:err _) false
                   .unwrap cursor
                   -> children
                     map-indexed $ fn (idx p) ([] idx p)
@@ -55,9 +56,10 @@
                 if
                   and
                     = 1 $ count children
-                    not $ or
-                      comp? $ .unwrap cursor
-                      shape? $ .unwrap cursor
+                    not $ match (.unwrap cursor)
+                      (quatrefoil.schema/Component _) true
+                      (quatrefoil.schema/Shape _) true
+                      (Map _) false
                   .unwrap cursor
                   -> children
                     map-indexed $ fn (idx p) ([] idx p)
@@ -168,14 +170,13 @@
             foldl children ([])
               fn (acc child)
                 hint-fn $ Fn (List Dynamic) Dynamic $ -> (List Dynamic)
-                if
-                  and (enum? child)
-                    = (&enum:definition child) (Some Option)
-                  if
-                    &= :some $ &enum:nth child 0
-                    append acc $ &enum:nth child 1
-                    , acc
-                  append acc child
+                match
+                  try-decode-map-as child $ Option Dynamic
+                  (:ok optional)
+                    match optional
+                      (:some item) (append acc item)
+                      (:none) acc
+                  (:err _) (append acc child)
           :examples $ []
           :schema $ quote $ Fn (List C)
             -> $ List Dynamic
@@ -1311,7 +1312,7 @@
           :schema $ quote $ Fn (-> Unit) (:features :io :js-ffi :state)
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
-            if (non-nil? build-errors) (hud! |error build-errors)
+            if (js-present? build-errors) (hud! |error build-errors)
               do (hud! |ok~ nil) (clear-cache!) (clear-control-loop!) (handle-control-events) (remove-watch! *store :changes)
                 add-watch! *store :changes $ fn (store prev) (render-app!) &unit
                 render-app!
@@ -1554,7 +1555,7 @@
                       on-toggle (not value) d!
                 text $ {}
                   :position $ [] 1.6 -0.8 0
-                  :text $ either label |On
+                  :text label
                   :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
                   :size 2
                   :depth 0.5
@@ -1616,7 +1617,7 @@
                     :position $ [] -1.6 2 0
                     :text $ let
                         prefix $ if
-                          blank? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (either label |) 'String
+                          blank? $ quatrefoil.util.core/require-decoded $ try-decode-map-as label 'String
                           , | $ str label "| "
                       str prefix $ .!toFixed value $ quatrefoil.util.core/field-or options :fract-length 2
                     :material $ {} (:kind :mesh-lambert) (:color text-color) (:opacity 0.9) (:transparent true)
@@ -1679,7 +1680,7 @@
                     :position $ [] -2 2 0
                     :text $ let
                         prefix $ if
-                          blank? $ quatrefoil.util.core/require-decoded $ try-decode-map-as (either label |) 'String
+                          blank? $ quatrefoil.util.core/require-decoded $ try-decode-map-as label 'String
                           , | $ str label "| "
                       str prefix
                         .!toFixed
@@ -2115,9 +2116,9 @@
               .!setClearColor @*global-renderer (quatrefoil.util.core/require-field options :background) 1
             ; set! (.-physicallyCorrectLights @*global-renderer) true
             ; set! (.-gammaFactor @*global-renderer) 22
-            .!setPixelRatio @*global-renderer $ either
-              js-number $ .-devicePixelRatio $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
-              , 1
+            .!setPixelRatio @*global-renderer $ let
+                dpr $ .-devicePixelRatio $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
+              if (js-present? dpr) (js-number dpr) 1
             .!setSize @*global-renderer
               js-number $ .-innerWidth $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
               js-number $ .-innerHeight $ js-cast js/window 'quatrefoil.util.core/WindowMetricsHost
@@ -2135,19 +2136,25 @@
                       p0 $ xr-input-source-at session 0
                       p1 $ xr-input-source-at session 1
                     let
-                        d $ ->
+                        d $ foldl
                           []
-                            if (js-present? p0) (read-input p0) nil
-                            if (js-present? p1) (read-input p1) nil
-                          filter non-nil?
+                            if (js-present? p0) (read-input p0) None
+                            if (js-present? p1) (read-input p1) None
+                          assert-type ([])
+                            List $ Tuple Tag $ Map Tag Dynamic
+                          fn (acc item)
+                            hint-fn $ Fn
+                              List $ Tuple Tag $ Map Tag Dynamic
+                              Option $ Tuple Tag $ Map Tag Dynamic
+                              -> $ List $ Tuple Tag (Map Tag Dynamic)
+                            match item
+                              (:some pair) (append acc pair)
+                              (:none) acc
                       if
                         not $ empty? d
-                        on-gamepad-event
-                          .unwrap $ last $ quatrefoil.util.core/require-decoded
-                            try-decode-map-as
-                              .unwrap $ first d
-                              List Dynamic
-                          * 0.001 $ - t0 prev-t
+                        let[] (_hand payload)
+                          .unwrap $ first d
+                          on-gamepad-event payload $ * 0.001 $ - t0 prev-t
               .!updateProjectionMatrix @*global-camera
               .!render @*global-renderer @*global-scene @*global-camera
             , &unit (; .!setSize @*global-composer js/window.innerWidth js/window.innerHeight)
@@ -2282,7 +2289,7 @@
                           js-number $ .-y rot
                           js-number $ .-z rot
                       if (not= data data0)
-                        []
+                        Some $ []
                           turn-tag $ quatrefoil.util.core/require-decoded $ try-decode-map-as (.-handedness input-source) (quote String)
                           {}
                             :v1 $ gamepad-button-value buttons 0
@@ -2295,10 +2302,13 @@
                             :forward $ camera-direction-for 0 0 -1
                             :upward $ camera-direction-for 0 1 0
                             :rightward $ camera-direction-for 1 0 0
-                    , nil
-                , nil
+                        , None
+                    , None
+                , None
           :examples $ []
-          :schema $ quote $ Fn JsObject (-> Dynamic) (:features :js-ffi :state)
+          :schema $ quote $ Fn JsObject
+            -> $ Option $ Tuple Tag (Map Tag Dynamic)
+            :features :js-ffi :state
         'refine-strength $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn refine-strength (x)
             &* x $ sqrt $ js-number
@@ -2507,9 +2517,7 @@
           :schema $ quote UnionDef
         'read-dispatch-target $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn read-dispatch-target (raw)
-            if (list? raw)
-              quatrefoil.util.core/require-decoded $ try-decode-map-as raw $ List Tag
-              quatrefoil.util.core/require-decoded $ try-decode-map-as raw 'Tag
+            quatrefoil.util.core/require-decoded $ try-decode-map-as raw DispatchTarget
           :examples $ []
           :schema $ quote $ Fn T (-> DispatchTarget) (:generics T)
         'read-state-pair $ %{} 'CodeEntry
@@ -2542,6 +2550,16 @@
         :code $ quote $ ns quatrefoil.cursor
     'quatrefoil.dsl.diff $ %{} 'FileEntry
       :defs $ {}
+        'decode-tag-map $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn decode-tag-map (value)
+            match (try-decode-map-as value 'Nil)
+              (:ok _) ({})
+              (:err _)
+                quatrefoil.util.core/require-decoded $ try-decode-map-as value $ Map Tag Dynamic
+          :examples $ []
+          :schema $ quote $ Fn T
+            -> $ Map Tag Dynamic
+            :generics T
         'diff-children $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-children (prev-children children coord collect!)
             let
@@ -2581,12 +2599,8 @@
         'diff-events $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-events (prev-events events coord collect!)
             let
-                prev-events0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                  either prev-events $ {}
-                  Map Tag Dynamic
-                events0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                  either events $ {}
-                  Map Tag Dynamic
+                prev-events0 $ decode-tag-map prev-events
+                events0 $ decode-tag-map events
                 prev-event-names $ keys prev-events0
                 event-names $ keys events0
                 added-events $ difference event-names prev-event-names
@@ -2609,12 +2623,8 @@
               not $ &= (quatrefoil.util.core/field-option prev-material :kind) (quatrefoil.util.core/field-option material :kind)
               collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :replace-material material
               let
-                  prev-material0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                    either prev-material $ {}
-                    Map Tag Dynamic
-                  material0 $ quatrefoil.util.core/require-decoded $ try-decode-map-as
-                    either material $ {}
-                    Map Tag Dynamic
+                  prev-material0 $ decode-tag-map prev-material
+                  material0 $ decode-tag-map material
                   prev-keys $ keys prev-material0
                   curr-keys $ keys material0
                   added-material $ filter-map-kv material0 $ fn (k v)
@@ -2699,67 +2709,63 @@
             -> Unit
         'diff-tree $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn diff-tree (prev-tree tree coord collect!) (; js/console.log |Diffing: coord prev-tree tree)
-            cond
-                and (js-nullish? prev-tree) (js-nullish? tree)
-                &let () &unit
-              (and (struct? prev-tree) (&struct:matches? prev-tree quatrefoil.schema/Component) (struct? tree) (&struct:matches? tree quatrefoil.schema/Component))
-                let
-                    previous $ assert-type prev-tree quatrefoil.schema/Component
-                    current $ assert-type tree quatrefoil.schema/Component
-                  if
-                    = (:name previous) (:name current)
-                    recur (quatrefoil.schema/component-tree previous) (quatrefoil.schema/component-tree current) coord collect!
-                    collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :replace-element (purify-tree current)
-              (and (struct? prev-tree) (&struct:matches? prev-tree quatrefoil.schema/Component))
-                recur
-                  quatrefoil.schema/component-tree $ assert-type prev-tree quatrefoil.schema/Component
-                  , tree coord collect!
-              (and (struct? tree) (&struct:matches? tree quatrefoil.schema/Component))
-                recur prev-tree
-                  quatrefoil.schema/component-tree $ assert-type tree quatrefoil.schema/Component
-                  , coord collect!
-              (and (js-present? tree) (js-nullish? prev-tree))
-                collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :add-element tree
-              (and (js-present? prev-tree) (js-nullish? tree))
-                collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :remove-element
-              (not (&= (quatrefoil.util.core/require-field prev-tree :name) (quatrefoil.util.core/require-field tree :name)))
-                collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :replace-element (purify-tree tree)
-              (and (let ((name-now (quatrefoil.util.core/require-field tree :name)) (name-before (quatrefoil.util.core/require-field prev-tree :name))) (and (&= :text name-now) (&= name-now name-before))) (not (&= (quatrefoil.util.core/require-field tree :params) (quatrefoil.util.core/require-field prev-tree :params))))
-                collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :replace-element (purify-tree tree)
-              (and (&= (quatrefoil.util.core/require-field tree :name) (quatrefoil.util.core/require-field prev-tree :name)) (not (&= (quatrefoil.util.core/require-field tree :params) (quatrefoil.util.core/require-field prev-tree :params))))
-                collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :replace-element (purify-tree tree)
-              true $ do
-                ; diff-params (:params prev-tree) (:params tree) coord collect!
-                if
-                  not $ &= (quatrefoil.util.core/require-field prev-tree :position) (quatrefoil.util.core/require-field tree :position)
-                  collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :change-position
-                    decode-map-as
-                      match (quatrefoil.util.core/require-field tree :position)
-                        (:some value) value
-                        (:none) ([] 0 0 0)
-                      , quatrefoil.schema/Vec3Value
-                if
-                  not $ &= (quatrefoil.util.core/require-field prev-tree :rotation) (quatrefoil.util.core/require-field tree :rotation)
-                  collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :change-rotation
-                    decode-map-as
-                      match (quatrefoil.util.core/require-field tree :rotation)
-                        (:some value) value
-                        (:none) ([] 0 0 0)
-                      List Number
-                if
-                  not $ &= (quatrefoil.util.core/require-field prev-tree :scale) (quatrefoil.util.core/require-field tree :scale)
-                  collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :change-scale
-                    decode-map-as
-                      match (quatrefoil.util.core/require-field tree :scale)
-                        (:some value) value
-                        (:none) ([] 1 1 1)
-                      , quatrefoil.schema/Vec3Value
-                if
-                  not $ &= (quatrefoil.util.core/require-field prev-tree :attributes) (quatrefoil.util.core/require-field tree :attributes)
-                  collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :change-attributes (quatrefoil.util.core/require-field tree :attributes)
-                diff-material (quatrefoil.util.core/require-field prev-tree :material) (quatrefoil.util.core/require-field tree :material) coord collect!
-                diff-events (quatrefoil.util.core/require-field prev-tree :event) (quatrefoil.util.core/require-field tree :event) coord collect!
-                diff-children (quatrefoil.util.core/require-field prev-tree :children) (quatrefoil.util.core/require-field tree :children) coord collect!
+            if (js-present? prev-tree)
+              match prev-tree
+                (quatrefoil.schema/Component previous)
+                  if (js-present? tree)
+                    match tree
+                      (quatrefoil.schema/Component current)
+                        if
+                          = (:name previous) (:name current)
+                          recur (quatrefoil.schema/component-tree previous) (quatrefoil.schema/component-tree current) coord collect!
+                          collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :replace-element (purify-tree current)
+                      (quatrefoil.schema/Shape _)
+                        recur (quatrefoil.schema/component-tree previous) tree coord collect!
+                    recur (quatrefoil.schema/component-tree previous) nil coord collect!
+                (quatrefoil.schema/Shape prev-shape)
+                  if (js-present? tree)
+                    match tree
+                      (quatrefoil.schema/Component current)
+                        recur prev-shape (quatrefoil.schema/component-tree current) coord collect!
+                      (quatrefoil.schema/Shape shape)
+                        cond
+                            not $ &= (:name prev-shape) (:name shape)
+                            collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :replace-element (purify-tree shape)
+                          (not (&= (:params prev-shape) (:params shape)))
+                            collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :replace-element (purify-tree shape)
+                          true $ do
+                            if
+                              not $ &= (:position prev-shape) (:position shape)
+                              collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :change-position
+                                match (:position shape)
+                                  (:some value) value
+                                  (:none) ([] 0 0 0)
+                            if
+                              not $ &= (:rotation prev-shape) (:rotation shape)
+                              collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :change-rotation
+                                match (:rotation shape)
+                                  (:some value) value
+                                  (:none) ([] 0 0 0)
+                            if
+                              not $ &= (:scale prev-shape) (:scale shape)
+                              collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :change-scale
+                                match (:scale shape)
+                                  (:some value) value
+                                  (:none) ([] 1 1 1)
+                            if
+                              not $ &= (:attributes prev-shape) (:attributes shape)
+                              collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :change-attributes (:attributes shape)
+                            diff-material (:material prev-shape) (:material shape) coord collect!
+                            diff-events (:event prev-shape) (:event shape) coord collect!
+                            diff-children (:children prev-shape) (:children shape) coord collect!
+                    collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :remove-element
+              if (js-present? tree)
+                match tree
+                  (quatrefoil.schema/Component current)
+                    recur nil (quatrefoil.schema/component-tree current) coord collect!
+                  (quatrefoil.schema/Shape shape)
+                    collect! $ quatrefoil.schema/ScenePatch :coord coord :change $ quatrefoil.schema/SceneChange :add-element shape
+                , &unit
           :examples $ []
           :schema $ quote $ Fn (JsNullish quatrefoil.schema/RenderTree) (JsNullish quatrefoil.schema/RenderTree) (List Number)
             Fn quatrefoil.schema/ScenePatch $ -> Unit
@@ -2784,7 +2790,11 @@
         'select-keys $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn select-keys (m xs)
             let
-                keys-list $ if (set? xs) (.to-list xs) xs
+                keys-list $ match
+                  try-decode-map-as xs $ Set Dynamic
+                  (:ok s) (.to-list s)
+                  (:err _)
+                    quatrefoil.util.core/require-decoded $ try-decode-map-as xs $ List Dynamic
               foldl keys-list ({})
                 fn (acc x)
                   match (get m x)
@@ -2849,6 +2859,9 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
+        'GeometryAttributeId $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defunion GeometryAttributeId String Tag Symbol Number Bool
+          :examples $ []
         'IntersectionHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait IntersectionHost (:object 'JsObject)
           :examples $ []
@@ -2936,22 +2949,26 @@
           :schema $ quote Trait
         'build-tree $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn build-tree (coord tree) (; js/console.log "|build tree:" coord tree)
-            if (non-nil? tree)
-              let
-                  object3d $ create-shape (assoc tree :children nil) coord
-                  children $ ->
-                    quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field tree :children) (Map Number Dynamic)
-                    &map:to-list
-                    map $ fn (entry)
-                      let[] (child-key child) entry $ [] child-key $ build-tree (conj coord child-key) child
-                  virtual-element $ {} (:object3d object3d) (:children children)
-                ; js/console.log "|handle children" children $ :children tree
-                &doseq (entry children)
-                  let[] (child-key child) entry (; js/console.log |Child: child entry) (.!addBy object3d child-key child)
-                , object3d
+            if (js-present? tree)
+              match tree
+                (quatrefoil.schema/Component component)
+                  recur coord $ quatrefoil.schema/component-tree component
+                (quatrefoil.schema/Shape shape)
+                  let
+                      object3d $ create-shape
+                        assoc shape :children $ {}
+                        , coord
+                      children $ ->
+                        quatrefoil.util.core/require-decoded $ try-decode-map-as (:children shape) (Map Number Dynamic)
+                        &map:to-list
+                        map $ fn (entry)
+                          let[] (child-key child) entry $ [] child-key $ build-tree (conj coord child-key) (quatrefoil.util.core/read-render-tree child)
+                    &doseq (entry children)
+                      let[] (child-key child) entry $ .!addBy object3d child-key child
+                    , object3d
               new THREE/Object3D
           :examples $ []
-          :schema $ quote $ Fn (List Number) Dynamic (-> Dynamic) (:features :js-ffi :state)
+          :schema $ quote $ Fn (List Number) (JsNullish quatrefoil.schema/RenderTree) (-> Dynamic) (:features :js-ffi :state)
         'call-event-on-target! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn call-event-on-target! (maybe-target event)
             let
@@ -3758,19 +3775,15 @@
               let
                   name $ let
                       id $ quatrefoil.util.core/field-or info :id |
-                    cond
-                        string? id
-                        quatrefoil.util.core/require-decoded $ try-decode-map-as id 'String
-                      (tag? id)
-                        .to-string $ quatrefoil.util.core/require-decoded $ try-decode-map-as id 'Tag
-                      (symbol? id)
-                        .to-string $ quatrefoil.util.core/require-decoded $ try-decode-map-as id 'Symbol
-                      (number? id)
-                        .to-string $ quatrefoil.util.core/require-decoded $ try-decode-map-as id 'Number
-                      (bool? id)
-                        .to-string $ quatrefoil.util.core/require-decoded $ try-decode-map-as id 'Bool
-                      (nil? id) (.to-string nil)
-                      true $ raise |geometry-attribute-id-must-be-a-scalar
+                    match (try-decode-map-as id GeometryAttributeId)
+                      (:ok scalar)
+                        match scalar
+                          (String s) s
+                          (Tag t) (.to-string t)
+                          (Symbol s) (.to-string s)
+                          (Number n) (.to-string n)
+                          (Bool b) (.to-string b)
+                      (:err _) (raise |geometry-attribute-id-must-be-a-scalar)
                   buffer $ quatrefoil.util.core/require-decoded $ try-decode-map-as (quatrefoil.util.core/require-field info :buffer) (List Number)
                   size $ quatrefoil.util.core/require-field info :size
                   type $ quatrefoil.util.core/field-or info :type :unknown
@@ -4255,11 +4268,18 @@
             let
                 xs-empty? $ empty? xs
                 ys-empty? $ empty? ys
-              if xs-empty? ys-empty? $ if ys-empty? false $ if
-                and (list? xs) (list? ys)
-                  identical? (first xs) (first ys)
-                recur (rest xs) (rest ys)
-                , false
+              if xs-empty? ys-empty? $ if ys-empty? false $ match
+                try-decode-map-as xs $ List Dynamic
+                (:ok xs0)
+                  match
+                    try-decode-map-as ys $ List Dynamic
+                    (:ok ys0)
+                      if
+                        identical? (first xs0) (first ys0)
+                        recur (rest xs0) (rest ys0)
+                        , false
+                    (:err _) false
+                (:err _) false
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (-> Bool)
         'JsIterableHost $ %{} 'CodeEntry (:doc |)
@@ -4313,24 +4333,29 @@
           :schema $ quote $ Fn M Tag Fallback (-> Dynamic) (:generics M Fallback)
         'find-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn find-element (tree coord)
-            if
-              and (struct? tree) (&struct:matches? tree quatrefoil.schema/Component)
-              recur
-                quatrefoil.schema/component-tree $ assert-type tree Component
-                , coord
-              if (empty? coord) tree $ if (list? coord)
-                let
-                    cursor $
-                      first coord
-                      , .unwrap
-                  let
-                      child $ get (quatrefoil.util.core/require-field tree :children) cursor
-                    if (child .some?)
-                      recur (child .unwrap) (rest coord)
-                      , nil
-                raise $ str "|find-element expects a coord list, got: " coord
+            let
+                node $ read-render-tree tree
+              if (js-present? node)
+                match node
+                  (quatrefoil.schema/Component component)
+                    recur (quatrefoil.schema/component-tree component) coord
+                  (quatrefoil.schema/Shape shape)
+                    if (empty? coord) shape $ match
+                      try-decode-map-as coord $ List Dynamic
+                      (:ok coord-list)
+                        let
+                            cursor $ .unwrap $ first coord-list
+                            child $ get
+                              require-decoded $ try-decode-map-as (:children shape) (Map Dynamic Dynamic)
+                              , cursor
+                          if (child .some?)
+                            recur (child .unwrap) (rest coord-list)
+                            , nil
+                      (:err _)
+                        raise $ str "|find-element expects a coord list, got: " coord
+                if (empty? coord) nil $ raise $ str "|[quatrefoil] missing field " :children
           :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic)
+          :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
         'purify-tree $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn purify-tree (tree)
             if (js-nullish? tree) nil $ match tree
@@ -4347,24 +4372,25 @@
             :features :js-ffi
         'reach-object3d $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reach-object3d (object3d coord)
-            if (empty? coord) object3d $ if (list? coord)
-              let
-                  cursor $ .unwrap $ first coord
-                recur (.!reachBy object3d cursor) (rest coord)
-              raise $ str "|reach-object3d expects a coord list, got: " coord
+            if (empty? coord) object3d $ match
+              try-decode-map-as coord $ List Dynamic
+              (:ok coord-list)
+                let
+                    cursor $ .unwrap $ first coord-list
+                  recur (.!reachBy object3d cursor) (rest coord-list)
+              (:err _)
+                raise $ str "|reach-object3d expects a coord list, got: " coord
           :examples $ []
           :schema $ quote $ Fn Dynamic Dynamic (-> Dynamic) (:features :js-ffi)
         'read-render-tree $ %{} 'CodeEntry
           :doc "|Check a child from the legacy scene Map without reifying or erasing its nominal definition."
           :code $ quote $ defn read-render-tree (value)
-            cond
-                nil? value
-                , nil
-              (and (struct? value) (&struct:matches? value quatrefoil.schema/Component))
-                assert-type value Component
-              (and (struct? value) (&struct:matches? value quatrefoil.schema/Shape))
-                assert-type value Shape
-              true $ raise "|expected a Quatrefoil component or shape"
+            match (try-decode-map-as value 'Nil)
+              (:ok _) nil
+              (:err _)
+                match (try-decode-map-as value quatrefoil.schema/RenderTree)
+                  (:ok tree) tree
+                  (:err _) (raise "|expected a Quatrefoil component or shape")
           :examples $ []
           :schema $ quote $ Fn Dynamic
             -> $ JsNullish quatrefoil.schema/RenderTree

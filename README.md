@@ -1,5 +1,9 @@
 # Quatrefoil
 
+## 0.3.11 候选 / Calcit 0.47.1
+
+升级时配对正式 Calcit / `@calcit/procs` 0.47.1、Touch Control 0.0.48、Pointed Prompt 0.0.35、Quaternion 0.2.29 和 JS-FFI 0.2.26，重新安装依赖并生成 JS。清理 `either`、冗余空判断与旧类型谓词为闭合名义模式匹配和边界解码（`GeometryAttributeId`、`RenderTree`、`DispatchTarget`、`js-present?`、`Option`），保持原有渲染与事件分发语义。
+
 ## 0.3.10 候选 / Calcit 0.46.0
 
 升级时配对正式 Calcit / `@calcit/procs` 0.46.0、Touch Control 0.0.47、Pointed Prompt 0.0.34、Quaternion 0.2.28 和 JS-FFI 0.2.26，重新安装依赖并生成 JS。场景和材质的异构值比较沿用原有行为。`select-keys` 声明 Map 输入并保留值类型，键集合继续支持 List 和 Set；待正式 tag 发布后再升级。
